@@ -1,0 +1,111 @@
+classDiagram
+    class User {
+      +int id
+      +string name
+      +string email
+      +string passwordHash
+      +string role
+      +bool isActive
+      +login()
+      +logout()
+    }
+
+    class DonorProfile {
+      +int id
+      +int userId
+      +string bloodType
+      +date dateOfBirth
+      +string gender
+      +string phone
+      +string address
+      +string medicalNotes
+      +update()
+      +isEligible(): bool
+    }
+
+    class Campaign {
+      +int id
+      +string title
+      +string description
+      +date startDate
+      +date endDate
+      +string location
+      +string status
+      +publish()
+      +close()
+    }
+
+    class ScheduleSlot {
+      +int id
+      +int campaignId
+      +datetime startTime
+      +datetime endTime
+      +int capacity
+      +int reservedCount
+      +reserve(): bool
+      +release()
+    }
+
+    class DonationRequest {
+      +int id
+      +int donorId
+      +int slotId
+      +string status
+      +datetime requestedAt
+      +approve()
+      +reject()
+      +complete()
+      +cancel()
+    }
+
+    class DonationRecord {
+      +int id
+      +int donationRequestId
+      +datetime donatedAt
+      +string volumeMl
+      +string notes
+    }
+
+    class Notification {
+      +int id
+      +int userId
+      +string channel
+      +string title
+      +string body
+      +datetime createdAt
+      +send()
+    }
+
+    class Report {
+      +generateCampaignReport()
+      +generateInventoryReport()
+      +generateDonorReport()
+    }
+
+    class AuthService {
+      +login(email, password)
+      +logout(userId)
+      +requireRole(role)
+    }
+
+    class AdminService {
+      +approveRequest(requestId)
+      +rejectRequest(requestId)
+      +createCampaign()
+      +publishCampaign()
+      +closeCampaign()
+    }
+
+    User "1" -- "1" DonorProfile : has
+    Campaign "1" -- "0..*" ScheduleSlot : defines
+    DonorProfile "1" -- "0..*" DonationRequest : creates
+    ScheduleSlot "1" -- "0..*" DonationRequest : receives
+    DonationRequest "1" -- "0..1" DonationRecord : results in
+    User "1" -- "0..*" Notification : receives
+    AuthService ..> User
+    AdminService ..> DonationRequest
+    AdminService ..> Campaign
+    Report ..> Campaign
+    Report ..> DonationRecord
+    Report ..> DonorProfile
+

@@ -1,0 +1,33 @@
+flowchart TB
+    subgraph Client
+      PWA[Donor PWA]
+      AdminUI[Admin Console]
+    end
+
+    subgraph Server
+      API[REST Controllers<br/>(PHP)]
+      Domain[Domain Services & Models]
+      Auth[Auth & RBAC]
+    end
+
+    subgraph Data
+      DB[(Relational DB)]
+      Cache[(Cache)]
+    end
+
+    subgraph Integrations
+      Email[Email Provider]
+      Push[Web Push/SMS]
+      Analytics[Analytics/Reporting]
+    end
+
+    PWA --> API
+    AdminUI --> API
+    API --> Auth
+    API --> Domain
+    Domain --> DB
+    Domain --> Cache
+    Domain --> Email
+    Domain --> Push
+    Domain --> Analytics
+

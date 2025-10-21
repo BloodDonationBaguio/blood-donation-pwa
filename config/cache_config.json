@@ -1,0 +1,21 @@
+{
+    "enabled": true,
+    "backend": "file",
+    "default_ttl": 3600,
+    "file": {
+        "path": "../cache/",
+        "max_size": "100MB"
+    },
+    "redis": {
+        "host": "localhost",
+        "port": 6379,
+        "password": "",
+        "database": 0
+    },
+    "memcached": {
+        "host": "localhost",
+        "port": 11211
+    },
+    "compression": true,
+    "serialization": "json"
+}

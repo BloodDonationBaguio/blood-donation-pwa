@@ -1,0 +1,25 @@
+flowchart LR
+    actor[(Admin)]
+
+    subgraph Admin_Console
+      UC_AdminLogin[Log In / Log Out]
+      UC_ManageDonors[View/Manage Donors]
+      UC_ManageCampaigns[Create/Publish/Close Campaigns]
+      UC_ApproveRequests[Approve/Reject Donation Requests]
+      UC_Schedule[Manage Schedules & Slots]
+      UC_Inventory[Record Post-Donation & Inventory]
+      UC_Notify[Broadcast Notifications]
+      UC_Reports[Analytics & Reports]
+      UC_Settings[System Settings & Roles]
+    end
+
+    Admin --- UC_AdminLogin
+    Admin --- UC_ManageDonors
+    Admin --- UC_ManageCampaigns
+    Admin --- UC_ApproveRequests
+    Admin --- UC_Schedule
+    Admin --- UC_Inventory
+    Admin --- UC_Notify
+    Admin --- UC_Reports
+    Admin --- UC_Settings
+

@@ -1,0 +1,28 @@
+{
+    "enabled": true,
+    "health_checks": {
+        "database": true,
+        "disk_space": true,
+        "memory_usage": true,
+        "response_time": true,
+        "error_rate": true
+    },
+    "thresholds": {
+        "disk_usage": 80,
+        "memory_usage": 85,
+        "response_time": 2,
+        "error_rate": 5
+    },
+    "alerts": {
+        "email": {
+            "enabled": true,
+            "recipients": ["admin@blooddonation.com"]
+        },
+        "webhook": {
+            "enabled": false,
+            "url": ""
+        }
+    },
+    "metrics_retention": 30,
+    "check_interval": 300
+}

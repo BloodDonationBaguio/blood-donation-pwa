@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant Admin as Admin (Console)
+    participant W as Admin UI
+    participant A as App Server (PHP)
+    participant DB as Database
+    participant N as Notification Service
+
+    Admin->>W: View pending requests
+    W->>A: GET /admin/requests?status=PENDING
+    A->>DB: SELECT pending requests
+    DB-->>A: rows
+    A-->>W: 200 OK
+    W-->>Admin: Render list
+
+    Admin->>W: Approve request(requestId)
+    W->>A: POST /admin/requests/{id}/approve
+    A->>DB: UPDATE DonationRequest -> APPROVED
+    DB-->>A: success
+    A->>N: send(userId, "Approved")
+    N-->>A: ok
+    A-->>W: 200 OK
+    W-->>Admin: Show success
+

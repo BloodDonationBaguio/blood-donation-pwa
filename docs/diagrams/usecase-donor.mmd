@@ -1,0 +1,25 @@
+flowchart LR
+    actor[(Donor)]
+
+    subgraph Blood_Donation_PWA
+      UC_Register[Register Account]
+      UC_Login[Log In / Log Out]
+      UC_UpdateProfile[Update Profile & Health Info]
+      UC_BrowseCampaigns[Browse Donation Campaigns]
+      UC_RequestSlot[Request Donation Slot]
+      UC_ViewStatus[View Request Status]
+      UC_ViewHistory[View Donation History & Rewards]
+      UC_GetNotified[Receive Notifications]
+      UC_AskSupport[Contact Support]
+    end
+
+    Donor --- UC_Register
+    Donor --- UC_Login
+    Donor --- UC_UpdateProfile
+    Donor --- UC_BrowseCampaigns
+    Donor --- UC_RequestSlot
+    Donor --- UC_ViewStatus
+    Donor --- UC_ViewHistory
+    Donor --- UC_GetNotified
+    Donor --- UC_AskSupport
+

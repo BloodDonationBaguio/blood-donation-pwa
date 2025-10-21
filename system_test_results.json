@@ -1,0 +1,28 @@
+{
+    "test_date": "2025-10-19 14:10:33",
+    "passed_tests": [
+        "\u2713 public\/index.php exists",
+        "\u2713 public\/admin.php exists",
+        "\u2713 public\/admin-login.php exists",
+        "\u2713 public\/donor-registration.php exists",
+        "\u2713 config\/db.php exists",
+        "\u2713 src\/includes\/admin_actions.php exists",
+        "\u2713 src\/includes\/audit_logger.php exists",
+        "\u2713 Database connection successful",
+        "\u2713 Admin functions working",
+        "\u2713 public\/index.php is valid PHP",
+        "\u2713 public\/about.php is valid PHP",
+        "\u2713 public\/find-us.php is valid PHP",
+        "\u2713 public\/donor-registration.php is valid PHP",
+        "\u2713 config\/db.php exists",
+        "\u2713 config\/email_config.json exists",
+        "\u2713 config\/monitoring_config.json exists",
+        "\u2713 public\/index.php contains expected content",
+        "\u2713 public\/admin.php contains expected content",
+        "\u2713 src\/includes\/admin_actions.php contains expected content"
+    ],
+    "errors": [],
+    "total_passed": 19,
+    "total_errors": 0,
+    "system_status": "WORKING"
+}

@@ -1,0 +1,22 @@
+# Logs
+logs/
+*.log
+
+# Backups
+backup/
+backup_20250930_232703/
+
+# Sensitive files with passwords
+db.php
+config/email_config.json
+config/backup_config.json
+
+# System files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp

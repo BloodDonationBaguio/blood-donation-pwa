@@ -1,0 +1,65 @@
+{
+  "name": "Blood Donation System",
+  "short_name": "Blood Donation",
+  "description": "Blood Donation Management System for Philippine Red Cross - Baguio Chapter",
+  "start_url": "/blood-donation-pwa/index.php",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#dc3545",
+  "orientation": "portrait-primary",
+  "scope": "/blood-donation-pwa/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["health", "medical", "lifestyle"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiNmZmZmZmYiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMTIgMjEuMzVjLTEuNjctMS4zMy0zLjMzLTIuNjctNS00QzUuNjcgMTUuMzMgNCAxMy42NyA0IDEyYzAtNC40MiAzLjU4LTggOC04czggMy41OCA4IDhjMCAxLjY3LS42NyAzLjMzLTIgNS0xLjY3IDEuMzMtMy4zMyAyLjY3LTUgNFoiIGZpbGw9IiNkYzM1NDUiLz4KPHBhdGggZD0iTTEyIDEyLjVjLjgzIDAgMS41LS42NyAxLjUtMS41UzEyLjgzIDkuNSAxMiA5LjVzLTEuNS42Ny0xLjUgMS41LjY3IDEuNSAxLjUgMS41WiIgZmlsbD0iI2ZmZmZmZiIvPgo8L3N2Zz4KPC9zdmc+",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9IiNmZmZmZmYiLz4KPHN2ZyB4PSIxMjgiIHk9IjEyOCIgd2lkdGg9IjI1NiIgaGVpZ2h0PSIyNTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIxLjM1Yy0xLjY3LTEuMzMtMy4zMy0yLjY3LTUtNEM1LjY3IDE1LjMzIDQgMTMuNjcgNCAxMmMwLTQuNDIgMy41OC04IDgtOHM4IDMuNTggOCA4YzAgMS42Ny0uNjcgMy4zMy0yIDUtMS42NyAxLjMzLTMuMzMgMi42Ny01IDRaIiBmaWxsPSIjZGMzNTQ1Ii8+CjxwYXRoIGQ9Ik0xMiAxMi41Yy44MyAwIDEuNS0uNjcgMS41LTEuNVMxMi44MyA5LjUgMTIgOS41cy0xLjUuNjctMS41IDEuNS42NyAxLjUgMS41IDEuNVoiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+Cjwvc3ZnPg==",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4MCIgaGVpZ2h0PSI3MjAiIHZpZXdCb3g9IjAgMCAxMjgwIDcyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyODAiIGhlaWdodD0iNzIwIiBmaWxsPSIjZjhmOWZhIi8+CjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjZGMzNTQ1Ii8+Cjx0ZXh0IHg9IjY0MCIgeT0iNDAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJsb29kIERvbmF0aW9uIFN5c3RlbTwvdGV4dD4KPC9zdmc+",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Blood Donation System Homepage"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Register as Donor",
+      "short_name": "Register",
+      "description": "Register as a blood donor",
+      "url": "/blood-donation-pwa/donor-registration.php",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIxLjM1Yy0xLjY3LTEuMzMtMy4zMy0yLjY3LTUtNEM1LjY3IDE1LjMzIDQgMTMuNjcgNCAxMmMwLTQuNDIgMy41OC04IDgtOHM4IDMuNTggOCA4YzAgMS42Ny0uNjcgMy4zMy0yIDUtMS42NyAxLjMzLTMuMzMgMi42Ny01IDRaIiBmaWxsPSIjZGMzNTQ1Ii8+CjxwYXRoIGQ9Ik0xMiAxMi41Yy44MyAwIDEuNS0uNjcgMS41LTEuNVMxMi44MyA5LjUgMTIgOS41cy0xLjUuNjctMS41IDEuNS42NyAxLjUgMS41IDEuNVoiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Track Application",
+      "short_name": "Track",
+      "description": "Track your donor application status",
+      "url": "/blood-donation-pwa/track.php",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIxLjM1Yy0xLjY3LTEuMzMtMy4zMy0yLjY3LTUtNEM1LjY3IDE1LjMzIDQgMTMuNjcgNCAxMmMwLTQuNDIgMy41OC04IDgtOHM4IDMuNTggOCA4YzAgMS42Ny0uNjcgMy4zMy0yIDUtMS42NyAxLjMzLTMuMzMgMi42Ny01IDRaIiBmaWxsPSIjZGMzNTQ1Ii8+CjxwYXRoIGQ9Ik0xMiAxMi41Yy44MyAwIDEuNS0uNjcgMS41LTEuNVMxMi44MyA5LjUgMTIgOS41cy0xLjUuNjctMS41IDEuNS42NyAxLjUgMS41IDEuNVoiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

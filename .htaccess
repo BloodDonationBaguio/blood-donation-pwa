@@ -1,0 +1,41 @@
+# Enable rewrite engine
+RewriteEngine On
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Ensure PHP files are processed by the PHP interpreter
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps)$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+# Redirect index.html to index.php
+RewriteRule ^index\.html$ /index.php [L,R=301]
+
+# Handle front controller pattern
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L,QSA]
+
+# Handle 404 errors
+ErrorDocument 404 /404.php
+
+# Security headers
+<IfModule mod_headers.c>
+    # CORS for API
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+    
+    # Security headers
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# PHP settings
+<IfModule mod_php7.c>
+    php_flag display_errors on
+    php_value error_reporting E_ALL
+</IfModule>

@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "bmewburn.vscode-intelephense-client",
+        "ms-vscode.vscode-json",
+        "bradlc.vscode-tailwindcss"
+    ],
+    "unwantedRecommendations": [
+        "felixfbecker.php-intellisense",
+        "devsense.phptools-vscode"
+    ]
+}

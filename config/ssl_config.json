@@ -1,0 +1,18 @@
+{
+    "enabled": false,
+    "certificate_path": "",
+    "private_key_path": "",
+    "ca_bundle_path": "",
+    "force_https": false,
+    "hsts_enabled": true,
+    "hsts_max_age": 31536000,
+    "security_headers": {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "geolocation=(), microphone=(), camera=()"
+    },
+    "csp_enabled": true,
+    "csp_policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';"
+}

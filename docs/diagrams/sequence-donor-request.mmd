@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant D as Donor (PWA)
+    participant W as Web App (Frontend)
+    participant A as App Server (PHP)
+    participant DB as Database
+
+    D->>W: Open Campaigns & Slots
+    W->>A: GET /campaigns
+    A->>DB: SELECT campaigns+slots
+    DB-->>A: rows
+    A-->>W: 200 OK (list)
+    W-->>D: Render campaigns & slots
+
+    D->>W: Request slot
+    W->>A: POST /donations/requests {slotId}
+    A->>DB: INSERT DonationRequest(status=PENDING)
+    DB-->>A: id
+    A-->>W: 201 Created (requestId)
+    W-->>D: Show pending status
+
+    A->>DB: (async/cron) eligibility check
+    DB-->>A: OK
+    A->>DB: UPDATE DonationRequest(status=APPROVED or REJECTED)
+    A-->>W: WebPush/Email notification
+    W-->>D: Notify status change
+

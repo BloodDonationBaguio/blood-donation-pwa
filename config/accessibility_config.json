@@ -1,0 +1,14 @@
+{
+    "enabled": true,
+    "aria_labels": true,
+    "keyboard_navigation": true,
+    "screen_reader_support": true,
+    "high_contrast": true,
+    "font_scaling": true,
+    "focus_indicators": true,
+    "skip_links": false,
+    "alt_text_required": true,
+    "form_labels": true,
+    "error_announcements": true,
+    "live_regions": true
+}

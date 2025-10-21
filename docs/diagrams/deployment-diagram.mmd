@@ -1,0 +1,25 @@
+flowchart LR
+    subgraph UserDevice[User Device]
+      Browser[Browser<br/>(PWA + Service Worker + Cache)]
+      PushAgent[Push Agent]
+    end
+
+    subgraph Edge[CDN/Edge]
+      CDN[Static CDN<br/>(HTML/CSS/JS)]
+    end
+
+    subgraph Cloud[Hosting]
+      WebSrv[PHP App Server<br/>(Nginx/Apache + PHP-FPM)]
+      Notifier[Notification Worker/Cron]
+      DB[(MySQL/MariaDB)]
+      Redis[(Redis/Cache)]
+    end
+
+    Browser -->|Fetch static| CDN
+    Browser -->|API HTTPS| WebSrv
+    PushAgent --> Browser
+    WebSrv --> DB
+    WebSrv --> Redis
+    Notifier --> DB
+    Notifier --> WebSrv
+
