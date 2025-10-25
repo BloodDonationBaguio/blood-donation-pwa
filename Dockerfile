@@ -1,7 +1,10 @@
 FROM php:8.1-apache
 
-# Install PHP extensions
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+# Install system dependencies for PostgreSQL
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql pgsql \
+    && apt-get clean
 
 # Enable Apache rewrite
 RUN a2enmod rewrite
