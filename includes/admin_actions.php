@@ -4,16 +4,47 @@
  * Tracks all admin actions for audit trail
  */
 
+/**
+ * Ensure audit log table exists
+ * Call this BEFORE starting any transaction to avoid auto-commit issues
+ */
+function ensureAuditLogTableExists($pdo) {
+    try {
+        // Check if table exists first to avoid unnecessary DDL
+        $stmt = $pdo->query("SHOW TABLES LIKE 'admin_audit_log'");
+        if ($stmt->rowCount() == 0) {
+            // Table doesn't exist, create it
+            $pdo->exec("CREATE TABLE IF NOT EXISTS admin_audit_log (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                admin_username VARCHAR(255) NULL,
+                action_type VARCHAR(255) NOT NULL,
+                table_name VARCHAR(255) NULL,
+                record_id VARCHAR(255) NULL,
+                description TEXT NULL,
+                ip_address VARCHAR(64) NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        }
+    } catch (PDOException $e) {
+        error_log("Failed to ensure audit log table exists: " . $e->getMessage());
+    }
+}
+
 function logAdminAction($pdo, $actionType, $tableName, $recordId, $actionDetails = null, $adminId = null) {
     try {
+        // DO NOT create table here - it auto-commits and breaks transactions
+        // Call ensureAuditLogTableExists() before starting any transaction instead
+        
         $stmt = $pdo->prepare("
             INSERT INTO admin_audit_log 
             (admin_username, action_type, table_name, record_id, description, ip_address, created_at) 
             VALUES (?, ?, ?, ?, ?, ?, NOW())
         ");
         
-        $stmt->execute([
-            $adminId ?? ($_SESSION['admin_username'] ?? 'unknown'),
+        $adminUsername = $adminId ?? ($_SESSION['admin_username'] ?? $_SESSION['username'] ?? 'system');
+        
+        $result = $stmt->execute([
+            $adminUsername,
             $actionType,
             $tableName,
             $recordId,
@@ -21,9 +52,16 @@ function logAdminAction($pdo, $actionType, $tableName, $recordId, $actionDetails
             $_SERVER['REMOTE_ADDR'] ?? 'unknown'
         ]);
         
-        return true;
+        if ($result) {
+            error_log("✓ Audit logged: $actionType on $tableName (ID: $recordId) by $adminUsername");
+        } else {
+            error_log("✗ Audit log failed for: $actionType on $tableName (ID: $recordId)");
+        }
+        
+        return $result;
     } catch (PDOException $e) {
-        error_log("Failed to log admin action: " . $e->getMessage());
+        error_log("✗ Failed to log admin action: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
         return false;
     }
 }

@@ -1,0 +1,30 @@
+# Logs
+logs/
+*.log
+
+# Backups
+backup/
+backup_*/
+
+# Sensitive files - DO NOT UPLOAD PASSWORDS!
+db.php
+config/email_config.json
+config/backup_config.json
+
+# System files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Test files
+test_*.php
+fix_*.php
+*_test.php
+
+# Personal files
+*.txt

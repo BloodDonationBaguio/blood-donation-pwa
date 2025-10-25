@@ -216,8 +216,13 @@ class BloodInventoryManagerComplete {
      * Add new blood unit
      */
     public function addBloodUnit($data) {
+        $transactionStarted = false;
         try {
-            $this->pdo->beginTransaction();
+            // Start transaction only if not already in one
+            if (!$this->pdo->inTransaction()) {
+                $this->pdo->beginTransaction();
+                $transactionStarted = true;
+            }
 
             // Validate donor
             $donorStmt = $this->pdo->prepare("
@@ -229,7 +234,7 @@ class BloodInventoryManagerComplete {
             $donor = $donorStmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$donor) {
-                throw new Exception('Donor not found or not eligible');
+                throw new Exception('Donor not found or not eligible for blood donation');
             }
 
             // Generate unit ID
@@ -263,12 +268,20 @@ class BloodInventoryManagerComplete {
                 'blood_type' => $donor['blood_type']
             ]);
 
-            $this->pdo->commit();
+            // Commit only if we started the transaction
+            if ($transactionStarted) {
+                $this->pdo->commit();
+            }
             return ['success' => true, 'message' => 'Blood unit created successfully', 'unit_id' => $unitId];
 
         } catch (Exception $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            // Rollback only if we started the transaction
+            if ($transactionStarted && $this->pdo->inTransaction()) {
+                try {
+                    $this->pdo->rollBack();
+                } catch (Exception $rollbackEx) {
+                    error_log("Error rolling back transaction: " . $rollbackEx->getMessage());
+                }
             }
             error_log("Error adding blood unit: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
@@ -279,8 +292,13 @@ class BloodInventoryManagerComplete {
      * Update unit status
      */
     public function updateUnitStatus($unitId, $newStatus, $reason = '') {
+        $transactionStarted = false;
         try {
-            $this->pdo->beginTransaction();
+            // Start transaction only if not already in one
+            if (!$this->pdo->inTransaction()) {
+                $this->pdo->beginTransaction();
+                $transactionStarted = true;
+            }
 
             // Get current unit
             $stmt = $this->pdo->prepare("SELECT * FROM blood_inventory WHERE unit_id = ?");
@@ -318,12 +336,20 @@ class BloodInventoryManagerComplete {
                 'notes_appended' => $noteLine
             ]);
 
-            $this->pdo->commit();
+            // Commit only if we started the transaction
+            if ($transactionStarted) {
+                $this->pdo->commit();
+            }
             return ['success' => true, 'message' => 'Status updated successfully'];
 
         } catch (Exception $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            // Rollback only if we started the transaction
+            if ($transactionStarted && $this->pdo->inTransaction()) {
+                try {
+                    $this->pdo->rollBack();
+                } catch (Exception $rollbackEx) {
+                    error_log("Error rolling back transaction: " . $rollbackEx->getMessage());
+                }
             }
             error_log("Error updating status: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
@@ -334,8 +360,13 @@ class BloodInventoryManagerComplete {
      * Update blood type
      */
     public function updateBloodType($unitId, $bloodType) {
+        $transactionStarted = false;
         try {
-            $this->pdo->beginTransaction();
+            // Start transaction only if not already in one
+            if (!$this->pdo->inTransaction()) {
+                $this->pdo->beginTransaction();
+                $transactionStarted = true;
+            }
 
             $stmt = $this->pdo->prepare("SELECT * FROM blood_inventory WHERE unit_id = ?");
             $stmt->execute([$unitId]);
@@ -360,12 +391,20 @@ class BloodInventoryManagerComplete {
                 'new_blood_type' => $bloodType
             ]);
 
-            $this->pdo->commit();
+            // Commit only if we started the transaction
+            if ($transactionStarted) {
+                $this->pdo->commit();
+            }
             return ['success' => true, 'message' => 'Blood type updated successfully'];
 
         } catch (Exception $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            // Rollback only if we started the transaction
+            if ($transactionStarted && $this->pdo->inTransaction()) {
+                try {
+                    $this->pdo->rollBack();
+                } catch (Exception $rollbackEx) {
+                    error_log("Error rolling back transaction: " . $rollbackEx->getMessage());
+                }
             }
             error_log("Error updating blood type: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
@@ -376,35 +415,67 @@ class BloodInventoryManagerComplete {
      * Delete unit
      */
     public function deleteUnit($unitId, $reason = '') {
+        $transactionStarted = false;
         try {
-            $this->pdo->beginTransaction();
+            // Validate unit_id
+            if (empty($unitId)) {
+                throw new Exception('Invalid unit ID');
+            }
 
+            // Start transaction only if not already in one
+            if (!$this->pdo->inTransaction()) {
+                $this->pdo->beginTransaction();
+                $transactionStarted = true;
+            }
+
+            // Get unit details
             $stmt = $this->pdo->prepare("SELECT * FROM blood_inventory WHERE unit_id = ?");
             $stmt->execute([$unitId]);
             $unit = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$unit) {
-                throw new Exception('Unit not found');
+                throw new Exception('Blood unit not found in inventory');
             }
 
             // Log audit before deletion
-            $this->logAudit($unit['id'], 'unit_deleted', "Blood unit deleted", [
-                'unit_id' => $unitId,
-                'reason' => $reason
-            ]);
+            try {
+                $this->logAudit($unit['id'], 'unit_deleted', "Blood unit deleted", [
+                    'unit_id' => $unitId,
+                    'blood_type' => $unit['blood_type'],
+                    'status' => $unit['status'],
+                    'reason' => $reason
+                ]);
+            } catch (Exception $auditEx) {
+                error_log("Audit logging failed: " . $auditEx->getMessage());
+                // Continue with deletion even if audit fails
+            }
 
             // Delete unit
             $deleteStmt = $this->pdo->prepare("DELETE FROM blood_inventory WHERE unit_id = ?");
             $deleteStmt->execute([$unitId]);
 
-            $this->pdo->commit();
-            return ['success' => true, 'message' => 'Unit deleted successfully'];
+            // Verify deletion
+            if ($deleteStmt->rowCount() === 0) {
+                throw new Exception('Failed to delete blood unit');
+            }
+
+            // Commit only if we started the transaction
+            if ($transactionStarted) {
+                $this->pdo->commit();
+            }
+            
+            return ['success' => true, 'message' => 'Blood unit deleted successfully'];
 
         } catch (Exception $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            // Rollback only if we started the transaction
+            if ($transactionStarted && $this->pdo->inTransaction()) {
+                try {
+                    $this->pdo->rollBack();
+                } catch (Exception $rollbackEx) {
+                    error_log("Error rolling back transaction: " . $rollbackEx->getMessage());
+                }
             }
-            error_log("Error deleting unit: " . $e->getMessage());
+            error_log("Error deleting unit $unitId: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
@@ -442,29 +513,57 @@ class BloodInventoryManagerComplete {
      * Log audit trail
      */
     private function logAudit($unitId, $action, $description, $details = []) {
+        $inTransaction = false;
+        
+        // Log to blood_inventory_audit table
         try {
+            // Check if we're in a transaction - if so, don't start a new one
+            $inTransaction = $this->pdo->inTransaction();
+            
+            // Ensure table exists
+            $this->pdo->exec("CREATE TABLE IF NOT EXISTS blood_inventory_audit (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                unit_id VARCHAR(100),
+                action VARCHAR(100),
+                old_values TEXT,
+                new_values TEXT,
+                admin_name VARCHAR(255),
+                ip_address VARCHAR(64),
+                user_agent TEXT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            
             $stmt = $this->pdo->prepare("
                 INSERT INTO blood_inventory_audit (
                     unit_id, action, old_values, new_values, 
                     admin_name, ip_address, user_agent, timestamp
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
             ");
-            $stmt->execute([
+            
+            $adminUsername = $_SESSION['admin_username'] ?? $_SESSION['username'] ?? 'system';
+            
+            $result = $stmt->execute([
                 $unitId,
                 $action,
                 json_encode($details),
                 json_encode($details),
-                $_SESSION['admin_username'] ?? 'system',
+                $adminUsername,
                 $_SERVER['REMOTE_ADDR'] ?? 'unknown',
                 $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
             ]);
+            
+            if ($result) {
+                error_log("✓ Blood inventory audit logged: $action for unit $unitId by $adminUsername");
+            } else {
+                error_log("✗ Blood inventory audit failed to log: $action for unit $unitId");
+            }
         } catch (Exception $e) {
-            error_log("Error logging audit: " . $e->getMessage());
+            error_log("✗ Error logging to blood_inventory_audit: " . $e->getMessage());
         }
 
         // Mirror into admin_audit_log for the Admin > Audit Log tab
         try {
-            // Ensure table exists (lightweight, safe to run)
+            // Ensure table exists
             $this->pdo->exec("CREATE TABLE IF NOT EXISTS admin_audit_log (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -476,16 +575,23 @@ class BloodInventoryManagerComplete {
                 ip_address VARCHAR(64) NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-            $adminUsername = $_SESSION['admin_username'] ?? 'system';
+            $adminUsername = $_SESSION['admin_username'] ?? $_SESSION['username'] ?? 'system';
             $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
             $tableName = 'blood_inventory';
             $recordId = is_scalar($unitId) ? (string)$unitId : null;
 
             $stmt2 = $this->pdo->prepare("INSERT INTO admin_audit_log (admin_username, action_type, table_name, record_id, description, ip_address)
                                           VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt2->execute([$adminUsername, $action, $tableName, $recordId, $description, $ip]);
+            $result2 = $stmt2->execute([$adminUsername, $action, $tableName, $recordId, $description, $ip]);
+            
+            if ($result2) {
+                error_log("✓ Admin audit log inserted: $action for unit $unitId by $adminUsername");
+            } else {
+                error_log("✗ Admin audit log failed: $action for unit $unitId");
+            }
         } catch (Exception $e) {
-            error_log('Admin audit mirror failed: ' . $e->getMessage());
+            error_log('✗ Admin audit log insert failed: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
         }
     }
 

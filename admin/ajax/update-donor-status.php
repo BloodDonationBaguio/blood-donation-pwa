@@ -48,6 +48,32 @@ try {
         $response['success'] = true;
         $response['message'] = 'Donor status updated successfully';
 
+        // AUTOMATICALLY CREATE BLOOD UNIT if status is changed to 'served'
+        if ($status === 'served') {
+            try {
+                require_once __DIR__ . '/../../includes/BloodInventoryManagerComplete.php';
+                $inventoryManager = new BloodInventoryManagerComplete($pdo);
+                
+                $bloodUnitData = [
+                    'donor_id' => $donorId,
+                    'collection_date' => date('Y-m-d'),
+                    'collection_site' => 'Main Center',
+                    'storage_location' => 'Storage A'
+                ];
+                
+                $unitResult = $inventoryManager->addBloodUnit($bloodUnitData);
+                
+                if ($unitResult['success']) {
+                    $response['blood_unit_created'] = true;
+                    $response['unit_id'] = $unitResult['unit_id'];
+                } else {
+                    error_log("Failed to auto-create blood unit for donor $donorId: " . $unitResult['message']);
+                }
+            } catch (Exception $e) {
+                error_log("Error auto-creating blood unit for donor $donorId: " . $e->getMessage());
+            }
+        }
+
         // Send email notification
         $to = 'recipient@example.com';
         $subject = 'Donor Status Update';

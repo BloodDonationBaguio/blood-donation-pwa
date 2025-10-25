@@ -135,14 +135,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #155724;
         }
         
+        .status-served {
+            background: #cfe2ff;
+            color: #084298;
+        }
+        
         .status-rejected {
             background: #f8d7da;
             color: #721c24;
         }
         
-        .status-deferred {
+        .status-unserved {
             background: #fff3cd;
             color: #856404;
+        }
+        
+        .status-deferred {
+            background: #f8d7da;
+            color: #721c24;
         }
         
         .type-badge {
@@ -263,6 +273,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     $statusText = ucfirst($donor['status'] ?? 'pending');
                                     
                                     switch(strtolower($donor['status'] ?? 'pending')) {
+                                        case 'approved':
+                                            $statusClass = 'success';
+                                            $statusText = 'Approved';
+                                            break;
                                         case 'served':
                                             $statusClass = 'success';
                                             $statusText = 'Served';
@@ -275,9 +289,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             $statusClass = 'danger';
                                             $statusText = 'Deferred';
                                             break;
-                                        default:
+                                        case 'pending':
                                             $statusClass = 'warning';
                                             $statusText = 'Pending';
+                                            break;
+                                        default:
+                                            $statusClass = 'secondary';
+                                            $statusText = ucfirst($donor['status'] ?? 'Unknown');
                                     }
                                     ?>
                                     <span class="status-<?= strtolower($donor['status'] ?? 'pending') ?>">
@@ -292,10 +310,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <i class="fas fa-info-circle me-2"></i>
                                     <strong>Your application is being reviewed.</strong> Our team is processing your registration and will contact you soon.
                                 </div>
-                            <?php elseif (strtolower($donor['status'] ?? 'pending') === 'served'): ?>
+                            <?php elseif (strtolower($donor['status'] ?? 'pending') === 'approved'): ?>
                                 <div class="alert alert-success">
                                     <i class="fas fa-check-circle me-2"></i>
-                                    <strong>Your application has been approved!</strong> You are now an active blood donor. Thank you for joining our cause.
+                                    <strong>Your application has been approved!</strong> You can now visit the Red Cross Baguio Chapter from <strong>8:00 AM to 5:00 PM</strong> to complete your blood donation. Please bring a valid ID and your reference number.
+                                </div>
+                            <?php elseif (strtolower($donor['status'] ?? 'pending') === 'served'): ?>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-heart me-2"></i>
+                                    <strong>Thank you for your donation!</strong> Your blood donation has been completed successfully. You are now an active blood donor. Thank you for helping save lives!
                                 </div>
                             <?php elseif (strtolower($donor['status'] ?? 'pending') === 'rejected'): ?>
                                 <div class="alert alert-danger">

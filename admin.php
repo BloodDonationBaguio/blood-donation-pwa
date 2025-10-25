@@ -248,6 +248,27 @@ try {
                     error_log("served_date column might not exist: " . $e->getMessage());
                 }
                 
+                // AUTOMATICALLY CREATE BLOOD UNIT when donor is marked as served
+                try {
+                    require_once __DIR__ . '/includes/BloodInventoryManagerComplete.php';
+                    $inventoryManager = new BloodInventoryManagerComplete($pdo);
+                    
+                    $bloodUnitData = [
+                        'donor_id' => $id,
+                        'collection_date' => date('Y-m-d'),
+                        'collection_site' => 'Main Center',
+                        'storage_location' => 'Storage A'
+                    ];
+                    
+                    $result = $inventoryManager->addBloodUnit($bloodUnitData);
+                    
+                    if (!$result['success']) {
+                        error_log("Failed to auto-create blood unit for donor $id: " . $result['message']);
+                    }
+                } catch (Exception $e) {
+                    error_log("Error auto-creating blood unit for donor $id: " . $e->getMessage());
+                }
+                
                 // Log the action
                 logAdminAction($pdo, 'donor_marked_served', 'donors_new', $id, "Donor marked as served");
                 
@@ -1588,48 +1609,181 @@ function buildPaginationUrl($page) {
                             </div>
                         
                         <?php elseif ($activeTab === 'audit-log'): ?>
-                            <h2 class="mb-4">Admin Audit Log</h2>
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h2 class="mb-0">Admin Audit Log</h2>
+                                <button class="btn btn-primary" onclick="printAuditLog()">
+                                    <i class="fas fa-print me-2"></i>Print Audit Log
+                                </button>
+                            </div>
                             <div class="card">
                                 <div class="card-body">
                                     <?php
                                     try {
-                                        $auditLogs = $pdo->query("SELECT * FROM admin_audit_log ORDER BY created_at DESC LIMIT 50")->fetchAll();
+                                        $auditLogs = $pdo->query("SELECT * FROM admin_audit_log ORDER BY created_at DESC LIMIT 200")->fetchAll();
                                     } catch (Exception $e) {
                                         $auditLogs = [];
+                                        error_log("Audit log query error: " . $e->getMessage());
                                     }
                                     ?>
-                                    <div class="table-responsive">
-                                        <table class="table table-striped">
-                                            <thead>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Showing last <?= count($auditLogs) ?> audit log entries
+                                    </div>
+                                    <div class="table-responsive" id="auditLogTable">
+                                        <table class="table table-striped table-hover">
+                                            <thead class="table-dark">
                                                 <tr>
-                                                    <th>Date</th>
+                                                    <th>Date & Time</th>
                                                     <th>Admin</th>
                                                     <th>Action</th>
                                                     <th>Table</th>
                                                     <th>Record ID</th>
                                                     <th>Description</th>
+                                                    <th>IP Address</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php if (!empty($auditLogs)): ?>
                                                     <?php foreach ($auditLogs as $log): ?>
                                                         <tr>
-                                                            <td><?= date('M d, Y H:i', strtotime($log['created_at'])) ?></td>
-                                                            <td><?= htmlspecialchars($log['admin_username'] ?? 'Unknown') ?></td>
-                                                            <td><?= htmlspecialchars($log['action'] ?? 'Unknown') ?></td>
+                                                            <td>
+                                                                <small class="text-muted"><?= date('M d, Y', strtotime($log['created_at'])) ?></small><br>
+                                                                <strong><?= date('H:i:s', strtotime($log['created_at'])) ?></strong>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-primary">
+                                                                    <?= htmlspecialchars($log['admin_username'] ?? 'system') ?>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <?php 
+                                                                    // Handle both old 'action' and new 'action_type' columns
+                                                                    $actionTypeValue = $log['action_type'] ?? $log['action'] ?? 'unknown';
+                                                                    $actionType = strtolower($actionTypeValue);
+                                                                    $badgeClass = 'secondary';
+                                                                    if ($actionType === 'unit_created') $badgeClass = 'success';
+                                                                    elseif ($actionType === 'unit_deleted') $badgeClass = 'danger';
+                                                                    elseif ($actionType === 'status_updated') $badgeClass = 'warning';
+                                                                    elseif ($actionType === 'donor_marked_served') $badgeClass = 'info';
+                                                                    elseif ($actionType === 'donor_approved') $badgeClass = 'success';
+                                                                    elseif ($actionType === 'donor_rejected') $badgeClass = 'danger';
+                                                                ?>
+                                                                <span class="badge bg-<?= $badgeClass ?>">
+                                                                    <?= htmlspecialchars($actionTypeValue) ?>
+                                                                </span>
+                                                            </td>
                                                             <td><?= htmlspecialchars($log['table_name'] ?? '-') ?></td>
-                                                            <td><?= htmlspecialchars($log['record_id'] ?? '-') ?></td>
+                                                            <td><code><?= htmlspecialchars($log['record_id'] ?? '-') ?></code></td>
                                                             <td><?= htmlspecialchars($log['description'] ?? '-') ?></td>
+                                                            <td><small class="text-muted"><?= htmlspecialchars($log['ip_address'] ?? 'N/A') ?></small></td>
                                                         </tr>
                                                     <?php endforeach; ?>
                                                 <?php else: ?>
-                                                    <tr><td colspan="6" class="text-center">No audit logs found</td></tr>
+                                                    <tr>
+                                                        <td colspan="7" class="text-center py-5">
+                                                            <i class="fas fa-clipboard-list text-muted" style="font-size: 3rem;"></i>
+                                                            <h6 class="text-muted mt-3">No audit logs found</h6>
+                                                            <p class="text-muted">Audit entries will appear here when actions are performed</p>
+                                                        </td>
+                                                    </tr>
                                                 <?php endif; ?>
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
                             </div>
+                            
+                            <script>
+                            function printAuditLog() {
+                                const printContent = document.getElementById('auditLogTable').cloneNode(true);
+                                
+                                // Remove badges and styling for print
+                                const badges = printContent.querySelectorAll('.badge');
+                                badges.forEach(badge => {
+                                    badge.style.backgroundColor = 'transparent';
+                                    badge.style.color = '#000';
+                                    badge.style.border = '1px solid #000';
+                                });
+                                
+                                const html = `
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <meta charset="utf-8">
+                                    <title>Audit Log - Blood Donation System</title>
+                                    <style>
+                                        @media print {
+                                            body { margin: 0; padding: 20px; }
+                                        }
+                                        body { 
+                                            font-family: Arial, sans-serif;
+                                            font-size: 12px;
+                                        }
+                                        h1 {
+                                            text-align: center;
+                                            color: #333;
+                                            margin-bottom: 10px;
+                                        }
+                                        .header-info {
+                                            text-align: center;
+                                            margin-bottom: 20px;
+                                            color: #666;
+                                        }
+                                        table { 
+                                            width: 100%; 
+                                            border-collapse: collapse;
+                                            margin-top: 20px;
+                                        }
+                                        th, td { 
+                                            border: 1px solid #ddd; 
+                                            padding: 8px; 
+                                            text-align: left;
+                                        }
+                                        th { 
+                                            background-color: #333; 
+                                            color: white;
+                                        }
+                                        tr:nth-child(even) { 
+                                            background-color: #f9f9f9; 
+                                        }
+                                        .badge {
+                                            background-color: transparent !important;
+                                            color: #000 !important;
+                                            border: 1px solid #000 !important;
+                                            padding: 2px 6px;
+                                            border-radius: 3px;
+                                            font-size: 11px;
+                                        }
+                                        code {
+                                            background: #f4f4f4;
+                                            padding: 2px 4px;
+                                            border-radius: 3px;
+                                            font-family: monospace;
+                                        }
+                                    </style>
+                                </head>
+                                <body>
+                                    <h1>🩸 Blood Donation System - Audit Log</h1>
+                                    <div class="header-info">
+                                        <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+                                        <p><strong>Total Entries:</strong> <?= count($auditLogs) ?></p>
+                                    </div>
+                                    ${printContent.innerHTML}
+                                    <script>
+                                        window.onload = function() {
+                                            window.print();
+                                            setTimeout(() => window.close(), 300);
+                                        }
+                                    </scr` + `ipt>
+                                </body>
+                                </html>`;
+                                
+                                const printWindow = window.open('', '_blank');
+                                printWindow.document.open();
+                                printWindow.document.write(html);
+                                printWindow.document.close();
+                            }
+                            </script>
                         
                         <?php elseif ($activeTab === 'blood-inventory'): ?>
                             <h2 class="mb-4">Blood Inventory Management</h2>

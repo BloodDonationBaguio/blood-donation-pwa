@@ -175,16 +175,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             }
 
             try {
+                // Clear any previous error
+                unset($GLOBALS['last_donor_error']);
+                
                 $ok = updateDonorStatus($pdo, $donorId, $newStatus, $notes);
                 if ($ok) {
                     echo json_encode(['success' => true, 'message' => 'Donor status updated successfully']);
                 } else {
-                    $ei = $pdo->errorInfo();
-                    $err = isset($ei[2]) ? $ei[2] : 'Unknown database error';
-                    echo json_encode(['success' => false, 'message' => 'Failed to update donor status', 'error' => $err]);
+                    // Check if there's a detailed error message from the function
+                    $detailedError = $GLOBALS['last_donor_error'] ?? null;
+                    
+                    // If no detailed error, check PDO error
+                    if (!$detailedError) {
+                        $ei = $pdo->errorInfo();
+                        $detailedError = isset($ei[2]) ? $ei[2] : 'Unknown database error';
+                    }
+                    
+                    error_log('update_donor_status failed: ' . $detailedError);
+                    echo json_encode(['success' => false, 'message' => 'Failed to update donor status', 'error' => $detailedError]);
                 }
             } catch (Throwable $e) {
                 error_log('update_donor_status error: ' . $e->getMessage());
+                error_log('Stack trace: ' . $e->getTraceAsString());
                 echo json_encode(['success' => false, 'message' => 'Failed to update donor status', 'error' => $e->getMessage()]);
             }
             exit;

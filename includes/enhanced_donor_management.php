@@ -94,6 +94,10 @@ function getDonorsList($pdo, $status = null, $limit = 50) {
 // Update donor status (admin controlled)
 function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = null) {
     try {
+        // Ensure audit log table exists BEFORE starting transaction
+        // (CREATE TABLE auto-commits and would break our transaction)
+        ensureAuditLogTableExists($pdo);
+        
         $pdo->beginTransaction();
         
         // Get current donor details
@@ -130,8 +134,15 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
         // If served via generic status update, also create donation record
         if ($newStatus === 'served') {
             $donationDate = date('Y-m-d');
-            $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, donation_status, created_at) VALUES (?, ?, ?, 'completed', NOW())");
-            $stmt->execute([$donorId, $donationDate, $donor['blood_type']]);
+            // Ensure blood_type is valid and not too long (max 10 chars for safety)
+            $bloodType = $donor['blood_type'];
+            if (strlen($bloodType) > 10) {
+                // Truncate or use a safe default
+                $bloodType = substr($bloodType, 0, 10);
+                error_log("WARNING: Blood type too long for donor $donorId: " . $donor['blood_type']);
+            }
+            $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, status, created_at) VALUES (?, ?, ?, 'completed', NOW())");
+            $stmt->execute([$donorId, $donationDate, $bloodType]);
         }
 
         // Log admin action
@@ -199,6 +210,11 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
             $pdo->rollBack();
         }
         error_log("Error updating donor status: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
+        // Store the error message so it can be retrieved by the caller
+        if (!isset($GLOBALS['last_donor_error'])) {
+            $GLOBALS['last_donor_error'] = $e->getMessage();
+        }
         return false;
     }
 }
@@ -206,6 +222,9 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
 // Approve donor (admin controlled)
 function approveDonor($pdo, $donorId, $adminId = null) {
     try {
+        // Ensure audit log table exists BEFORE starting transaction
+        ensureAuditLogTableExists($pdo);
+        
         $pdo->beginTransaction();
         
         // Get donor details for email
@@ -283,6 +302,9 @@ function approveDonor($pdo, $donorId, $adminId = null) {
 // Mark donor as unserved (admin controlled)
 function markDonorUnserved($pdo, $donorId, $reason, $customNote = '', $adminId = null) {
     try {
+        // Ensure audit log table exists BEFORE starting transaction
+        ensureAuditLogTableExists($pdo);
+        
         $pdo->beginTransaction();
         
         // Get donor details for email
@@ -352,16 +374,19 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
     $logMessage = "[" . date('Y-m-d H:i:s') . "] markDonorServed called with donorId: $donorId\n";
     
     try {
-        $pdo->beginTransaction();
+        // Ensure audit log table exists BEFORE starting transaction
+        ensureAuditLogTableExists($pdo);
         
-        // First, modify the status column to include 'served' if it doesn't already
+        // Ensure status column includes 'served' BEFORE starting transaction (DDL auto-commits)
         try {
-            $pdo->exec("ALTER TABLE donors_new MODIFY COLUMN status ENUM('pending','approved','served','rejected','suspended') DEFAULT 'pending'");
+            $pdo->exec("ALTER TABLE donors_new MODIFY COLUMN status ENUM('pending','approved','served','rejected','suspended','unserved') DEFAULT 'pending'");
             $logMessage .= "Updated status column to include 'served'\n";
         } catch (Exception $e) {
-            // Column might not exist or already updated
-            $logMessage .= "Status column update: " . $e->getMessage() . "\n";
+            // Column might already be updated or doesn't need changes
+            $logMessage .= "Status column check: " . $e->getMessage() . "\n";
         }
+        
+        $pdo->beginTransaction();
         
         // Log current tables
         $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
@@ -371,24 +396,7 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
         $tableName = 'donors_new';
         $logMessage .= "Using table: $tableName\n";
         
-        // Check columns in the table
-        $columns = $pdo->query("SHOW COLUMNS FROM $tableName")->fetchAll(PDO::FETCH_COLUMN);
-        $logMessage .= "Columns in $tableName: " . implode(", ", $columns) . "\n";
-        
-        // Ensure status column exists in the table and includes 'served' in the ENUM
-        if (!in_array('status', $columns)) {
-            $logMessage .= "Adding status column to $tableName\n";
-            $pdo->exec("ALTER TABLE $tableName ADD COLUMN status ENUM('pending','approved','served','rejected','suspended') DEFAULT 'pending'");
-        } else {
-            // Check if 'served' is in the ENUM
-            $columnInfo = $pdo->query("SHOW COLUMNS FROM $tableName WHERE Field = 'status'")->fetch(PDO::FETCH_ASSOC);
-            if (strpos($columnInfo['Type'], "'served'") === false) {
-                $logMessage .= "Updating status column to include 'served'\n";
-                $pdo->exec("ALTER TABLE $tableName MODIFY COLUMN status ENUM('pending','approved','served','rejected','suspended') DEFAULT 'pending'");
-            }
-        }
-        
-        // Log the update
+        // Log the update (schema already ensured before transaction)
         $logMessage .= "Updating donor $donorId status to 'served'\n";
         
         // Update donor status to 'served'
@@ -412,9 +420,43 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
         
         // Add donation record
         $donationDate = $donationDate ?: date('Y-m-d');
-        // Note: donations_new table column is named `donation_status`, not `status`
-        $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, donation_status, created_at) VALUES (?, ?, ?, 'completed', NOW())");
-        $stmt->execute([$donorId, $donationDate, $donor['blood_type']]);
+        // Ensure blood_type is valid and not too long (max 10 chars for safety)
+        $bloodType = $donor['blood_type'];
+        if (strlen($bloodType) > 10) {
+            // Truncate or use a safe default
+            $bloodType = substr($bloodType, 0, 10);
+            error_log("WARNING: Blood type too long for donor $donorId: " . $donor['blood_type']);
+        }
+        // Use the correct column name 'status' as defined in the table schema
+        $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, status, created_at) VALUES (?, ?, ?, 'completed', NOW())");
+        $stmt->execute([$donorId, $donationDate, $bloodType]);
+        
+        // AUTOMATICALLY CREATE BLOOD UNIT when donor is marked as served
+        try {
+            require_once __DIR__ . '/BloodInventoryManagerComplete.php';
+            $inventoryManager = new BloodInventoryManagerComplete($pdo);
+            
+            $bloodUnitData = [
+                'donor_id' => $donorId,
+                'collection_date' => $donationDate,
+                'collection_site' => 'Main Center',
+                'storage_location' => 'Storage A'
+            ];
+            
+            $result = $inventoryManager->addBloodUnit($bloodUnitData);
+            
+            if ($result['success']) {
+                $logMessage .= "Blood unit created automatically: {$result['unit_id']}\n";
+                file_put_contents($logFile, $logMessage, FILE_APPEND);
+            } else {
+                $logMessage .= "Failed to create blood unit: {$result['message']}\n";
+                file_put_contents($logFile, $logMessage, FILE_APPEND);
+            }
+        } catch (Exception $e) {
+            $logMessage .= "Error creating blood unit: " . $e->getMessage() . "\n";
+            file_put_contents($logFile, $logMessage, FILE_APPEND);
+            error_log("Error auto-creating blood unit for donor $donorId: " . $e->getMessage());
+        }
         
         if ($donor && !empty($donor['email'])) {
             // Send served confirmation email
