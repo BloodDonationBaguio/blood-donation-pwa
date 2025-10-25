@@ -1,7 +1,4 @@
 <?php
-// Production database configuration for Render
-// Uses environment variables
-
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
@@ -12,51 +9,50 @@ if (!file_exists($logDir)) {
 }
 ini_set('error_log', $logDir . '/error.log');
 
-// Get database credentials from environment variables
-$db_host = getenv('DB_HOST') ?: 'localhost';
-$db_name = getenv('DB_NAME') ?: 'blood_system';
-$db_user = getenv('DB_USER') ?: 'root';
-$db_pass = getenv('DB_PASS') ?: '';
+// Get database URL from Render PostgreSQL
+$database_url = getenv('DATABASE_URL');
 
-define('DB_TYPE', 'mysql');
-define('DB_HOST', $db_host);
-define('DB_NAME', $db_name);
-define('DB_USER', $db_user);
-define('DB_PASS', $db_pass);
-
-try {
-    $pdo = new PDO(
-        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-        DB_USER,
-        DB_PASS,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_EMULATE_PREPARES => false,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ]
-    );
-    error_log("Database connection established successfully");
-} catch (PDOException $e) {
-    error_log("Database connection failed: " . $e->getMessage());
-    die("Database connection error. Please check configuration.");
+if ($database_url) {
+    $db = parse_url($database_url);
+    define('DB_HOST', $db['host']);
+    define('DB_NAME', ltrim($db['path'], '/'));
+    define('DB_USER', $db['user']);
+    define('DB_PASS', $db['pass']);
+    define('DB_PORT', isset($db['port']) ? $db['port'] : 5432);
+    
+    try {
+        $pdo = new PDO(
+            "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME,
+            DB_USER,
+            DB_PASS,
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            ]
+        );
+        error_log("PostgreSQL connection established successfully");
+    } catch (PDOException $e) {
+        error_log("Database connection failed: " . $e->getMessage());
+        die("Database connection error. Please check logs.");
+    }
+} else {
+    die("DATABASE_URL not found. Please configure database connection.");
 }
 
 function tableExists($pdo, $table) {
     try {
-        $result = $pdo->query("SHOW TABLES LIKE '" . $pdo->quote($table) . "'");
-        return $result->rowCount() > 0;
+        $result = $pdo->query("SELECT to_regclass('public." . $table . "')");
+        return $result->fetchColumn() !== null;
     } catch (PDOException $e) {
-        error_log("Error checking if table exists: " . $e->getMessage());
         return false;
     }
 }
 
 function getTableStructure($pdo, $table) {
     try {
-        $stmt = $pdo->query("DESCRIBE `" . str_replace('`', '``', $table) . "`");
+        $stmt = $pdo->query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" . $table . "'");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        error_log("Error getting table structure: " . $e->getMessage());
         return [];
     }
 }
