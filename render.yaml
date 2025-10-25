@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: blooddonationbaguio
+    env: docker
+    branch: main
+    plan: free

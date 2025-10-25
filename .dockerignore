@@ -1,0 +1,8 @@
+.git
+.gitignore
+logs/
+backup/
+*.log
+*.md
+test_*.php
+fix_*.php
