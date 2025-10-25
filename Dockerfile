@@ -1,29 +1,20 @@
 FROM php:8.1-apache
 
-# Install MySQL extensions
+# Install PHP extensions
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-# Enable Apache modules
+# Enable Apache rewrite
 RUN a2enmod rewrite
 
-# Set working directory
-WORKDIR /var/www/html
-
-# Copy all files
+# Copy application
 COPY . /var/www/html/
 
-# Create logs directory
-RUN mkdir -p /var/www/html/logs && chmod 777 /var/www/html/logs
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
-# Apache configuration for Render
-RUN echo "Listen \${PORT:-8080}" > /etc/apache2/ports.conf && \
-    echo "<VirtualHost *:\${PORT:-8080}>" > /etc/apache2/sites-available/000-default.conf && \
-    echo "    DocumentRoot /var/www/html" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    <Directory /var/www/html>" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "        AllowOverride All" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "        Require all granted" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    </Directory>" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "</VirtualHost>" >> /etc/apache2/sites-available/000-default.conf
+# Expose port 80
+EXPOSE 80
 
 # Start Apache
 CMD ["apache2-foreground"]
