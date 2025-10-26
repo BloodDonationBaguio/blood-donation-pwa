@@ -1,15 +1,11 @@
 <?php
 // PostgreSQL Database Setup Script
-// Run this ONCE on Render to create all tables
-
 require_once 'db.php';
 
 echo "<!DOCTYPE html><html><head><title>Database Setup</title></head><body>";
-echo "<h1>Blood Donation System - Database Setup</h1>";
-echo "<pre>";
+echo "<h1>Blood Donation System - Database Setup</h1><pre>";
 
 try {
-    // Create admin_users table
     echo "Creating admin_users table...\n";
     $pdo->exec("CREATE TABLE IF NOT EXISTS admin_users (
         id SERIAL PRIMARY KEY,
@@ -20,9 +16,8 @@ try {
         role VARCHAR(20) DEFAULT 'admin',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
-    echo "✓ admin_users table created\n\n";
+    echo "✓ admin_users created\n\n";
     
-    // Create donors table
     echo "Creating donors table...\n";
     $pdo->exec("CREATE TABLE IF NOT EXISTS donors (
         id SERIAL PRIMARY KEY,
@@ -40,9 +35,8 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
-    echo "✓ donors table created\n\n";
+    echo "✓ donors created\n\n";
     
-    // Create blood_units table
     echo "Creating blood_units table...\n";
     $pdo->exec("CREATE TABLE IF NOT EXISTS blood_units (
         id SERIAL PRIMARY KEY,
@@ -54,9 +48,8 @@ try {
         volume_ml INTEGER DEFAULT 450,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
-    echo "✓ blood_units table created\n\n";
+    echo "✓ blood_units created\n\n";
     
-    // Create notifications table
     echo "Creating notifications table...\n";
     $pdo->exec("CREATE TABLE IF NOT EXISTS notifications (
         id SERIAL PRIMARY KEY,
@@ -65,38 +58,26 @@ try {
         is_read BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
-    echo "✓ notifications table created\n\n";
+    echo "✓ notifications created\n\n";
     
-    // Insert default admin user
-    echo "Creating default admin user...\n";
-    $username = 'admin';
+    echo "Creating admin user...\n";
     $password = password_hash('admin123', PASSWORD_DEFAULT);
-    $email = 'admin@blooddonation.com';
-    $full_name = 'System Administrator';
-    
     $stmt = $pdo->prepare("INSERT INTO admin_users (username, password, email, full_name, role) 
                           VALUES (?, ?, ?, ?, 'super_admin') 
                           ON CONFLICT (username) DO NOTHING");
-    $stmt->execute([$username, $password, $email, $full_name]);
+    $stmt->execute(['admin', $password, 'admin@blooddonation.com', 'System Administrator']);
     
     echo "✓ Admin user created\n";
-    echo "  Username: admin\n";
-    echo "  Password: admin123\n\n";
-    
+    echo "  Username: admin\n  Password: admin123\n\n";
     echo "=====================================\n";
     echo "✅ DATABASE SETUP COMPLETE!\n";
     echo "=====================================\n\n";
-    echo "You can now:\n";
-    echo "1. Login to admin panel with username: admin, password: admin123\n";
-    echo "2. Register donors\n";
-    echo "3. Manage blood inventory\n\n";
-    echo "⚠️ IMPORTANT: Delete this file after setup for security!\n";
+    echo "Login at: <a href='admin_login.php'>Admin Login</a>\n";
+    echo "⚠️ Delete this file after setup!\n";
     
 } catch (PDOException $e) {
     echo "❌ ERROR: " . $e->getMessage() . "\n";
 }
 
-echo "</pre>";
-echo "<p><a href='admin_login.php'>Go to Admin Login</a></p>";
-echo "</body></html>";
+echo "</pre></body></html>";
 ?>
