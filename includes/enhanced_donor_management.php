@@ -14,7 +14,8 @@ require_once __DIR__ . '/admin_actions.php';
 function ensureDonorStatusColumnExists($pdo) {
     try {
         // Check if status column exists (PostgreSQL syntax)
-        $stmt = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'status'");
+        $stmt = $pdo->prepare("SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'donors' AND column_name = 'status'");
+        $stmt->execute();
         if (!$stmt->fetch()) {
             // Create a standard status column used across the app
             $pdo->exec("ALTER TABLE donors ADD COLUMN status VARCHAR(20) DEFAULT 'pending'");
@@ -22,6 +23,36 @@ function ensureDonorStatusColumnExists($pdo) {
     } catch (Exception $e) {
         // Don't break the page; log for troubleshooting
         error_log("ensureDonorStatusColumnExists error: " . $e->getMessage());
+    }
+}
+
+// Ensure extended donor metadata columns exist
+function ensureDonorExtendedColumns($pdo) {
+    try {
+        $requiredColumns = [
+            'rejection_reason'   => 'TEXT',
+            'unserved_reason'    => 'TEXT',
+            'served_date'        => 'TIMESTAMP NULL',
+            'last_donation_date' => 'TIMESTAMP NULL'
+        ];
+
+        if (!empty($requiredColumns)) {
+            $placeholders = implode(',', array_fill(0, count($requiredColumns), '?'));
+            $stmt = $pdo->prepare(
+                "SELECT column_name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'donors' AND column_name IN ($placeholders)"
+            );
+            $stmt->execute(array_keys($requiredColumns));
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $existing = $columns ? array_flip(array_map('strtolower', $columns)) : [];
+
+            foreach ($requiredColumns as $column => $type) {
+                if (!isset($existing[strtolower($column)])) {
+                    $pdo->exec("ALTER TABLE donors ADD COLUMN $column $type");
+                }
+            }
+        }
+    } catch (Exception $e) {
+        error_log("ensureDonorExtendedColumns error: " . $e->getMessage());
     }
 }
 
@@ -529,7 +560,8 @@ function createDonorManagementTables($pdo) {
     try {
         // Make sure donors.status exists (required by the UI and queries)
         ensureDonorStatusColumnExists($pdo);
-        
+        ensureDonorExtendedColumns($pdo);
+
         // Create donor_notes table
         $pdo->exec("CREATE TABLE IF NOT EXISTS donor_notes (
             id INT AUTO_INCREMENT PRIMARY KEY,
