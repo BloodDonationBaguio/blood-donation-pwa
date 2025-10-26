@@ -57,9 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['admin_id'] = $admin['id'];
                     $_SESSION['admin_username'] = $admin['username'];
                     
-                    // Update last login time
-                    $updateStmt = $pdo->prepare("UPDATE admin_users SET last_login = NOW() WHERE id = ?");
-                    $updateStmt->execute([$admin['id']]);
+                    // Update last login time (PostgreSQL syntax)
+                    try {
+                        $updateStmt = $pdo->prepare("UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE id = ?");
+                        $updateStmt->execute([$admin['id']]);
+                    } catch (Exception $e) {
+                        // Ignore last_login update error - not critical
+                        error_log("Last login update failed: " . $e->getMessage());
+                    }
                     
                     // Redirect to admin dashboard
                     header('Location: admin.php');
