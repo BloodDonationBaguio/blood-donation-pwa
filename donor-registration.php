@@ -198,10 +198,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     // Insert donor information
                     $stmt = $pdo->prepare("
-                        INSERT INTO donors_new (
+                        INSERT INTO donors (
                             first_name, last_name, email, phone, blood_type, date_of_birth, 
-                            gender, address, city, province, weight, height, reference_code, status, created_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
+                            gender, address, city, province, status, created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
                     ");
                     
                     // Split full name into first and last name
@@ -220,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     $stmt->execute([
                         $firstName, $lastName, $email, $phone, $bloodType, $dob, 
-                        $gender, $address, $city, $province, $weight, $height, $refNumber
+                        $gender, $address, $city, $province
                     ]);
 
                     // Get donor ID but DON'T commit yet - we need to save medical screening too
