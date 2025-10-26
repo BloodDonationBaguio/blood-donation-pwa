@@ -676,7 +676,10 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                                         <a href="?tab=donor-details&id=<?= $donor['id'] ?>" class="btn btn-sm btn-info" title="View Complete Donor Information">
                                             <i class="fas fa-info-circle"></i> View More Information
                                         </a>
-                                        <a href="?tab=pending-donors&approve_donor=<?= $donor['id'] ?>" class="btn btn-sm btn-success action-btn" title="Approve" onclick="showLoading(this, 'Approving...'); return confirm('Approve this donor?')">
+                                        <a href="?tab=pending-donors&approve_donor=<?= $donor['id'] ?>" 
+                                           class="btn btn-sm btn-success action-btn ajax-approve" 
+                                           data-donor-id="<?= $donor['id'] ?>"
+                                           title="Approve">
                                             <i class="fas fa-check me-2"></i>Approve Donor
                                         </a>
                                         <button type="button" class="btn btn-sm btn-danger" title="Reject" onclick="showRejectModal(<?= $donor['id'] ?>, '<?= addslashes($donor['first_name'] . ' ' . $donor['last_name']) ?>')">
@@ -1100,7 +1103,10 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                                         <i class="fas fa-times-circle"></i>
                                     </button>
                                 <?php endif; ?>
-                                <a href="?tab=donor-list&delete_donor=<?= $donor['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this donor?')">
+                                <a href="?tab=donor-list&delete_donor=<?= $donor['id'] ?>" 
+                                   class="btn btn-sm btn-outline-danger action-btn ajax-delete" 
+                                   data-donor-id="<?= $donor['id'] ?>" 
+                                   title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </td>
@@ -1424,7 +1430,25 @@ function confirmReject() {
         const customReason = customReasonElement.value;
         const finalReason = reason === 'Other' ? customReason : reason;
         if (typeof showGlobalLoader === 'function') { showGlobalLoader('Rejecting donor...'); }
-        window.location.href = `?tab=pending-donors&reject_donor=${currentRejectId}&reason=${encodeURIComponent(finalReason)}`;
+        fetch('admin/ajax/donor_actions.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `action=reject&id=${encodeURIComponent(currentRejectId)}&reason=${encodeURIComponent(finalReason)}`
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                if (typeof showToast === 'function') showToast('Donor rejected', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                if (typeof showToast === 'function') showToast('Error: ' + (data.message || 'Failed'), 'danger');
+                if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
+            }
+        })
+        .catch(err => {
+            if (typeof showToast === 'function') showToast('Error: ' + err.message, 'danger');
+            if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
+        });
     }
 }
 
@@ -1450,7 +1474,25 @@ function confirmUnserved() {
         const customReason = customReasonElement.value;
         const finalReason = reason === 'Other' ? customReason : reason;
         if (typeof showGlobalLoader === 'function') { showGlobalLoader('Marking as unserved...'); }
-        window.location.href = `?tab=donor-list&mark_unserved=${currentUnservedId}&reason=${encodeURIComponent(finalReason)}`;
+        fetch('admin/ajax/donor_actions.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `action=unserved&id=${encodeURIComponent(currentUnservedId)}&reason=${encodeURIComponent(finalReason)}`
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                if (typeof showToast === 'function') showToast('Donor marked unserved', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                if (typeof showToast === 'function') showToast('Error: ' + (data.message || 'Failed'), 'danger');
+                if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
+            }
+        })
+        .catch(err => {
+            if (typeof showToast === 'function') showToast('Error: ' + err.message, 'danger');
+            if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
+        });
     }
 }
 
@@ -1829,13 +1871,66 @@ function showGlobalLoader(message) {
 
 // Attach overlay to action buttons and on navigation
 document.addEventListener('DOMContentLoaded', function() {
-    // Any action buttons trigger overlay
-    document.querySelectorAll('.action-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            showGlobalLoader('Processing...');
+    // Intercept approve via AJAX
+    document.querySelectorAll('.ajax-approve').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const id = this.getAttribute('data-donor-id');
+            if (!id) return;
+            if (!confirm('Approve this donor?')) return;
+            showGlobalLoader('Approving donor...');
+            fetch('admin/ajax/donor_actions.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=approve&id=${encodeURIComponent(id)}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    if (typeof showToast === 'function') showToast('Donor approved', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    if (typeof showToast === 'function') showToast('Error: ' + (data.message || 'Failed'), 'danger');
+                    if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
+                }
+            })
+            .catch(err => {
+                if (typeof showToast === 'function') showToast('Error: ' + err.message, 'danger');
+                if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
+            });
         });
     });
 
+    // Intercept delete via AJAX
+    document.querySelectorAll('.ajax-delete').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const id = this.getAttribute('data-donor-id');
+            if (!id) return;
+            if (!confirm('Delete this donor? This cannot be undone.')) return;
+            showGlobalLoader('Deleting donor...');
+            fetch('admin/ajax/donor_actions.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=delete&id=${encodeURIComponent(id)}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    if (typeof showToast === 'function') showToast('Donor deleted', 'success');
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    if (typeof showToast === 'function') showToast('Delete failed: ' + (data.message || 'Unknown error'), 'danger');
+                    if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
+                }
+            })
+            .catch(err => {
+                if (typeof showToast === 'function') showToast('Error: ' + err.message, 'danger');
+                if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
+            });
+        });
+    });
+    
     // Show overlay on page unload if an action is in progress
     window.addEventListener('beforeunload', function() {
         const anyLoading = document.querySelector('.action-btn.loading');

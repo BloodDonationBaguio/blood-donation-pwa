@@ -1437,7 +1437,7 @@ function buildPaginationUrl($page) {
                                                         <a href="admin_enhanced_donor_management.php?donor_id=<?= $donor['id'] ?>" class="btn btn-sm btn-primary">
                                                             <i class="fas fa-eye"></i> View
                                                         </a>
-                                                        <a href="?tab=donor-list&delete_donor=<?= $donor['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this donor?')">
+                                                        <a href="?tab=donor-list&delete_donor=<?= $donor['id'] ?>" class="btn btn-sm btn-outline-danger action-btn ajax-delete" data-donor-id="<?= $donor['id'] ?>" title="Delete">
                                                             <i class="fas fa-trash"></i> Delete
                                                         </a>
                                                     </div>
