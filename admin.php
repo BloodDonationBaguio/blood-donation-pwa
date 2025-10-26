@@ -83,27 +83,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } else {
         try {
             // Get current admin user
-            $stmt = $pdo->prepare("SELECT id, password, password_hash FROM admin_users WHERE username = ? AND is_active = 1");
+            $stmt = $pdo->prepare("SELECT id, password FROM admin_users WHERE username = ?");
             $stmt->execute([$_SESSION['admin_username']]);
             $admin = $stmt->fetch();
             
             if (!$admin) {
                 $error = "Admin user not found.";
             } else {
-                // Check current password (try both password fields for compatibility)
-                $currentPasswordValid = false;
-                if (!empty($admin['password_hash']) && password_verify($currentPassword, $admin['password_hash'])) {
-                    $currentPasswordValid = true;
-                } elseif (!empty($admin['password']) && $admin['password'] === $currentPassword) {
-                    $currentPasswordValid = true;
-                }
+                // Check current password using password_verify
+                $currentPasswordValid = password_verify($currentPassword, $admin['password']);
                 
                 if (!$currentPasswordValid) {
                     $error = "Current password is incorrect.";
                 } else {
-                    // Update password
+                    // Update password - hash it and store in password column
                     $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
-                    $updateStmt = $pdo->prepare("UPDATE admin_users SET password_hash = ?, password = '', updated_at = NOW() WHERE id = ?");
+                    $updateStmt = $pdo->prepare("UPDATE admin_users SET password = ? WHERE id = ?");
                     
                     if ($updateStmt->execute([$newPasswordHash, $admin['id']])) {
                         $success = "Password changed successfully!";
