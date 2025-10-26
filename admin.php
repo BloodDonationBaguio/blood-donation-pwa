@@ -2898,6 +2898,20 @@ function buildPaginationUrl($page) {
             }
         }
     </script>
+
+    <div id="globalLoader" style="position:fixed;inset:0;background:rgba(255,255,255,0.7);display:none;align-items:center;justify-content:center;z-index:2000;">
+        <div class="text-center">
+            <div class="spinner-border text-danger" role="status" style="width:3rem;height:3rem;"></div>
+            <div class="mt-3 global-loader-message">Processing...</div>
+        </div>
+    </div>
+    <script>
+        window.hideGlobalLoader = function() {
+            const overlay = document.getElementById('globalLoader');
+            if (overlay) overlay.style.display = 'none';
+        };
+        window.addEventListener('pageshow', hideGlobalLoader);
+    </script>
 </body>
 </html>
 

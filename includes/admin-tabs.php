@@ -1423,6 +1423,7 @@ function confirmReject() {
         const reason = reasonElement.value;
         const customReason = customReasonElement.value;
         const finalReason = reason === 'Other' ? customReason : reason;
+        if (typeof showGlobalLoader === 'function') { showGlobalLoader('Rejecting donor...'); }
         window.location.href = `?tab=pending-donors&reject_donor=${currentRejectId}&reason=${encodeURIComponent(finalReason)}`;
     }
 }
@@ -1448,6 +1449,7 @@ function confirmUnserved() {
         const reason = reasonElement.value;
         const customReason = customReasonElement.value;
         const finalReason = reason === 'Other' ? customReason : reason;
+        if (typeof showGlobalLoader === 'function') { showGlobalLoader('Marking as unserved...'); }
         window.location.href = `?tab=donor-list&mark_unserved=${currentUnservedId}&reason=${encodeURIComponent(finalReason)}`;
     }
 }
@@ -1815,6 +1817,33 @@ function showLoading(button, loadingText) {
         button.style.pointerEvents = '';
     }, 10000); // 10 seconds timeout
 }
+
+// Global full-page loader shown during long navigations/actions
+function showGlobalLoader(message) {
+    let overlay = document.getElementById('globalLoader');
+    if (!overlay) return;
+    const msg = overlay.querySelector('.global-loader-message');
+    if (msg) { msg.textContent = message || 'Processing...'; }
+    overlay.style.display = 'flex';
+}
+
+// Attach overlay to action buttons and on navigation
+document.addEventListener('DOMContentLoaded', function() {
+    // Any action buttons trigger overlay
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            showGlobalLoader('Processing...');
+        });
+    });
+
+    // Show overlay on page unload if an action is in progress
+    window.addEventListener('beforeunload', function() {
+        const anyLoading = document.querySelector('.action-btn.loading');
+        if (anyLoading) {
+            showGlobalLoader('Processing...');
+        }
+    });
+});
 
 // Help system functions
 function printHelp() {
