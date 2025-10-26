@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ref = trim($_POST['reference']);
         
         // Check if it's a donor reference
-        $stmt = $pdo->prepare('SELECT * FROM donors_new WHERE reference_code = ?');
+        $stmt = $pdo->prepare('SELECT * FROM donors WHERE reference_code = ?');
         $stmt->execute([$ref]);
         $donor = $stmt->fetch();
         
