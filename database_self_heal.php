@@ -208,10 +208,13 @@ ensureTable($pdo, 'donor_medical_screening_simple', $medicalSql, $results, $sche
 
 // Donors table critical columns
 $timestampType = $isPostgres ? 'TIMESTAMP NULL' : 'DATETIME NULL';
+$decimalType = $isPostgres ? 'NUMERIC(5,2)' : 'DECIMAL(5,2)';
 
 $donorColumns = [
     'status' => "VARCHAR(20) DEFAULT 'pending'",
     'reference_code' => 'VARCHAR(50)',
+    'weight' => $decimalType,
+    'height' => $decimalType,
     'rejection_reason' => 'TEXT',
     'unserved_reason' => 'TEXT',
     'served_date' => $timestampType,
@@ -222,6 +225,18 @@ $donorColumns = [
 
 foreach ($donorColumns as $column => $definition) {
     ensureColumn($pdo, 'donors', $column, $definition, $results, $schema, $isPostgres);
+}
+
+// Backfill missing reference_code for existing donors
+try {
+    if ($isPostgres) {
+        $pdo->exec("UPDATE donors SET reference_code = 'DNR-' || substr(md5(random()::text || id::text || coalesce(created_at::text,'')),1,6) WHERE reference_code IS NULL OR reference_code = ''");
+    } else {
+        $pdo->exec("UPDATE donors SET reference_code = CONCAT('DNR-', SUBSTRING(MD5(RAND()),1,6)) WHERE reference_code IS NULL OR reference_code = ''");
+    }
+    addResult($results, 'Backfill: donors.reference_code', 'fixed', 'Generated codes for missing references.');
+} catch (Throwable $e) {
+    addResult($results, 'Backfill: donors.reference_code', 'error', $e->getMessage());
 }
 
 // Lightweight tests to ensure critical updates work
