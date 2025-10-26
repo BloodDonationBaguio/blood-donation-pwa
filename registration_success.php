@@ -22,7 +22,7 @@ $stmt = $pdo->prepare("
         blood_type,
         email,
         phone
-    FROM donors_new 
+    FROM donors 
     WHERE reference_code = ?
 ");
 $stmt->execute([$reference]);
