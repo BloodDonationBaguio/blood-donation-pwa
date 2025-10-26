@@ -28,10 +28,10 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit();
 }
 
-// Additional security: Verify admin still exists and is active
+// Additional security: Verify admin still exists
 try {
     require_once(__DIR__ . "/db.php");
-    $stmt = $pdo->prepare("SELECT id, username, is_active FROM admin_users WHERE username = ? AND is_active = 1");
+    $stmt = $pdo->prepare("SELECT id, username FROM admin_users WHERE username = ?");
     $stmt->execute([$_SESSION['admin_username']]);
     $admin = $stmt->fetch();
     
