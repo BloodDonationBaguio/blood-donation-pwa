@@ -181,13 +181,13 @@ try {
         $donor = $pdo->query('SELECT * FROM donors WHERE id = ' . $id)->fetch();
         if ($donor && $donor['email']) {
             require_once __DIR__ . '/includes/mail_helper.php';
-            $subject = "Your Donor Application Approved [Ref: {$donor['reference_code']}]";
+            $subject = "Your Donor Application Approved [ID: {$donor['id']}]";
             $message = "<p>Dear {$donor['first_name']} {$donor['last_name']},</p>
-            <p>Your blood donation application (Ref: <b>{$donor['reference_code']}</b>) has been <b>approved</b>!</p>
+            <p>Your blood donation application (ID: <b>{$donor['id']}</b>) has been <b>approved</b>!</p>
             <p><strong>Next Steps:</strong></p>
             <ul>
                 <li>You can visit the Red Cross center from 8:00 AM to 5:00 PM</li>
-                <li>Bring your ID and this reference number: <b>{$donor['reference_code']}</b></li>
+                <li>Bring your ID and this reference number: <b>{$donor['id']}</b></li>
                 <li>Complete your donation process</li>
             </ul>
             <p>Status: <b>Approved</b></p>
@@ -451,7 +451,7 @@ try {
         
         // Recent activity - PostgreSQL compatible
         $recentActivity = $pdo->query("
-                    SELECT 'donor' as type, (d.first_name || ' ' || d.last_name) as name, d.status, d.created_at, d.reference_code as reference
+                    SELECT 'donor' as type, (d.first_name || ' ' || d.last_name) as name, d.status, d.created_at, d.id::text as reference
         FROM donors d
         WHERE d.created_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
             ORDER BY created_at DESC 
@@ -494,8 +494,8 @@ try {
         $params = [];
         
         if ($search) {
-            $sql .= ' AND ((d.first_name || \' \' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ? OR d.reference_code LIKE ?)';
-            $params = array_merge($params, array_fill(0, 4, "%$search%"));
+            $sql .= ' AND ((d.first_name || \' \' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?)';
+            $params = array_merge($params, array_fill(0, 3, "%$search%"));
         }
         
         if ($statusFilter) {
@@ -530,12 +530,12 @@ try {
     
     if ($activeTab === 'pending-donors') {
         $search = trim($_GET['donor_search'] ?? '');
-        $sql = 'SELECT d.* FROM donors d WHERE d.status = "pending"';
+        $sql = "SELECT d.* FROM donors d WHERE d.status = 'pending'";
         $params = [];
         
         if ($search) {
-            $sql .= ' AND (CONCAT(d.first_name, " ", d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ? OR d.reference_code LIKE ?)';
-            $params = array_fill(0, 4, "%$search%");
+            $sql .= " AND ((d.first_name || ' ' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?)";
+            $params = array_fill(0, 3, "%$search%");
         }
         
         $sql .= ' ORDER BY d.created_at DESC';
@@ -1377,7 +1377,7 @@ function buildPaginationUrl($page) {
                                         <?php foreach ($donors as $donor): ?>
                                             <tr>
                                                 <td><?= htmlspecialchars($donor['id']) ?></td>
-                                                <td><code><?= htmlspecialchars($donor['reference_code'] ?? 'N/A') ?></code></td>
+                                                <td><code><?= htmlspecialchars($donor['id'] ?? 'N/A') ?></code></td>
                                                 <td><strong><?= htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) ?></strong></td>
                                                 <td><?= htmlspecialchars($donor['email']) ?></td>
                                                 <td><?= htmlspecialchars($donor['phone'] ?? 'N/A') ?></td>
@@ -1546,7 +1546,7 @@ function buildPaginationUrl($page) {
                                         <?php foreach ($pendingDonors as $donor): ?>
                                             <tr>
                                                 <td><?= htmlspecialchars($donor['id']) ?></td>
-                                                <td><code><?= htmlspecialchars($donor['reference_code'] ?? 'N/A') ?></code></td>
+                                                <td><code><?= htmlspecialchars($donor['id'] ?? 'N/A') ?></code></td>
                                                 <td><strong><?= htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) ?></strong></td>
                                                 <td><?= htmlspecialchars($donor['email']) ?></td>
                                                 <td><?= htmlspecialchars($donor['phone'] ?? 'N/A') ?></td>
