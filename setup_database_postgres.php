@@ -70,6 +70,17 @@ try {
     )");
     echo "✓ notifications created\n\n";
     
+    echo "Creating donor_medical_screening_simple table...\n";
+    $pdo->exec("CREATE TABLE IF NOT EXISTS donor_medical_screening_simple (
+        id SERIAL PRIMARY KEY,
+        donor_id INTEGER REFERENCES donors(id) ON DELETE CASCADE,
+        reference_code VARCHAR(20),
+        screening_data JSONB,
+        all_questions_answered BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    echo "✓ donor_medical_screening_simple created\n\n";
+    
     echo "Creating admin user...\n";
     $password = password_hash('admin123', PASSWORD_DEFAULT);
     $stmt = $pdo->prepare("INSERT INTO admin_users (username, password, email, full_name, role) 

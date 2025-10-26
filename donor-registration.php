@@ -88,8 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         try {
             $duplicateCheck = $pdo->prepare("
-                SELECT id, created_at FROM donors_new 
-                WHERE email = ? AND created_at > DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+                SELECT id, created_at FROM donors 
+                WHERE email = ? AND created_at > CURRENT_TIMESTAMP - INTERVAL '5 minutes'
                 ORDER BY created_at DESC LIMIT 1
             ");
             $duplicateCheck->execute([$email]);
@@ -165,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         try {
             // Check if email already exists and handle repeat donations
-            $checkEmail = $pdo->prepare("SELECT id, first_name, last_name, status, created_at FROM donors_new WHERE email = ? ORDER BY created_at DESC LIMIT 1");
+            $checkEmail = $pdo->prepare("SELECT id, first_name, last_name, status, created_at FROM donors WHERE email = ? ORDER BY created_at DESC LIMIT 1");
             $checkEmail->execute([$email]);
             $existingDonor = $checkEmail->fetch();
             
@@ -228,12 +228,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     error_log("Got donor ID: $donorId, now saving medical screening in same transaction...");
                     
                     // Verify the data was actually saved
-                    $verifyStmt = $pdo->prepare("SELECT id, reference_code FROM donors_new WHERE id = ?");
+                    $verifyStmt = $pdo->prepare("SELECT id FROM donors WHERE id = ?");
                     $verifyStmt->execute([$donorId]);
                     $savedDonor = $verifyStmt->fetch();
                     
                     if ($savedDonor) {
-                        error_log("Verified: Donor saved with ID: {$savedDonor['id']}, Ref: {$savedDonor['reference_code']}");
+                        error_log("Verified: Donor saved with ID: {$savedDonor['id']}");
                         
                         // Save medical screening data WITHIN the same transaction
                         error_log('Saving medical screening data for donor ID ' . $donorId);
