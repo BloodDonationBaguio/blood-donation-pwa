@@ -7,7 +7,11 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Use the main database configuration
-require_once 'db.php';
+try {
+    require_once 'db.php';
+} catch (Exception $e) {
+    die("Database error: " . $e->getMessage());
+}
 
 // Check if already logged in - but only redirect if we have a valid session
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true && isset($_SESSION['admin_username'])) {
@@ -35,6 +39,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 // Process login
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    error_log("POST received! Username: " . ($_POST['username'] ?? 'NOT SET'));
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     
@@ -51,11 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $passwordValid = password_verify($password, $admin['password']);
                 
                 if ($passwordValid) {
+                    error_log("Password valid! Setting session...");
                     // Set session variables
                     session_regenerate_id(true); // Prevent session fixation
                     $_SESSION['admin_logged_in'] = true;
                     $_SESSION['admin_id'] = $admin['id'];
                     $_SESSION['admin_username'] = $admin['username'];
+                    
+                    error_log("Session set. Redirecting to admin.php...");
                     
                     // Update last login time (PostgreSQL syntax)
                     try {
@@ -67,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     
                     // Redirect to admin dashboard
+                    error_log("Redirecting...");
                     header('Location: admin.php');
                     exit();
                 } else {
