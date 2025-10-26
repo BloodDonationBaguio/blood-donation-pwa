@@ -5,7 +5,7 @@ ob_start();
 define('INCLUDES_PATH', true);
 session_start();
 require_once __DIR__ . "/includes/db.php";
-require_once __DIR__ . "/includes/mail.php";
+require_once __DIR__ . "/includes/mail_helper.php";
 
 // Enable error reporting but don't display to prevent output before DOCTYPE
 error_reporting(E_ALL);
@@ -335,7 +335,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                             
                             // Send the email
-                            require_once __DIR__ . '/includes/mail.php';
                             if (function_exists('send_confirmation_email')) {
                                 error_log('Attempting to send confirmation email to: ' . $email);
                                 $emailSent = send_confirmation_email($email, $subject, $message, $fullName);

@@ -1,0 +1,30 @@
+{
+    "enabled": true,
+    "provider": "smtp",
+    "smtp": {
+        "host": "smtp.gmail.com",
+        "port": 587,
+        "encryption": "tls",
+        "username": "prc.baguio.blood@gmail.com",
+        "password": "anoi yppm telm vmfy",
+        "from_email": "prc.baguio.blood@gmail.com",
+        "from_name": "Blood Donation System"
+    },
+    "sendgrid": {
+        "api_key": "",
+        "from_email": "prc.baguio.blood@gmail.com",
+        "from_name": "Blood Donation System"
+    },
+    "mailgun": {
+        "api_key": "",
+        "domain": "",
+        "from_email": "prc.baguio.blood@gmail.com",
+        "from_name": "Blood Donation System"
+    },
+    "backup_providers": [
+        "sendgrid",
+        "mailgun"
+    ],
+    "retry_attempts": 3,
+    "timeout": 30
+}
