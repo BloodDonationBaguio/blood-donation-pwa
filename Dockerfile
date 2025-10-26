@@ -19,8 +19,11 @@ RUN cp /var/www/html/db_production.php /var/www/html/db.php
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
+# Change Apache to listen on port 10000 for Render
+RUN sed -i 's/80/10000/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
+
 # Expose port
-EXPOSE 80
+EXPOSE 10000
 
 # Start Apache
 CMD ["apache2-foreground"]
