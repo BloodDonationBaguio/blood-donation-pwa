@@ -58,14 +58,14 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
     try {
         // Server settings
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = getenv('MAIL_HOST') ?: 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'prc.baguio.blood@gmail.com';
-        $mail->Password = 'anoi yppm telm vmfy'; // App Password
-        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
+        $mail->Username = getenv('MAIL_USER') ?: 'prc.baguio.blood@gmail.com';
+        $mail->Password = getenv('MAIL_PASS') ?: '';
+        $mail->SMTPSecure = getenv('MAIL_SECURE') ?: PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = getenv('MAIL_PORT') ?: 587;
         $mail->SMTPKeepAlive = true; // Enable keep-alive
-        $mail->Timeout = 30; // Set a reasonable timeout
+        $mail->Timeout = 8; // Fail fast if SMTP is unreachable
         
         // Force SMTP to be used
         $mail->Mailer = 'smtp';

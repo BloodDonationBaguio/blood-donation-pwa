@@ -341,7 +341,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 if ($emailSent) {
                                     error_log('Confirmation email sent successfully to ' . $email);
                                 } else {
-                                    error_log('Failed to send confirmation email to ' . $email);
+                                    error_log('Failed to send confirmation email to ' . $email . ' (proceeding with registration)');
                                 }
                             } else {
                                 error_log('send_confirmation_email function not found!');
