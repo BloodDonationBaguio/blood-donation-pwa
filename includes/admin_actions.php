@@ -38,7 +38,7 @@ function logAdminAction($pdo, $actionType, $tableName, $recordId, $actionDetails
         $stmt = $pdo->prepare("
             INSERT INTO admin_audit_log 
             (admin_username, action_type, table_name, record_id, description, ip_address, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, NOW())
+            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
         ");
         
         $adminUsername = $adminId ?? ($_SESSION['admin_username'] ?? $_SESSION['username'] ?? 'system');

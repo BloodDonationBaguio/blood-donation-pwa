@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
                         $updateStmt = $pdo->prepare("
                             UPDATE admin_users 
-                            SET username = ?, password = ?, updated_at = NOW() 
+                            SET username = ?, password = ? 
                             WHERE id = ?
                         ");
                         

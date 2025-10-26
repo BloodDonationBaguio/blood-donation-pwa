@@ -13,10 +13,11 @@ require_once __DIR__ . '/admin_actions.php';
 // Ensure critical columns exist on first load (idempotent)
 function ensureDonorStatusColumnExists($pdo) {
     try {
-        $stmt = $pdo->query("SHOW COLUMNS FROM donors_new LIKE 'status'");
+        // Check if status column exists (PostgreSQL syntax)
+        $stmt = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'status'");
         if (!$stmt->fetch()) {
             // Create a standard status column used across the app
-            $pdo->exec("ALTER TABLE donors_new ADD COLUMN status ENUM('pending','approved','served','unserved','rejected') DEFAULT 'pending'");
+            $pdo->exec("ALTER TABLE donors ADD COLUMN status VARCHAR(20) DEFAULT 'pending'");
         }
     } catch (Exception $e) {
         // Don't break the page; log for troubleshooting
@@ -35,7 +36,7 @@ function getDonorDetails($pdo, $donorId) {
     try {
         $stmt = $pdo->prepare("
             SELECT d.*, ms.screening_data, ms.all_questions_answered, ms.created_at as screening_date
-            FROM donors_new d
+            FROM donors d
             LEFT JOIN donor_medical_screening_simple ms ON d.id = ms.donor_id
             WHERE d.id = ?
               AND d.email NOT LIKE 'test_%' 
@@ -57,7 +58,7 @@ function getDonorsList($pdo, $status = null, $limit = 50) {
     try {
         $query = "
             SELECT d.*, ms.screening_data, ms.all_questions_answered, ms.created_at as screening_date
-            FROM donors_new d
+            FROM donors d
             LEFT JOIN donor_medical_screening_simple ms ON d.id = ms.donor_id
             WHERE d.email NOT LIKE 'test_%' 
               AND d.email NOT LIKE '%@example.com'
@@ -101,7 +102,7 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
         $pdo->beginTransaction();
         
         // Get current donor details
-        $stmt = $pdo->prepare("SELECT * FROM donors_new WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT * FROM donors WHERE id = ?");
         $stmt->execute([$donorId]);
         $donor = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -110,13 +111,19 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
         }
         
         // Update donor status
-        $stmt = $pdo->prepare("UPDATE donors_new SET status = ?, updated_at = NOW() WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE donors SET status = ? WHERE id = ?");
         $result = $stmt->execute([$newStatus, $donorId]);
         
         // Add status change note and email donor with the note
         if (!empty($notes)) {
-            $stmt = $pdo->prepare("INSERT INTO donor_notes (donor_id, note, created_by, created_at) VALUES (?, ?, ?, NOW())");
-            $stmt->execute([$donorId, $notes, $adminId]);
+            // Only insert note if donor_notes table exists
+            try {
+                $stmt = $pdo->prepare("INSERT INTO donor_notes (donor_id, note, created_by, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
+                $stmt->execute([$donorId, $notes, $adminId]);
+            } catch (PDOException $e) {
+                // donor_notes table might not exist, log but continue
+                error_log("donor_notes insert failed: " . $e->getMessage());
+            }
 
             // Email donor with the remark
             if (!empty($donor['email'])) {
@@ -141,12 +148,12 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
                 $bloodType = substr($bloodType, 0, 10);
                 error_log("WARNING: Blood type too long for donor $donorId: " . $donor['blood_type']);
             }
-            $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, status, created_at) VALUES (?, ?, ?, 'completed', NOW())");
+            $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, status, created_at) VALUES (?, ?, ?, 'completed', CURRENT_TIMESTAMP)");
             $stmt->execute([$donorId, $donationDate, $bloodType]);
         }
 
         // Log admin action
-        logAdminAction($pdo, 'donor_status_updated', 'donors_new', $donorId, "Status changed from {$donor['status']} to: $newStatus");
+        logAdminAction($pdo, 'donor_status_updated', 'donors', $donorId, "Status changed from {$donor['status']} to: $newStatus");
         
         // Send status-change email templates (always notify)
         if (!empty($donor['email'])) {
@@ -235,7 +242,7 @@ function approveDonor($pdo, $donorId, $adminId = null) {
         }
         
         // Update donor status
-        $stmt = $pdo->prepare("UPDATE donors_new SET status = 'approved', updated_at = NOW() WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE donors SET status = 'approved' WHERE id = ?");
         $stmt->execute([$donorId]);
         
         if ($donor && !empty($donor['email'])) {
@@ -285,7 +292,7 @@ function approveDonor($pdo, $donorId, $adminId = null) {
         }
         
         // Log admin action
-        logAdminAction($pdo, 'donor_approved', 'donors_new', $donorId, "Donor approved and email sent");
+        logAdminAction($pdo, 'donor_approved', 'donors', $donorId, "Donor approved and email sent");
         
         $pdo->commit();
         return true;
@@ -315,7 +322,7 @@ function markDonorUnserved($pdo, $donorId, $reason, $customNote = '', $adminId =
         }
         
         // Update donor status
-        $stmt = $pdo->prepare("UPDATE donors_new SET status = 'unserved', updated_at = NOW() WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE donors SET status = 'unserved' WHERE id = ?");
         $stmt->execute([$donorId]);
         
         // Add note about unserved reason
@@ -325,7 +332,7 @@ function markDonorUnserved($pdo, $donorId, $reason, $customNote = '', $adminId =
                 $note .= " - " . $customNote;
             }
             
-            $stmt = $pdo->prepare("INSERT INTO donor_notes (donor_id, note, created_by, created_at) VALUES (?, ?, ?, NOW())");
+            $stmt = $pdo->prepare("INSERT INTO donor_notes (donor_id, note, created_by, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
             $stmt->execute([$donorId, $note, $adminId]);
         }
         
@@ -350,7 +357,7 @@ function markDonorUnserved($pdo, $donorId, $reason, $customNote = '', $adminId =
         }
         
         // Log admin action
-        logAdminAction($pdo, 'donor_unserved', 'donors_new', $donorId, "Donor marked as unserved. Reason: $reason");
+        logAdminAction($pdo, 'donor_unserved', 'donors', $donorId, "Donor marked as unserved. Reason: $reason");
         
         $pdo->commit();
         return true;
@@ -379,7 +386,8 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
         
         // Ensure status column includes 'served' BEFORE starting transaction (DDL auto-commits)
         try {
-            $pdo->exec("ALTER TABLE donors_new MODIFY COLUMN status ENUM('pending','approved','served','rejected','suspended','unserved') DEFAULT 'pending'");
+            // PostgreSQL doesn't need ENUM modification - VARCHAR handles all these values
+            // $pdo->exec("ALTER TABLE donors ALTER COLUMN status SET DEFAULT 'pending'");
             $logMessage .= "Updated status column to include 'served'\n";
         } catch (Exception $e) {
             // Column might already be updated or doesn't need changes
@@ -392,15 +400,15 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
         $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
         $logMessage .= "Available tables: " . implode(", ", $tables) . "\n";
         
-        // Always use donors_new table
-        $tableName = 'donors_new';
+        // Always use donors table
+        $tableName = 'donors';
         $logMessage .= "Using table: $tableName\n";
         
         // Log the update (schema already ensured before transaction)
         $logMessage .= "Updating donor $donorId status to 'served'\n";
         
         // Update donor status to 'served'
-        $stmt = $pdo->prepare("UPDATE $tableName SET status = 'served', updated_at = NOW() WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE $tableName SET status = 'served' WHERE id = ?");
         $result = $stmt->execute([$donorId]);
         $logMessage .= "Update result: " . ($result ? "success" : "failed") . "\n";
         
@@ -428,7 +436,7 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
             error_log("WARNING: Blood type too long for donor $donorId: " . $donor['blood_type']);
         }
         // Use the correct column name 'status' as defined in the table schema
-        $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, status, created_at) VALUES (?, ?, ?, 'completed', NOW())");
+        $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, status, created_at) VALUES (?, ?, ?, 'completed', CURRENT_TIMESTAMP)");
         $stmt->execute([$donorId, $donationDate, $bloodType]);
         
         // AUTOMATICALLY CREATE BLOOD UNIT when donor is marked as served
@@ -478,7 +486,7 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
         }
         
         // Log admin action
-        logAdminAction($pdo, 'donor_served', 'donors_new', $donorId, "Donor marked as served after donation");
+        logAdminAction($pdo, 'donor_served', 'donors', $donorId, "Donor marked as served after donation");
         
         $pdo->commit();
         return true;
@@ -507,7 +515,7 @@ function getDonorNotes($pdo, $donorId) {
 // Add note to donor
 function addDonorNote($pdo, $donorId, $note, $adminId = null) {
     try {
-        $stmt = $pdo->prepare("INSERT INTO donor_notes (donor_id, note, created_by, created_at) VALUES (?, ?, ?, NOW())");
+        $stmt = $pdo->prepare("INSERT INTO donor_notes (donor_id, note, created_by, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
         $stmt->execute([$donorId, $note, $adminId]);
         return true;
     } catch (Exception $e) {
@@ -519,7 +527,7 @@ function addDonorNote($pdo, $donorId, $note, $adminId = null) {
 // Create donor management tables
 function createDonorManagementTables($pdo) {
     try {
-        // Make sure donors_new.status exists (required by the UI and queries)
+        // Make sure donors.status exists (required by the UI and queries)
         ensureDonorStatusColumnExists($pdo);
         
         // Create donor_notes table
@@ -560,23 +568,23 @@ function getDonorStatistics($pdo) {
         $stats = [];
         
         // Total donors
-        $stmt = $pdo->query("SELECT COUNT(*) as total FROM donors_new");
+        $stmt = $pdo->query("SELECT COUNT(*) as total FROM donors");
         $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
         
         // Status breakdown
-        $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM donors_new GROUP BY status");
+        $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM donors GROUP BY status");
         $stats['by_status'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // Blood type breakdown
-        $stmt = $pdo->query("SELECT blood_type, COUNT(*) as count FROM donors_new GROUP BY blood_type");
+        $stmt = $pdo->query("SELECT blood_type, COUNT(*) as count FROM donors GROUP BY blood_type");
         $stats['by_blood_type'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Recent donors (last 7 days)
-        $stmt = $pdo->query("SELECT COUNT(*) as recent FROM donors_new WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
+        // Recent donors (last 7 days) - PostgreSQL syntax
+        $stmt = $pdo->query("SELECT COUNT(*) as recent FROM donors WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'");
         $stats['recent'] = $stmt->fetch(PDO::FETCH_ASSOC)['recent'];
         
         // Served donors count
-        $stmt = $pdo->query("SELECT COUNT(*) as served FROM donors_new WHERE status = 'served'");
+        $stmt = $pdo->query("SELECT COUNT(*) as served FROM donors WHERE status = 'served'");
         $stats['served'] = $stmt->fetch(PDO::FETCH_ASSOC)['served'];
         
         return $stats;
