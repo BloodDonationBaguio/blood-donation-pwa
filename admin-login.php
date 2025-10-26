@@ -1,13 +1,13 @@
 <?php
+// Start session FIRST before any output
+session_start();
+
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Use the main database configuration
 require_once 'db.php';
-
-// Start session
-session_start();
 
 // Check if already logged in - but only redirect if we have a valid session
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true && isset($_SESSION['admin_username'])) {
