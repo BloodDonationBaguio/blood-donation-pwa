@@ -10,20 +10,41 @@
  */
 function ensureAuditLogTableExists($pdo) {
     try {
-        // Check if table exists first to avoid unnecessary DDL
-        $stmt = $pdo->query("SHOW TABLES LIKE 'admin_audit_log'");
-        if ($stmt->rowCount() == 0) {
-            // Table doesn't exist, create it
-            $pdo->exec("CREATE TABLE IF NOT EXISTS admin_audit_log (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                admin_username VARCHAR(255) NULL,
-                action_type VARCHAR(255) NOT NULL,
-                table_name VARCHAR(255) NULL,
-                record_id VARCHAR(255) NULL,
-                description TEXT NULL,
-                ip_address VARCHAR(64) NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $exists = false;
+        if ($driver === 'pgsql') {
+            $stmt = $pdo->query("SELECT to_regclass('public.admin_audit_log')");
+            $exists = $stmt && $stmt->fetchColumn() !== null;
+        } else {
+            // MySQL/MariaDB
+            $stmt = $pdo->query("SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'admin_audit_log'");
+            $exists = $stmt && $stmt->fetchColumn() ? true : false;
+        }
+
+        if (!$exists) {
+            if ($driver === 'pgsql') {
+                $pdo->exec("CREATE TABLE IF NOT EXISTS admin_audit_log (
+                    id SERIAL PRIMARY KEY,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    admin_username VARCHAR(255) NULL,
+                    action_type VARCHAR(255) NOT NULL,
+                    table_name VARCHAR(255) NULL,
+                    record_id VARCHAR(255) NULL,
+                    description TEXT NULL,
+                    ip_address VARCHAR(64) NULL
+                )");
+            } else {
+                $pdo->exec("CREATE TABLE IF NOT EXISTS admin_audit_log (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    admin_username VARCHAR(255) NULL,
+                    action_type VARCHAR(255) NOT NULL,
+                    table_name VARCHAR(255) NULL,
+                    record_id VARCHAR(255) NULL,
+                    description TEXT NULL,
+                    ip_address VARCHAR(64) NULL
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            }
         }
     } catch (PDOException $e) {
         error_log("Failed to ensure audit log table exists: " . $e->getMessage());
