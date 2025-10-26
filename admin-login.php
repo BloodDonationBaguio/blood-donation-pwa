@@ -3,11 +3,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Database configuration - define constants first
-define('DB_HOST', 'localhost:3306');
-define('DB_NAME', 'blood_system');
-define('DB_USER', 'root');
-define('DB_PASS', 'password112');
+// Use the main database configuration
+require_once 'db.php';
 
 // Start session
 session_start();
@@ -16,17 +13,7 @@ session_start();
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true && isset($_SESSION['admin_username'])) {
     // Verify the session is still valid by checking the database
     try {
-        $pdo = new PDO(
-            "mysql:host=localhost;port=3306;dbname=" . DB_NAME . ";charset=utf8mb4",
-            DB_USER,
-            DB_PASS,
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            ]
-        );
-        
-        $stmt = $pdo->prepare("SELECT id FROM admin_users WHERE username = ? AND is_active = 1");
+        $stmt = $pdo->prepare("SELECT id FROM admin_users WHERE username = ?");
         $stmt->execute([$_SESSION['admin_username']]);
         $admin = $stmt->fetch();
         
@@ -53,33 +40,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (!empty($username) && !empty($password)) {
         try {
-            $pdo = new PDO(
-                "mysql:host=localhost;port=3306;dbname=" . DB_NAME . ";charset=utf8mb4",
-                DB_USER,
-                DB_PASS,
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                ]
-            );
-            
+            // Use the $pdo connection from db.php
             // Check admin credentials in admin_users table
             $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ? LIMIT 1");
             $stmt->execute([$username]);
             $admin = $stmt->fetch();
             
             if ($admin) {
-                // Check password using both password_hash (new) and password (old) for compatibility
-                $passwordValid = false;
-                
-                // First try password_hash (new method)
-                if (!empty($admin['password_hash']) && password_verify($password, $admin['password_hash'])) {
-                    $passwordValid = true;
-                }
-                // Fallback to old password field for compatibility
-                elseif (!empty($admin['password']) && $admin['password'] === $password) {
-                    $passwordValid = true;
-                }
+                // Check password using password_verify (password is hashed in database)
+                $passwordValid = password_verify($password, $admin['password']);
                 
                 if ($passwordValid) {
                     // Set session variables
