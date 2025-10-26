@@ -13,6 +13,10 @@ AddDefaultCharset UTF-8
 RewriteRule ^index\.html$ /index.php [L,R=301]
 
 # Handle front controller pattern
+# Allow direct access to debug_latest_donors.php
+RewriteCond %{REQUEST_URI} ^/debug_latest_donors\.php$
+RewriteRule ^ - [L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [L,QSA]
