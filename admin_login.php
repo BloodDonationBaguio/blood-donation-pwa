@@ -47,15 +47,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $admin = $stmt->fetch();
             
             if ($admin) {
-                // Check password using both password_hash (new) and password (old) for compatibility
+                // Check password using password_verify (password is hashed in database)
                 $passwordValid = false;
                 
-                // First try password_hash (new method)
-                if (!empty($admin['password_hash']) && password_verify($password, $admin['password_hash'])) {
-                    $passwordValid = true;
-                }
-                // Fallback to old password field for compatibility
-                elseif (!empty($admin['password']) && $admin['password'] === $password) {
+                // Check the password column with password_verify
+                if (!empty($admin['password']) && password_verify($password, $admin['password'])) {
                     $passwordValid = true;
                 }
                 
