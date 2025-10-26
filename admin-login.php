@@ -1,6 +1,12 @@
 <?php
 // Start session FIRST before any output
-session_start();
+session_start([
+    'cookie_httponly' => true,
+    'cookie_secure' => false, // Set to false for HTTP, true for HTTPS
+    'use_strict_mode' => true,
+    'cookie_lifetime' => 3600, // 1 hour
+    'gc_maxlifetime' => 3600   // 1 hour
+]);
 
 // Enable error reporting for debugging
 error_reporting(E_ALL);

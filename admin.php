@@ -11,8 +11,10 @@ error_reporting(E_ALL);
 // Secure session
 session_start([
     'cookie_httponly' => true,
-    'cookie_secure' => isset($_SERVER['HTTPS']),
-    'use_strict_mode' => true
+    'cookie_secure' => false, // Set to false for HTTP, true for HTTPS
+    'use_strict_mode' => true,
+    'cookie_lifetime' => 3600, // 1 hour
+    'gc_maxlifetime' => 3600   // 1 hour
 ]);
 
 // Security headers
@@ -24,7 +26,7 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 // Check admin login
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || !isset($_SESSION['admin_username'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'] ?? '/admin.php';
-    header("Location: admin_login.php");
+    header("Location: admin-login.php");
     exit();
 }
 
@@ -176,7 +178,7 @@ try {
     // Handle donor management actions
     if (isset($_GET['approve_donor'])) {
         $id = (int)$_GET['approve_donor'];
-        $stmt = $pdo->prepare('UPDATE donors SET status = "approved" WHERE id = ?');
+        $stmt = $pdo->prepare("UPDATE donors SET status = 'approved' WHERE id = ?");
         $stmt->execute([$id]);
         $donor = $pdo->query('SELECT * FROM donors WHERE id = ' . $id)->fetch();
         if ($donor && $donor['email']) {
@@ -205,7 +207,7 @@ try {
     if (isset($_GET['reject_donor'])) {
         $id = (int)$_GET['reject_donor'];
         $reason = $_GET['reason'] ?? 'Eligibility criteria not met';
-        $stmt = $pdo->prepare('UPDATE donors SET status = "rejected", rejection_reason = ? WHERE id = ?');
+        $stmt = $pdo->prepare("UPDATE donors SET status = 'rejected', rejection_reason = ? WHERE id = ?");
         $stmt->execute([$reason, $id]);
         $donor = $pdo->query('SELECT * FROM donors WHERE id = ' . $id)->fetch();
         if ($donor && $donor['email']) {
@@ -230,7 +232,7 @@ try {
         $id = (int)$_GET['mark_served'];
         try {
             // Check if served_date column exists, if not use a different approach
-            $stmt = $pdo->prepare('UPDATE donors SET status = "served" WHERE id = ?');
+            $stmt = $pdo->prepare("UPDATE donors SET status = 'served' WHERE id = ?");
             $result = $stmt->execute([$id]);
             
             if ($result) {
@@ -285,7 +287,7 @@ try {
         $reason = $_GET['reason'] ?? 'No show';
         try {
             // Update status first
-            $stmt = $pdo->prepare('UPDATE donors SET status = "unserved" WHERE id = ?');
+            $stmt = $pdo->prepare("UPDATE donors SET status = 'unserved' WHERE id = ?");
             $result = $stmt->execute([$id]);
             
             if ($result) {
