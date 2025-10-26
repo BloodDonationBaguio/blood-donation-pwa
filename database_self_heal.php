@@ -52,7 +52,7 @@ function addResult(&$results, $label, $status, $message)
     ];
 }
 
-function tableExists(PDO $pdo, string $table, string $schema, bool $isPostgres): bool
+function sh_table_exists(PDO $pdo, string $table, string $schema, bool $isPostgres): bool
 {
     if ($isPostgres) {
         $stmt = $pdo->prepare('SELECT to_regclass(:schema_table)');
@@ -65,7 +65,7 @@ function tableExists(PDO $pdo, string $table, string $schema, bool $isPostgres):
     return (int) $stmt->fetchColumn() > 0;
 }
 
-function columnExists(PDO $pdo, string $table, string $column, string $schema, bool $isPostgres): bool
+function sh_column_exists(PDO $pdo, string $table, string $column, string $schema, bool $isPostgres): bool
 {
     $sql = 'SELECT 1 FROM information_schema.columns WHERE table_name = :table AND column_name = :column';
     $params = ['table' => $table, 'column' => $column];
@@ -85,7 +85,7 @@ function columnExists(PDO $pdo, string $table, string $column, string $schema, b
 
 function ensureTable(PDO $pdo, string $table, string $sql, array &$results, string $schema, bool $isPostgres)
 {
-    if (tableExists($pdo, $table, $schema, $isPostgres)) {
+    if (sh_table_exists($pdo, $table, $schema, $isPostgres)) {
         addResult($results, "Table: $table", 'ok', 'Already exists.');
         return;
     }
@@ -100,12 +100,12 @@ function ensureTable(PDO $pdo, string $table, string $sql, array &$results, stri
 
 function ensureColumn(PDO $pdo, string $table, string $column, string $definition, array &$results, string $schema, bool $isPostgres)
 {
-    if (!tableExists($pdo, $table, $schema, $isPostgres)) {
+    if (!sh_table_exists($pdo, $table, $schema, $isPostgres)) {
         addResult($results, "Column: $table.$column", 'error', 'Cannot add column because table is missing.');
         return;
     }
 
-    if (columnExists($pdo, $table, $column, $schema, $isPostgres)) {
+    if (sh_column_exists($pdo, $table, $column, $schema, $isPostgres)) {
         addResult($results, "Column: $table.$column", 'ok', 'Already exists.');
         return;
     }
