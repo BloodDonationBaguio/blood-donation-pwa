@@ -1,5 +1,8 @@
 <?php
 // STANDALONE LOGIN TEST - NO INCLUDES, NO HEADERS
+// Start session FIRST before any output
+session_start();
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -66,8 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (password_verify($password, $admin['password'])) {
                     echo "<span class='success'>✅ PASSWORD IS CORRECT!</span>\n\n";
                     
-                    // Start session and set variables
-                    session_start();
+                    // Set session variables (session already started at top)
                     $_SESSION['admin_logged_in'] = true;
                     $_SESSION['admin_id'] = $admin['id'];
                     $_SESSION['admin_username'] = $admin['username'];
