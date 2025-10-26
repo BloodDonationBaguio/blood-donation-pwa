@@ -14,9 +14,19 @@ try {
         email VARCHAR(100) UNIQUE NOT NULL,
         full_name VARCHAR(100) NOT NULL,
         role VARCHAR(20) DEFAULT 'admin',
+        last_login TIMESTAMP NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
-    echo "✓ admin_users created\n\n";
+    echo "✓ admin_users created\n";
+    
+    // Add last_login column if it doesn't exist
+    try {
+        $pdo->exec("ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP NULL");
+        echo "✓ last_login column added\n";
+    } catch (PDOException $e) {
+        echo "  (last_login column may already exist)\n";
+    }
+    echo "\n";
     
     echo "Creating donors table...\n";
     $pdo->exec("CREATE TABLE IF NOT EXISTS donors (
