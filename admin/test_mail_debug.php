@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 require_once __DIR__ . '/../includes/mail_helper.php';
-$to = 'prc.baguio.blood@gmail.com'; // Real test recipient
+$to = 'nageb96414@gmail.com'; // Real test recipient
 $subject = 'Test Email from Blood Donation System';
 $message = '<h2>This is a test email from your Render deployment.</h2>';
 $result = false;
