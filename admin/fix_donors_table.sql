@@ -1,0 +1,2 @@
+ALTER TABLE donors ADD COLUMN weight NUMERIC(5,2);
+ALTER TABLE donors ADD COLUMN height NUMERIC(5,2);

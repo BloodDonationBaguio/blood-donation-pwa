@@ -38,6 +38,7 @@ if (php_sapi_name() !== 'cli') {
  * @param string $toName Optional recipient name
  * @return bool True if email was sent successfully, false otherwise
  */
+require_once __DIR__ . '/sendgrid_helper.php';
 function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
     // Create a new PHPMailer instance
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
@@ -55,102 +56,6 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
         }
     }
     
-    try {
-        // Server settings
-        $mail->isSMTP();
-        $mail->Host = getenv('MAIL_HOST') ?: 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = getenv('MAIL_USER') ?: 'prc.baguio.blood@gmail.com';
-        $mail->Password = getenv('MAIL_PASS') ?: '';
-        $mail->SMTPSecure = getenv('MAIL_SECURE') ?: PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = getenv('MAIL_PORT') ?: 587;
-        $mail->SMTPKeepAlive = true; // Enable keep-alive
-        $mail->Timeout = 8; // Fail fast if SMTP is unreachable
-        
-        // Force SMTP to be used
-        $mail->Mailer = 'smtp';
-        
-        // Debug settings - only enable if we can write to the logs directory
-        if (is_writable($logDir)) {
-            $mail->SMTPDebug = PHPMailer\PHPMailer\SMTP::DEBUG_SERVER;
-            $mail->Debugoutput = function($str, $level) use ($debugLog) {
-                @file_put_contents($debugLog, date('Y-m-d H:i:s') . ' - ' . trim($str) . "\n", FILE_APPEND);
-            };
-        } else {
-            $mail->SMTPDebug = PHPMailer\PHPMailer\SMTP::DEBUG_OFF;
-            error_log("Log directory not writable: $logDir");
-        }
-        
-        // Disable strict certificate verification for local testing
-        $mail->SMTPOptions = [
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            ]
-        ];
-        
-        // Recipients — set From to authenticated Gmail to improve deliverability
-        $mail->setFrom('prc.baguio.blood@gmail.com', 'Blood Donation System');
-        
-        // Add recipient with name if provided
-        if (!empty($toName)) {
-            $mail->addAddress($to, $toName);
-        } else {
-            $mail->addAddress($to);
-        }
-        
-        $mail->addReplyTo('prc.baguio.blood@gmail.com', 'Blood Donation System');
-        
-        // Content
-        $mail->isHTML(true);
-        $mail->Subject = $subject;
-        $mail->Body = $htmlMessage;
-        $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $htmlMessage));
-        
-        // Send the email
-        $result = $mail->send();
-        
-        // Log the email sending attempt
-        $logMessage = sprintf(
-            "[%s] Email %s to %s - %s\n",
-            date('Y-m-d H:i:s'),
-            $result ? 'SENT' : 'FAILED',
-            $to,
-            $result ? '' : 'Error: ' . $mail->ErrorInfo
-        );
-        
-        // Log to appropriate files if directory is writable
-        if (is_writable($logDir)) {
-            if ($result) {
-                @file_put_contents($successLog, $logMessage, FILE_APPEND);
-            } else {
-                @file_put_contents($errorLog, $logMessage, FILE_APPEND);
-            }
-            @file_put_contents($debugLog, $logMessage, FILE_APPEND);
-        }
-        
-        error_log(trim($logMessage));
-        return $result;
-        
-    } catch (Exception $e) {
-        $errorMsg = "Failed to send email to $to: " . $e->getMessage();
-        error_log($errorMsg);
-        
-        // Log to error file if directory is writable
-        if (is_writable($logDir)) {
-            @file_put_contents(
-                $errorLog,
-                '[' . date('Y-m-d H:i:s') . '] ' . $errorMsg . "\n",
-                FILE_APPEND
-            );
-            @file_put_contents(
-                $debugLog,
-                '[' . date('Y-m-d H:i:s') . '] ERROR: ' . $errorMsg . "\n",
-                FILE_APPEND
-            );
-        }
-        
-        return false;
-    }
+    // Use SendGrid Web API for all outgoing mail
+    return sendgrid_send_email($to, $subject, $htmlMessage, $toName);
 }
