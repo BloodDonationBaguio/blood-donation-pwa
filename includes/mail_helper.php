@@ -10,7 +10,7 @@ ini_set('log_errors', 1);
 
 // Prevent direct access through web browser, but allow from our debug script and password reset pages
 if (php_sapi_name() !== 'cli') {
-    $is_debug_script = (basename($_SERVER['SCRIPT_FILENAME']) === 'debug_email.php');
+    $is_debug_script = in_array(basename($_SERVER['SCRIPT_FILENAME']), ['debug_email.php', 'test_mail_debug.php']);
     $is_password_reset = in_array(basename($_SERVER['SCRIPT_FILENAME']), [
         'admin-forgot-password.php', 
         'admin-reset-password.php',
