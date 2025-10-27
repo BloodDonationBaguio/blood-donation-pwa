@@ -8,20 +8,15 @@ $subject = 'Test Email from Blood Donation System';
 $message = '<h2>This is a test email from your Render deployment.</h2>';
 $result = false;
 if (function_exists('send_confirmation_email')) {
-    ob_start();
-    $result = send_confirmation_email($to, $subject, $message, 'Test User');
-    $debug = ob_get_clean();
-    if ($result) {
-        echo '<span style="color:green;">SUCCESS: Email sent (check your inbox or spam).</span>';
-    } else {
-        echo '<span style="color:red;">FAIL: Email not sent.<br>';
-        if (function_exists('error_get_last')) {
-            $err = error_get_last();
-            if ($err) echo 'PHP Error: ' . htmlspecialchars($err['message']) . '<br>';
+    try {
+        $result = send_confirmation_email($to, $subject, $message, 'Test User');
+        if ($result) {
+            echo '<span style="color:green;">SUCCESS: Email sent (check your inbox or spam).</span>';
+        } else {
+            echo '<span style="color:red;">FAIL: Email not sent. No exception thrown.</span>';
         }
-        echo 'If available, see logs/email_errors.log.<br>';
-        if (!empty($debug)) echo '<pre>' . htmlspecialchars($debug) . '</pre>';
-        echo '</span>';
+    } catch (Exception $e) {
+        echo '<span style="color:red;">FAIL: Email not sent.<br><strong>Exception:</strong> ' . htmlspecialchars($e->getMessage()) . '</span>';
     }
 } else {
     echo '<span style="color:red;">send_confirmation_email() function not found.</span>';
