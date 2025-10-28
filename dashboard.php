@@ -4,8 +4,9 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
+// Include necessary files
+require_once 'db.php';
 require_once 'includes/session_manager.php';
-require_once 'includes/db.php';
 
 // Require user to be logged in
 requireUserLogin();

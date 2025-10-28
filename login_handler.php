@@ -25,9 +25,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: $redirectUrl");
         exit();
     } else {
+        // Log the error for debugging
+        error_log("Login failed for user: " . $email);
         header("Location: login.php?error=invalid");
         exit();
     }
 }
-header("Location: login.php");
+// If we get here, something went wrong with the form submission
+header("Location: login.php?error=system_error");
 exit();

@@ -1,6 +1,21 @@
 <?php
 // Include session configuration first - before any output
 require_once __DIR__ . '/includes/session_config.php';
+
+// Handle system error display
+$error_message = '';
+if (isset($_GET['error']) && $_GET['error'] == 'system_error') {
+    $error_message = 'A system error occurred. Please try again.';
+    // Log the error for debugging
+    error_log("System error on login page");
+}
+
+// Check if user is already logged in
+if (isset($_SESSION['user_id'])) {
+    // User is already logged in, redirect to dashboard
+    header("Location: dashboard.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
