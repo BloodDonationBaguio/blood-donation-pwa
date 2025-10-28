@@ -224,12 +224,20 @@ class BloodInventoryManagerComplete {
                 $transactionStarted = true;
             }
 
-            // Validate donor
-            $donorStmt = $this->pdo->prepare("
-                SELECT id, first_name, last_name, blood_type, status 
-                FROM donors 
-                WHERE id = ? AND status IN ('approved', 'served')
-            ");
+            // Validate donor (support both donors and donors_new)
+            $donorTable = 'donors';
+            try {
+                if (function_exists('tableExists') && tableExists($this->pdo, 'donors_new')) {
+                    $donorTable = 'donors_new';
+                }
+            } catch (Exception $e) {
+                // If table detection fails, default to original 'donors'
+                error_log('Table detection failed in addBloodUnit, defaulting to donors: ' . $e->getMessage());
+            }
+
+            $donorStmt = $this->pdo->prepare(
+                "SELECT id, first_name, last_name, blood_type, status FROM {$donorTable} WHERE id = ? AND status IN ('approved', 'served')"
+            );
             $donorStmt->execute([$data['donor_id']]);
             $donor = $donorStmt->fetch(PDO::FETCH_ASSOC);
 
