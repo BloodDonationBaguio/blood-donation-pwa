@@ -7,8 +7,15 @@
 // Start session for authentication
 session_start();
 
-require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/db_production.php';
 // Note: admin_auth.php and enhanced_donor_management.php may not be needed for this endpoint
+
+// Check database connection
+if (!isset($pdo) || !$pdo) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Database connection failed']);
+    exit;
+}
 
 // Check if user is authenticated as admin
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
