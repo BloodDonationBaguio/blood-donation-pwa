@@ -3,6 +3,7 @@
 require_once __DIR__ . '/includes/session_config.php';
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/donor_history.php';
+require_once __DIR__ . '/pg_compat.php';
 
 // Initialize donor history tables
 createDonorHistoryTable($pdo);
@@ -13,8 +14,14 @@ $donationHistory = [];
 $donorStats = null;
 
 if ($donorId) {
+    // Check which table to use
+    $donorsTable = 'donors';
+    if (tableExists($pdo, 'donors_new')) {
+        $donorsTable = 'donors_new';
+    }
+    
     // Get donor information
-    $stmt = $pdo->prepare("SELECT * FROM donors_new WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT * FROM " . $donorsTable . " WHERE id = ?");
     $stmt->execute([$donorId]);
     $donor = $stmt->fetch();
     
@@ -275,4 +282,4 @@ function viewDonationDetails(donationId) {
 </script>
 
 </body>
-</html> 
+</html>

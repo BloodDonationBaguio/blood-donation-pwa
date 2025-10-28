@@ -8,6 +8,7 @@ ini_set('display_errors', 1);
 
 // Include required files
 require_once __DIR__ . "/includes/db.php";
+require_once __DIR__ . "/pg_compat.php";
 
 function generateReferenceNumber() {
     return strtoupper('DNR-' . substr(md5(uniqid(mt_rand(), true)), 0, 6));
@@ -65,12 +66,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $firstName = $nameParts[0] ?? '';
             $lastName = $nameParts[1] ?? '';
             
+            // Check which table to use
+            $donorsTable = 'donors';
+            if (tableExists($pdo, 'donors_new')) {
+                $donorsTable = 'donors_new';
+            }
+            
             // Insert donor information
             $stmt = $pdo->prepare("
-                INSERT INTO donors_new (
+                INSERT INTO " . $donorsTable . " (
                     first_name, last_name, email, phone, blood_type, date_of_birth, 
                     gender, address, city, province, weight, height, reference_code, status, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', " . mysql_now() . ")
             ");
             
             $stmt->execute([

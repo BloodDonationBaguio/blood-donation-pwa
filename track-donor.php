@@ -1,6 +1,7 @@
 <?php
 // track-donor.php
 require_once 'db.php';
+require_once 'pg_compat.php';
 $ref = '';
 $status = '';
 $error = '';
@@ -9,8 +10,14 @@ $donor = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ref = trim($_POST['reference']);
     if ($ref) {
+        // Check which table to use
+        $donorsTable = 'donors';
+        if (tableExists($pdo, 'donors_new')) {
+            $donorsTable = 'donors_new';
+        }
+        
         // Check reference_code field
-        $stmt = $pdo->prepare('SELECT * FROM donors_new WHERE reference_code = ?');
+        $stmt = $pdo->prepare("SELECT * FROM $donorsTable WHERE reference_code = ?");
         $stmt->execute([$ref]);
         $donor = $stmt->fetch();
         
