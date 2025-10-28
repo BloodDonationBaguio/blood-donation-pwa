@@ -170,5 +170,3 @@ function generateDonorReport($pdo, $filters = []) {
     $stmt->execute($params);
     return $stmt->fetchAll();
 }
-
-?> 
