@@ -225,7 +225,7 @@ function checkSessionTimeout() {
 /**
  * Require user login - redirect if not logged in
  */
-function requireUserLogin($redirectTo = '/blood-donation-pwa/login.php') {
+function requireUserLogin($redirectTo = 'login.php') {
     checkRememberMeToken(); // Check for remember me token first
     
     if (!isUserLoggedIn() || !checkSessionTimeout()) {
