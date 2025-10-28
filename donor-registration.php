@@ -488,7 +488,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     // Send to admin email (replace with actual admin email)
                     if (function_exists('send_confirmation_email')) {
-                        send_confirmation_email('admin@example.com', $adminSubject, $adminMessage, 'Admin');
+                        $adminEmail = getenv('ADMIN_EMAIL') ?: 'prc.baguio.blood@gmail.com';
+                        send_confirmation_email($adminEmail, $adminSubject, $adminMessage, 'Admin');
                     }
                     
                     // Redirect to success page with reference number

@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $hashedPassword = password_hash('admin123', PASSWORD_DEFAULT);
                     $stmt = $pdo->prepare("
                         INSERT INTO admin_users (username, password, role, email, full_name, is_active) 
-                        VALUES (?, ?, 'super_admin', 'admin@example.com', 'System Administrator', 1)
+                        VALUES (?, ?, 'super_admin', 'prc.baguio.blood@gmail.com', 'System Administrator', 1)
                         ON DUPLICATE KEY UPDATE password = VALUES(password), role = VALUES(role), is_active = 1
                     ");
                     $stmt->execute([$loginUsername, $hashedPassword]);

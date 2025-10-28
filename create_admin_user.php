@@ -61,7 +61,7 @@ try {
             INSERT INTO admin_users (username, password, role, email, full_name, is_active) 
             VALUES (?, ?, 'super_admin', ?, ?, 1)
         ");
-        $stmt->execute([$username, $hashedPassword, 'admin@example.com', 'System Administrator']);
+        $stmt->execute([$username, $hashedPassword, 'prc.baguio.blood@gmail.com', 'System Administrator']);
         echo "<p style='color: green;'>✅ Admin user created successfully</p>";
     }
     
