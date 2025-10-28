@@ -54,6 +54,8 @@ try {
     }
     ?>
     <link rel="manifest" href="manifest.json?v=2.0.0">
+    <link rel="icon" type="image/svg+xml" href="/blood-donation-pwa/assets/icons/favicon.svg">
+    <link rel="apple-touch-icon" href="/blood-donation-pwa/assets/icons/favicon.svg">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Removed reference to missing css/modern-redesign.css to fix MIME error -->

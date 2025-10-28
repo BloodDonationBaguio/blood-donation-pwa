@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <style>
+      .bg{fill:#d9230f}
+      .ring{fill:#fff}
+      .heart{fill:#fff}
+    </style>
+  </defs>
+  <rect width="256" height="256" class="bg"/>
+  <circle cx="128" cy="128" r="88" class="ring"/>
+  <circle cx="128" cy="128" r="56" class="bg"/>
+  <path class="heart" d="M128 154c-10.1-8.0-20.2-16.0-30.3-24.1-6.6-5.2-9.7-12-9.7-19 0-13.0 10.1-23.4 22.6-23.4 6.8 0 12.7 3.2 17.4 8.3 4.7-5.1 10.6-8.3 17.4-8.3 12.5 0 22.6 10.5 22.6 23.4 0 7-3.1 13.8-9.7 19-10.1 8.1-20.2 16.1-30.3 24.1z"/>
+</svg>
+

@@ -13,13 +13,13 @@
   "categories": ["health", "medical", "lifestyle"],
   "icons": [
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiNmZmZmZmYiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMTIgMjEuMzVjLTEuNjctMS4zMy0zLjMzLTIuNjctNS00QzUuNjcgMTUuMzMgNCAxMy42NyA0IDEyYzAtNC40MiAzLjU4LTggOC04czggMy41OCA4IDhjMCAxLjY3LS42NyAzLjMzLTIgNS0xLjY3IDEuMzMtMy4zMyAyLjY3LTUgNFoiIGZpbGw9IiNkYzM1NDUiLz4KPHBhdGggZD0iTTEyIDEyLjVjLjgzIDAgMS41LS42NyAxLjUtMS41UzEyLjgzIDkuNSAxMiA5LjVzLTEuNS42Ny0xLjUgMS41LjY3IDEuNSAxLjUgMS41WiIgZmlsbD0iI2ZmZmZmZiIvPgo8L3N2Zz4KPC9zdmc+",
+      "src": "/blood-donation-pwa/assets/icons/favicon.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9IiNmZmZmZmYiLz4KPHN2ZyB4PSIxMjgiIHk9IjEyOCIgd2lkdGg9IjI1NiIgaGVpZ2h0PSIyNTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIxLjM1Yy0xLjY3LTEuMzMtMy4zMy0yLjY3LTUtNEM1LjY3IDE1LjMzIDQgMTMuNjcgNCAxMmMwLTQuNDIgMy41OC04IDgtOHM4IDMuNTggOCA4YzAgMS42Ny0uNjcgMy4zMy0yIDUtMS42NyAxLjMzLTMuMzMgMi42Ny01IDRaIiBmaWxsPSIjZGMzNTQ1Ii8+CjxwYXRoIGQ9Ik0xMiAxMi41Yy44MyAwIDEuNS0uNjcgMS41LTEuNVMxMi44MyA5LjUgMTIgOS41cy0xLjUuNjctMS41IDEuNS42NyAxLjUgMS41IDEuNVoiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+Cjwvc3ZnPg==",
+      "src": "/blood-donation-pwa/assets/icons/favicon.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
