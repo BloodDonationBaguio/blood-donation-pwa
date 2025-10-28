@@ -9,41 +9,118 @@ if (!file_exists($logDir)) {
 }
 ini_set('error_log', $logDir . '/error.log');
 
-// Get database URL from Render PostgreSQL
+// Load .env if present for deployments that use plain env vars
+$envFile = __DIR__ . '/.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) { continue; }
+        if (strpos($line, '=') !== false) {
+            [$k, $v] = array_map('trim', explode('=', $line, 2));
+            putenv("$k=$v");
+        }
+    }
+}
+
+// Primary: Render/Heroku-style DATABASE_URL (PostgreSQL)
 $database_url = getenv('DATABASE_URL');
+$pdo = null;
 
 if ($database_url) {
     $db = parse_url($database_url);
-    define('DB_HOST', $db['host']);
-    define('DB_NAME', ltrim($db['path'], '/'));
-    define('DB_USER', $db['user']);
-    define('DB_PASS', $db['pass']);
-    define('DB_PORT', isset($db['port']) ? $db['port'] : 5432);
-    
+    $dbHost = $db['host'] ?? 'localhost';
+    $dbName = ltrim($db['path'] ?? '', '/');
+    $dbUser = $db['user'] ?? '';
+    $dbPass = $db['pass'] ?? '';
+    $dbPort = isset($db['port']) ? $db['port'] : 5432;
+
     try {
         $pdo = new PDO(
-            "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME,
-            DB_USER,
-            DB_PASS,
+            "pgsql:host={$dbHost};port={$dbPort};dbname={$dbName}",
+            $dbUser,
+            $dbPass,
             [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
             ]
         );
-        error_log("PostgreSQL connection established successfully");
+        error_log("PostgreSQL connection established successfully (DATABASE_URL)");
     } catch (PDOException $e) {
-        error_log("Database connection failed: " . $e->getMessage());
-        die("Database connection error. Please check logs.");
+        error_log("PostgreSQL connection failed (DATABASE_URL): " . $e->getMessage());
+        $pdo = null; // fall back to other strategies
     }
-} else {
-    die("DATABASE_URL not found. Please configure database connection.");
 }
 
+// Fallback: explicit env vars (DB_TYPE, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS)
+if ($pdo === null) {
+    $envDbType = getenv('DB_TYPE') ?: 'mysql';
+    $envHost   = getenv('DB_HOST') ?: null;
+    $envPort   = getenv('DB_PORT') ?: null; // optional
+    $envName   = getenv('DB_NAME') ?: null;
+    $envUser   = getenv('DB_USER') ?: null;
+    $envPass   = getenv('DB_PASS') ?: null;
+
+    if ($envHost && $envName && $envUser) {
+        try {
+            if (in_array(strtolower($envDbType), ['pgsql','postgres','postgresql'], true)) {
+                $dsn = "pgsql:host={$envHost}" . ($envPort ? ";port={$envPort}" : '') . ";dbname={$envName}";
+            } else {
+                $dsn = "mysql:host={$envHost}" . ($envPort ? ";port={$envPort}" : '') . ";dbname={$envName};charset=utf8mb4";
+            }
+
+            $pdo = new PDO(
+                $dsn,
+                $envUser,
+                $envPass ?: '',
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                ]
+            );
+            error_log("Database connection established via explicit env vars ({$envDbType})");
+        } catch (PDOException $e) {
+            error_log("Database connection failed via explicit env vars: " . $e->getMessage());
+            $pdo = null;
+        }
+    }
+}
+
+// Last resort: include a local config file that defines $pdo
+if ($pdo === null) {
+    $candidates = [
+        __DIR__ . '/includes/config.php',
+        __DIR__ . '/db.php',            // local MySQL fallback
+        __DIR__ . '/db.example.php',    // template with defaults
+    ];
+    foreach ($candidates as $path) {
+        if (file_exists($path)) {
+            require_once $path;
+            if (isset($pdo) && $pdo instanceof PDO) {
+                error_log("Database connection established via included config: " . basename($path));
+                break;
+            }
+        }
+    }
+}
+
+if ($pdo === null) {
+    die("Database not configured. Set 'DATABASE_URL' (PostgreSQL) OR 'DB_HOST/DB_NAME/DB_USER/DB_PASS' env vars. Alternatively, configure includes/config.php. Domain: " . htmlspecialchars($_SERVER['HTTP_HOST'] ?? 'unknown'));
+}
+
+// Helper functions compatible with both MySQL and PostgreSQL
 if (!function_exists('tableExists')) {
     function tableExists($pdo, $table) {
         try {
-            $result = $pdo->query("SELECT to_regclass('public." . $table . "')");
-            return $result->fetchColumn() !== null;
+            $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+            if ($driver === 'pgsql') {
+                $safe = str_replace("'", "''", $table);
+                $stmt = $pdo->query("SELECT to_regclass('public." . $safe . "')");
+                return $stmt->fetchColumn() !== null;
+            } else {
+                $stmt = $pdo->query("SHOW TABLES LIKE " . $pdo->quote($table));
+                return $stmt->rowCount() > 0;
+            }
         } catch (PDOException $e) {
             return false;
         }
@@ -53,8 +130,15 @@ if (!function_exists('tableExists')) {
 if (!function_exists('getTableStructure')) {
     function getTableStructure($pdo, $table) {
         try {
-            $stmt = $pdo->query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" . $table . "'");
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+            if ($driver === 'pgsql') {
+                $safe = str_replace("'", "''", $table);
+                $stmt = $pdo->query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" . $safe . "'");
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } else {
+                $stmt = $pdo->query("DESCRIBE `" . str_replace('`', '``', $table) . "`");
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
         } catch (PDOException $e) {
             return [];
         }

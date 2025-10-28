@@ -1,7 +1,8 @@
 <?php
 // Environment-aware DB config: PostgreSQL on Render (DATABASE_URL), MySQL locally
 if (getenv('DATABASE_URL')) {
-    
+    // In production with DATABASE_URL, delegate to db_production.php
+    require_once __DIR__ . '/db_production.php';
     return;
 }
 // Local/dev fallback: MySQL
@@ -147,5 +148,3 @@ if (!function_exists('tableExists')) {
         }
     }
 }
-
-require_once __DIR__ . '/db_production.php';

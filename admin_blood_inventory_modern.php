@@ -451,6 +451,41 @@ function buildPaginationUrl($page) {
             outline: none;
         }
 
+        /* Enhanced Dropdown Styling */
+        .form-select.form-control-modern {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dc3545' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 20px 20px;
+            padding-right: 3rem;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        .form-select.form-control-modern:focus {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dc3545' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+            background-size: 22px 22px;
+        }
+
+        .form-select.form-control-modern:hover {
+            border-color: var(--primary-color);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c82333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+            background-size: 22px 22px;
+        }
+
+        /* Dropdown option styling */
+        .form-select.form-control-modern option {
+            padding: 0.5rem 1rem;
+            background: white;
+            color: var(--text-primary);
+        }
+
+        .form-select.form-control-modern option:hover {
+            background: #f8fafc;
+        }
+
         .modal-modern .modal-content {
             border: none;
             border-radius: var(--radius-lg);
