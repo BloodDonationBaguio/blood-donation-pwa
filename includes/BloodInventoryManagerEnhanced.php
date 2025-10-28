@@ -24,12 +24,12 @@ class BloodInventoryManagerEnhanced {
             $stmt = $this->pdo->query("
                 SELECT 
                     blood_type,
-                    COUNT(*) as count,
-                    SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available,
-                    SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END) as used,
-                    SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END) as expired,
-                    SUM(CASE WHEN status = 'quarantined' THEN 1 ELSE 0 END) as quarantined
-                FROM blood_inventory 
+                    COALESCE(COUNT(*), 0) as count,
+                    COALESCE(SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END), 0) as available,
+                    COALESCE(SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END), 0) as used,
+                    COALESCE(SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END), 0) as expired,
+                    COALESCE(SUM(CASE WHEN status = 'quarantined' THEN 1 ELSE 0 END), 0) as quarantined
+                FROM public.blood_inventory 
                 GROUP BY blood_type
             ");
             $byBloodType = [];
@@ -76,16 +76,17 @@ class BloodInventoryManagerEnhanced {
      */
     public function getExpiringUnits($days = 5) {
         try {
+            $endDate = date('Y-m-d', strtotime('+' . (int)$days . ' days'));
             $stmt = $this->pdo->prepare("
                 SELECT bi.*, d.first_name, d.last_name, d.reference_code
                 FROM blood_inventory bi
-                LEFT JOIN donors d ON bi.donor_id = d.id
+                LEFT JOIN donors_new d ON bi.donor_id = d.id
                 WHERE bi.status = 'available' 
-                AND bi.expiry_date <= DATE_ADD(NOW(), INTERVAL ? DAY)
-                AND bi.expiry_date > NOW()
+                AND bi.expiry_date <= ?
+                AND bi.expiry_date > CURRENT_DATE
                 ORDER BY bi.expiry_date ASC
             ");
-            $stmt->execute([$days]);
+            $stmt->execute([$endDate]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             error_log("Error getting expiring units: " . $e->getMessage());
@@ -135,7 +136,7 @@ class BloodInventoryManagerEnhanced {
             $countSql = "
                 SELECT COUNT(*) as total
                 FROM blood_inventory bi
-                LEFT JOIN donors d ON bi.donor_id = d.id
+                LEFT JOIN donors_new d ON bi.donor_id = d.id
                 $whereClause
             ";
             $countStmt = $this->pdo->prepare($countSql);
@@ -151,9 +152,9 @@ class BloodInventoryManagerEnhanced {
                     d.reference_code,
                     d.blood_type as donor_blood_type,
                     d.status as donor_status,
-                    CONCAT(d.first_name, ' ', d.last_name) as donor_name
+                    COALESCE(d.first_name, '') || ' ' || COALESCE(d.last_name, '') as donor_name
                 FROM blood_inventory bi
-                LEFT JOIN donors d ON bi.donor_id = d.id
+                LEFT JOIN donors_new d ON bi.donor_id = d.id
                 $whereClause
                 ORDER BY bi.created_at DESC
                 LIMIT ? OFFSET ?
@@ -161,7 +162,7 @@ class BloodInventoryManagerEnhanced {
             $params[] = $limit;
             $params[] = $offset;
 
-            $stmt = $pdo->prepare($sql);
+            $stmt = $this->pdo->prepare($sql);
             $stmt->execute($params);
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -189,7 +190,7 @@ class BloodInventoryManagerEnhanced {
      */
     public function getBloodUnit($unitId) {
         try {
-            $stmt = $pdo->prepare("
+            $stmt = $this->pdo->prepare("
                 SELECT 
                     bi.*,
                     d.first_name,
@@ -201,7 +202,7 @@ class BloodInventoryManagerEnhanced {
                     d.phone,
                     CONCAT(d.first_name, ' ', d.last_name) as donor_name
                 FROM blood_inventory bi
-                LEFT JOIN donors d ON bi.donor_id = d.id
+                LEFT JOIN donors_new d ON bi.donor_id = d.id
                 WHERE bi.id = ?
             ");
             $stmt->execute([$unitId]);
@@ -212,7 +213,7 @@ class BloodInventoryManagerEnhanced {
             }
 
             // Get audit log
-            $auditStmt = $pdo->prepare("
+            $auditStmt = $this->pdo->prepare("
                 SELECT * FROM blood_inventory_audit 
                 WHERE unit_id = ? 
                 ORDER BY created_at DESC
@@ -241,9 +242,9 @@ class BloodInventoryManagerEnhanced {
             }
 
             // Validate donor exists and is approved/served
-            $donorStmt = $pdo->prepare("
+            $donorStmt = $this->pdo->prepare("
                 SELECT id, first_name, last_name, blood_type, status 
-                FROM donors 
+FROM donors_new 
                 WHERE id = ? AND status IN ('approved', 'served')
             ");
             $donorStmt->execute([$data['donor_id']]);
@@ -259,26 +260,24 @@ class BloodInventoryManagerEnhanced {
             // Calculate expiry date (25 days from collection)
             $expiryDate = date('Y-m-d', strtotime($data['collection_date'] . ' +25 days'));
 
-            $pdo->beginTransaction();
+            $this->pdo->beginTransaction();
 
             // Insert blood unit
-            $stmt = $pdo->prepare("
+            $stmt = $this->pdo->prepare("
                 INSERT INTO blood_inventory (
                     unit_id, donor_id, blood_type, collection_date, expiry_date,
-                    status, collection_center, collection_staff, created_at
-                ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, NOW())
+                    status, created_at
+                ) VALUES (?, ?, ?, ?, ?, 'available', CURRENT_TIMESTAMP)
             ");
             $stmt->execute([
                 $unitId,
                 $data['donor_id'],
                 $data['blood_type'],
                 $data['collection_date'],
-                $expiryDate,
-                $data['collection_center'] ?? 'Main Center',
-                $data['collection_staff'] ?? 'Unknown'
+                $expiryDate
             ]);
 
-            $unitId = $pdo->lastInsertId();
+            $unitId = $this->pdo->lastInsertId();
 
             // Log audit
             $this->logAudit($unitId, 'unit_created', 'Blood unit created', [
@@ -287,12 +286,12 @@ class BloodInventoryManagerEnhanced {
                 'blood_type' => $data['blood_type']
             ]);
 
-            $pdo->commit();
+            $this->pdo->commit();
 
             return ['success' => true, 'message' => 'Blood unit created successfully', 'unit_id' => $unitId];
         } catch (Exception $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
             }
             error_log("Error creating blood unit: " . $e->getMessage());
             return ['success' => false, 'message' => 'Error creating blood unit: ' . $e->getMessage()];
@@ -309,10 +308,10 @@ class BloodInventoryManagerEnhanced {
                 return ['success' => false, 'message' => 'Invalid status'];
             }
 
-            $pdo->beginTransaction();
+            $this->pdo->beginTransaction();
 
             // Get current unit
-            $stmt = $pdo->prepare("SELECT * FROM blood_inventory WHERE id = ?");
+            $stmt = $this->pdo->prepare("SELECT * FROM blood_inventory WHERE id = ?");
             $stmt->execute([$unitId]);
             $unit = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -323,9 +322,9 @@ class BloodInventoryManagerEnhanced {
             $oldStatus = $unit['status'];
 
             // Update status
-            $updateStmt = $pdo->prepare("
+            $updateStmt = $this->pdo->prepare("
                 UPDATE blood_inventory 
-                SET status = ?, updated_at = NOW() 
+                SET status = ?, updated_at = CURRENT_TIMESTAMP 
                 WHERE id = ?
             ");
             $updateStmt->execute([$newStatus, $unitId]);
@@ -337,12 +336,12 @@ class BloodInventoryManagerEnhanced {
                 'notes' => $notes
             ]);
 
-            $pdo->commit();
+            $this->pdo->commit();
 
             return ['success' => true, 'message' => 'Status updated successfully'];
         } catch (Exception $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
             }
             error_log("Error updating blood unit status: " . $e->getMessage());
             return ['success' => false, 'message' => 'Error updating status: ' . $e->getMessage()];
@@ -359,10 +358,10 @@ class BloodInventoryManagerEnhanced {
                 return ['success' => false, 'message' => 'Invalid blood type'];
             }
 
-            $pdo->beginTransaction();
+            $this->pdo->beginTransaction();
 
             // Get current unit
-            $stmt = $pdo->prepare("SELECT * FROM blood_inventory WHERE id = ?");
+            $stmt = $this->pdo->prepare("SELECT * FROM blood_inventory WHERE id = ?");
             $stmt->execute([$unitId]);
             $unit = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -373,9 +372,9 @@ class BloodInventoryManagerEnhanced {
             $oldType = $unit['blood_type'];
 
             // Update blood type
-            $updateStmt = $pdo->prepare("
+            $updateStmt = $this->pdo->prepare("
                 UPDATE blood_inventory 
-                SET blood_type = ?, updated_at = NOW() 
+                SET blood_type = ?, updated_at = CURRENT_TIMESTAMP 
                 WHERE id = ?
             ");
             $updateStmt->execute([$bloodType, $unitId]);
@@ -386,12 +385,12 @@ class BloodInventoryManagerEnhanced {
                 'new_blood_type' => $bloodType
             ]);
 
-            $pdo->commit();
+            $this->pdo->commit();
 
             return ['success' => true, 'message' => 'Blood type updated successfully'];
         } catch (Exception $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
             }
             error_log("Error updating blood type: " . $e->getMessage());
             return ['success' => false, 'message' => 'Error updating blood type: ' . $e->getMessage()];
@@ -403,9 +402,9 @@ class BloodInventoryManagerEnhanced {
      */
     public function getApprovedDonors($limit = 100) {
         try {
-            $stmt = $pdo->prepare("
+            $stmt = $this->pdo->prepare("
                 SELECT id, first_name, last_name, reference_code, blood_type, status
-                FROM donors 
+                FROM donors_new 
                 WHERE status IN ('approved', 'served')
                 ORDER BY last_donation_date DESC, created_at DESC
                 LIMIT ?
@@ -433,11 +432,11 @@ class BloodInventoryManagerEnhanced {
      */
     private function logAudit($unitId, $action, $description, $details = []) {
         try {
-            $stmt = $pdo->prepare("
+            $stmt = $this->pdo->prepare("
                 INSERT INTO blood_inventory_audit (
                     unit_id, action_type, description, details, 
                     admin_username, ip_address, user_agent, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ");
             $stmt->execute([
                 $unitId,
