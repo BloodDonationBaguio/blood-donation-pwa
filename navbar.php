@@ -62,15 +62,15 @@ if ($user_id) {
       
       <?php if ($user_id): ?>
         <div class="nav-dropdown">
-          <a href="#" onclick="toggleDropdown(); return false;" class="nav-link user-link">
+          <a href="#" id="userDropdownToggle" role="button" aria-haspopup="true" aria-expanded="false" onclick="toggleDropdown(event); return false;" class="nav-link user-link">
             <span class="user-icon">👤</span> 
             <span class="user-name"><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></span>
           </a>
-          <div id="userDropdown" class="dropdown-menu">
-            <a href="dashboard.php" class="dropdown-item">Dashboard</a>
-            <a href="profile.php" class="dropdown-item">Profile</a>
+          <div id="userDropdown" class="dropdown-menu" aria-labelledby="userDropdownToggle" role="menu">
+            <a href="dashboard.php" class="dropdown-item" role="menuitem">Dashboard</a>
+            <a href="profile.php" class="dropdown-item" role="menuitem">Profile</a>
             <hr class="dropdown-divider">
-            <a href="logout.php" class="dropdown-item text-danger">Logout</a>
+            <a href="logout.php" class="dropdown-item text-danger" role="menuitem">Logout</a>
           </div>
         </div>
       <?php else: ?>
@@ -217,6 +217,8 @@ if ($user_id) {
   display: flex;
   align-items: center;
   gap: 8px;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
 }
 
 .user-link:hover {
@@ -225,6 +227,14 @@ if ($user_id) {
 
 .user-icon {
   color: #dc3545;
+}
+
+/* Dropdown indicator (caret) */
+.user-link::after {
+  content: '▾';
+  font-size: 12px;
+  color: #666;
+  margin-left: 6px;
 }
 
 .dropdown-menu {
@@ -236,8 +246,12 @@ if ($user_id) {
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   padding: 8px 0;
   min-width: 160px;
-  display: none;
+  display: none; /* default hidden */
   margin-top: 8px;
+}
+
+.dropdown-menu.show {
+  display: block;
 }
 
 .dropdown-item {
@@ -433,10 +447,13 @@ function toggleMobileMenu() {
 }
 
 // Dropdown functionality
-function toggleDropdown() {
+function toggleDropdown(event) {
   const dropdown = document.getElementById('userDropdown');
-  if (dropdown) {
-    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+  const toggle = event.currentTarget;
+  if (dropdown && toggle) {
+    dropdown.classList.toggle('show');
+    const expanded = dropdown.classList.contains('show');
+    toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
   }
 }
 
@@ -461,11 +478,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Close dropdown when clicking outside
 document.addEventListener('click', function(e) {
-  // Close user dropdown
-  if (!e.target.closest('[onclick*="toggleDropdown"]')) {
+  // Close user dropdown when clicking outside
+  if (!e.target.closest('.nav-dropdown')) {
     const dropdown = document.getElementById('userDropdown');
-    if (dropdown) {
-      dropdown.style.display = 'none';
+    const toggle = document.querySelector('.user-link');
+    if (dropdown && dropdown.classList.contains('show')) {
+      dropdown.classList.remove('show');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
     }
   }
   

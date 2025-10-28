@@ -103,7 +103,7 @@ class BloodInventoryManagerComplete {
             $countSql = "
                 SELECT COUNT(*) as total
                 FROM blood_inventory bi
-                LEFT JOIN donors_new d ON bi.donor_id = d.id
+                LEFT JOIN donors d ON bi.donor_id = d.id
                 $whereClause
             ";
             $countStmt = $this->pdo->prepare($countSql);
@@ -227,7 +227,7 @@ class BloodInventoryManagerComplete {
             // Validate donor
             $donorStmt = $this->pdo->prepare("
                 SELECT id, first_name, last_name, blood_type, status 
-                FROM donors_new 
+                FROM donors 
                 WHERE id = ? AND status IN ('approved', 'served')
             ");
             $donorStmt->execute([$data['donor_id']]);
@@ -487,7 +487,7 @@ class BloodInventoryManagerComplete {
         try {
             $stmt = $this->pdo->prepare("
                 SELECT id, first_name, last_name, reference_code, blood_type, status
-                FROM donors_new 
+                FROM donors 
                 WHERE status IN ('approved', 'served')
                 ORDER BY last_name, first_name
             ");
@@ -672,7 +672,7 @@ class BloodInventoryManagerComplete {
             $query = "
                 SELECT COUNT(*) as total
                 FROM blood_inventory bi
-                LEFT JOIN donors_new d ON bi.donor_id = d.id
+                LEFT JOIN donors d ON bi.donor_id = d.id
                 $whereClause
             ";
             

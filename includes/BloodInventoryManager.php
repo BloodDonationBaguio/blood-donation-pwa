@@ -462,7 +462,7 @@ class BloodInventoryManager {
         $stmt = $this->pdo->prepare("
             SELECT id, first_name, last_name, email, blood_type, reference_code, 
                    status, created_at, phone
-            FROM donors_new 
+            FROM donors 
             WHERE email NOT LIKE 'test_%' 
               AND email NOT LIKE '%@example.com'
               AND first_name != 'Test'
@@ -487,7 +487,7 @@ class BloodInventoryManager {
         $stmt = $this->pdo->prepare("
             SELECT id, first_name, last_name, email, blood_type, reference_code, 
                    status, created_at, phone, last_donation_date
-            FROM donors_new 
+            FROM donors 
             WHERE email NOT LIKE 'test_%' 
               AND email NOT LIKE '%@example.com'
               AND first_name != 'Test'
@@ -650,7 +650,7 @@ class BloodInventoryManager {
                        END as urgency_status,
                        DATEDIFF(bi.expiry_date, CURDATE()) as days_to_expiry
                 FROM blood_inventory bi
-                INNER JOIN donors_new d ON bi.donor_id = d.id
+                INNER JOIN donors d ON bi.donor_id = d.id
                 $whereClause
                 ORDER BY bi.$sortBy $sortOrder
                 LIMIT ? OFFSET ?
@@ -722,7 +722,7 @@ class BloodInventoryManager {
                 
                 // Also exclude by seed_flag if column exists
                 try {
-                    $checkSeedFlag = $this->pdo->query("SHOW COLUMNS FROM donors_new LIKE 'seed_flag'");
+                    $checkSeedFlag = $this->pdo->query("SHOW COLUMNS FROM donors LIKE 'seed_flag'");
                     if ($checkSeedFlag->fetch()) {
                         $whereConditions[] = "(d.seed_flag = 0 OR d.seed_flag IS NULL)";
                     }
@@ -737,7 +737,7 @@ class BloodInventoryManager {
             $query = "
                 SELECT COUNT(*) as total
                 FROM blood_inventory bi
-                INNER JOIN donors_new d ON bi.donor_id = d.id
+                INNER JOIN donors d ON bi.donor_id = d.id
                 $whereClause
             ";
             

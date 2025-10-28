@@ -209,7 +209,7 @@ class BloodInventoryManagerSimple {
                         d.phone,
                         CONCAT(d.first_name, ' ', d.last_name) as donor_name
                     FROM blood_inventory bi
-                    LEFT JOIN donors_new d ON bi.donor_id = d.id
+                    LEFT JOIN donors d ON bi.donor_id = d.id
                     WHERE bi.unit_id = ?
                 ");
             }
