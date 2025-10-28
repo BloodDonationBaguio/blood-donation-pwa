@@ -20,7 +20,26 @@ class BloodInventoryManagerEnhanced {
      */
     public function getDashboardSummary() {
         try {
-            // Get total units by blood type
+            // Check if blood_inventory table exists
+            $tableCheck = $this->pdo->query("
+                SELECT COUNT(*) as table_exists 
+                FROM information_schema.tables 
+                WHERE table_name = 'blood_inventory'
+            ");
+            $tableExists = $tableCheck->fetch(PDO::FETCH_ASSOC)['table_exists'] > 0;
+            
+            if (!$tableExists) {
+                error_log("Blood inventory table does not exist");
+                return [
+                    'total_units' => 0,
+                    'available_units' => 0,
+                    'expired_units' => 0,
+                    'by_blood_type' => [],
+                    'low_stock_types' => []
+                ];
+            }
+
+            // Get total units by blood type (without schema prefix for better compatibility)
             $stmt = $this->pdo->query("
                 SELECT 
                     blood_type,
@@ -29,7 +48,7 @@ class BloodInventoryManagerEnhanced {
                     COALESCE(SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END), 0) as used,
                     COALESCE(SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END), 0) as expired,
                     COALESCE(SUM(CASE WHEN status = 'quarantined' THEN 1 ELSE 0 END), 0) as quarantined
-                FROM public.blood_inventory 
+                FROM blood_inventory 
                 GROUP BY blood_type
             ");
             $byBloodType = [];
@@ -61,12 +80,24 @@ class BloodInventoryManagerEnhanced {
             ];
         } catch (Exception $e) {
             error_log("Error getting dashboard summary: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            
+            // Try a simple count query to test basic connectivity
+            try {
+                $testStmt = $this->pdo->query("SELECT COUNT(*) as total FROM blood_inventory");
+                $testResult = $testStmt->fetch(PDO::FETCH_ASSOC);
+                error_log("Simple count query result: " . json_encode($testResult));
+            } catch (Exception $testE) {
+                error_log("Even simple count query failed: " . $testE->getMessage());
+            }
+            
             return [
                 'total_units' => 0,
                 'available_units' => 0,
                 'expired_units' => 0,
                 'by_blood_type' => [],
-                'low_stock_types' => []
+                'low_stock_types' => [],
+                'error' => $e->getMessage()
             ];
         }
     }
