@@ -4,7 +4,17 @@
 // Include session configuration first
 require_once __DIR__ . '/session_config.php';
 
-require_once __DIR__ . '/db.php';
+// Load the main db.php from project root
+require_once __DIR__ . '/../db.php';
+
+function getDbDriver() {
+    try {
+        global $pdo;
+        return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    } catch (Exception $e) {
+        return 'mysql';
+    }
+}
 
 /**
  * Check if user is logged in
@@ -51,13 +61,25 @@ function loginUser($user, $rememberMe = false) {
         $expires = date('Y-m-d H:i:s', strtotime('+30 days'));
         
         try {
-            // Store remember token in database
-            $stmt = $pdo->prepare("
-                INSERT INTO user_remember_tokens (user_id, token, expires_at) 
-                VALUES (?, ?, ?) 
-                ON DUPLICATE KEY UPDATE token = ?, expires_at = ?
-            ");
-            $stmt->execute([$user['id'], $token, $expires, $token, $expires]);
+            // Store remember token in database (MySQL and PostgreSQL compatible upsert)
+            $driver = getDbDriver();
+            if ($driver === 'pgsql') {
+                $stmt = $pdo->prepare("
+                    INSERT INTO user_remember_tokens (user_id, token, expires_at) 
+                    VALUES (?, ?, ?)
+                    ON CONFLICT (user_id) DO UPDATE SET 
+                        token = EXCLUDED.token, 
+                        expires_at = EXCLUDED.expires_at
+                ");
+                $stmt->execute([$user['id'], $token, $expires]);
+            } else {
+                $stmt = $pdo->prepare("
+                    INSERT INTO user_remember_tokens (user_id, token, expires_at) 
+                    VALUES (?, ?, ?) 
+                    ON DUPLICATE KEY UPDATE token = ?, expires_at = ?
+                ");
+                $stmt->execute([$user['id'], $token, $expires, $token, $expires]);
+            }
             
             // Set remember me cookie
             setcookie('remember_token', $token, strtotime('+30 days'), '/', '', false, true);
@@ -219,21 +241,60 @@ function requireUserLogin($redirectTo = '/blood-donation-pwa/login.php') {
 function createRememberTokensTable() {
     global $pdo;
     try {
-        $sql = "
-        CREATE TABLE IF NOT EXISTS user_remember_tokens (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id INT NOT NULL,
-            token VARCHAR(64) NOT NULL UNIQUE,
-            expires_at DATETIME NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users_new(id) ON DELETE CASCADE,
-            INDEX idx_token (token),
-            INDEX idx_user_id (user_id),
-            INDEX idx_expires (expires_at)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-        ";
-        
-        $pdo->exec($sql);
+        // Ensure users_new table exists (minimal schema) for FK to work
+        $driver = getDbDriver();
+        if ($driver === 'pgsql') {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS users_new (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                role VARCHAR(32) DEFAULT 'user',
+                status VARCHAR(32) DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );");
+        } else {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS users_new (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                role ENUM('user','admin','super_admin') DEFAULT 'user',
+                status ENUM('active','inactive','suspended') DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+        }
+        if ($driver === 'pgsql') {
+            $sql = "
+                CREATE TABLE IF NOT EXISTS user_remember_tokens (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL UNIQUE,
+                    token VARCHAR(64) NOT NULL UNIQUE,
+                    expires_at TIMESTAMP NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users_new(id) ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS idx_expires ON user_remember_tokens (expires_at);
+            ";
+            $pdo->exec($sql);
+        } else {
+            $sql = "
+                CREATE TABLE IF NOT EXISTS user_remember_tokens (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    token VARCHAR(64) NOT NULL UNIQUE,
+                    expires_at DATETIME NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users_new(id) ON DELETE CASCADE,
+                    INDEX idx_token (token),
+                    INDEX idx_user_id (user_id),
+                    INDEX idx_expires (expires_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ";
+            $pdo->exec($sql);
+        }
         return true;
     } catch (Exception $e) {
         error_log("Failed to create remember tokens table: " . $e->getMessage());
