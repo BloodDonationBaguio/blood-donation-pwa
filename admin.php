@@ -1396,7 +1396,7 @@ function buildPaginationUrl($page) {
                                         <?php foreach ($donors as $donor): ?>
                                             <tr>
                                                 <td><?= htmlspecialchars($donor['id']) ?></td>
-                                                <td><code><?= htmlspecialchars($donor['id'] ?? 'N/A') ?></code></td>
+                                                <td><code><?= htmlspecialchars($donor['reference_code'] ?? $donor['reference_number'] ?? $donor['id'] ?? 'N/A') ?></code></td>
                                                 <td><strong><?= htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) ?></strong></td>
                                                 <td><?= htmlspecialchars($donor['email']) ?></td>
                                                 <td><?= htmlspecialchars($donor['phone'] ?? 'N/A') ?></td>
