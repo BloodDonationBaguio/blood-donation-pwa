@@ -19,8 +19,17 @@ try {
     die("Database error: " . $e->getMessage());
 }
 
+// If we were sent here due to a database error, do NOT auto-redirect
+$incomingError = $_GET['error'] ?? '';
+$skipAutoRedirect = ($incomingError === 'database_error');
+if ($skipAutoRedirect) {
+    // Clear any possibly invalid session and continue to login screen
+    session_destroy();
+    session_start();
+}
+
 // Check if already logged in - but only redirect if we have a valid session
-if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true && isset($_SESSION['admin_username'])) {
+if (!$skipAutoRedirect && isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true && isset($_SESSION['admin_username'])) {
     // Verify the session is still valid by checking the database
     try {
         $stmt = $pdo->prepare("SELECT id FROM admin_users WHERE username = ?");
@@ -44,6 +53,9 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 
 // Process login
 $error = '';
+if ($skipAutoRedirect) {
+    $error = 'A database error occurred. Please log in again.';
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     error_log("POST received! Username: " . ($_POST['username'] ?? 'NOT SET'));
     $username = $_POST['username'] ?? '';
