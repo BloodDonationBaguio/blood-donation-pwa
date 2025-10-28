@@ -1,13 +1,13 @@
 // Service Worker for Blood Donation PWA
 const CACHE_NAME = 'blood-donation-pwa-v2';
 const urlsToCache = [
-  '/blood-donation-pwa/',
-  '/blood-donation-pwa/index.php',
-  '/blood-donation-pwa/css/style.css',
-  '/blood-donation-pwa/manifest.json',
-  '/blood-donation-pwa/donor-registration.php',
-  '/blood-donation-pwa/login.php',
-  '/blood-donation-pwa/admin.php'
+  '/',
+  '/index.php',
+  '/css/style.css',
+  '/manifest.json',
+  '/donor-registration.php',
+  '/login.php',
+  '/admin.php'
 ];
 
 // Install event
