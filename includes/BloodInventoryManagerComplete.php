@@ -124,7 +124,7 @@ class BloodInventoryManagerComplete {
                         ELSE 0 
                     END as expiring_soon
                 FROM blood_inventory bi
-                LEFT JOIN donors_new d ON bi.donor_id = d.id
+                LEFT JOIN donors d ON bi.donor_id = d.id
                 $whereClause
                 ORDER BY bi.created_at DESC
                 LIMIT ? OFFSET ?
@@ -165,7 +165,7 @@ class BloodInventoryManagerComplete {
                     d.phone,
                     CONCAT(d.first_name, ' ', d.last_name) as donor_name
                 FROM blood_inventory bi
-                LEFT JOIN donors_new d ON bi.donor_id = d.id
+                LEFT JOIN donors d ON bi.donor_id = d.id
                 WHERE bi.unit_id = ?
             ");
             $stmt->execute([$unitId]);

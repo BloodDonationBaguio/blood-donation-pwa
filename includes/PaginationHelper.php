@@ -40,7 +40,7 @@ class PaginationHelper {
         $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
         
         // Get total count
-        $countQuery = "SELECT COUNT(*) as total FROM donors_new d $whereClause";
+        $countQuery = "SELECT COUNT(*) as total FROM donors d $whereClause";
         $countStmt = $this->pdo->prepare($countQuery);
         $countStmt->execute($params);
         $totalRecords = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
@@ -62,7 +62,7 @@ class PaginationHelper {
                 d.created_at,
                 d.updated_at,
                 CONCAT(d.first_name, ' ', d.last_name) as full_name
-            FROM donors_new d
+            FROM donors d
             $whereClause
             ORDER BY d.$sortBy $sortOrder
             LIMIT ? OFFSET ?
@@ -123,7 +123,7 @@ class PaginationHelper {
         $countQuery = "
             SELECT COUNT(*) as total 
             FROM blood_inventory bi
-            LEFT JOIN donors_new d ON bi.donor_id = d.id
+            LEFT JOIN donors d ON bi.donor_id = d.id
             $whereClause
         ";
         $countStmt = $this->pdo->prepare($countQuery);
@@ -164,7 +164,7 @@ class PaginationHelper {
                     ELSE 'good'
                 END as urgency_status
             FROM blood_inventory bi
-            LEFT JOIN donors_new d ON bi.donor_id = d.id
+            LEFT JOIN donors d ON bi.donor_id = d.id
             $whereClause
             ORDER BY bi.$sortBy $sortOrder
             LIMIT ? OFFSET ?
@@ -210,14 +210,14 @@ class PaginationHelper {
         $counts = [];
         
         // Status counts
-        $statusQuery = "SELECT status, COUNT(*) as count FROM donors_new WHERE seed_flag = 0 GROUP BY status";
+        $statusQuery = "SELECT status, COUNT(*) as count FROM donors WHERE seed_flag = 0 GROUP BY status";
         $statusStmt = $this->pdo->query($statusQuery);
         while ($row = $statusStmt->fetch(PDO::FETCH_ASSOC)) {
             $counts['status'][$row['status']] = $row['count'];
         }
         
         // Blood type counts
-        $bloodTypeQuery = "SELECT blood_type, COUNT(*) as count FROM donors_new WHERE seed_flag = 0 GROUP BY blood_type";
+        $bloodTypeQuery = "SELECT blood_type, COUNT(*) as count FROM donors WHERE seed_flag = 0 GROUP BY blood_type";
         $bloodTypeStmt = $this->pdo->query($bloodTypeQuery);
         while ($row = $bloodTypeStmt->fetch(PDO::FETCH_ASSOC)) {
             $counts['blood_type'][$row['blood_type']] = $row['count'];
@@ -255,7 +255,7 @@ class PaginationHelper {
     public function getApprovedDonors($limit = 100) {
         $query = "
             SELECT id, first_name, last_name, reference_code, blood_type, status
-            FROM donors_new 
+            FROM donors 
             WHERE status = 'approved' AND seed_flag = 0
             ORDER BY first_name, last_name
             LIMIT ?
@@ -272,7 +272,7 @@ class PaginationHelper {
     public function validateDonorForBloodUnit($donorId) {
         $query = "
             SELECT id, first_name, last_name, blood_type, status
-            FROM donors_new 
+            FROM donors 
             WHERE id = ? AND status = 'approved' AND seed_flag = 0
         ";
         
@@ -294,8 +294,8 @@ class PaginationHelper {
         // Generate unit ID
         $unitId = $this->generateUnitId();
         
-        // Calculate expiry date (42 days from collection)
-        $expiryDate = date('Y-m-d', strtotime($data['collection_date'] . ' +42 days'));
+        // Calculate expiry date (25 days from collection)
+        $expiryDate = date('Y-m-d', strtotime($data['collection_date'] . ' +25 days'));
         
         $query = "
             INSERT INTO blood_inventory (

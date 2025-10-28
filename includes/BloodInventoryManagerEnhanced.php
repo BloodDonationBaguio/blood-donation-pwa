@@ -79,7 +79,7 @@ class BloodInventoryManagerEnhanced {
             $stmt = $this->pdo->prepare("
                 SELECT bi.*, d.first_name, d.last_name, d.reference_code
                 FROM blood_inventory bi
-                LEFT JOIN donors_new d ON bi.donor_id = d.id
+                LEFT JOIN donors d ON bi.donor_id = d.id
                 WHERE bi.status = 'available' 
                 AND bi.expiry_date <= DATE_ADD(NOW(), INTERVAL ? DAY)
                 AND bi.expiry_date > NOW()
@@ -135,10 +135,10 @@ class BloodInventoryManagerEnhanced {
             $countSql = "
                 SELECT COUNT(*) as total
                 FROM blood_inventory bi
-                LEFT JOIN donors_new d ON bi.donor_id = d.id
+                LEFT JOIN donors d ON bi.donor_id = d.id
                 $whereClause
             ";
-            $countStmt = $pdo->prepare($countSql);
+            $countStmt = $this->pdo->prepare($countSql);
             $countStmt->execute($params);
             $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
@@ -153,7 +153,7 @@ class BloodInventoryManagerEnhanced {
                     d.status as donor_status,
                     CONCAT(d.first_name, ' ', d.last_name) as donor_name
                 FROM blood_inventory bi
-                LEFT JOIN donors_new d ON bi.donor_id = d.id
+                LEFT JOIN donors d ON bi.donor_id = d.id
                 $whereClause
                 ORDER BY bi.created_at DESC
                 LIMIT ? OFFSET ?
@@ -201,7 +201,7 @@ class BloodInventoryManagerEnhanced {
                     d.phone,
                     CONCAT(d.first_name, ' ', d.last_name) as donor_name
                 FROM blood_inventory bi
-                LEFT JOIN donors_new d ON bi.donor_id = d.id
+                LEFT JOIN donors d ON bi.donor_id = d.id
                 WHERE bi.id = ?
             ");
             $stmt->execute([$unitId]);
@@ -243,7 +243,7 @@ class BloodInventoryManagerEnhanced {
             // Validate donor exists and is approved/served
             $donorStmt = $pdo->prepare("
                 SELECT id, first_name, last_name, blood_type, status 
-                FROM donors_new 
+                FROM donors 
                 WHERE id = ? AND status IN ('approved', 'served')
             ");
             $donorStmt->execute([$data['donor_id']]);
@@ -256,8 +256,8 @@ class BloodInventoryManagerEnhanced {
             // Generate unique unit ID
             $unitId = $this->generateUnitId($data['blood_type']);
 
-            // Calculate expiry date (42 days from collection)
-            $expiryDate = date('Y-m-d', strtotime($data['collection_date'] . ' +42 days'));
+            // Calculate expiry date (25 days from collection)
+            $expiryDate = date('Y-m-d', strtotime($data['collection_date'] . ' +25 days'));
 
             $pdo->beginTransaction();
 
@@ -405,7 +405,7 @@ class BloodInventoryManagerEnhanced {
         try {
             $stmt = $pdo->prepare("
                 SELECT id, first_name, last_name, reference_code, blood_type, status
-                FROM donors_new 
+                FROM donors 
                 WHERE status IN ('approved', 'served')
                 ORDER BY last_donation_date DESC, created_at DESC
                 LIMIT ?

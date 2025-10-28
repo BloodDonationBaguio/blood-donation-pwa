@@ -39,21 +39,25 @@ if ($database_url) {
     die("DATABASE_URL not found. Please configure database connection.");
 }
 
-function tableExists($pdo, $table) {
-    try {
-        $result = $pdo->query("SELECT to_regclass('public." . $table . "')");
-        return $result->fetchColumn() !== null;
-    } catch (PDOException $e) {
-        return false;
+if (!function_exists('tableExists')) {
+    function tableExists($pdo, $table) {
+        try {
+            $result = $pdo->query("SELECT to_regclass('public." . $table . "')");
+            return $result->fetchColumn() !== null;
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 }
 
-function getTableStructure($pdo, $table) {
-    try {
-        $stmt = $pdo->query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" . $table . "'");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        return [];
+if (!function_exists('getTableStructure')) {
+    function getTableStructure($pdo, $table) {
+        try {
+            $stmt = $pdo->query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" . $table . "'");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
     }
 }
 ?>
