@@ -35,21 +35,15 @@ self.addEventListener('fetch', function(event) {
     return; // let the browser handle it
   }
 
-  // Bypass SW for admin-related pages so redirects work correctly
+  // Bypass SW entirely for admin-related pages so redirects work correctly
   const isAdminUrl = adminUrls.some(url => requestUrl.pathname.endsWith(url));
   if (isAdminUrl) {
-    event.respondWith(fetch(event.request));
-    return;
+    return; // don't call respondWith — let the browser handle navigation/redirects
   }
 
-  // Handle same-origin navigation requests
+  // Do not intercept top-level navigations to avoid redirect mode issues
   if (event.request.mode === 'navigate') {
-    event.respondWith(
-      caches.match(event.request).then(function(response) {
-        return response || fetch(event.request);
-      })
-    );
-    return;
+    return; // allow the browser to handle navigation normally
   }
 
   // Handle other same-origin requests with cache-first, then network

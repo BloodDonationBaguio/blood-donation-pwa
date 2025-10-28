@@ -65,7 +65,8 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=8').then(function(registration) {
+        // Force update of the Service Worker by bumping version
+        navigator.serviceWorker.register('sw.js?v=9').then(function(registration) {
           console.log('Service Worker registered successfully');
         }).catch(function(error) {
           console.log('Service Worker registration failed:', error);
