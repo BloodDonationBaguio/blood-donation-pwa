@@ -1,7 +1,7 @@
 <?php
 // Environment-aware DB config: PostgreSQL on Render (DATABASE_URL), MySQL locally
 if (getenv('DATABASE_URL')) {
-    require_once __DIR__ . '/db_production.php';
+    
     return;
 }
 // Local/dev fallback: MySQL
