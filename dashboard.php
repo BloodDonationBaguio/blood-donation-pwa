@@ -60,10 +60,20 @@ try {
     
 } catch (Exception $e) {
     // Log the error but don't redirect to prevent loops
-    error_log("Dashboard error: " . $e->getMessage());
+    $errorMessage = $e->getMessage();
+    error_log("Dashboard error: " . $errorMessage);
     
     // Send proper content type header
     header('Content-Type: text/html; charset=UTF-8');
+    
+    // Get error details for debugging
+    $errorCode = $e->getCode();
+    $errorFile = basename($e->getFile());
+    $errorLine = $e->getLine();
+    $errorTrace = $e->getTraceAsString();
+    
+    // Create a user-friendly message but include technical details
+    $userMessage = "We're experiencing technical difficulties with our database connection.";
     
     // Display a complete HTML page with user-friendly error message
     echo "<!DOCTYPE html>
@@ -80,7 +90,7 @@ try {
                 background-color: #f8f9fa;
             }
             .error-container {
-                max-width: 600px;
+                max-width: 800px;
                 margin: 0 auto;
                 background: white;
                 padding: 30px;
@@ -96,14 +106,40 @@ try {
                 background-color: #c82333;
                 border-color: #bd2130;
             }
+            .error-details {
+                margin-top: 20px;
+                text-align: left;
+                background-color: #f8f9fa;
+                padding: 15px;
+                border-radius: 5px;
+                border: 1px solid #ddd;
+                font-family: monospace;
+                font-size: 14px;
+                overflow-x: auto;
+            }
+            .error-details pre {
+                margin-bottom: 0;
+                white-space: pre-wrap;
+            }
         </style>
     </head>
     <body>
         <div class='container'>
             <div class='error-container'>
                 <h2 class='mb-4'>System Error</h2>
-                <p class='mb-4'>We're experiencing technical difficulties with our database connection. Please try again later.</p>
-                <a href='logout.php' class='btn btn-primary'>Logout and Try Again</a>
+                <p class='mb-4'>{$userMessage}</p>
+                
+                <div class='error-details'>
+                    <h5>Error Details (for technical support):</h5>
+                    <p><strong>Error:</strong> " . htmlspecialchars($errorMessage) . "</p>
+                    <p><strong>Code:</strong> {$errorCode}</p>
+                    <p><strong>Location:</strong> {$errorFile} (line {$errorLine})</p>
+                    <p><strong>Database Type:</strong> " . (defined('DB_TYPE') ? DB_TYPE : 'Unknown') . "</p>
+                </div>
+                
+                <div class='mt-4'>
+                    <a href='logout.php' class='btn btn-primary'>Logout and Try Again</a>
+                </div>
             </div>
         </div>
     </body>
