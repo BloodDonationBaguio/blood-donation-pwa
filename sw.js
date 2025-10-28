@@ -1,5 +1,5 @@
 // Service Worker for Blood Donation PWA
-const CACHE_NAME = 'blood-donation-pwa-v2';
+const CACHE_NAME = 'blood-donation-pwa-v3';
 const urlsToCache = [
   '/',
   '/index.php',
@@ -16,10 +16,11 @@ const adminUrls = [
 
 // Install event
 self.addEventListener('install', function(event) {
+  // Ensure the new SW activates immediately
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
@@ -27,58 +28,52 @@ self.addEventListener('install', function(event) {
 
 // Fetch event
 self.addEventListener('fetch', function(event) {
-  // Check if the request is for an admin URL
   const requestUrl = new URL(event.request.url);
-  const isAdminUrl = adminUrls.some(url => requestUrl.pathname.endsWith(url));
 
+  // Do not intercept cross-origin requests (e.g., CDN assets)
+  if (requestUrl.origin !== self.location.origin) {
+    return; // let the browser handle it
+  }
+
+  // Bypass SW for admin-related pages so redirects work correctly
+  const isAdminUrl = adminUrls.some(url => requestUrl.pathname.endsWith(url));
   if (isAdminUrl) {
-    // For admin URLs, always go to the network
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // Handle navigation requests with preload
+  // Handle same-origin navigation requests
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      event.preloadResponse.then(function(preloadResponse) {
-        if (preloadResponse) {
-          return preloadResponse;
-        }
-        return caches.match(event.request).then(function(response) {
-          if (response) {
-            return response;
-          }
-          return fetch(event.request);
-        });
+      caches.match(event.request).then(function(response) {
+        return response || fetch(event.request);
       })
     );
-  } else {
-    // Handle other requests normally
-    event.respondWith(
-      caches.match(event.request)
-        .then(function(response) {
-          // Cache hit - return response
-          if (response) {
-            return response;
-          }
-          return fetch(event.request);
-        })
-    );
+    return;
   }
+
+  // Handle other same-origin requests with cache-first, then network
+  event.respondWith(
+    caches.match(event.request).then(function(response) {
+      return response || fetch(event.request);
+    })
+  );
 });
 
 // Activate event
 self.addEventListener('activate', function(event) {
   event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
+    (async () => {
+      const cacheNames = await caches.keys();
+      await Promise.all(
         cacheNames.map(function(cacheName) {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    })
+      // Take control immediately
+      await self.clients.claim();
+    })()
   );
 });
