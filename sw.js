@@ -6,8 +6,12 @@ const urlsToCache = [
   '/css/style.css',
   '/manifest.json',
   '/donor-registration.php',
-  '/login.php',
-  '/admin.php'
+  '/login.php'
+];
+
+const adminUrls = [
+  '/admin.php',
+  '/admin-login.php'
 ];
 
 // Install event
@@ -23,6 +27,16 @@ self.addEventListener('install', function(event) {
 
 // Fetch event
 self.addEventListener('fetch', function(event) {
+  // Check if the request is for an admin URL
+  const requestUrl = new URL(event.request.url);
+  const isAdminUrl = adminUrls.some(url => requestUrl.pathname.endsWith(url));
+
+  if (isAdminUrl) {
+    // For admin URLs, always go to the network
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   // Handle navigation requests with preload
   if (event.request.mode === 'navigate') {
     event.respondWith(
