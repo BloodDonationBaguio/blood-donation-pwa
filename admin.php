@@ -17,6 +17,11 @@ session_start([
     'gc_maxlifetime' => 3600   // 1 hour
 ]);
 
+// Start output buffering to ensure clean redirects even if any stray output occurs
+if (!headers_sent()) {
+    ob_start();
+}
+
 // Security headers
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
@@ -128,6 +133,20 @@ try {
     
     // Handle admin actions before any output
     require_once __DIR__ . '/includes/admin_actions.php';
+
+    // Helper: safely perform a redirect, clearing any buffered output
+    if (!function_exists('safeRedirect')) {
+        function safeRedirect($url) {
+            if (ob_get_level() > 0) {
+                // Clear any buffered output to prevent "headers already sent" issues
+                @ob_end_clean();
+            }
+            header('Cache-Control: no-store, no-cache, must-revalidate');
+            header('Pragma: no-cache');
+            header('Location: ' . $url);
+            exit();
+        }
+    }
     
     // Handle donor update action
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_donor') {
@@ -200,8 +219,7 @@ try {
         // Log the action
         logAdminAction($pdo, 'donor_approved', 'donors', $id, "Donor approved and email sent");
         
-                    header('Location: ?tab=pending-donors&success=Donor was approved successfully.');
-        exit();
+                    safeRedirect('admin.php?tab=pending-donors&success=Donor was approved successfully.');
     }
 
     if (isset($_GET['reject_donor'])) {
@@ -224,8 +242,7 @@ try {
         // Log the action
         logAdminAction($pdo, 'donor_rejected', 'donors', $id, "Donor rejected with reason: $reason");
         
-                    header('Location: ?tab=pending-donors&success=Donor was rejected successfully.');
-        exit();
+                    safeRedirect('admin.php?tab=pending-donors&success=Donor was rejected successfully.');
     }
 
     if (isset($_GET['mark_served'])) {
