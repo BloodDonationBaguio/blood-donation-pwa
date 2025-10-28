@@ -20,10 +20,11 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
 # Change Apache to listen on port 10000 for Render
-RUN sed -i 's/80/10000/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
+RUN sed -i 's/80/${PORT}/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
+RUN sed -i 's/Listen 0.0.0.0:80/Listen 0.0.0.0:${PORT}/g' /etc/apache2/ports.conf
 
 # Expose port
-EXPOSE 10000
+EXPOSE ${PORT}
 
 # Start Apache
 CMD ["apache2-foreground"]
