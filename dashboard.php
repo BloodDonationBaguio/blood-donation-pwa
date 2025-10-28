@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 // Include necessary files
 require_once 'db.php';
 require_once 'includes/session_manager.php';
+require_once 'pg_compat.php'; // Add PostgreSQL compatibility layer
 
 // Require user to be logged in
 requireUserLogin();
@@ -20,8 +21,8 @@ if (!$user_id) {
 }
 
 try {
-    // Fetch user info
-    $stmt = $pdo->prepare('SELECT * FROM users_new WHERE id = ?');
+    // Fetch user info - use CAST for PostgreSQL compatibility with numeric IDs
+    $stmt = $pdo->prepare('SELECT * FROM users_new WHERE id = CAST(? AS INTEGER)');
     $stmt->execute([$user_id]);
     $user = $stmt->fetch();
     
@@ -47,11 +48,11 @@ try {
         exit();
     }
     
-    // Fetch user donation history - check if user_id column exists
-    // If not, use email to match donations
+    // Fetch user donation history with PostgreSQL compatible query
+    // Use LOWER for case-insensitive email comparison in PostgreSQL
     $donations = $pdo->prepare('
         SELECT * FROM donors_new 
-        WHERE email = ? 
+        WHERE LOWER(email) = LOWER(?) 
         ORDER BY id DESC
     ');
     $donations->execute([$user['email']]);
