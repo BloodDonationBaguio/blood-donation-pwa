@@ -26,8 +26,24 @@ try {
     $user = $stmt->fetch();
     
     if (!$user) {
+        // Clear session but don't redirect to prevent loops
+        $_SESSION = array();
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
         session_destroy();
-        header('Location: login.php?error=user_not_found');
+        
+        // Use JavaScript to clear cookies and redirect
+        echo "<script>
+            document.cookie.split(';').forEach(function(c) {
+                document.cookie = c.trim().split('=')[0] + '=;' + 'expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
+            });
+            window.location.href = 'login.php?error=session_cleared';
+        </script>";
         exit();
     }
     
@@ -42,8 +58,15 @@ try {
     $donation_history = $donations->fetchAll();
     
 } catch (Exception $e) {
+    // Log the error but don't redirect to prevent loops
     error_log("Dashboard error: " . $e->getMessage());
-    header('Location: login.php?error=system_error');
+    
+    // Display a user-friendly error message
+    echo "<div style='text-align:center; margin-top:50px;'>
+        <h2>System Error</h2>
+        <p>We're experiencing technical difficulties. Please try again later.</p>
+        <p><a href='logout.php'>Click here to logout and try again</a></p>
+    </div>";
     exit();
 }
 
