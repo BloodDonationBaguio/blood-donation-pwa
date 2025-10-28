@@ -50,11 +50,28 @@ try {
     
     // Fetch user donation history with PostgreSQL compatible query
     // Use LOWER for case-insensitive email comparison in PostgreSQL
-    $donations = $pdo->prepare('
-        SELECT * FROM donors_new 
+    // Check if donors_new exists, otherwise use donors table
+    $donorsTable = 'donors'; // Default to 'donors' table which likely exists
+    
+    try {
+        // For PostgreSQL - check if table exists before querying
+        $checkTable = $pdo->prepare("SELECT to_regclass('public.donors_new') AS exists");
+        $checkTable->execute();
+        $tableResult = $checkTable->fetch(PDO::FETCH_ASSOC);
+        
+        if (!empty($tableResult['exists'])) {
+            $donorsTable = 'donors_new';
+        }
+    } catch (Exception $e) {
+        // If error checking table, stick with default 'donors'
+        error_log("Table check error: " . $e->getMessage());
+    }
+    
+    $donations = $pdo->prepare("
+        SELECT * FROM $donorsTable 
         WHERE LOWER(email) = LOWER(?) 
         ORDER BY id DESC
-    ');
+    ");
     $donations->execute([$user['email']]);
     $donation_history = $donations->fetchAll();
     
