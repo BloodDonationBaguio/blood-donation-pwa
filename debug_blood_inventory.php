@@ -1,8 +1,19 @@
 <?php
-require_once 'includes/config.php';
+// Use production database configuration
+require_once 'db_production.php';
 
 echo "<h2>Blood Inventory Debug Report</h2>";
 echo "<p>Generated at: " . date('Y-m-d H:i:s') . "</p>";
+
+// Check if database connection is established
+if (!isset($pdo) || !$pdo) {
+    echo "<p style='color: red;'>❌ Database connection not established!</p>";
+    echo "<p><strong>DATABASE_URL set:</strong> " . (getenv('DATABASE_URL') ? 'YES' : 'NO') . "</p>";
+    echo "<p><strong>PDO PostgreSQL available:</strong> " . (extension_loaded('pdo_pgsql') ? 'YES' : 'NO') . "</p>";
+    die("Cannot proceed without database connection.");
+}
+
+echo "<p style='color: green;'>✅ Database connection established</p>";
 
 try {
     // Check if blood_inventory table exists
