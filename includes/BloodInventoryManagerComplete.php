@@ -18,13 +18,26 @@ class BloodInventoryManagerComplete {
         try {
             $stmt = $this->pdo->query("
                 SELECT 
-                    COUNT(*) as total_units,
-                    SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available_units,
-                    SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END) as expired_units,
-                    SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END) as used_units
+                    COALESCE(COUNT(*), 0) AS total_units,
+                    COALESCE(SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END), 0) AS available_units,
+                    COALESCE(SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END), 0) AS expired_units,
+                    COALESCE(SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END), 0) AS used_units
                 FROM blood_inventory
             ");
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row || !isset($row['total_units'])) {
+                // Fallback: schema-qualified for PostgreSQL if search_path differs
+                $stmt = $this->pdo->query("
+                    SELECT 
+                        COALESCE(COUNT(*), 0) AS total_units,
+                        COALESCE(SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END), 0) AS available_units,
+                        COALESCE(SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END), 0) AS expired_units,
+                        COALESCE(SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END), 0) AS used_units
+                    FROM public.blood_inventory
+                ");
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+            return $row ?: ['total_units' => 0, 'available_units' => 0, 'expired_units' => 0, 'used_units' => 0];
         } catch (Exception $e) {
             error_log("Error getting dashboard summary: " . $e->getMessage());
             return ['total_units' => 0, 'available_units' => 0, 'expired_units' => 0, 'used_units' => 0];

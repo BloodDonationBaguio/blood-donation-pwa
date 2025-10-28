@@ -48,7 +48,29 @@ function createBloodInventoryTableIfMissing(PDO $pdo) {
                 SELECT 1 FROM information_schema.table_constraints 
                 WHERE constraint_name = 'chk_status_valid' AND table_name = 'blood_inventory') THEN
                 ALTER TABLE blood_inventory ADD CONSTRAINT chk_status_valid CHECK (status IN ('available','used','expired','quarantined'));
-            END IF; END $$;"
+            END IF; END $$;",
+            // Summary view for dashboard cards (PostgreSQL-safe)
+            "CREATE OR REPLACE VIEW blood_inventory_summary AS
+                SELECT 
+                    COALESCE(COUNT(*), 0) AS total_units,
+                    COALESCE(SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END), 0) AS available_units,
+                    COALESCE(SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END), 0) AS used_units,
+                    COALESCE(SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END), 0) AS expired_units
+                FROM blood_inventory;",
+            // Expiring units view for alerts (5-day window)
+            "CREATE OR REPLACE VIEW expiring_blood_units AS
+                SELECT 
+                    bi.*,
+                    d.first_name,
+                    d.last_name,
+                    d.reference_code,
+                    (bi.expiry_date - CURRENT_DATE) AS days_to_expiry
+                FROM blood_inventory bi
+                LEFT JOIN donors_new d ON bi.donor_id = d.id
+                WHERE bi.status = 'available' 
+                  AND bi.expiry_date <= CURRENT_DATE + INTERVAL '5 day'
+                  AND bi.expiry_date > CURRENT_DATE
+                ORDER BY bi.expiry_date ASC;"
         ];
 
         foreach ($statements as $stmt) {
