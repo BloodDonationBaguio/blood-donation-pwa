@@ -7,9 +7,8 @@
 // Start session for authentication
 session_start();
 
-require_once 'db.php';
-require_once __DIR__ . '/admin/includes/admin_auth.php';
-require_once 'includes/enhanced_donor_management.php';
+require_once __DIR__ . '/includes/config.php';
+// Note: admin_auth.php and enhanced_donor_management.php may not be needed for this endpoint
 
 // Check if user is authenticated as admin
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
@@ -62,7 +61,7 @@ try {
     }
     
     // Load medical questions
-    $medicalQuestions = include __DIR__ . '/includes/medical_questions.php';
+    $medicalQuestions = include 'includes/medical_questions.php';
     $sections = $medicalQuestions['sections'] ?? [];
     
     // Build response
