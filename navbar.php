@@ -232,9 +232,10 @@ if ($user_id) {
 /* Dropdown indicator (caret) */
 .user-link::after {
   content: '▾';
-  font-size: 12px;
-  color: #666;
-  margin-left: 6px;
+  font-size: 18px; /* enlarged caret for better visibility */
+  color: #444;
+  margin-left: 8px;
+  line-height: 1;
 }
 
 .dropdown-menu {
