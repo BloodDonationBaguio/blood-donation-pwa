@@ -37,8 +37,10 @@ if (!isset($_GET['donor_id']) || !is_numeric($_GET['donor_id'])) {
 $donorId = (int)$_GET['donor_id'];
 
 try {
+    // Resolve donors table dynamically (prefer donors_new when available)
+    $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
     // Get donor basic information
-    $donorStmt = $pdo->prepare("SELECT first_name, last_name, reference_code, gender FROM donors_new WHERE id = ?");
+    $donorStmt = $pdo->prepare("SELECT first_name, last_name, reference_code, gender FROM {$donorsTable} WHERE id = ?");
     $donorStmt->execute([$donorId]);
     $donor = $donorStmt->fetch(PDO::FETCH_ASSOC);
     

@@ -86,8 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         
         $logStmt = $pdo->prepare("
-            INSERT INTO admin_audit_log (admin_username, action_type, table_name, record_id, description, ip_address, user_agent)
-            VALUES (?, 'donor_edited', ?, ?, ?, ?, ?)
+            INSERT INTO admin_audit_log (admin_username, action_type, table_name, record_id, description, ip_address)
+            VALUES (?, 'donor_edited', ?, ?, ?, ?)
         ");
         
         $logStmt->execute([
@@ -95,8 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $donorsTable,
             $donorId,
             "Donor information updated: {$firstName} {$lastName}",
-            $_SERVER['REMOTE_ADDR'],
-            $_SERVER['HTTP_USER_AGENT'] ?? ''
+            $_SERVER['REMOTE_ADDR']
         ]);
         
         $success = "Donor information updated successfully!";
