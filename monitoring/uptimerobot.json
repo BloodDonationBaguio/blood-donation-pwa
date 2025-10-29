@@ -1,0 +1,17 @@
+{
+  "monitors": [
+    {
+      "friendly_name": "Main Site",
+      "type": 1,
+      "url": "https://www.blooddonationbaguio.com/",
+      "interval": 300
+    },
+    {
+      "friendly_name": "Health",
+      "type": 1,
+      "url": "https://www.blooddonationbaguio.com/health.php",
+      "interval": 60
+    }
+  ],
+  "notes": "Use with monitoring/setup-uptimerobot.ps1. Requires UPTIMEROBOT_API_KEY env var."
+}
