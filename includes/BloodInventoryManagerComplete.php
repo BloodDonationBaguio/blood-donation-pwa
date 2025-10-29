@@ -37,6 +37,24 @@ class BloodInventoryManagerComplete {
                 ");
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
             }
+            // Fallback: if inventory is empty, infer counts from donors_new served
+            try {
+                $tu = isset($row['total_units']) ? (int)$row['total_units'] : 0;
+                if ($tu === 0) {
+                    $servedStmt = $this->pdo->query("SELECT COUNT(*) AS cnt FROM donors_new WHERE status = 'served'");
+                    $served = (int)($servedStmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
+                    if ($served > 0) {
+                        $row = [
+                            'total_units' => $served,
+                            'available_units' => 0,
+                            'expired_units' => 0,
+                            'used_units' => $served
+                        ];
+                    }
+                }
+            } catch (Exception $fe) {
+                error_log('Fallback donors_new served aggregation failed: ' . $fe->getMessage());
+            }
             return $row ?: ['total_units' => 0, 'available_units' => 0, 'expired_units' => 0, 'used_units' => 0];
         } catch (Exception $e) {
             error_log("Error getting dashboard summary: " . $e->getMessage());

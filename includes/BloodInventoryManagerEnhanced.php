@@ -55,12 +55,33 @@ class BloodInventoryManagerEnhanced {
             $totalUnits = 0;
             $availableUnits = 0;
             $expiredUnits = 0;
+            $usedUnits = 0;
 
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $byBloodType[$row['blood_type']] = $row['count'];
                 $totalUnits += $row['count'];
                 $availableUnits += $row['available'];
                 $expiredUnits += $row['expired'];
+                $usedUnits += $row['used'];
+            }
+
+            // Fallback: if inventory table has no rows, infer counts from donors_new "served" status
+            if ($totalUnits === 0) {
+                try {
+                    $fallbackStmt = $this->pdo->query("\n                        SELECT blood_type, COUNT(*) as count\n                        FROM donors_new\n                        WHERE status = 'served'\n                        GROUP BY blood_type\n                    ");
+                    $byBloodType = [];
+                    $totalUnits = 0;
+                    $availableUnits = 0; // unknown without unit records
+                    $expiredUnits = 0;
+                    $usedUnits = 0;
+                    while ($r = $fallbackStmt->fetch(PDO::FETCH_ASSOC)) {
+                        $byBloodType[$r['blood_type']] = (int)$r['count'];
+                        $totalUnits += (int)$r['count'];
+                        $usedUnits += (int)$r['count'];
+                    }
+                } catch (Exception $fe) {
+                    error_log('Fallback donors_new aggregation failed: ' . $fe->getMessage());
+                }
             }
 
             // Get low stock alerts (less than 5 units)
@@ -75,6 +96,7 @@ class BloodInventoryManagerEnhanced {
                 'total_units' => $totalUnits,
                 'available_units' => $availableUnits,
                 'expired_units' => $expiredUnits,
+                'used_units' => $usedUnits,
                 'by_blood_type' => $byBloodType,
                 'low_stock_types' => $lowStockTypes
             ];
