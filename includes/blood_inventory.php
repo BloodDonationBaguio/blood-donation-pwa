@@ -39,6 +39,7 @@ function updateBloodInventory($pdo, $bloodType, $units = 1, $action = 'add') {
 
 function addBloodUnit($pdo, $donorId, $bloodType, $collectionDate = null) {
     try {
+
         if (!$collectionDate) {
             $collectionDate = date('Y-m-d');
         }
@@ -59,6 +60,7 @@ function addBloodUnit($pdo, $donorId, $bloodType, $collectionDate = null) {
         updateBloodInventory($pdo, $bloodType, 1, 'add');
         
         return $unitId;
+    } catch (Exception $e) {
         error_log("Error adding blood unit: " . $e->getMessage());
         return false;
     }
@@ -75,7 +77,7 @@ function getBloodInventory($pdo, $bloodTypeFilter = null) {
                 0 as units_reserved,
                 MAX(created_at) as last_updated
             FROM donors_new 
-            WHERE status IN ('approved', 'served')";
+            WHERE status = 'served'";
         
         // Add blood type filter if specified
         if ($bloodTypeFilter) {
@@ -189,4 +191,4 @@ function reserveBloodUnit($pdo, $bloodType, $requestId) {
         return false;
     }
 }
-?> 
+?>

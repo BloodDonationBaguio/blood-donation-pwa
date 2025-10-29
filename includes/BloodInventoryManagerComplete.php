@@ -249,7 +249,7 @@ class BloodInventoryManagerComplete {
             }
 
             $donorStmt = $this->pdo->prepare(
-                "SELECT id, first_name, last_name, blood_type, status FROM {$donorTable} WHERE id = ? AND status IN ('approved', 'served')"
+                "SELECT id, first_name, last_name, blood_type, status FROM {$donorTable} WHERE id = ? AND status = 'served'"
             );
             $donorStmt->execute([$data['donor_id']]);
             $donor = $donorStmt->fetch(PDO::FETCH_ASSOC);
@@ -509,7 +509,7 @@ class BloodInventoryManagerComplete {
             $stmt = $this->pdo->prepare("
                 SELECT id, first_name, last_name, reference_code, blood_type, status
                 FROM donors 
-                WHERE status IN ('approved', 'served')
+                WHERE status = 'served'
                 ORDER BY last_name, first_name
             ");
             $stmt->execute();

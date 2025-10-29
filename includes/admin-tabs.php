@@ -299,7 +299,7 @@ if ($activeTab === 'add-donor'): ?>
                         $bloodTypeStats = $pdo->query("
                             SELECT blood_type, COUNT(*) as count 
                             FROM donors_new 
-                            WHERE status IN ('approved', 'served') 
+                            WHERE status = 'served' 
                             GROUP BY blood_type 
                             ORDER BY count DESC
                         ")->fetchAll();

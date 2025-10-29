@@ -149,13 +149,13 @@ try {
     // Handle error silently
 }
 
-// Get approved donors for adding new blood units
+// Get served donors for adding new blood units
 $approvedDonors = [];
 try {
     $approvedDonorsQuery = "
         SELECT id, first_name, last_name, reference_code, blood_type, status
         FROM donors_new 
-        WHERE status = 'approved'
+        WHERE status = 'served'
         ORDER BY first_name, last_name
         LIMIT 100
     ";
@@ -475,13 +475,13 @@ try {
                         <?php if (empty($approvedDonors)): ?>
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>No approved donors available</strong><br>
-                                Blood units can only be created for real donors who have registered through this website and been approved.
+                                <strong>No served donors available</strong><br>
+                                Blood units can only be created for real donors who have been marked as served.
                             </div>
                             <input type="hidden" name="donor_id" value="">
                         <?php else: ?>
                             <select name="donor_id" class="form-select" required>
-                                <option value="">Choose an approved donor...</option>
+                                <option value="">Choose a served donor...</option>
                                 <?php foreach ($approvedDonors as $donor): ?>
                                     <option value="<?= $donor['id'] ?>" data-blood-type="<?= $donor['blood_type'] ?>">
                                         <?= htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) ?> 
@@ -491,7 +491,7 @@ try {
                                 <?php endforeach; ?>
                             </select>
                             <small class="form-text text-muted">
-                                Only showing approved donors who registered through this website
+                                Only showing served donors who registered through this website
                             </small>
                         <?php endif; ?>
                     </div>

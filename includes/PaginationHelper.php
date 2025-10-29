@@ -250,13 +250,13 @@ class PaginationHelper {
     }
     
     /**
-     * Get approved donors for blood unit creation
+     * Get served donors for blood unit creation
      */
     public function getApprovedDonors($limit = 100) {
         $query = "
             SELECT id, first_name, last_name, reference_code, blood_type, status
             FROM donors 
-            WHERE status = 'approved' AND seed_flag = 0
+            WHERE status = 'served' AND seed_flag = 0
             ORDER BY first_name, last_name
             LIMIT ?
         ";
@@ -267,13 +267,13 @@ class PaginationHelper {
     }
     
     /**
-     * Validate donor exists and is approved
+     * Validate donor exists and is served
      */
     public function validateDonorForBloodUnit($donorId) {
         $query = "
             SELECT id, first_name, last_name, blood_type, status
             FROM donors 
-            WHERE id = ? AND status = 'approved' AND seed_flag = 0
+            WHERE id = ? AND status = 'served' AND seed_flag = 0
         ";
         
         $stmt = $this->pdo->prepare($query);
@@ -288,7 +288,7 @@ class PaginationHelper {
         // Validate donor
         $donor = $this->validateDonorForBloodUnit($data['donor_id']);
         if (!$donor) {
-            throw new Exception('Invalid donor ID or donor not approved');
+            throw new Exception('Invalid donor ID or donor not served');
         }
         
         // Generate unit ID

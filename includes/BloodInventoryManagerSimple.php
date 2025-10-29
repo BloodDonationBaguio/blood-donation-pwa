@@ -255,7 +255,7 @@ class BloodInventoryManagerSimple {
             $donorStmt = $this->pdo->prepare("
                 SELECT id, first_name, last_name, blood_type, status 
                 FROM donors_new 
-                WHERE id = ? AND status IN ('approved', 'served')
+                WHERE id = ? AND status = 'served'
             ");
             $donorStmt->execute([$data['donor_id']]);
             $donor = $donorStmt->fetch(PDO::FETCH_ASSOC);
@@ -377,7 +377,7 @@ class BloodInventoryManagerSimple {
             $stmt = $this->pdo->prepare("
                 SELECT id, first_name, last_name, reference_code, blood_type, status
                 FROM donors_new 
-                WHERE status IN ('approved', 'served')
+                WHERE status = 'served'
                 ORDER BY created_at DESC
                 LIMIT ?
             ");

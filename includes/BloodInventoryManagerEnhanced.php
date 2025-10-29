@@ -272,11 +272,11 @@ class BloodInventoryManagerEnhanced {
                 }
             }
 
-            // Validate donor exists and is approved/served
+            // Validate donor exists and is served
             $donorStmt = $this->pdo->prepare("
                 SELECT id, first_name, last_name, blood_type, status 
-FROM donors_new 
-                WHERE id = ? AND status IN ('approved', 'served')
+                FROM donors_new 
+                WHERE id = ? AND status = 'served'
             ");
             $donorStmt->execute([$data['donor_id']]);
             $donor = $donorStmt->fetch(PDO::FETCH_ASSOC);
@@ -436,7 +436,7 @@ FROM donors_new
             $stmt = $this->pdo->prepare("
                 SELECT id, first_name, last_name, reference_code, blood_type, status
                 FROM donors_new 
-                WHERE status IN ('approved', 'served')
+                WHERE status = 'served'
                 ORDER BY last_donation_date DESC, created_at DESC
                 LIMIT ?
             ");

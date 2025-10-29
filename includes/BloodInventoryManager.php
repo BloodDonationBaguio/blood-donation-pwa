@@ -107,9 +107,9 @@ class BloodInventoryManager {
                 throw new Exception('Invalid donor ID. Blood units can only be created for real registered donors.');
             }
             
-            // Validate donor status
-            if ($donor['status'] !== 'approved' && $donor['status'] !== 'served') {
-                throw new Exception('Blood units can only be created for approved donors. Current status: ' . $donor['status']);
+            // Validate donor status: ONLY served donors are eligible
+            if ($donor['status'] !== 'served') {
+                throw new Exception('Blood units can only be created for served donors. Current status: ' . $donor['status']);
             }
             
             // Validate blood type matches donor's blood type
@@ -428,21 +428,58 @@ class BloodInventoryManager {
             throw new Exception('Insufficient permissions to view dashboard');
         }
         
-        // Get inventory summary
-        $stmt = $this->pdo->query("SELECT * FROM blood_inventory_summary");
-        $summary = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Get inventory summary (with fallback)
+        $summary = [];
+        try {
+            $stmt = $this->pdo->query("SELECT * FROM blood_inventory_summary");
+            if ($stmt) {
+                $summary = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        } catch (Exception $e) {}
+        if (empty($summary)) {
+            $stmt = $this->pdo->query(
+                "SELECT blood_type,
+                        COUNT(*) AS total_units,
+                        SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) AS available_units,
+                        SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END) AS used_units,
+                        SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END) AS expired_units,
+                        SUM(CASE WHEN status = 'quarantined' THEN 1 ELSE 0 END) AS quarantined_units
+                 FROM blood_inventory
+                 GROUP BY blood_type"
+            );
+            $summary = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        }
         
-        // Get expiring units
-        $stmt = $this->pdo->query("SELECT * FROM expiring_blood_units");
-        $expiringUnits = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Get expiring units (with fallback)
+        $expiringUnits = [];
+        try {
+            $stmt = $this->pdo->query("SELECT * FROM expiring_blood_units");
+            if ($stmt) {
+                $expiringUnits = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        } catch (Exception $e) {}
+        if (empty($expiringUnits)) {
+            $stmt = $this->pdo->prepare(
+                "SELECT unit_id, blood_type, collection_date, expiry_date, status
+                 FROM blood_inventory
+                 WHERE status = 'available'
+                   AND expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 5 DAY)"
+            );
+            $stmt->execute();
+            $expiringUnits = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
         
-        // Get low stock alerts (< 5 units)
-        $stmt = $this->pdo->query("
-            SELECT blood_type, available_units 
-            FROM blood_inventory_summary 
-            WHERE available_units < 5
-        ");
-        $lowStockAlerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Get low stock alerts (< 5 units) from summary data
+        $lowStockAlerts = [];
+        foreach ($summary as $row) {
+            $available = (int)($row['available_units'] ?? 0);
+            if ($available < 5) {
+                $lowStockAlerts[] = [
+                    'blood_type' => $row['blood_type'],
+                    'available_units' => $available
+                ];
+            }
+        }
         
         return [
             'summary' => $summary,
@@ -462,7 +499,7 @@ class BloodInventoryManager {
         $stmt = $this->pdo->prepare("
             SELECT id, first_name, last_name, email, blood_type, reference_code, 
                    status, created_at, phone
-            FROM donors 
+            FROM donors_new 
             WHERE email NOT LIKE 'test_%' 
               AND email NOT LIKE '%@example.com'
               AND first_name != 'Test'
@@ -487,13 +524,13 @@ class BloodInventoryManager {
         $stmt = $this->pdo->prepare("
             SELECT id, first_name, last_name, email, blood_type, reference_code, 
                    status, created_at, phone, last_donation_date
-            FROM donors 
+            FROM donors_new 
             WHERE email NOT LIKE 'test_%' 
               AND email NOT LIKE '%@example.com'
               AND first_name != 'Test'
               AND last_name != 'User'
               AND (reference_code NOT LIKE 'TEST-%' OR reference_code IS NULL)
-              AND status IN ('approved', 'served')
+              AND status = 'served'
             ORDER BY 
                 CASE WHEN last_donation_date IS NULL THEN 1 ELSE 0 END,
                 last_donation_date ASC,
@@ -650,7 +687,7 @@ class BloodInventoryManager {
                        END as urgency_status,
                        DATEDIFF(bi.expiry_date, CURDATE()) as days_to_expiry
                 FROM blood_inventory bi
-                INNER JOIN donors d ON bi.donor_id = d.id
+                INNER JOIN donors_new d ON bi.donor_id = d.id
                 $whereClause
                 ORDER BY bi.$sortBy $sortOrder
                 LIMIT ? OFFSET ?
@@ -722,7 +759,7 @@ class BloodInventoryManager {
                 
                 // Also exclude by seed_flag if column exists
                 try {
-                    $checkSeedFlag = $this->pdo->query("SHOW COLUMNS FROM donors LIKE 'seed_flag'");
+                    $checkSeedFlag = $this->pdo->query("SHOW COLUMNS FROM donors_new LIKE 'seed_flag'");
                     if ($checkSeedFlag->fetch()) {
                         $whereConditions[] = "(d.seed_flag = 0 OR d.seed_flag IS NULL)";
                     }
@@ -737,7 +774,7 @@ class BloodInventoryManager {
             $query = "
                 SELECT COUNT(*) as total
                 FROM blood_inventory bi
-                INNER JOIN donors d ON bi.donor_id = d.id
+                INNER JOIN donors_new d ON bi.donor_id = d.id
                 $whereClause
             ";
             
