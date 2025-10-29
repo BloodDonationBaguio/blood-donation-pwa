@@ -137,12 +137,10 @@ class BloodInventoryManagerComplete {
                 $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
             }
 
-            // Only show blood units for donors with eligible status
-            if ($donorTable === 'donors_new') {
-                $whereConditions[] = "(d.status = 'served' OR d.status = 'completed')";
-            } else {
-                $whereConditions[] = "d.status = 'served'";
-            }
+            // Donor eligibility moved into JOIN to keep units without donors visible
+            $donorStatusCondition = ($donorTable === 'donors_new')
+                ? "(d.status = 'served' OR d.status = 'completed')"
+                : "d.status = 'served'";
 
             $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
 
@@ -150,7 +148,7 @@ class BloodInventoryManagerComplete {
             $countSql = "
                 SELECT COUNT(*) as total
                 FROM blood_inventory bi
-                LEFT JOIN {$donorTable} d ON bi.donor_id = d.id
+                LEFT JOIN {$donorTable} d ON bi.donor_id = d.id AND {$donorStatusCondition}
                 $whereClause
             ";
             $countStmt = $this->pdo->prepare($countSql);
@@ -171,7 +169,7 @@ class BloodInventoryManagerComplete {
                         ELSE 0 
                     END as expiring_soon
                 FROM blood_inventory bi
-                LEFT JOIN {$donorTable} d ON bi.donor_id = d.id
+                LEFT JOIN {$donorTable} d ON bi.donor_id = d.id AND {$donorStatusCondition}
                 $whereClause
                 ORDER BY bi.created_at DESC
                 LIMIT ? OFFSET ?
@@ -282,9 +280,12 @@ class BloodInventoryManagerComplete {
                 error_log('Table detection failed in addBloodUnit, defaulting to donors: ' . $e->getMessage());
             }
 
-            $donorStmt = $this->pdo->prepare(
-                "SELECT id, first_name, last_name, blood_type, status FROM {$donorTable} WHERE id = ? AND status = 'served'"
-            );
+            // Accept donors with 'served' (both tables) and 'completed' (donors_new)
+            $eligibility = ($donorTable === 'donors_new')
+                ? "(status = 'served' OR status = 'completed')"
+                : "status = 'served'";
+            $sql = "SELECT id, first_name, last_name, blood_type, status FROM {$donorTable} WHERE id = ? AND {$eligibility}";
+            $donorStmt = $this->pdo->prepare($sql);
             $donorStmt->execute([$data['donor_id']]);
             $donor = $donorStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -736,19 +737,17 @@ class BloodInventoryManagerComplete {
                 $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
             }
             
-            // Only show blood units for donors with eligible status
-            if ($donorTable === 'donors_new') {
-                $whereConditions[] = "(d.status = 'served' OR d.status = 'completed')";
-            } else {
-                $whereConditions[] = "d.status = 'served'";
-            }
+            // Donor eligibility moved into JOIN to keep units without donors visible
+            $donorStatusCondition = ($donorTable === 'donors_new')
+                ? "(d.status = 'served' OR d.status = 'completed')"
+                : "d.status = 'served'";
             
             $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
             
             $query = "
                 SELECT COUNT(*) as total
                 FROM blood_inventory bi
-                LEFT JOIN {$donorTable} d ON bi.donor_id = d.id
+                LEFT JOIN {$donorTable} d ON bi.donor_id = d.id AND {$donorStatusCondition}
                 $whereClause
             ";
             
