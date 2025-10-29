@@ -921,7 +921,7 @@ try {
         </div>
       </div>
       <div class="text-center mt-4" style="font-size:0.95rem;color:#888;">
-        &copy; 2025 Blood Donation System. All rights reserved.
+        &copy; 2025 Blood Donation System — Developed by Najib Mahfoodh Yousef (Yemen)
       </div>
     </div>
   </footer>
