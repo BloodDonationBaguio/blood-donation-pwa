@@ -17,6 +17,10 @@ RewriteRule ^index\.html$ /index.php [L,R=301]
 RewriteCond %{REQUEST_URI} ^/debug_latest_donors\.php$
 RewriteRule ^ - [L]
 
+# Allow direct access to admin subdirectory files (login, assets, etc.)
+RewriteCond %{REQUEST_URI} ^/blood-donation-pwa/admin/ [NC]
+RewriteRule ^ - [L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [L,QSA]

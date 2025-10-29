@@ -11,7 +11,9 @@ const urlsToCache = [
 
 const adminUrls = [
   '/admin.php',
-  '/admin-login.php'
+  '/admin-login.php',
+  '/blood-donation-pwa/admin/login.php',
+  '/blood-donation-pwa/admin/'
 ];
 
 // Install event
