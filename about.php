@@ -625,7 +625,7 @@ $about_content = isset($settings['pages']['about']) ? $settings['pages']['about'
         <h2 class="section-title text-center mb-5">About the Developer</h2>
         <div class="row align-items-center">
             <div class="col-lg-8 slide-in-left">
-                <p class="lead mb-4" style="font-size: 1.2rem; color: #6c757d;">This Blood Donation Progressive Web Application (PWA) was developed by <strong>Najib Yousef</strong>, an IT student from Saudi Arabia specializing in Network Security.</p>
+                <p class="lead mb-4" style="font-size: 1.2rem; color: #6c757d;">This Blood Donation Progressive Web Application (PWA) was developed by <strong>Najib Yousef</strong>, an IT student from Yemen specializing in Network Security.</p>
                 <p class="mb-4" style="font-size: 1.1rem; line-height: 1.8;">The system was created as a capstone project in collaboration with the Philippine Red Cross — Baguio Chapter.</p>
                 <p class="mb-0" style="font-size: 1.1rem; line-height: 1.8;">The project aims to digitalize and streamline the blood donation process, promote voluntary blood donation, and improve data management for both donors and the blood bank.</p>
             </div>
