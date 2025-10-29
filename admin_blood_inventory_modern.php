@@ -27,8 +27,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     ini_set('display_errors', '0');
     ini_set('log_errors', '1');
     
-    // Include dependencies
-    require_once 'db.php';
+    // Include dependencies (robust DB bootstrap)
+    // Prefer production bootstrap that supports env vars and PostgreSQL, then fallback
+    try {
+        require_once 'db_production.php';
+        if (!isset($pdo) || !($pdo instanceof PDO)) {
+            require_once 'db.php';
+        }
+    } catch (Throwable $e) {
+        // Fallback to legacy config if needed
+        if (!isset($pdo) || !($pdo instanceof PDO)) {
+            @require_once 'db.php';
+        }
+    }
     require_once 'includes/BloodInventoryManagerComplete.php';
     
     // Initialize manager
@@ -79,7 +90,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 // Regular page load starts here
 session_start();
-require_once 'db.php';
+// Robust DB bootstrap for regular page load
+try {
+    require_once 'db_production.php';
+    if (!isset($pdo) || !($pdo instanceof PDO)) {
+        require_once 'db.php';
+    }
+} catch (Throwable $e) {
+    if (!isset($pdo) || !($pdo instanceof PDO)) {
+        @require_once 'db.php';
+    }
+}
 require_once 'includes/BloodInventoryManagerComplete.php';
 
 // Check admin authentication
