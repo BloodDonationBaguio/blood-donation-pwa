@@ -94,7 +94,8 @@ if ($activeTab === 'add-donor'): ?>
     </div>
 <?php endif; ?>
 
-        <?php else: ?>
+        <?php if ($activeTab === 'donor-matching'): ?>
+            <?php if (!isset($requestId) || empty($request)): ?>
             <!-- Show pending blood requests -->
             <div class="row">
                 <div class="col-12">
@@ -149,7 +150,7 @@ if ($activeTab === 'add-donor'): ?>
                     </div>
                 </div>
             </div>
-        <?php endif; ?>
+            <?php else: ?>
             
             <div class="row">
                 <div class="col-md-6">
@@ -245,6 +246,7 @@ if ($activeTab === 'add-donor'): ?>
                 </div>
             </div>
             
+            <?php endif; ?>
         <?php endif; ?>
         </div>
 
