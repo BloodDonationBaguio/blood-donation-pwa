@@ -17,7 +17,7 @@ $medicalQuestions = $medicalQuestions['sections'] ?? [];
     </div>
 
     <?php foreach ($medicalQuestions as $sectionKey => $section): ?>
-        <div class="card mb-4">
+        <div class="card mb-4 <?php echo ($sectionKey === 'female_only') ? 'female-only-section' : ''; ?>">
             <div class="card-header bg-light">
                 <h5 class="mb-0"><?php echo htmlspecialchars($section['title']); ?></h5>
             </div>
@@ -96,8 +96,9 @@ $medicalQuestions = $medicalQuestions['sections'] ?? [];
 <script>
 // Show/hide female-only questions based on gender selection
 document.addEventListener('DOMContentLoaded', function() {
-    const genderSelect = document.getElementById('gender');
+    const genderSelect = document.getElementById('gender') || document.querySelector('select[name="gender"]');
     const femaleQuestions = document.querySelectorAll('.female-only');
+    const femaleSections = document.querySelectorAll('.female-only-section');
     const q34DateInput = document.getElementById('q34_date_input');
     const q34DateRadio = document.getElementById('q34_date');
     const q34NoneRadio = document.getElementById('q34_none');
@@ -107,6 +108,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const isFemale = genderSelect && genderSelect.value === 'Female';
         femaleQuestions.forEach(el => {
             el.style.display = isFemale ? 'block' : 'none';
+            // Toggle required only when visible (female selected)
+            el.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.required = isFemale;
+            });
+        });
+        // Hide the entire female-only section card when not female
+        femaleSections.forEach(card => {
+            card.style.display = isFemale ? '' : 'none';
         });
     }
 
