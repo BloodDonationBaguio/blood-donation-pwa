@@ -110,6 +110,17 @@ class BloodInventoryManagerComplete {
             $whereConditions = [];
             $params = [];
 
+            // Determine donor table dynamically (support deployments using donors_new)
+            $donorTable = 'donors';
+            try {
+                if (function_exists('tableExists') && tableExists($this->pdo, 'donors_new')) {
+                    $donorTable = 'donors_new';
+                }
+            } catch (Exception $e) {
+                // Default to legacy donors table if detection fails
+                error_log('Table detection failed in getInventory, defaulting to donors: ' . $e->getMessage());
+            }
+
             if (!empty($filters['blood_type'])) {
                 $whereConditions[] = "bi.blood_type = ?";
                 $params[] = $filters['blood_type'];
@@ -126,8 +137,12 @@ class BloodInventoryManagerComplete {
                 $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
             }
 
-            // Only show blood units for donors with "served" status
-            $whereConditions[] = "d.status = 'served'";
+            // Only show blood units for donors with eligible status
+            if ($donorTable === 'donors_new') {
+                $whereConditions[] = "(d.status = 'served' OR d.status = 'completed')";
+            } else {
+                $whereConditions[] = "d.status = 'served'";
+            }
 
             $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
 
@@ -135,7 +150,7 @@ class BloodInventoryManagerComplete {
             $countSql = "
                 SELECT COUNT(*) as total
                 FROM blood_inventory bi
-                LEFT JOIN donors d ON bi.donor_id = d.id
+                LEFT JOIN {$donorTable} d ON bi.donor_id = d.id
                 $whereClause
             ";
             $countStmt = $this->pdo->prepare($countSql);
@@ -156,7 +171,7 @@ class BloodInventoryManagerComplete {
                         ELSE 0 
                     END as expiring_soon
                 FROM blood_inventory bi
-                LEFT JOIN donors d ON bi.donor_id = d.id
+                LEFT JOIN {$donorTable} d ON bi.donor_id = d.id
                 $whereClause
                 ORDER BY bi.created_at DESC
                 LIMIT ? OFFSET ?
@@ -525,12 +540,19 @@ class BloodInventoryManagerComplete {
      */
     public function getEligibleDonors() {
         try {
-            $stmt = $this->pdo->prepare("
-                SELECT id, first_name, last_name, reference_code, blood_type, status
-                FROM donors 
-                WHERE status = 'served'
-                ORDER BY last_name, first_name
-            ");
+            // Determine donor table dynamically
+            $donorTable = 'donors';
+            try {
+                if (function_exists('tableExists') && tableExists($this->pdo, 'donors_new')) {
+                    $donorTable = 'donors_new';
+                }
+            } catch (Exception $e) {
+                error_log('Table detection failed in getEligibleDonors, defaulting to donors: ' . $e->getMessage());
+            }
+
+            $statusFilter = $donorTable === 'donors_new' ? "(status = 'served' OR status = 'completed')" : "status = 'served'";
+
+            $stmt = $this->pdo->prepare("SELECT id, first_name, last_name, reference_code, blood_type, status FROM {$donorTable} WHERE {$statusFilter} ORDER BY last_name, first_name");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
@@ -684,6 +706,16 @@ class BloodInventoryManagerComplete {
         try {
             $whereConditions = [];
             $params = [];
+
+            // Determine donor table dynamically
+            $donorTable = 'donors';
+            try {
+                if (function_exists('tableExists') && tableExists($this->pdo, 'donors_new')) {
+                    $donorTable = 'donors_new';
+                }
+            } catch (Exception $e) {
+                error_log('Table detection failed in getInventoryCount, defaulting to donors: ' . $e->getMessage());
+            }
             
             // Blood type filter
             if (!empty($filters['blood_type'])) {
@@ -704,15 +736,19 @@ class BloodInventoryManagerComplete {
                 $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
             }
             
-            // Only show blood units for donors with "served" status
-            $whereConditions[] = "d.status = 'served'";
+            // Only show blood units for donors with eligible status
+            if ($donorTable === 'donors_new') {
+                $whereConditions[] = "(d.status = 'served' OR d.status = 'completed')";
+            } else {
+                $whereConditions[] = "d.status = 'served'";
+            }
             
             $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
             
             $query = "
                 SELECT COUNT(*) as total
                 FROM blood_inventory bi
-                LEFT JOIN donors d ON bi.donor_id = d.id
+                LEFT JOIN {$donorTable} d ON bi.donor_id = d.id
                 $whereClause
             ";
             
