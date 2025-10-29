@@ -106,8 +106,31 @@ try {
         ];
         
         foreach ($section['questions'] as $questionKey => $questionText) {
+            // Default answer handling
             $answer = $screeningData[$questionKey] ?? 'not_answered';
-            
+
+            // Special handling for date-type female questions
+            if ($questionKey === 'q34') {
+                // Last childbirth: either 'none' or 'date' with q34_date value
+                $q34Type = $screeningData['q34'] ?? null; // 'none' or 'date'
+                $q34Date = $screeningData['q34_date'] ?? null;
+                if ($q34Type === 'none') {
+                    $answer = 'None';
+                } elseif ($q34Type === 'date' && !empty($q34Date)) {
+                    $answer = $q34Date; // YYYY-MM-DD stored; let UI show as-is
+                } else {
+                    $answer = 'not_answered';
+                }
+            } elseif ($questionKey === 'q37') {
+                // Last menstrual period: stored as q37_date
+                $q37Date = $screeningData['q37_date'] ?? null;
+                if (!empty($q37Date)) {
+                    $answer = $q37Date;
+                } else {
+                    $answer = 'not_answered';
+                }
+            }
+
             $sectionData['questions'][] = [
                 'key' => $questionKey,
                 'question' => $questionText,
