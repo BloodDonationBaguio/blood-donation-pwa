@@ -87,11 +87,12 @@ if ($pdo === null) {
 }
 
 // Last resort: include a local config file that defines $pdo
+// Prefer db.php first to avoid includes/config.php hard-failing on connection errors
 if ($pdo === null) {
     $candidates = [
-        __DIR__ . '/includes/config.php',
-        __DIR__ . '/db.php',            // local MySQL fallback
+        __DIR__ . '/db.php',            // local MySQL fallback (preferred)
         __DIR__ . '/db.example.php',    // template with defaults
+        __DIR__ . '/includes/config.php', // legacy config (use as last resort)
     ];
     foreach ($candidates as $path) {
         if (file_exists($path)) {
