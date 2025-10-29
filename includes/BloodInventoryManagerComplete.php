@@ -37,11 +37,12 @@ class BloodInventoryManagerComplete {
                 ");
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
             }
-            // Fallback: if inventory is empty, infer counts from donors_new served
+            // Fallback: if inventory is empty, infer counts from donors_new served/completed
             try {
                 $tu = isset($row['total_units']) ? (int)$row['total_units'] : 0;
                 if ($tu === 0) {
-                    $servedStmt = $this->pdo->query("SELECT COUNT(*) AS cnt FROM donors_new WHERE status = 'served'");
+                    // Some deployments use 'completed' instead of 'served' in donors_new
+                    $servedStmt = $this->pdo->query("SELECT COUNT(*) AS cnt FROM donors_new WHERE status IN ('served','completed')");
                     $served = (int)($servedStmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
                     if ($served > 0) {
                         $row = [
