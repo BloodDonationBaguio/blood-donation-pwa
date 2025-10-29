@@ -19,10 +19,17 @@ if ($donorId <= 0) {
     exit();
 }
 
-// Fetch donor data
-$stmt = $pdo->prepare("SELECT * FROM donors_new WHERE id = ?");
-$stmt->execute([$donorId]);
-$donor = $stmt->fetch(PDO::FETCH_ASSOC);
+// Choose donors table dynamically and fetch safely
+$donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+try {
+    $stmt = $pdo->prepare("SELECT * FROM {$donorsTable} WHERE id = ?");
+    $stmt->execute([$donorId]);
+    $donor = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    error_log('admin_edit_donor.php: donor fetch failed - ' . $e->getMessage());
+    header('Location: admin.php?tab=donor-list&error=Database error loading donor');
+    exit();
+}
 
 if (!$donor) {
     header('Location: admin.php?tab=donor-list&error=Donor not found');
@@ -52,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Update donor
         $updateStmt = $pdo->prepare("
-            UPDATE donors_new SET 
+            UPDATE {$donorsTable} SET 
                 first_name = ?, last_name = ?, email = ?, phone = ?, 
                 blood_type = ?, date_of_birth = ?, gender = ?, 
                 address = ?, city = ?, province = ?, 
@@ -80,11 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $logStmt = $pdo->prepare("
             INSERT INTO admin_audit_log (admin_username, action_type, table_name, record_id, description, ip_address, user_agent)
-            VALUES (?, 'donor_edited', 'donors_new', ?, ?, ?, ?)
+            VALUES (?, 'donor_edited', ?, ?, ?, ?, ?)
         ");
         
         $logStmt->execute([
             $_SESSION['admin_username'] ?? 'admin',
+            $donorsTable,
             $donorId,
             "Donor information updated: {$firstName} {$lastName}",
             $_SERVER['REMOTE_ADDR'],
