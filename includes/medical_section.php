@@ -89,6 +89,18 @@ $medicalQuestions = $medicalQuestions['sections'] ?? [];
                     recipients of my blood.
                 </label>
             </div>
+
+            <!-- Data Privacy Consent -->
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="privacy_consent" name="privacy_consent" required
+                    <?php echo (isset($_POST['privacy_consent'])) ? 'checked' : ''; ?>>
+                <label class="form-check-label" for="privacy_consent">
+                    I consent to the collection, use, and storage of my personal information and medical screening data for blood donation processing, record-keeping, and communication purposes in accordance with applicable data privacy laws.
+                </label>
+                <div class="form-text">
+                    You must agree to proceed with registration.
+                </div>
+            </div>
         </div>
     </div>
 </div>
