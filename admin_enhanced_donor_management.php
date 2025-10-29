@@ -1138,23 +1138,10 @@ if ($searchTerm) {
                                 <h5><i class="fas fa-clipboard-check me-2"></i>Screening Summary</h5>
                                 <p><strong>Status:</strong> <span class="badge bg-${data.screening.completed ? 'success' : 'warning'}">${data.screening.completed ? 'Completed' : 'Incomplete'}</span></p>
                                 <p><strong>Date:</strong> ${new Date(data.screening.date).toLocaleDateString()}</p>
-                                <p><strong>Summary:</strong> Safe: ${data.summary.no_count} | Risk: ${data.summary.yes_count} | Not Answered: ${data.summary.not_answered}</p>
+                                <p><strong>Summary:</strong> Safe: ${data.summary.no_count} | Risk: ${data.summary.yes_count}</p>
                             </div>
                         </div>`;
                     
-                    if (data.summary.yes_count > 0) {
-                        html += `
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>Medical Review Required:</strong> This donor has ${data.summary.yes_count} positive responses that require medical review.
-                            </div>`;
-                    } else {
-                        html += `
-                            <div class="alert alert-success">
-                                <i class="fas fa-check-circle me-2"></i>
-                                <strong>Medical Screening Passed:</strong> All responses are negative or not applicable.
-                            </div>`;
-                    }
                     
                     html += `<div class="accordion" id="screeningAccordion">`;
                     
@@ -1171,13 +1158,10 @@ if ($searchTerm) {
                                     <div class="accordion-body">`;
                         
                         section.questions.forEach(q => {
-                            const answerClass = q.answer === 'yes' ? 'border-danger bg-light' : (q.answer === 'no' ? 'border-success bg-light' : 'border-secondary');
-                            const answerIcon = q.answer === 'yes' ? '<i class="fas fa-times-circle text-danger me-1"></i>' : (q.answer === 'no' ? '<i class="fas fa-check-circle text-success me-1"></i>' : '<i class="fas fa-question-circle text-muted me-1"></i>');
-                            
                             html += `
-                                <div class="mb-3 p-3 border rounded ${answerClass}">
+                                <div class="mb-3">
                                     <div class="fw-bold mb-2">${q.question}</div>
-                                    <div>${answerIcon}<strong>Answer:</strong> ${q.answer.charAt(0).toUpperCase() + q.answer.slice(1)}</div>
+                                    <div><strong>Answer:</strong> ${q.answer.charAt(0).toUpperCase() + q.answer.slice(1)}</div>
                                 </div>`;
                         });
                         
@@ -1202,4 +1186,4 @@ if ($searchTerm) {
         }
     </script>
 </body>
-</html> 
+</html>
