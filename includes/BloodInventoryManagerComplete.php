@@ -500,13 +500,45 @@ class BloodInventoryManagerComplete {
                 $newNotes = trim(rtrim($newNotes)) . (empty($newNotes) ? '' : "\n") . $noteLine;
             }
 
-            // Update status (and notes)
-            $updateStmt = $this->pdo->prepare("
-                UPDATE blood_inventory 
-                SET status = ?, notes = ?, updated_at = NOW() 
-                WHERE unit_id = ?
-            ");
-            $updateStmt->execute([$newStatus, $newNotes, $unitId]);
+            // Determine column availability to avoid failing on missing columns
+            $hasNotes = false;
+            $hasUpdatedAt = false;
+            try {
+                $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            } catch (Throwable $e) {
+                $driver = 'mysql';
+            }
+            try {
+                if ($driver === 'pgsql') {
+                    $chk = $this->pdo->prepare("SELECT 1 FROM information_schema.columns WHERE table_name = 'blood_inventory' AND column_name = 'notes' LIMIT 1");
+                    $chk->execute();
+                    $hasNotes = (bool)$chk->fetchColumn();
+                    $chk2 = $this->pdo->prepare("SELECT 1 FROM information_schema.columns WHERE table_name = 'blood_inventory' AND column_name = 'updated_at' LIMIT 1");
+                    $chk2->execute();
+                    $hasUpdatedAt = (bool)$chk2->fetchColumn();
+                } else {
+                    $chk = $this->pdo->prepare("SHOW COLUMNS FROM blood_inventory LIKE 'notes'");
+                    $chk->execute();
+                    $hasNotes = (bool)$chk->fetchColumn();
+                    $chk2 = $this->pdo->prepare("SHOW COLUMNS FROM blood_inventory LIKE 'updated_at'");
+                    $chk2->execute();
+                    $hasUpdatedAt = (bool)$chk2->fetchColumn();
+                }
+            } catch (Throwable $e) {
+                // If detection fails, default to conservative (no extra columns)
+                $hasNotes = isset($unit['notes']);
+                $hasUpdatedAt = isset($unit['updated_at']);
+            }
+
+            // Build dynamic update statement
+            $sets = ["status = ?"];
+            $params = [$newStatus];
+            if ($hasNotes) { $sets[] = "notes = ?"; $params[] = $newNotes; }
+            if ($hasUpdatedAt) { $sets[] = "updated_at = NOW()"; }
+            $sql = "UPDATE blood_inventory SET " . implode(', ', $sets) . " WHERE unit_id = ?";
+            $params[] = $unitId;
+            $updateStmt = $this->pdo->prepare($sql);
+            $updateStmt->execute($params);
 
             // Log audit
             $this->logAudit($unit['id'], 'status_updated', "Status changed from $oldStatus to $newStatus", [
