@@ -1466,7 +1466,7 @@ function buildPaginationUrl($page) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary-modern btn-modern" onclick="confirmStatusUpdate()">
+                    <button type="button" class="btn btn-primary-modern btn-modern" onclick="confirmStatusUpdate(this)">
                         <i class="fas fa-save me-2"></i>Update Status
                     </button>
                 </div>
@@ -1660,15 +1660,17 @@ function buildPaginationUrl($page) {
         }
 
         // Confirm Status Update
-        function confirmStatusUpdate() {
+        function confirmStatusUpdate(btnEl) {
             const form = document.getElementById('updateStatusForm');
             const formData = new FormData(form);
             formData.append('action', 'update_status');
             
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<div class="loading-spinner me-2"></div>Updating...';
-            btn.disabled = true;
+            const btn = btnEl || document.querySelector('#updateStatusModal .btn.btn-primary-modern');
+            const originalText = btn ? btn.innerHTML : null;
+            if (btn) {
+                btn.innerHTML = '<div class="loading-spinner me-2"></div>Updating...';
+                btn.disabled = true;
+            }
             
             fetch('admin_blood_inventory_modern.php', {
                 method: 'POST',
@@ -1688,8 +1690,10 @@ function buildPaginationUrl($page) {
                 showNotification('An error occurred while updating the status.', 'error');
             })
             .finally(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                if (btn && originalText !== null) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
             });
         }
 
