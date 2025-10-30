@@ -159,12 +159,14 @@ if (empty($inventory['data']) || $summary['total_units'] == 0) {
     $totalRecords = $inventoryManager->getInventoryCount($filters);
     $usingFallback = false;
 }
-$totalPages = ceil($totalRecords / $perPage);
+// Calculate pagination info (sync with actual inventory total when available)
+$displayTotal = isset($inventory['total']) ? (int)$inventory['total'] : (int)$totalRecords;
+$totalPages = (int)ceil($displayTotal / $perPage);
 
-// Calculate pagination info
+// Calculate pagination bounds
 $offset = ($filters['page'] - 1) * $perPage;
-$startRecord = $offset + 1;
-$endRecord = min($offset + $perPage, $totalRecords);
+$startRecord = $displayTotal > 0 ? ($offset + 1) : 0;
+$endRecord = min($offset + $perPage, $displayTotal);
 
 // Final guard: if we have records but no data rows, fetch minimal dataset directly
 if ($totalRecords > 0 && (empty($inventory) || empty($inventory['data']))) {
@@ -1189,7 +1191,7 @@ function buildPaginationUrl($page) {
                                 <h5 class="mb-0">
                                     <i class="fas fa-list me-2"></i>Blood Inventory
                                     <span class="badge bg-danger ms-2">
-                                        Showing <?= $startRecord ?>-<?= $endRecord ?> of <?= number_format($totalRecords) ?> units
+                                        Showing <?= $startRecord ?>-<?= $endRecord ?> of <?= number_format($displayTotal) ?> units
                                         <?php if ($totalPages > 1): ?>
                                             (Page <?= $filters['page'] ?> of <?= $totalPages ?>)
                                         <?php endif; ?>

@@ -47,9 +47,9 @@ class BloodInventoryManagerComplete {
                     if ($served > 0) {
                         $row = [
                             'total_units' => $served,
-                            'available_units' => 0,
+                            'available_units' => $served,
                             'expired_units' => 0,
-                            'used_units' => $served
+                            'used_units' => 0
                         ];
                     }
                 }

@@ -187,12 +187,22 @@ class BloodInventoryManagerRobust {
         // Determine donor table
         $donorTable = $this->getDonorTable();
         
-        // Base condition for served/completed donors
-        $statusCondition = ($donorTable === 'donors_new') 
-            ? "status IN ('served', 'completed')" 
-            : "status = 'served'";
+        // Base condition for served/completed donors (support both tables uniformly)
+        $statusCondition = "status IN ('served', 'completed')";
         
         $whereConditions[] = $statusCondition;
+
+        // If a unit status filter is provided and it is NOT 'available', donor fallback cannot satisfy it
+        if (!empty($filters['status']) && strtolower($filters['status']) !== 'available') {
+            return [
+                'data' => [],
+                'total' => 0,
+                'page' => $page,
+                'limit' => $limit,
+                'total_pages' => 0,
+                'source' => 'virtual_from_donors'
+            ];
+        }
 
         // Apply filters
         if (!empty($filters['blood_type'])) {
@@ -355,8 +365,32 @@ class BloodInventoryManagerRobust {
                 return $count;
             }
 
-            // Fallback to donor count
-            return $this->getServedDonorCount();
+            // Fallback to donor count with same filter semantics as donor-derived inventory
+            $donorTable = $this->getDonorTable();
+
+            // Donor-based units are treated as 'available' only. If user filters another status, return 0
+            if (!empty($filters['status']) && strtolower($filters['status']) !== 'available') {
+                return 0;
+            }
+
+            $dWhere = ["status IN ('served','completed')"];
+            $dParams = [];
+
+            if (!empty($filters['blood_type'])) {
+                $dWhere[] = 'blood_type = ?';
+                $dParams[] = $filters['blood_type'];
+            }
+
+            if (!empty($filters['search'])) {
+                $searchTerm = '%' . $filters['search'] . '%';
+                $dWhere[] = "(first_name LIKE ? OR last_name LIKE ? OR reference_code LIKE ?)";
+                $dParams = array_merge($dParams, [$searchTerm, $searchTerm, $searchTerm]);
+            }
+
+            $dWhereClause = 'WHERE ' . implode(' AND ', $dWhere);
+            $stmt = $this->pdo->prepare("SELECT COUNT(*) as total FROM $donorTable $dWhereClause");
+            $stmt->execute($dParams);
+            return (int)$stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
         } catch (Exception $e) {
             if ($this->debug) {
