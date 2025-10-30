@@ -225,9 +225,7 @@ if ($totalRecords > 0 && (empty($inventory) || empty($inventory['data']))) {
             ];
         } else {
             // Secondary guard: generate virtual rows from donors if blood_inventory has no rows
-            $statusCondition = ($donorTable === 'donors_new')
-                ? "status IN ('served','completed')"
-                : "status = 'served'";
+            $statusCondition = "status IN ('served','completed')";
 
             $dWhere = [$statusCondition];
             $dParams = [];
@@ -1212,6 +1210,16 @@ function buildPaginationUrl($page) {
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        <?php if (empty($inventory['data'])): ?>
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <i class="fas fa-circle-info me-2 text-secondary"></i>
+                                                    <span>No blood units found for the current view. Try switching views or adding a unit.</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <?php endif; ?>
                                         <?php foreach ($inventory['data'] as $unit): ?>
                                         <tr class="<?= $unit['expiring_soon'] ? 'expiring-soon' : '' ?>">
                                             <td>
