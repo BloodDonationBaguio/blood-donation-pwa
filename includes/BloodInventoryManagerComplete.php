@@ -235,6 +235,55 @@ class BloodInventoryManagerComplete {
             $unit = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$unit) {
+                // Fallback: support virtual unit IDs derived from donors
+                // Detect donors table dynamically
+                $donorTable = 'donors';
+                try {
+                    if (function_exists('tableExists') && tableExists($this->pdo, 'donors_new')) {
+                        $donorTable = 'donors_new';
+                    }
+                } catch (Exception $e) {
+                    // default to donors
+                }
+
+                // If unitId looks like VIRT-<donor_id>, synthesize details from donor record
+                if (is_string($unitId) && preg_match('/^VIRT-(\d+)$/', $unitId, $m)) {
+                    $donorId = (int)$m[1];
+                    try {
+                        $dsql = "SELECT id, first_name, last_name, reference_code, blood_type, created_at FROM {$donorTable} WHERE id = ?";
+                        $dst = $this->pdo->prepare($dsql);
+                        $dst->execute([$donorId]);
+                        $donor = $dst->fetch(PDO::FETCH_ASSOC);
+                        if ($donor) {
+                            // Compute expiry: 35 days after donor created_at
+                            $created = $donor['created_at'] ?? date('Y-m-d');
+                            $expiry = date('Y-m-d', strtotime($created . ' +35 days'));
+                            $unit = [
+                                'id' => null,
+                                'unit_id' => $unitId,
+                                'donor_id' => $donor['id'],
+                                'blood_type' => $donor['blood_type'],
+                                'collection_date' => $created,
+                                'expiry_date' => $expiry,
+                                'status' => 'available',
+                                'collection_site' => 'Main Center',
+                                'storage_location' => 'Storage A',
+                                'notes' => '',
+                                'first_name' => $donor['first_name'],
+                                'last_name' => $donor['last_name'],
+                                'reference_code' => $donor['reference_code'],
+                                'donor_blood_type' => $donor['blood_type'],
+                                'email' => null,
+                                'phone' => null,
+                                'donor_name' => trim(($donor['first_name'] ?? '') . ' ' . ($donor['last_name'] ?? '')),
+                                'audit_log' => []
+                            ];
+                            return ['success' => true, 'unit' => $unit];
+                        }
+                    } catch (Exception $e) {
+                        // fall through to error
+                    }
+                }
                 return ['success' => false, 'message' => 'Unit not found'];
             }
 
@@ -380,7 +429,64 @@ class BloodInventoryManagerComplete {
             $unit = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$unit) {
-                throw new Exception('Unit not found');
+                // If this is a virtual unit (VIRT-<donor_id>), promote to a real unit first
+                if (is_string($unitId) && preg_match('/^VIRT-(\d+)$/', $unitId, $m)) {
+                    $donorId = (int)$m[1];
+
+                    // Detect donors table dynamically
+                    $donorTable = 'donors';
+                    try {
+                        if (function_exists('tableExists') && tableExists($this->pdo, 'donors_new')) {
+                            $donorTable = 'donors_new';
+                        }
+                    } catch (Exception $e) {
+                        // default to donors
+                    }
+
+                    // Verify donor exists
+                    $dsql = "SELECT id, first_name, last_name, blood_type, created_at FROM {$donorTable} WHERE id = ?";
+                    $dst = $this->pdo->prepare($dsql);
+                    $dst->execute([$donorId]);
+                    $donor = $dst->fetch(PDO::FETCH_ASSOC);
+                    if (!$donor) {
+                        throw new Exception('Associated donor not found for virtual unit');
+                    }
+
+                    // Create a real blood_inventory record using donor info
+                    $collectionDate = $donor['created_at'] ?? date('Y-m-d');
+                    $expiryDate = date('Y-m-d', strtotime($collectionDate . ' +25 days'));
+
+                    $insert = $this->pdo->prepare("
+                        INSERT INTO blood_inventory (
+                            unit_id, donor_id, blood_type, collection_date, expiry_date,
+                            status, collection_site, storage_location, created_at
+                        ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, NOW())
+                    ");
+                    // Generate a unit id based on donor blood type
+                    $newUnitId = $this->generateUnitId($donor['blood_type']);
+                    $insert->execute([
+                        $newUnitId,
+                        $donorId,
+                        $donor['blood_type'],
+                        $collectionDate,
+                        $expiryDate,
+                        'Main Center',
+                        'Storage A'
+                    ]);
+
+                    // Reload the newly created unit
+                    $stmt2 = $this->pdo->prepare("SELECT * FROM blood_inventory WHERE unit_id = ?");
+                    $stmt2->execute([$newUnitId]);
+                    $unit = $stmt2->fetch(PDO::FETCH_ASSOC);
+                    if (!$unit) {
+                        throw new Exception('Failed to create inventory record for virtual unit');
+                    }
+
+                    // Overwrite unitId for status update and downstream audit
+                    $unitId = $newUnitId;
+                } else {
+                    throw new Exception('Unit not found');
+                }
             }
 
             $oldStatus = $unit['status'];
@@ -508,6 +614,10 @@ class BloodInventoryManagerComplete {
             $unit = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$unit) {
+                // Gracefully handle virtual unit IDs
+                if (is_string($unitId) && preg_match('/^VIRT-(\d+)$/', $unitId)) {
+                    throw new Exception('This is a virtual unit derived from a donor record; no inventory entry to delete.');
+                }
                 throw new Exception('Blood unit not found in inventory');
             }
 
