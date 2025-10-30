@@ -1111,10 +1111,10 @@ function buildPaginationUrl($page) {
                     <div class="col-12">
                         <div class="d-flex justify-content-end">
                             <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-outline-danger" id="tableViewBtn" onclick="toggleView('table')">
+                                <button type="button" class="btn btn-danger" id="tableViewBtn" onclick="toggleView('table')">
                                     <i class="fas fa-table me-2"></i>Table View
                                 </button>
-                                <button type="button" class="btn btn-danger" id="cardViewBtn" onclick="toggleView('card')">
+                                <button type="button" class="btn btn-outline-danger" id="cardViewBtn" onclick="toggleView('card')">
                                     <i class="fas fa-th-large me-2"></i>Card View
                                 </button>
                             </div>
@@ -1123,7 +1123,7 @@ function buildPaginationUrl($page) {
                 </div>
 
                 <!-- Card View -->
-                <div class="row fade-in" id="cardView">
+                <div class="row fade-in d-none" id="cardView">
                     <?php foreach ($inventory['data'] as $unit): ?>
                         <div class="col-lg-4 col-md-6 mb-4">
                             <div class="blood-unit-card" data-unit-id="<?= $unit['unit_id'] ?>">
@@ -1224,7 +1224,7 @@ function buildPaginationUrl($page) {
                 </div>
 
                 <!-- Inventory Table -->
-                <div class="row fade-in d-none" id="tableView">
+                <div class="row fade-in" id="tableView">
                     <div class="col-12">
                         <div class="inventory-card">
                             <div class="inventory-header">
@@ -1537,9 +1537,9 @@ function buildPaginationUrl($page) {
             }
         }
 
-        // Initialize with card view
+        // Initialize with table view
         document.addEventListener('DOMContentLoaded', function() {
-            toggleView('card');
+            toggleView('table');
         });
 
         // Add Blood Unit
