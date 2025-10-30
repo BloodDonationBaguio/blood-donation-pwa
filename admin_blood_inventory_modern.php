@@ -129,6 +129,26 @@ $filters = [
     'page' => (int)($_GET['page'] ?? 1)
 ];
 
+// Normalize filters: only accept known values; treat UI "All" labels as empty
+$allowedStatuses = ['available','used','expired','quarantined','reserved'];
+$allowedBloodTypes = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+
+// Status: map any non-allowed or "all" style to empty
+$statusNorm = strtolower(trim((string)$filters['status']));
+if ($statusNorm === '' || $statusNorm === 'all' || strpos($statusNorm, 'all stat') === 0) {
+    $filters['status'] = '';
+} elseif (!in_array($statusNorm, $allowedStatuses, true)) {
+    $filters['status'] = '';
+}
+
+// Blood type: only keep if exactly matches allowed types; otherwise empty
+$btNorm = strtoupper(trim((string)$filters['blood_type']));
+if (!in_array($btNorm, $allowedBloodTypes, true)) {
+    $filters['blood_type'] = '';
+} else {
+    $filters['blood_type'] = $btNorm;
+}
+
 $perPage = (int)($_GET['per_page'] ?? 20);
 $allowedPerPage = [10, 20, 50, 100];
 if (!in_array($perPage, $allowedPerPage)) {
@@ -192,6 +212,19 @@ if ($totalRecords > 0 && (empty($inventory) || empty($inventory['data']))) {
         }
         $whereClause = !empty($where) ? ('WHERE ' . implode(' AND ', $where)) : '';
 
+        // Choose date math and string concatenation compatible with the current PDO driver
+        try {
+            $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+        } catch (Throwable $e) {
+            $driver = 'mysql';
+        }
+        $expiringSoonExpr = ($driver === 'pgsql')
+            ? "CASE WHEN bi.expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND bi.status = 'available' THEN 1 ELSE 0 END"
+            : "CASE WHEN bi.expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) AND bi.status = 'available' THEN 1 ELSE 0 END";
+        $donorNameExpr = ($driver === 'pgsql')
+            ? "COALESCE(d.first_name || ' ' || d.last_name, 'Unknown Donor')"
+            : "COALESCE(CONCAT(d.first_name, ' ', d.last_name), 'Unknown Donor')";
+
         $sql = "
             SELECT 
                 bi.unit_id,
@@ -199,12 +232,9 @@ if ($totalRecords > 0 && (empty($inventory) || empty($inventory['data']))) {
                 bi.status,
                 bi.collection_date,
                 bi.expiry_date,
-                COALESCE(CONCAT(d.first_name, ' ', d.last_name), 'Unknown Donor') AS donor_name,
+                $donorNameExpr AS donor_name,
                 d.reference_code,
-                CASE 
-                    WHEN bi.expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) AND bi.status = 'available' THEN 1 
-                    ELSE 0 
-                END AS expiring_soon
+                $expiringSoonExpr AS expiring_soon
             FROM blood_inventory bi
             LEFT JOIN {$donorTable} d ON bi.donor_id = d.id
             $whereClause
@@ -238,16 +268,26 @@ if ($totalRecords > 0 && (empty($inventory) || empty($inventory['data']))) {
                 $dParams = array_merge($dParams, [$term, $term, $term]);
             }
             $dWhereClause = 'WHERE ' . implode(' AND ', $dWhere);
+            // Driver-aware expiry and string concatenation for virtual rows
+            $expiryFromCreatedExpr = ($driver === 'pgsql')
+                ? "created_at + INTERVAL '35 day'"
+                : "DATE_ADD(created_at, INTERVAL 35 DAY)";
+            $virtUnitIdExpr = ($driver === 'pgsql')
+                ? "('VIRT-' || id)"
+                : "CONCAT('VIRT-', id)";
+            $virtDonorNameExpr = ($driver === 'pgsql')
+                ? "(first_name || ' ' || last_name)"
+                : "CONCAT(first_name, ' ', last_name)";
             $dsql = "
                 SELECT 
                     id AS donor_id,
-                    CONCAT('VIRT-', id) AS unit_id,
+                    $virtUnitIdExpr AS unit_id,
                     blood_type,
                     'available' AS status,
-                    CONCAT(first_name, ' ', last_name) AS donor_name,
+                    $virtDonorNameExpr AS donor_name,
                     reference_code,
                     created_at AS collection_date,
-                    DATE_ADD(created_at, INTERVAL 35 DAY) AS expiry_date,
+                    $expiryFromCreatedExpr AS expiry_date,
                     0 AS expiring_soon
                 FROM {$donorTable}
                 {$dWhereClause}
