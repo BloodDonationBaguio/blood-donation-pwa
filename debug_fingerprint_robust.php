@@ -15,7 +15,10 @@ $md5 = md5($src);
 $mtime = @date('c', @filemtime($file));
 
 // Heuristic feature checks for the fixed implementation
-$hasSetTotalEqCount = (strpos($src, "result['total'] = $count") !== false) || (strpos($src, 'result[\'total\'] = $count') !== false);
+$hasSetTotalEqCount = (
+    strpos($src, "result['total'] = \$count") !== false
+    || strpos($src, 'result[\'total\'] = $count') !== false
+);
 $hasSourceInventory = (strpos($src, "'source' => 'blood_inventory'") !== false);
 $hasSourceDonors = (strpos($src, "'source' => 'virtual_from_donors'") !== false);
 $hasGetInventoryCountCall = (strpos($src, 'getInventoryCount($filters)') !== false);
