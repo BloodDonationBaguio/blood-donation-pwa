@@ -2,16 +2,19 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start();
-
 require_once __DIR__ . '/db_production.php';
 require_once __DIR__ . '/includes/BloodInventoryManagerComplete.php';
+require_once __DIR__ . '/includes/admin_auth.php';
 
 function isAuthorized() {
-    $loggedIn = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+    // Use the existing admin auth system
+    $loggedIn = isAdminLoggedIn();
+    
+    // Also allow token-based access for testing
     $tokenEnv = getenv('ADMIN_TEST_TOKEN');
     $tokenReq = $_GET['token'] ?? ($_POST['token'] ?? ($_SERVER['HTTP_X_ADMIN_TEST_TOKEN'] ?? null));
     $tokenOk = $tokenEnv && $tokenReq && hash_equals($tokenEnv, $tokenReq);
+    
     return $loggedIn || $tokenOk;
 }
 
@@ -21,7 +24,7 @@ if (!isAuthorized()) {
     echo '<style>body{font-family:system-ui,Arial,sans-serif;padding:24px;background:#0b0b10;color:#e6e6e6}a{color:#9ad}input,select,textarea{width:100%;padding:8px;margin:6px 0;background:#141420;color:#e6e6e6;border:1px solid #2a2a3a;border-radius:6px}button{padding:10px 14px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer}button:hover{background:#1d4ed8}.card{background:#12121b;border:1px solid #222437;border-radius:10px;padding:18px;margin-top:18px}</style></head><body>';
     echo '<h1>Admin Update Status Test</h1>';
     echo '<div class="card"><p>Unauthorized. Please log in as admin or provide the correct token.</p>';
-    echo '<p>Login: <a href="admin-login-working.php">admin-login-working.php</a></p>';
+    echo '<p>Login: <a href="admin-login.php">admin-login.php</a></p>';
     echo '<p>Or set env <code>ADMIN_TEST_TOKEN</code> and pass it via query <code>?token=...</code> or header <code>X-Admin-Test-Token</code>.</p></div>';
     echo '</body></html>';
     exit;

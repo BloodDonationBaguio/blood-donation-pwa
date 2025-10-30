@@ -2,18 +2,21 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start();
-
 require_once __DIR__ . '/db_production.php';
 require_once __DIR__ . '/includes/BloodInventoryManagerComplete.php';
+require_once __DIR__ . '/includes/admin_auth.php';
 
 header('Content-Type: application/json');
 
 function isAuthorized() {
-    $loggedIn = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+    // Use the existing admin auth system
+    $loggedIn = isAdminLoggedIn();
+    
+    // Also allow token-based access for testing
     $tokenEnv = getenv('ADMIN_TEST_TOKEN');
     $tokenReq = $_GET['token'] ?? ($_POST['token'] ?? ($_SERVER['HTTP_X_ADMIN_TEST_TOKEN'] ?? null));
     $tokenOk = $tokenEnv && $tokenReq && hash_equals($tokenEnv, $tokenReq);
+    
     return $loggedIn || $tokenOk;
 }
 
