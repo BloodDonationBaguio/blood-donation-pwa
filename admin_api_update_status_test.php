@@ -39,21 +39,37 @@ try {
 
     $manager = new BloodInventoryManagerComplete($pdo);
 
+    if (!$pdo) {
+        throw new RuntimeException('Database connection not available');
+    }
     $stmt1 = $pdo->prepare('SELECT unit_id, status, notes FROM blood_inventory WHERE unit_id = ?');
     $stmt1->execute([$unitId]);
     $before = $stmt1->fetch(PDO::FETCH_ASSOC) ?: null;
 
     $result = $manager->updateUnitStatus($unitId, $newStatus, $reason);
 
+    // Query using original unit_id
     $stmt2 = $pdo->prepare('SELECT unit_id, status, notes FROM blood_inventory WHERE unit_id = ?');
     $stmt2->execute([$unitId]);
     $after = $stmt2->fetch(PDO::FETCH_ASSOC) ?: null;
+
+    // If the unit was promoted (virtual -> real), also fetch by final unit id
+    $finalUnitId = $result['final_unit_id'] ?? $unitId;
+    $afterFinal = null;
+    if ($finalUnitId && $finalUnitId !== $unitId) {
+        $stmt3 = $pdo->prepare('SELECT unit_id, status, notes FROM blood_inventory WHERE unit_id = ?');
+        $stmt3->execute([$finalUnitId]);
+        $afterFinal = $stmt3->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
 
     echo json_encode([
         'success' => (bool)($result['success'] ?? false),
         'message' => $result['message'] ?? null,
         'before' => $before,
-        'after' => $after
+        'after' => $after,
+        'final_unit_id' => $finalUnitId,
+        'promoted' => (bool)($result['promoted'] ?? false),
+        'after_final' => $afterFinal
     ]);
 } catch (Throwable $e) {
     http_response_code(500);

@@ -33,6 +33,8 @@ if (!isAuthorized()) {
 $result = null;
 $before = null;
 $after = null;
+$finalUnitId = null;
+$afterFinal = null;
 $error = null;
 
 try {
@@ -47,15 +49,27 @@ try {
             throw new Exception('unit_id and status are required');
         }
 
+        if (!$pdo) {
+            throw new Exception('Database connection not available');
+        }
         $stmt1 = $pdo->prepare('SELECT unit_id, status, notes FROM blood_inventory WHERE unit_id = ?');
         $stmt1->execute([$unitId]);
         $before = $stmt1->fetch(PDO::FETCH_ASSOC) ?: null;
 
         $result = $manager->updateUnitStatus($unitId, $newStatus, $reason);
 
+        // Query original unit_id
         $stmt2 = $pdo->prepare('SELECT unit_id, status, notes FROM blood_inventory WHERE unit_id = ?');
         $stmt2->execute([$unitId]);
         $after = $stmt2->fetch(PDO::FETCH_ASSOC) ?: null;
+
+        // If promotion occurred, also query final unit id
+        $finalUnitId = $result['final_unit_id'] ?? $unitId;
+        if ($finalUnitId && $finalUnitId !== $unitId) {
+            $stmt3 = $pdo->prepare('SELECT unit_id, status, notes FROM blood_inventory WHERE unit_id = ?');
+            $stmt3->execute([$finalUnitId]);
+            $afterFinal = $stmt3->fetch(PDO::FETCH_ASSOC) ?: null;
+        }
     }
 } catch (Throwable $e) {
     $error = $e->getMessage();
@@ -94,6 +108,11 @@ echo '</div>';
 
 echo '<div class="card"><h3>Result</h3>';
 echo '<pre>' . htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) . '</pre>';
+if ($finalUnitId && $finalUnitId !== ($before['unit_id'] ?? $finalUnitId)) {
+    echo '<p><strong>Note:</strong> This looks like a virtual unit. It was promoted to a real unit ID <code>' . htmlspecialchars($finalUnitId) . '</code>.</p>';
+    echo '<h3>After (Final Unit)</h3>';
+    echo '<pre>' . htmlspecialchars(json_encode($afterFinal, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) . '</pre>';
+}
 if ($error) {
     echo '<p style="color:#f99">Error: ' . htmlspecialchars($error) . '</p>';
 }

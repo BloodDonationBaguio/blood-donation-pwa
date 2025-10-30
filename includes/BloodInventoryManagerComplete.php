@@ -416,6 +416,8 @@ class BloodInventoryManagerComplete {
      */
     public function updateUnitStatus($unitId, $newStatus, $reason = '') {
         $transactionStarted = false;
+        $finalUnitId = $unitId;
+        $promoted = false;
         try {
             // Start transaction only if not already in one
             if (!$this->pdo->inTransaction()) {
@@ -484,6 +486,8 @@ class BloodInventoryManagerComplete {
 
                     // Overwrite unitId for status update and downstream audit
                     $unitId = $newUnitId;
+                    $finalUnitId = $newUnitId;
+                    $promoted = true;
                 } else {
                     throw new Exception('Unit not found');
                 }
@@ -559,7 +563,12 @@ class BloodInventoryManagerComplete {
                     error_log("Commit skipped: " . $commitEx->getMessage());
                 }
             }
-            return ['success' => true, 'message' => 'Status updated successfully'];
+            return [
+                'success' => true,
+                'message' => 'Status updated successfully',
+                'final_unit_id' => $finalUnitId,
+                'promoted' => $promoted
+            ];
 
         } catch (Exception $e) {
             // Rollback only if we started the transaction
