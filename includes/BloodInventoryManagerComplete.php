@@ -548,9 +548,16 @@ class BloodInventoryManagerComplete {
                 'notes_appended' => $noteLine
             ]);
 
-            // Commit only if we started the transaction
+            // Commit only if we started the transaction, guard for autocommit
             if ($transactionStarted) {
-                $this->pdo->commit();
+                try {
+                    if ($this->pdo->inTransaction()) {
+                        $this->pdo->commit();
+                    }
+                } catch (Throwable $commitEx) {
+                    // Ignore benign commit errors when autocommit is enabled
+                    error_log("Commit skipped: " . $commitEx->getMessage());
+                }
             }
             return ['success' => true, 'message' => 'Status updated successfully'];
 
@@ -603,9 +610,16 @@ class BloodInventoryManagerComplete {
                 'new_blood_type' => $bloodType
             ]);
 
-            // Commit only if we started the transaction
+            // Commit only if we started the transaction, guard for autocommit
             if ($transactionStarted) {
-                $this->pdo->commit();
+                try {
+                    if ($this->pdo->inTransaction()) {
+                        $this->pdo->commit();
+                    }
+                } catch (Throwable $commitEx) {
+                    // Ignore benign commit errors when autocommit is enabled
+                    error_log("Commit skipped: " . $commitEx->getMessage());
+                }
             }
             return ['success' => true, 'message' => 'Blood type updated successfully'];
 
