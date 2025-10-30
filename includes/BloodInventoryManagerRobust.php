@@ -78,15 +78,18 @@ class BloodInventoryManagerRobust {
     public function getInventory($filters = [], $page = 1, $limit = 20) {
         try {
             $offset = ($page - 1) * $limit;
-            
-            // Primary approach: Get from blood_inventory table
-            $result = $this->getInventoryFromTable($filters, $page, $limit);
-            
-            if ($result['total'] > 0) {
+
+            // Decide source based on the same count logic used elsewhere
+            $count = (int)$this->getInventoryCount($filters);
+            if ($count > 0) {
+                $result = $this->getInventoryFromTable($filters, $page, $limit);
+                // Ensure totals/pagination align exactly with count logic
+                $result['total'] = $count;
+                $result['total_pages'] = (int)ceil($count / $limit);
                 return $result;
             }
 
-            // Fallback: Generate from donors if blood_inventory is empty
+            // Fallback: Generate from donors if blood_inventory is empty or filtered count is zero
             return $this->getInventoryFromDonors($filters, $page, $limit);
 
         } catch (Exception $e) {

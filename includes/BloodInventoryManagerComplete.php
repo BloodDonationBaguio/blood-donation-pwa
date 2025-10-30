@@ -56,6 +56,24 @@ class BloodInventoryManagerComplete {
             } catch (Exception $fe) {
                 error_log('Fallback donors_new served aggregation failed: ' . $fe->getMessage());
             }
+            // Secondary fallback: legacy donors served count if donors_new absent or empty
+            try {
+                $tu2 = isset($row['total_units']) ? (int)$row['total_units'] : 0;
+                if ($tu2 === 0) {
+                    $servedStmt2 = $this->pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served'");
+                    $served2 = (int)($servedStmt2->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
+                    if ($served2 > 0) {
+                        $row = [
+                            'total_units' => $served2,
+                            'available_units' => $served2,
+                            'expired_units' => 0,
+                            'used_units' => 0
+                        ];
+                    }
+                }
+            } catch (Exception $fe2) {
+                error_log('Fallback donors served aggregation failed: ' . $fe2->getMessage());
+            }
             return $row ?: ['total_units' => 0, 'available_units' => 0, 'expired_units' => 0, 'used_units' => 0];
         } catch (Exception $e) {
             error_log("Error getting dashboard summary: " . $e->getMessage());
