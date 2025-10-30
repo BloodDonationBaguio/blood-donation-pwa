@@ -17,6 +17,14 @@ RewriteRule ^index\.html$ /index.php [L,R=301]
 RewriteCond %{REQUEST_URI} ^/debug_latest_donors\.php$
 RewriteRule ^ - [L]
 
+# Allow direct access to diagnostics and test endpoints
+RewriteCond %{REQUEST_URI} ^/debug_inventory_manager_versions\.php$ [NC]
+RewriteRule ^ - [L]
+RewriteCond %{REQUEST_URI} ^/flush_opcache\.php$ [NC]
+RewriteRule ^ - [L]
+RewriteCond %{REQUEST_URI} ^/run_all_tests\.php$ [NC]
+RewriteRule ^ - [L]
+
 # Allow direct access to admin subdirectory files (login, assets, etc.)
 RewriteCond %{REQUEST_URI} ^/blood-donation-pwa/admin/ [NC]
 RewriteRule ^ - [L]
