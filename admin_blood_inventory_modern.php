@@ -166,6 +166,70 @@ $offset = ($filters['page'] - 1) * $perPage;
 $startRecord = $offset + 1;
 $endRecord = min($offset + $perPage, $totalRecords);
 
+// Final guard: if we have records but no data rows, fetch minimal dataset directly
+if ($totalRecords > 0 && (empty($inventory) || empty($inventory['data']))) {
+    try {
+        $donorTable = 'donors';
+        try {
+            // Prefer donors_new when present and populated
+            $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors_new");
+            $hasNew = (int)$stmt->fetch(PDO::FETCH_ASSOC)['cnt'] > 0;
+            if ($hasNew) { $donorTable = 'donors_new'; }
+        } catch (Throwable $e) {
+            // fall back to donors
+        }
+
+        $where = [];
+        $params = [];
+        if (!empty($filters['blood_type'])) { $where[] = 'bi.blood_type = ?'; $params[] = $filters['blood_type']; }
+        if (!empty($filters['status']) && strtolower($filters['status']) !== 'all') { $where[] = 'bi.status = ?'; $params[] = $filters['status']; }
+        if (!empty($filters['search'])) {
+            $term = '%' . $filters['search'] . '%';
+            $where[] = '(bi.unit_id LIKE ? OR d.first_name LIKE ? OR d.last_name LIKE ? OR d.reference_code LIKE ?)';
+            $params = array_merge($params, [$term, $term, $term, $term]);
+        }
+        $whereClause = !empty($where) ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+        $sql = "
+            SELECT 
+                bi.unit_id,
+                bi.blood_type,
+                bi.status,
+                bi.collection_date,
+                bi.expiry_date,
+                COALESCE(CONCAT(d.first_name, ' ', d.last_name), 'Unknown Donor') AS donor_name,
+                d.reference_code,
+                CASE 
+                    WHEN bi.expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) AND bi.status = 'available' THEN 1 
+                    ELSE 0 
+                END AS expiring_soon
+            FROM blood_inventory bi
+            LEFT JOIN {$donorTable} d ON bi.donor_id = d.id
+            $whereClause
+            ORDER BY bi.created_at DESC
+            LIMIT ? OFFSET ?
+        ";
+        $params[] = $perPage;
+        $params[] = $offset;
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($rows)) {
+            $inventory = [
+                'data' => $rows,
+                'total' => $totalRecords,
+                'page' => $filters['page'],
+                'limit' => $perPage,
+                'total_pages' => $totalPages,
+                'source' => 'final_guard_query'
+            ];
+        }
+    } catch (Throwable $e) {
+        // Keep page rendering even if guard fails
+        error_log('Final guard inventory query failed: ' . $e->getMessage());
+    }
+}
+
 /**
  * Build pagination URL with current parameters
  */
