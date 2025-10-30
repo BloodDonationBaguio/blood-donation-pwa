@@ -223,6 +223,52 @@ if ($totalRecords > 0 && (empty($inventory) || empty($inventory['data']))) {
                 'total_pages' => $totalPages,
                 'source' => 'final_guard_query'
             ];
+        } else {
+            // Secondary guard: generate virtual rows from donors if blood_inventory has no rows
+            $statusCondition = ($donorTable === 'donors_new')
+                ? "status IN ('served','completed')"
+                : "status = 'served'";
+
+            $dWhere = [$statusCondition];
+            $dParams = [];
+            if (!empty($filters['blood_type'])) { $dWhere[] = 'blood_type = ?'; $dParams[] = $filters['blood_type']; }
+            if (!empty($filters['search'])) {
+                $term = '%' . $filters['search'] . '%';
+                $dWhere[] = '(first_name LIKE ? OR last_name LIKE ? OR reference_code LIKE ?)';
+                $dParams = array_merge($dParams, [$term, $term, $term]);
+            }
+            $dWhereClause = 'WHERE ' . implode(' AND ', $dWhere);
+            $dsql = "
+                SELECT 
+                    id AS donor_id,
+                    CONCAT('VIRT-', id) AS unit_id,
+                    blood_type,
+                    'available' AS status,
+                    CONCAT(first_name, ' ', last_name) AS donor_name,
+                    reference_code,
+                    created_at AS collection_date,
+                    DATE_ADD(created_at, INTERVAL 35 DAY) AS expiry_date,
+                    0 AS expiring_soon
+                FROM {$donorTable}
+                {$dWhereClause}
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+            ";
+            $dParams[] = $perPage;
+            $dParams[] = $offset;
+            $dstmt = $pdo->prepare($dsql);
+            $dstmt->execute($dParams);
+            $drows = $dstmt->fetchAll(PDO::FETCH_ASSOC);
+            if (!empty($drows)) {
+                $inventory = [
+                    'data' => $drows,
+                    'total' => $totalRecords,
+                    'page' => $filters['page'],
+                    'limit' => $perPage,
+                    'total_pages' => $totalPages,
+                    'source' => 'final_guard_virtual_from_donors'
+                ];
+            }
         }
     } catch (Throwable $e) {
         // Keep page rendering even if guard fails
