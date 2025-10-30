@@ -41,9 +41,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
     }
     require_once 'includes/BloodInventoryManagerComplete.php';
+    require_once 'includes/BloodInventoryManagerRobust.php';
     
-    // Initialize manager
+    // Initialize managers
     $inventoryManager = new BloodInventoryManagerComplete($pdo);
+    $robustManager = new BloodInventoryManagerRobust($pdo, true);
     
     try {
         $result = ['success' => false, 'message' => 'Unknown error'];
@@ -102,6 +104,7 @@ try {
     }
 }
 require_once 'includes/BloodInventoryManagerComplete.php';
+require_once 'includes/BloodInventoryManagerRobust.php';
 
 // Check admin authentication
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
@@ -109,8 +112,9 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
-// Initialize manager
+// Initialize managers with fallback strategy
 $inventoryManager = new BloodInventoryManagerComplete($pdo);
+$robustManager = new BloodInventoryManagerRobust($pdo, true);
 
 // Get user permissions - ALL FEATURES ENABLED
 $userRole = $_SESSION['admin_role'] ?? 'super_admin';
@@ -137,13 +141,24 @@ if (isset($_GET['export']) && strtolower($_GET['export']) === 'csv') {
     exit;
 }
 
+// Try primary manager first, fallback to robust manager if needed
 $inventory = $inventoryManager->getInventory($filters, $filters['page'], $perPage);
 $summary = $inventoryManager->getDashboardSummary();
-$alerts = $inventoryManager->getAlerts();
-$donors = $inventoryManager->getEligibleDonors();
 
-// Get total count for pagination
-$totalRecords = $inventoryManager->getInventoryCount($filters);
+// Use robust manager as fallback if primary returns empty results
+if (empty($inventory['data']) || $summary['total_units'] == 0) {
+    $inventory = $robustManager->getInventory($filters, $filters['page'], $perPage);
+    $summary = $robustManager->getDashboardSummary();
+    $alerts = $robustManager->getAlerts();
+    $donors = $robustManager->getEligibleDonors();
+    $totalRecords = $robustManager->getInventoryCount($filters);
+    $usingFallback = true;
+} else {
+    $alerts = $inventoryManager->getAlerts();
+    $donors = $inventoryManager->getEligibleDonors();
+    $totalRecords = $inventoryManager->getInventoryCount($filters);
+    $usingFallback = false;
+}
 $totalPages = ceil($totalRecords / $perPage);
 
 // Calculate pagination info
@@ -834,6 +849,16 @@ function buildPaginationUrl($page) {
                 <?php endif; ?>
 
                 <!-- Dashboard Summary -->
+                <?php if (isset($usingFallback) && $usingFallback): ?>
+                <div class="alert alert-info mb-3">
+                    <i class="fas fa-info-circle"></i> 
+                    <strong>Fallback Mode:</strong> Using alternative data source to display inventory.
+                    <?php if (isset($inventory['source'])): ?>
+                    <small>(Source: <?= htmlspecialchars($inventory['source']) ?>)</small>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+                
                 <div class="row mb-4 fade-in">
                     <div class="col-md-3 mb-3">
                         <div class="stats-card">
