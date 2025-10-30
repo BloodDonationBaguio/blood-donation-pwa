@@ -140,14 +140,21 @@ class BloodInventoryManagerRobust {
         $countStmt->execute($params);
         $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
+        // Choose date math compatible with the current driver
+        try {
+            $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+        } catch (Throwable $e) {
+            $driver = 'mysql';
+        }
+        $expiringSoonExpr = ($driver === 'pgsql')
+            ? "CASE WHEN expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND status = 'available' THEN 1 ELSE 0 END"
+            : "CASE WHEN expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) AND status = 'available' THEN 1 ELSE 0 END";
+
         // Get data
         $sql = "
             SELECT 
                 *,
-                CASE 
-                    WHEN expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) AND status = 'available' THEN 1 
-                    ELSE 0 
-                END as expiring_soon,
+                $expiringSoonExpr as expiring_soon,
                 'blood_inventory' as data_source
             FROM blood_inventory 
             $whereClause
@@ -227,6 +234,16 @@ class BloodInventoryManagerRobust {
         $countStmt->execute($params);
         $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
+        // Choose date math compatible with the current driver
+        try {
+            $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+        } catch (Throwable $e) {
+            $driver = 'mysql';
+        }
+        $expiryExpr = ($driver === 'pgsql')
+            ? "created_at + INTERVAL '35 day'"
+            : "DATE_ADD(created_at, INTERVAL 35 DAY)";
+
         // Get data
         $sql = "
             SELECT 
@@ -239,7 +256,7 @@ class BloodInventoryManagerRobust {
                 reference_code,
                 CONCAT(first_name, ' ', last_name) as donor_name,
                 created_at,
-                DATE_ADD(created_at, INTERVAL 35 DAY) as expiry_date,
+                $expiryExpr as expiry_date,
                 0 as expiring_soon,
                 'virtual_from_donors' as data_source
             FROM $donorTable 
