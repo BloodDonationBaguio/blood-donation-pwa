@@ -25,6 +25,10 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_URI} ^/run_all_tests\.php$ [NC]
 RewriteRule ^ - [L]
 
+# Allow direct access to robust code fingerprint endpoint
+RewriteCond %{REQUEST_URI} ^/debug_fingerprint_robust\.php$ [NC]
+RewriteRule ^ - [L]
+
 # Allow direct access to admin subdirectory files (login, assets, etc.)
 RewriteCond %{REQUEST_URI} ^/blood-donation-pwa/admin/ [NC]
 RewriteRule ^ - [L]
