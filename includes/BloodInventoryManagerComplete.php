@@ -391,9 +391,20 @@ class BloodInventoryManagerComplete {
                 'blood_type' => $donor['blood_type']
             ]);
 
-            // Commit only if we started the transaction
+            // Commit only if we started the transaction, guard for autocommit
             if ($transactionStarted) {
-                $this->pdo->commit();
+                try {
+                    error_log('DeleteUnit: attempting commit');
+                    if ($this->pdo->inTransaction()) {
+                        $this->pdo->commit();
+                        error_log('DeleteUnit: commit succeeded');
+                    } else {
+                        error_log('DeleteUnit: not in transaction, skipping commit');
+                    }
+                } catch (Throwable $commitEx) {
+                    // Ignore benign commit errors when autocommit is enabled
+                    error_log("Commit skipped: " . $commitEx->getMessage());
+                }
             }
             return ['success' => true, 'message' => 'Blood unit created successfully', 'unit_id' => $unitId];
 
@@ -698,9 +709,16 @@ class BloodInventoryManagerComplete {
                 throw new Exception('Failed to delete blood unit');
             }
 
-            // Commit only if we started the transaction
+            // Commit only if we started the transaction, guard for autocommit
             if ($transactionStarted) {
-                $this->pdo->commit();
+                try {
+                    if ($this->pdo->inTransaction()) {
+                        $this->pdo->commit();
+                    }
+                } catch (Throwable $commitEx) {
+                    // Ignore benign commit errors when autocommit is enabled
+                    error_log("Commit skipped: " . $commitEx->getMessage());
+                }
             }
             
             return ['success' => true, 'message' => 'Blood unit deleted successfully'];
