@@ -86,6 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     
     // Send clean JSON response
     header('Content-Type: application/json');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
     echo json_encode($result);
     exit;
 }
@@ -161,12 +163,21 @@ if (isset($_GET['export']) && strtolower($_GET['export']) === 'csv') {
     exit;
 }
 
-// Try primary manager first, fallback to robust manager if needed
+// Try primary manager first
 $inventory = $inventoryManager->getInventory($filters, $filters['page'], $perPage);
 $summary = $inventoryManager->getDashboardSummary();
 
-// Use robust manager as fallback if primary returns empty results
-if (empty($inventory['data']) || $summary['total_units'] == 0) {
+// Decide fallback strictly based on actual inventory count for current filters
+$primaryTotal = 0;
+try {
+    $primaryTotal = (int)$inventoryManager->getInventoryCount($filters);
+} catch (Throwable $e) {
+    // Default to zero on error to allow robust fallback
+    $primaryTotal = 0;
+}
+
+if ($primaryTotal === 0) {
+    // Use robust manager only when primary inventory truly has no records
     $inventory = $robustManager->getInventory($filters, $filters['page'], $perPage);
     $summary = $robustManager->getDashboardSummary();
     $alerts = $robustManager->getAlerts();
@@ -174,9 +185,10 @@ if (empty($inventory['data']) || $summary['total_units'] == 0) {
     $totalRecords = $robustManager->getInventoryCount($filters);
     $usingFallback = true;
 } else {
+    // Keep primary manager results even if current page has no rows due to filters
     $alerts = $inventoryManager->getAlerts();
     $donors = $inventoryManager->getEligibleDonors();
-    $totalRecords = $inventoryManager->getInventoryCount($filters);
+    $totalRecords = $primaryTotal;
     $usingFallback = false;
 }
 // Calculate pagination info (sync with actual inventory total when available)
