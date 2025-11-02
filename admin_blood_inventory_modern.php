@@ -167,17 +167,24 @@ if (isset($_GET['export']) && strtolower($_GET['export']) === 'csv') {
 $inventory = $inventoryManager->getInventory($filters, $filters['page'], $perPage);
 $summary = $inventoryManager->getDashboardSummary();
 
-// Decide fallback strictly based on actual inventory count for current filters
-$primaryTotal = 0;
+// Decide fallback based on UNFILTERED total count (only fallback when table is truly empty)
+$filteredTotal = 0;
+$unfilteredTotal = 0;
 try {
-    $primaryTotal = (int)$inventoryManager->getInventoryCount($filters);
+    // Current filtered count (for pagination)
+    $filteredTotal = (int)$inventoryManager->getInventoryCount($filters);
+
+    // Unfiltered count (ignore status/blood_type/search for fallback decision)
+    $baseFilters = ['blood_type' => '', 'status' => '', 'search' => ''];
+    $unfilteredTotal = (int)$inventoryManager->getInventoryCount($baseFilters);
 } catch (Throwable $e) {
-    // Default to zero on error to allow robust fallback
-    $primaryTotal = 0;
+    // Default to zero on error to allow robust fallback only if truly empty
+    $filteredTotal = 0;
+    $unfilteredTotal = 0;
 }
 
-if ($primaryTotal === 0) {
-    // Use robust manager only when primary inventory truly has no records
+if ($unfilteredTotal === 0) {
+    // Use robust manager only when primary inventory truly has no records (table empty)
     $inventory = $robustManager->getInventory($filters, $filters['page'], $perPage);
     $summary = $robustManager->getDashboardSummary();
     $alerts = $robustManager->getAlerts();
@@ -188,7 +195,7 @@ if ($primaryTotal === 0) {
     // Keep primary manager results even if current page has no rows due to filters
     $alerts = $inventoryManager->getAlerts();
     $donors = $inventoryManager->getEligibleDonors();
-    $totalRecords = $primaryTotal;
+    $totalRecords = $filteredTotal;
     $usingFallback = false;
 }
 // Calculate pagination info (sync with actual inventory total when available)
