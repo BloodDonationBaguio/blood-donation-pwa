@@ -1145,9 +1145,16 @@ function buildPaginationUrl($page) {
                                             <i class="fas fa-barcode me-2"></i>
                                             <code><?= htmlspecialchars($unit['unit_id']) ?></code>
                                         </div>
+                                        <?php if ($canEdit): ?>
+                                        <span class="status-badge status-<?= $unit['status'] ?>" role="button" title="Edit status"
+                                              onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $unit['status'] ?>')">
+                                            <?= ucfirst($unit['status']) ?>
+                                        </span>
+                                        <?php else: ?>
                                         <span class="status-badge status-<?= $unit['status'] ?>">
                                             <?= ucfirst($unit['status']) ?>
                                         </span>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 
@@ -1305,9 +1312,16 @@ function buildPaginationUrl($page) {
                                                 <?php endif; ?>
                                             </td>
                                             <td>
+                                                <?php if ($canEdit): ?>
+                                                <span class="status-badge status-<?= $unit['status'] ?>" role="button" title="Edit status"
+                                                      onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $unit['status'] ?>')">
+                                                    <?= ucfirst($unit['status']) ?>
+                                                </span>
+                                                <?php else: ?>
                                                 <span class="status-badge status-<?= $unit['status'] ?>">
                                                     <?= ucfirst($unit['status']) ?>
                                                 </span>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
                                                 <div class="d-flex">
@@ -1680,6 +1694,7 @@ function buildPaginationUrl($page) {
 
         // Update Unit Status
         function updateUnitStatus(unitId, currentStatus) {
+            console.log('[Inventory] Open update modal for', unitId, 'current:', currentStatus);
             document.getElementById('updateUnitId').value = unitId;
             document.querySelector('#updateStatusForm select[name="status"]').value = currentStatus;
             new bootstrap.Modal(document.getElementById('updateStatusModal')).show();
@@ -1704,19 +1719,27 @@ function buildPaginationUrl($page) {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(async (response) => {
-                // Try to parse JSON safely
+                const statusCode = response.status;
+                let raw = '';
                 try {
-                    const data = await response.json();
-                    if (data && data.success) {
-                        showNotification('Unit status updated successfully!', 'success');
-                        location.reload();
-                    } else {
-                        const msg = (data && data.message) ? data.message : 'Failed to update status';
-                        showNotification('Error: ' + msg, 'error');
-                    }
+                    raw = await response.text();
                 } catch (e) {
-                    // If JSON parsing fails, do NOT show success blindly
-                    showNotification('Error processing update response. Please retry.', 'error');
+                    console.warn('Failed to read response text', e);
+                }
+                let data = null;
+                try {
+                    data = raw ? JSON.parse(raw) : null;
+                } catch (e) {
+                    console.warn('JSON parse failed. Raw:', raw);
+                }
+                if (data && data.success) {
+                    console.log('[Inventory] Update success', data);
+                    showNotification('Unit status updated successfully!', 'success');
+                    location.reload();
+                } else {
+                    const msg = (data && data.message) ? data.message : `HTTP ${statusCode}. Raw: ${raw?.slice(0,200)}`;
+                    console.error('[Inventory] Update failed', msg);
+                    showNotification('Error: ' + msg, 'error');
                 }
             })
             .catch(error => {
