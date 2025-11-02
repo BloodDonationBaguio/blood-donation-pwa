@@ -1213,9 +1213,16 @@ function buildPaginationUrl($page) {
                                         <button class="btn btn-sm btn-outline-warning" onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $unit['status'] ?>')" title="Update Status">
                                             <i class="fas fa-edit me-1"></i>Edit
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUnit('<?= $unit['unit_id'] ?>')" title="Delete Unit">
-                                            <i class="fas fa-trash me-1"></i>Delete
-                                        </button>
+                                        <?php $isVirtual = strpos($unit['unit_id'], 'VIRT-') === 0; ?>
+                                        <?php if ($isVirtual): ?>
+                                            <button class="btn btn-sm btn-outline-danger" title="Virtual units cannot be deleted" disabled>
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </button>
+                                        <?php else: ?>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteUnit('<?= $unit['unit_id'] ?>')" title="Delete Unit">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -1298,9 +1305,16 @@ function buildPaginationUrl($page) {
                                                     <button class="action-btn btn-edit" onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $unit['status'] ?>')" title="Update Status">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                    <button class="action-btn btn-delete" onclick="deleteUnit('<?= $unit['unit_id'] ?>')" title="Delete Unit">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
+                                                    <?php $isVirtual = strpos($unit['unit_id'], 'VIRT-') === 0; ?>
+                                                    <?php if ($isVirtual): ?>
+                                                        <button class="action-btn btn-delete" title="Virtual units cannot be deleted" disabled>
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <button class="action-btn btn-delete" onclick="deleteUnit('<?= $unit['unit_id'] ?>')" title="Delete Unit">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                         </tr>
@@ -1674,15 +1688,23 @@ function buildPaginationUrl($page) {
             
             fetch('admin_blood_inventory_modern.php', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Unit status updated successfully!', 'success');
-                    location.reload();
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
+            .then(async (response) => {
+                // Try to parse JSON safely
+                try {
+                    const data = await response.json();
+                    if (data && data.success) {
+                        showNotification('Unit status updated successfully!', 'success');
+                        location.reload();
+                    } else {
+                        const msg = (data && data.message) ? data.message : 'Failed to update status';
+                        showNotification('Error: ' + msg, 'error');
+                    }
+                } catch (e) {
+                    // If JSON parsing fails, do NOT show success blindly
+                    showNotification('Error processing update response. Please retry.', 'error');
                 }
             })
             .catch(error => {
@@ -1699,6 +1721,11 @@ function buildPaginationUrl($page) {
 
         // Delete Unit
         function deleteUnit(unitId) {
+            // Prevent delete attempts on virtual units client-side
+            if (unitId && unitId.startsWith('VIRT-')) {
+                showNotification('Virtual units cannot be deleted.', 'error');
+                return;
+            }
             if (confirm('Are you sure you want to delete this blood unit? This action cannot be undone.')) {
                 const formData = new FormData();
                 formData.append('action', 'delete_unit');
@@ -1711,52 +1738,27 @@ function buildPaginationUrl($page) {
                 fetch('admin_blood_inventory_modern.php', {
                     method: 'POST',
                     body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 })
-                .then(response => {
-                    // Check if response is ok
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(text => {
-                    // Log the raw response for debugging
-                    console.log('Delete response:', text);
-                    
-                    // Try to parse as JSON
-                    let data;
+                .then(async (response) => {
+                    // Prefer strict JSON handling; do not assume success on parse errors
                     try {
-                        // Clean any whitespace or BOM
-                        const cleanText = text.trim().replace(/^\uFEFF/, '');
-                        data = JSON.parse(cleanText);
+                        const data = await response.json();
+                        if (data && data.success) {
+                            showNotification('Blood unit deleted successfully!', 'success');
+                            setTimeout(() => location.reload(), 800);
+                        } else {
+                            const msg = (data && data.message) ? data.message : 'Failed to delete unit';
+                            showNotification('Error: ' + msg, 'error');
+                        }
                     } catch (e) {
                         console.error('JSON parse error:', e);
-                        console.log('Raw response:', text);
-                        
-                        // If we can't parse JSON, just reload and assume success
-                        // (since we know deletion actually works)
-                        showNotification('Blood unit deleted. Refreshing...', 'success');
-                        setTimeout(() => location.reload(), 800);
-                        return;
-                    }
-                    
-                    // Handle parsed JSON response
-                    if (data && data.success) {
-                        showNotification('Blood unit deleted successfully!', 'success');
-                        setTimeout(() => location.reload(), 800);
-                    } else {
-                        showNotification('Error: ' + (data.message || 'Failed to delete unit'), 'error');
-                        setTimeout(() => location.reload(), 1500);
+                        showNotification('Error processing delete response. Please retry.', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Fetch error:', error);
-                    // Even on error, deletion often works - just reload
-                    showNotification('Processing... Refreshing page.', 'info');
-                    setTimeout(() => location.reload(), 1000);
+                    showNotification('Network error while deleting unit.', 'error');
                 });
             }
         }
