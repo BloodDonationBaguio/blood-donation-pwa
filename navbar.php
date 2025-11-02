@@ -512,3 +512,72 @@ window.addEventListener('resize', function() {
   }
 });
 </script>
+
+<!-- Global Loading Overlay (Bootstrap 5 compatible) -->
+<style>
+  #global-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(220, 53, 69, 0.95); /* #dc3545 with opacity */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; /* above navbar */
+    color: #fff;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    transition: opacity 250ms ease;
+  }
+  #global-loading-overlay.hidden { opacity: 0; pointer-events: none; }
+  .loading-content { text-align: center; }
+  .loading-title { font-size: 20px; margin-top: 12px; letter-spacing: 0.3px; }
+  .spinner-border { width: 2.5rem; height: 2.5rem; border-width: 0.25rem; }
+  @media (prefers-reduced-motion: reduce) {
+    #global-loading-overlay { transition: none; }
+  }
+  /* Ensure overlay does not shift fixed navbar spacing */
+  body { overscroll-behavior: none; }
+  /* Optional: subtle brand accent glow */
+  #global-loading-overlay .spinner-border { filter: drop-shadow(0 0 6px rgba(255,255,255,0.3)); }
+  #global-loading-overlay .loading-title { text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+  /* Prevent layout shift when overlay is visible */
+  html, body { height: 100%; }
+  /* Notch safe area */
+  #global-loading-overlay { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+</style>
+
+<div id="global-loading-overlay" role="alert" aria-live="polite" aria-busy="true">
+  <div class="loading-content">
+    <div class="spinner-border text-light" role="status" aria-hidden="true"></div>
+    <div class="loading-title">Loading...</div>
+  </div>
+  <!-- Accessible description for screen readers -->
+  <span class="visually-hidden">Page is loading, please wait.</span>
+</div>
+
+<script>
+  // Show overlay immediately (it will be in DOM early via navbar include)
+  (function() {
+    var overlay = document.getElementById('global-loading-overlay');
+    if (!overlay) return;
+    // Auto hide on full load
+    window.addEventListener('load', function() {
+      try {
+        overlay.classList.add('hidden');
+        // Remove from DOM after transition to avoid interfering with content
+        setTimeout(function(){
+          if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+          }
+        }, 260);
+      } catch (e) {
+        // Fail-safe remove
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }
+    });
+  })();
+</script>

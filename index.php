@@ -4,6 +4,17 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Performance tuning for Render free tier
+@ini_set('memory_limit', '128M');
+@ini_set('max_execution_time', '30');
+
+// Start output buffering with gzip compression when available, avoiding double compression
+if (extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
+    ob_start('ob_gzhandler');
+} else {
+    ob_start();
+}
+
 session_start();
 
 // Production features
@@ -972,3 +983,10 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Removed duplicate IntersectionObserver script to avoid const redeclaration errors -->
 </body>
 </html>
+<?php
+// Flush compressed output at the end
+if (ob_get_level() > 0) {
+    while (ob_get_level() > 1) { ob_end_flush(); }
+    ob_end_flush();
+}
+?>

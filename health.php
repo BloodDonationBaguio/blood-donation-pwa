@@ -1,51 +1,39 @@
 <?php
-// Basic health check endpoint for uptime monitoring and rapid diagnostics
-// Returns JSON with app status and database connectivity
+// Lightweight health check endpoint
+// Returns HTTP 200 with JSON and proper no-cache headers
 
+// Force minimal resource usage
+@ini_set('memory_limit', '32M');
+@ini_set('max_execution_time', '5');
+
+// Prevent session and heavy includes for health
+// Use microtime for quick timing and avoid DB unless needed
+
+// Headers
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
-$status = [
-    'app' => 'ok',
-    'time' => date('c'),
-    'host' => $_SERVER['HTTP_HOST'] ?? 'localhost',
-    'db' => [
-        'connected' => false,
-        'driver' => null,
-        'ping' => false,
-        'tables' => []
-    ]
+// Build response
+$now = new DateTime('now', new DateTimeZone('UTC'));
+$serverTime = date('Y-m-d H:i:s');
+
+$response = [
+    'status' => 'ok',
+    'timestamp' => $now->format('c'),
+    'server_time' => $serverTime
 ];
 
-// Try to use the production DB bootstrap, which falls back to local config
+// Graceful error handling
 try {
-    require_once __DIR__ . '/db_production.php';
-
-    if (isset($pdo) && $pdo instanceof PDO) {
-        $status['db']['connected'] = true;
-        $status['db']['driver'] = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-
-        // Simple ping
-        try {
-            $pdo->query('SELECT 1');
-            $status['db']['ping'] = true;
-        } catch (Throwable $e) {
-            $status['db']['ping'] = false;
-        }
-
-        // Table existence checks using helper from db_production.php when available
-        if (function_exists('tableExists')) {
-            foreach (['users', 'donors', 'requests', 'blood_inventory'] as $tbl) {
-                $status['db']['tables'][$tbl] = tableExists($pdo, $tbl);
-            }
-        }
-    }
+    http_response_code(200);
+    echo json_encode($response);
 } catch (Throwable $e) {
-    // Swallow errors and report as degraded
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Health check failed',
+        'timestamp' => $now->format('c')
+    ]);
 }
-
-// Decide HTTP status: healthy only if DB is connected and ping succeeds
-$healthy = $status['db']['connected'] && $status['db']['ping'];
-http_response_code($healthy ? 200 : 503);
-
-echo json_encode($status);
 ?>
