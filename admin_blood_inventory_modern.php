@@ -173,13 +173,14 @@ $unfilteredTotal = 0;
 try {
     // Current filtered count (for pagination)
     $filteredTotal = (int)$inventoryManager->getInventoryCount($filters);
-
-    // Unfiltered count (ignore status/blood_type/search for fallback decision)
-    $baseFilters = ['blood_type' => '', 'status' => '', 'search' => ''];
-    $unfilteredTotal = (int)$inventoryManager->getInventoryCount($baseFilters);
 } catch (Throwable $e) {
-    // Default to zero on error to allow robust fallback only if truly empty
     $filteredTotal = 0;
+}
+// Unfiltered count (definitive table emptiness check)
+try {
+    $stmt = $pdo->query("SELECT COUNT(*) AS total FROM blood_inventory");
+    $unfilteredTotal = (int)($stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+} catch (Throwable $e) {
     $unfilteredTotal = 0;
 }
 
