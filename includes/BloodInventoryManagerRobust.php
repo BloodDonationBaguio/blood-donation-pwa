@@ -243,18 +243,24 @@ class BloodInventoryManagerRobust {
         $expiryExpr = ($driver === 'pgsql')
             ? "created_at + INTERVAL '35 day'"
             : "DATE_ADD(created_at, INTERVAL 35 DAY)";
+        $virtUnitIdExpr = ($driver === 'pgsql')
+            ? "('VIRT-' || id)"
+            : "CONCAT('VIRT-', id)";
+        $donorNameExpr = ($driver === 'pgsql')
+            ? "(first_name || ' ' || last_name)"
+            : "CONCAT(first_name, ' ', last_name)";
 
         // Get data
         $sql = "
             SELECT 
                 id as donor_id,
-                CONCAT('VIRT-', id) as unit_id,
+                $virtUnitIdExpr as unit_id,
                 blood_type,
                 'available' as status,
                 first_name,
                 last_name,
                 reference_code,
-                CONCAT(first_name, ' ', last_name) as donor_name,
+                $donorNameExpr as donor_name,
                 created_at,
                 $expiryExpr as expiry_date,
                 0 as expiring_soon,
@@ -288,9 +294,17 @@ class BloodInventoryManagerRobust {
         $donorTable = $this->getDonorTable();
         
         try {
+            try {
+                $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            } catch (Throwable $e) {
+                $driver = 'mysql';
+            }
+            $donorNameExpr = ($driver === 'pgsql')
+                ? "(first_name || ' ' || last_name)"
+                : "CONCAT(first_name, ' ', last_name)";
             $stmt = $this->pdo->prepare("
                 SELECT first_name, last_name, reference_code, blood_type as donor_blood_type,
-                       CONCAT(first_name, ' ', last_name) as donor_name
+                       {$donorNameExpr} as donor_name
                 FROM $donorTable 
                 WHERE id = ?
             ");
@@ -476,14 +490,23 @@ class BloodInventoryManagerRobust {
         $donorTable = $this->getDonorTable();
         
         try {
-            $stmt = $this->pdo->query("
+            try {
+                $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            } catch (Throwable $e) {
+                $driver = 'mysql';
+            }
+            $fullNameExpr = ($driver === 'pgsql')
+                ? "(first_name || ' ' || last_name)"
+                : "CONCAT(first_name, ' ', last_name)";
+            $sql = "
                 SELECT id, first_name, last_name, blood_type, reference_code,
-                       CONCAT(first_name, ' ', last_name) as full_name
+                       $fullNameExpr as full_name
                 FROM $donorTable 
                 WHERE status IN ('served', 'completed')
                 ORDER BY created_at DESC 
                 LIMIT 100
-            ");
+            ";
+            $stmt = $this->pdo->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             return [];

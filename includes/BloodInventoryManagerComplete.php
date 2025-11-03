@@ -162,6 +162,19 @@ class BloodInventoryManagerComplete {
 
             $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
 
+            // Driver-aware expressions for donor name and expiry math
+            try {
+                $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            } catch (Throwable $e) {
+                $driver = 'mysql';
+            }
+            $donorNameExpr = ($driver === 'pgsql')
+                ? "COALESCE(d.first_name || ' ' || d.last_name, 'Unknown Donor')"
+                : "COALESCE(CONCAT(d.first_name, ' ', d.last_name), 'Unknown Donor')";
+            $expiringSoonExpr = ($driver === 'pgsql')
+                ? "CASE WHEN bi.expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND bi.status = 'available' THEN 1 ELSE 0 END"
+                : "CASE WHEN bi.expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) AND bi.status = 'available' THEN 1 ELSE 0 END";
+
             // Get total count
             $countSql = "
                 SELECT COUNT(*) as total
@@ -181,11 +194,8 @@ class BloodInventoryManagerComplete {
                     d.last_name,
                     d.reference_code,
                     d.blood_type as donor_blood_type,
-                    CONCAT(d.first_name, ' ', d.last_name) as donor_name,
-                    CASE 
-                        WHEN bi.expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) AND bi.status = 'available' THEN 1 
-                        ELSE 0 
-                    END as expiring_soon
+                    {$donorNameExpr} as donor_name,
+                    {$expiringSoonExpr} as expiring_soon
                 FROM blood_inventory bi
                 LEFT JOIN {$donorTable} d ON bi.donor_id = d.id AND {$donorStatusCondition}
                 $whereClause
@@ -217,6 +227,15 @@ class BloodInventoryManagerComplete {
      */
     public function getUnitDetails($unitId, $canViewPII = true) {
         try {
+            // Driver-aware donor_name expression for PostgreSQL vs MySQL
+            try {
+                $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            } catch (Throwable $e) {
+                $driver = 'mysql';
+            }
+            $donorNameExpr = ($driver === 'pgsql')
+                ? "(d.first_name || ' ' || d.last_name)"
+                : "CONCAT(d.first_name, ' ', d.last_name)";
             $stmt = $this->pdo->prepare("
                 SELECT 
                     bi.*,
@@ -226,7 +245,7 @@ class BloodInventoryManagerComplete {
                     d.blood_type as donor_blood_type,
                     d.email,
                     d.phone,
-                    CONCAT(d.first_name, ' ', d.last_name) as donor_name
+                    {$donorNameExpr} as donor_name
                 FROM blood_inventory bi
                 LEFT JOIN donors d ON bi.donor_id = d.id
                 WHERE bi.unit_id = ?
@@ -549,7 +568,10 @@ class BloodInventoryManagerComplete {
             $sets = ["status = ?"];
             $params = [$newStatus];
             if ($hasNotes) { $sets[] = "notes = ?"; $params[] = $newNotes; }
-            if ($hasUpdatedAt) { $sets[] = "updated_at = NOW()"; }
+            if ($hasUpdatedAt) {
+                $timestampExpr = ($driver === 'pgsql') ? 'CURRENT_TIMESTAMP' : 'NOW()';
+                $sets[] = "updated_at = $timestampExpr";
+            }
             $sql = "UPDATE blood_inventory SET " . implode(', ', $sets) . " WHERE unit_id = ?";
             $params[] = $unitId;
             $updateStmt = $this->pdo->prepare($sql);
