@@ -519,6 +519,14 @@ require_once __DIR__ . '/includes/session_config.php';
                 alert('Please accept the Terms of Service and Privacy Policy.');
                 return;
             }
+
+            // Show processing state and prevent double submissions
+            const btn = this.querySelector('.btn-signup');
+            if (btn) {
+                btn.disabled = true;
+                btn.setAttribute('aria-busy', 'true');
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Creating Account...';
+            }
         });
         
         function isValidEmail(email) {

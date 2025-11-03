@@ -397,6 +397,14 @@ if (isset($_SESSION['user_id'])) {
                 alert('Please enter a valid email address.');
                 return;
             }
+
+            // Show processing state and prevent double submissions
+            const btn = this.querySelector('.btn-login');
+            if (btn) {
+                btn.disabled = true;
+                btn.setAttribute('aria-busy', 'true');
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Signing In...';
+            }
         });
         
         function isValidEmail(email) {

@@ -161,5 +161,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Show a loading indicator on submit to indicate processing
+      document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        if (!form) return;
+        form.addEventListener('submit', function () {
+          const btn = form.querySelector('.btn.btn-login');
+          if (!btn) return;
+          btn.disabled = true;
+          btn.setAttribute('aria-busy', 'true');
+          btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Signing In...';
+        });
+      });
+    </script>
 </body>
 </html>

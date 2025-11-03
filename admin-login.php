@@ -277,5 +277,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     </div>
   </div>
+  <script>
+    // Show a loading indicator on submit to indicate processing
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.querySelector('.login-form');
+      if (!form) return;
+      form.addEventListener('submit', function () {
+        const btn = form.querySelector('button[type="submit"]');
+        if (!btn) return;
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Signing In...';
+      });
+    });
+  </script>
 </body>
 </html>
