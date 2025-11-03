@@ -1,4 +1,8 @@
 <?php
+// Enforce Manila timezone for all runtime date operations
+if (function_exists('date_default_timezone_set')) {
+    @date_default_timezone_set('Asia/Manila');
+}
 // Environment-aware DB config: Prefer PostgreSQL (DATABASE_URL or DB_TYPE=pgsql), fallback to MySQL
 if (getenv('DATABASE_URL')) {
     // In production with DATABASE_URL, delegate to db_production.php
