@@ -2132,82 +2132,8 @@ function buildPaginationUrl($page) {
                                     <input type="search" id="helpSearch" class="form-control" placeholder="Search help topics…" oninput="filterHelpSections()" />
                                 </div>
                             </div>
-                            
-                            <!-- Welcome Banner -->
-                            <div class="alert alert-gradient border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <h4 class="alert-heading mb-2">
-                                            <i class="fas fa-rocket me-2"></i>Welcome to Blood Donation Admin Panel
-                                        </h4>
-                                        <p class="mb-0">Your comprehensive blood donation management system with modern features and intuitive interface.</p>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        <i class="fas fa-heart fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Quick Stats -->
-                            <?php
-                            $totalDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE {$servedStatusCondition}")->fetchColumn();
-                            $totalBloodUnits = $pdo->query("
-                                SELECT COUNT(*) FROM blood_inventory bi
-                                INNER JOIN {$donorsTable} d ON bi.donor_id = d.id
-                                WHERE {$servedStatusCondition}
-                            ")->fetchColumn();
-                            $pendingDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE status = 'pending'")->fetchColumn();
-                            $bloodTypes = (int)$pdo->query("SELECT COUNT(DISTINCT blood_type) FROM {$donorsTable} WHERE {$servedStatusCondition}")->fetchColumn();
-                            ?>
-                            
-                            <div class="row mb-4">
-                                <div class="col-md-3">
-                                    <div class="card border-0 shadow-sm h-100">
-                                        <div class="card-body text-center">
-                                            <div class="text-primary mb-2">
-                                                <i class="fas fa-users fa-2x"></i>
-                                            </div>
-                                            <h3 class="text-primary mb-1"><?= $totalDonors ?></h3>
-                                            <p class="text-muted mb-0">Served Donors</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card border-0 shadow-sm h-100">
-                                        <div class="card-body text-center">
-                                            <div class="text-success mb-2">
-                                                <i class="fas fa-tint fa-2x"></i>
-                                            </div>
-                                            <h3 class="text-success mb-1"><?= $totalBloodUnits ?></h3>
-                                            <p class="text-muted mb-0">Blood Units</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card border-0 shadow-sm h-100">
-                                        <div class="card-body text-center">
-                                            <div class="text-warning mb-2">
-                                                <i class="fas fa-clock fa-2x"></i>
-                                            </div>
-                                            <h3 class="text-warning mb-1"><?= $pendingDonors ?></h3>
-                                            <p class="text-muted mb-0">Pending Review</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card border-0 shadow-sm h-100">
-                                        <div class="card-body text-center">
-                                            <div class="text-info mb-2">
-                                                <i class="fas fa-vial fa-2x"></i>
-                                            </div>
-                                            <h3 class="text-info mb-1"><?= $bloodTypes ?></h3>
-                                            <p class="text-muted mb-0">Blood Types</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Action Center Quick Actions (surfaced at top) -->
+
+                            <!-- Action Center Quick Actions (at top of Help page) -->
                             <div class="card border-0 shadow-sm mb-4">
                                 <div class="card-body">
                                     <h4 class="card-title text-primary mb-3">
@@ -2283,6 +2209,81 @@ function buildPaginationUrl($page) {
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Welcome Banner -->
+                            <div class="alert alert-gradient border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h4 class="alert-heading mb-2">
+                                            <i class="fas fa-rocket me-2"></i>Welcome to Blood Donation Admin Panel
+                                        </h4>
+                                        <p class="mb-0">Your comprehensive blood donation management system with modern features and intuitive interface.</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <i class="fas fa-heart fa-3x opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Stats -->
+                            <?php
+                            $totalDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE {$servedStatusCondition}")->fetchColumn();
+                            $totalBloodUnits = $pdo->query("
+                                SELECT COUNT(*) FROM blood_inventory bi
+                                INNER JOIN {$donorsTable} d ON bi.donor_id = d.id
+                                WHERE {$servedStatusCondition}
+                            ")->fetchColumn();
+                            $pendingDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE status = 'pending'")->fetchColumn();
+                            $bloodTypes = (int)$pdo->query("SELECT COUNT(DISTINCT blood_type) FROM {$donorsTable} WHERE {$servedStatusCondition}")->fetchColumn();
+                            ?>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center">
+                                            <div class="text-primary mb-2">
+                                                <i class="fas fa-users fa-2x"></i>
+                                            </div>
+                                            <h3 class="text-primary mb-1"><?= $totalDonors ?></h3>
+                                            <p class="text-muted mb-0">Served Donors</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center">
+                                            <div class="text-success mb-2">
+                                                <i class="fas fa-tint fa-2x"></i>
+                                            </div>
+                                            <h3 class="text-success mb-1"><?= $totalBloodUnits ?></h3>
+                                            <p class="text-muted mb-0">Blood Units</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center">
+                                            <div class="text-warning mb-2">
+                                                <i class="fas fa-clock fa-2x"></i>
+                                            </div>
+                                            <h3 class="text-warning mb-1"><?= $pendingDonors ?></h3>
+                                            <p class="text-muted mb-0">Pending Review</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center">
+                                            <div class="text-info mb-2">
+                                                <i class="fas fa-vial fa-2x"></i>
+                                            </div>
+                                            <h3 class="text-info mb-1"><?= $bloodTypes ?></h3>
+                                            <p class="text-muted mb-0">Blood Types</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
 
                             <!-- Main Content Tabs -->
                             <div class="row">
