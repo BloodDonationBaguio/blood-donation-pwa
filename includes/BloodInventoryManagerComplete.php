@@ -1031,36 +1031,58 @@ class BloodInventoryManagerComplete {
         $inserted = 0;
         $startedTx = false;
         try {
-            // Determine donor table dynamically (prefer donors_new when populated)
-            $donorTable = 'donors';
+            // Helper to fetch eligible donors without units from a given table
+            $fetchMissing = function (string $table, int $limit) {
+                // Eligibility per table
+                $eligibility = ($table === 'donors_new')
+                    ? "status IN ('served','completed')"
+                    : "status = 'served'";
+
+                // Avoid referencing non-existent columns; compute collection date in PHP
+                $sql = "
+                    SELECT d.id, d.first_name, d.last_name, d.blood_type
+                    FROM {$table} d
+                    LEFT JOIN blood_inventory bi ON bi.donor_id = d.id
+                    WHERE {$eligibility} AND bi.id IS NULL
+                    ORDER BY d.id DESC
+                    LIMIT ?
+                ";
+                $st = $this->pdo->prepare($sql);
+                $st->execute([$limit]);
+                return $st->fetchAll(PDO::FETCH_ASSOC);
+            };
+
+            // Determine which tables exist and have eligible donors
+            $tablesToCheck = [];
             try {
-                $stmt = $this->pdo->query("SELECT COUNT(*) AS cnt FROM donors_new");
-                $hasNew = (int)$stmt->fetch(PDO::FETCH_ASSOC)['cnt'] > 0;
-                if ($hasNew) { $donorTable = 'donors_new'; }
-            } catch (Throwable $e) {
-                // fall back to donors
+                $cntNew = (int)$this->pdo->query("SELECT COUNT(*) AS cnt FROM donors_new")->fetch(PDO::FETCH_ASSOC)['cnt'];
+                if ($cntNew > 0) { $tablesToCheck[] = 'donors_new'; }
+            } catch (Throwable $e) { /* ignore */ }
+            try {
+                $cntDon = (int)$this->pdo->query("SELECT COUNT(*) AS cnt FROM donors")->fetch(PDO::FETCH_ASSOC)['cnt'];
+                if ($cntDon > 0) { $tablesToCheck[] = 'donors'; }
+            } catch (Throwable $e) { /* ignore */ }
+
+            // If neither table is present, nothing to do
+            if (empty($tablesToCheck)) {
+                return ['success' => true, 'inserted' => 0];
             }
 
-            // Eligibility condition
-            $eligibility = ($donorTable === 'donors_new')
-                ? "status IN ('served','completed')"
-                : "status = 'served'";
+            // Collect missing donors across both tables (up to maxInserts total)
+            $missingAll = [];
+            $remaining = $maxInserts;
+            foreach ($tablesToCheck as $tbl) {
+                if ($remaining <= 0) { break; }
+                $batch = $fetchMissing($tbl, $remaining);
+                foreach ($batch as $row) {
+                    $row['_table'] = $tbl; // annotate source
+                    $missingAll[] = $row;
+                    $remaining--;
+                    if ($remaining <= 0) { break; }
+                }
+            }
 
-            // Find donors with no existing inventory unit
-            $sql = "
-                SELECT d.id, d.first_name, d.last_name, d.blood_type,
-                       COALESCE(d.created_at, d.registration_date, CURRENT_DATE) AS collection_date
-                FROM {$donorTable} d
-                LEFT JOIN blood_inventory bi ON bi.donor_id = d.id
-                WHERE {$eligibility} AND bi.id IS NULL
-                ORDER BY d.created_at DESC
-                LIMIT ?
-            ";
-            $st = $this->pdo->prepare($sql);
-            $st->execute([$maxInserts]);
-            $missing = $st->fetchAll(PDO::FETCH_ASSOC);
-
-            if (empty($missing)) { return ['success' => true, 'inserted' => 0]; }
+            if (empty($missingAll)) { return ['success' => true, 'inserted' => 0]; }
 
             // Begin transaction if not already in one
             if (!$this->pdo->inTransaction()) {
@@ -1074,10 +1096,9 @@ class BloodInventoryManagerComplete {
                     status, collection_site, storage_location, created_at
                 ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, CURRENT_TIMESTAMP)");
 
-            foreach ($missing as $d) {
+            foreach ($missingAll as $d) {
                 $unitId = $this->generateUnitId($d['blood_type'] ?? 'O+');
-                // Align with system rule: 25 days after collection
-                $collectionDate = $d['collection_date'] ?? date('Y-m-d');
+                $collectionDate = date('Y-m-d');
                 $expiryDate = date('Y-m-d', strtotime($collectionDate . ' +25 days'));
                 $ins->execute([
                     $unitId,
@@ -1094,7 +1115,8 @@ class BloodInventoryManagerComplete {
                     'unit_id' => $unitId,
                     'donor_id' => $d['id'],
                     'donor_name' => trim(($d['first_name'] ?? '') . ' ' . ($d['last_name'] ?? '')),
-                    'blood_type' => $d['blood_type'] ?? 'Unknown'
+                    'blood_type' => $d['blood_type'] ?? 'Unknown',
+                    'source_table' => $d['_table'] ?? 'donors'
                 ]);
                 $inserted++;
             }
