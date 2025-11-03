@@ -3,4 +3,5 @@ services:
     name: blooddonationbaguio
     env: docker
     branch: main
+    autoDeploy: true
     plan: free
