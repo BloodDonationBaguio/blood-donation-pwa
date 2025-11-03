@@ -1,4 +1,8 @@
 <?php
+// Ensure application uses Manila time for user-facing messages
+if (function_exists('date_default_timezone_set')) {
+    @date_default_timezone_set('Asia/Manila');
+}
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
