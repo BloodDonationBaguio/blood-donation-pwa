@@ -134,6 +134,20 @@ try {
     // Handle admin actions before any output
     require_once __DIR__ . '/includes/admin_actions.php';
 
+    // Choose donors table dynamically
+    $donorsTable = 'donors';
+    try {
+        $chk = $pdo->query("SELECT COUNT(*) FROM donors_new");
+        // If query succeeds, donors_new exists
+        if ($chk !== false) {
+            $donorsTable = 'donors_new';
+        }
+    } catch (Throwable $e) {
+        // donors_new doesn't exist; keep default 'donors'
+    }
+    // Helper for served/completed status across tables
+    $servedStatusCondition = ($donorsTable === 'donors_new') ? "status IN ('served','completed')" : "status = 'served'";
+
     // Helper: safely perform a redirect, clearing any buffered output
     if (!function_exists('safeRedirect')) {
         function safeRedirect($url) {
@@ -159,17 +173,13 @@ try {
         $status = $_POST['status'];
         
         // Get original donor data for logging
-        $originalStmt = $pdo->prepare('SELECT * FROM donors WHERE id = ?');
+        $originalStmt = $pdo->prepare("SELECT * FROM {$donorsTable} WHERE id = ?");
         $originalStmt->execute([$donorId]);
         $originalDonor = $originalStmt->fetch();
         
         if ($originalDonor) {
             // Update donor information
-            $updateStmt = $pdo->prepare('
-                UPDATE donors 
-                SET first_name = ?, last_name = ?, email = ?, phone = ?, blood_type = ?, status = ?, updated_at = NOW()
-                WHERE id = ?
-            ');
+            $updateStmt = $pdo->prepare("\n                UPDATE {$donorsTable} \n                SET first_name = ?, last_name = ?, email = ?, phone = ?, blood_type = ?, status = ?, updated_at = NOW()\n                WHERE id = ?\n            ");
             
             if ($updateStmt->execute([$firstName, $lastName, $email, $phone, $bloodType, $status, $donorId])) {
                 // Log the changes
@@ -182,7 +192,7 @@ try {
                 if ($originalDonor['status'] !== $status) $changes[] = "Status: {$originalDonor['status']} → $status";
                 
                 $changeLog = implode(', ', $changes);
-                logAdminAction($pdo, 'donor_updated', 'donors', $donorId, "Donor information updated: $changeLog");
+                logAdminAction($pdo, 'donor_updated', $donorsTable, $donorId, "Donor information updated: $changeLog");
                 
                 header('Location: ?tab=donor-list&success=Donor information updated successfully.');
                 exit();
@@ -197,18 +207,18 @@ try {
     // Handle donor management actions
     if (isset($_GET['approve_donor'])) {
         $id = (int)$_GET['approve_donor'];
-        $stmt = $pdo->prepare("UPDATE donors SET status = 'approved' WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE {$donorsTable} SET status = 'approved' WHERE id = ?");
         $stmt->execute([$id]);
-        $donor = $pdo->query('SELECT * FROM donors WHERE id = ' . $id)->fetch();
+        $donor = $pdo->query("SELECT * FROM {$donorsTable} WHERE id = " . (int)$id)->fetch();
         if ($donor && $donor['email']) {
             require_once __DIR__ . '/includes/mail_helper.php';
-            $subject = "Your Donor Application Approved [ID: {$donor['id']}]";
+            $subject = "Your Donor Application Approved [Ref: " . ($donor['reference_code'] ?? $donor['id']) . "]";
             $message = "<p>Dear {$donor['first_name']} {$donor['last_name']},</p>
-            <p>Your blood donation application (ID: <b>{$donor['id']}</b>) has been <b>approved</b>!</p>
+            <p>Your blood donation application (Reference: <b>" . htmlspecialchars($donor['reference_code'] ?? $donor['id']) . "</b>) has been <b>approved</b>!</p>
             <p><strong>Next Steps:</strong></p>
             <ul>
                 <li>You can visit the Red Cross center from 8:00 AM to 5:00 PM</li>
-                <li>Bring your ID and this reference number: <b>{$donor['id']}</b></li>
+                <li>Bring your ID and this reference number: <b>" . htmlspecialchars($donor['reference_code'] ?? $donor['id']) . "</b></li>
                 <li>Complete your donation process</li>
             </ul>
             <p>Status: <b>Approved</b></p>
@@ -217,7 +227,7 @@ try {
         }
         
         // Log the action
-        logAdminAction($pdo, 'donor_approved', 'donors', $id, "Donor approved and email sent");
+        logAdminAction($pdo, 'donor_approved', $donorsTable, $id, "Donor approved and email sent");
         
                     safeRedirect('admin.php?tab=pending-donors&success=Donor was approved successfully.');
     }
@@ -225,14 +235,14 @@ try {
     if (isset($_GET['reject_donor'])) {
         $id = (int)$_GET['reject_donor'];
         $reason = $_GET['reason'] ?? 'Eligibility criteria not met';
-        $stmt = $pdo->prepare("UPDATE donors SET status = 'rejected', rejection_reason = ? WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE {$donorsTable} SET status = 'rejected', rejection_reason = ? WHERE id = ?");
         $stmt->execute([$reason, $id]);
-        $donor = $pdo->query('SELECT * FROM donors WHERE id = ' . $id)->fetch();
+        $donor = $pdo->query("SELECT * FROM {$donorsTable} WHERE id = " . (int)$id)->fetch();
         if ($donor && $donor['email']) {
             require_once __DIR__ . '/includes/mail_helper.php';
-            $subject = "Your Donor Application Update [ID: {$donor['id']}]";
+            $subject = "Your Donor Application Update [Ref: " . ($donor['reference_code'] ?? $donor['id']) . "]";
             $message = "<p>Dear {$donor['first_name']} {$donor['last_name']},</p>
-            <p>Your blood donation application (ID: <b>{$donor['id']}</b>) has been reviewed.</p>
+            <p>Your blood donation application (Reference: <b>" . htmlspecialchars($donor['reference_code'] ?? $donor['id']) . "</b>) has been reviewed.</p>
             <p><strong>Status:</strong> <b>Not Approved</b></p>
             <p><strong>Reason:</strong> {$reason}</p>
             <p>If you have any questions, please contact us.</p>";
@@ -240,7 +250,7 @@ try {
         }
         
         // Log the action
-        logAdminAction($pdo, 'donor_rejected', 'donors', $id, "Donor rejected with reason: $reason");
+        logAdminAction($pdo, 'donor_rejected', $donorsTable, $id, "Donor rejected with reason: $reason");
         
                     safeRedirect('admin.php?tab=pending-donors&success=Donor was rejected successfully.');
     }
@@ -249,13 +259,13 @@ try {
         $id = (int)$_GET['mark_served'];
         try {
             // Check if served_date column exists, if not use a different approach
-            $stmt = $pdo->prepare("UPDATE donors SET status = 'served' WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE {$donorsTable} SET status = 'served' WHERE id = ?");
             $result = $stmt->execute([$id]);
             
             if ($result) {
                 // Try to update served_date if column exists
                 try {
-                    $dateStmt = $pdo->prepare('UPDATE donors SET served_date = NOW() WHERE id = ?');
+                    $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = NOW() WHERE id = ?");
                     $dateStmt->execute([$id]);
                 } catch (PDOException $e) {
                     // Column might not exist, that's okay
@@ -284,7 +294,7 @@ try {
                 }
                 
                 // Log the action
-                logAdminAction($pdo, 'donor_marked_served', 'donors', $id, "Donor marked as served");
+                logAdminAction($pdo, 'donor_marked_served', $donorsTable, $id, "Donor marked as served");
                 
                 header('Location: ?tab=donor-list&success=Donor was marked as served successfully.');
                 exit();
@@ -304,13 +314,13 @@ try {
         $reason = $_GET['reason'] ?? 'No show';
         try {
             // Update status first
-            $stmt = $pdo->prepare("UPDATE donors SET status = 'unserved' WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE {$donorsTable} SET status = 'unserved' WHERE id = ?");
             $result = $stmt->execute([$id]);
             
             if ($result) {
                 // Try to update unserved_reason if column exists
                 try {
-                    $reasonStmt = $pdo->prepare('UPDATE donors SET unserved_reason = ? WHERE id = ?');
+                    $reasonStmt = $pdo->prepare("UPDATE {$donorsTable} SET unserved_reason = ? WHERE id = ?");
                     $reasonStmt->execute([$reason, $id]);
                 } catch (PDOException $e) {
                     // Column might not exist, that's okay
@@ -318,7 +328,7 @@ try {
                 }
                 
                 // Log the action
-                logAdminAction($pdo, 'donor_marked_unserved', 'donors', $id, "Donor marked as unserved with reason: $reason");
+                logAdminAction($pdo, 'donor_marked_unserved', $donorsTable, $id, "Donor marked as unserved with reason: $reason");
                 
                 header('Location: ?tab=donor-list&success=Donor was marked as unserved successfully.');
                 exit();
@@ -338,7 +348,7 @@ try {
         
         try {
             // Get donor info before deletion for logging
-            $stmt = $pdo->prepare('SELECT * FROM donors WHERE id = ?');
+            $stmt = $pdo->prepare("SELECT * FROM {$donorsTable} WHERE id = ?");
             $stmt->execute([$id]);
             $donor = $stmt->fetch();
         // Check medical screening status
@@ -357,7 +367,7 @@ try {
             if ($donor) {
                 // Store donor info before deletion
                 $donorName = $donor['first_name'] . ' ' . $donor['last_name'];
-                $donorReference = $donor['id'] ?? 'N/A';
+                $donorReference = $donor['reference_code'] ?? ($donor['id'] ?? 'N/A');
                 
                 // Delete related records (ignore errors if tables don't exist)
                 try {
@@ -376,12 +386,12 @@ try {
                 } catch (PDOException $e) {}
                 
                 // Delete the donor
-                $stmt = $pdo->prepare('DELETE FROM donors WHERE id = ?');
+                $stmt = $pdo->prepare("DELETE FROM {$donorsTable} WHERE id = ?");
                 $stmt->execute([$id]);
                 
                 // Log the action (ignore errors)
                 try {
-                    logAdminAction($pdo, 'donor_deleted', 'donors', $id, "Donor deleted: {$donorName} ({$donorReference})");
+                    logAdminAction($pdo, 'donor_deleted', $donorsTable, $id, "Donor deleted: {$donorName} ({$donorReference})");
                 } catch (Exception $e) {}
                 
                 // Always show success if donor was found
@@ -398,16 +408,17 @@ try {
     }
 
     
-    // Get counts for dashboard
-    $donorCount = $pdo->query("SELECT COUNT(*) FROM donors")->fetchColumn();
-    $pendingDonorCount = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'pending'")->fetchColumn();
-    $approvedDonorCount = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'approved'")->fetchColumn();
-    $servedDonorCount = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'served'")->fetchColumn();
+    // Get counts for dashboard (dynamic donors table)
+    $donorCount = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable}")->fetchColumn();
+    $pendingDonorCount = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE status = 'pending'")->fetchColumn();
+    $approvedDonorCount = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE status = 'approved'")->fetchColumn();
+    $servedDonorCount = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE {$servedStatusCondition}")->fetchColumn();
     
     // Enhanced blood inventory analytics
     try {
         // Blood type distribution for approved and served donors
-        $stmt = $pdo->query("SELECT blood_type, COUNT(*) as count FROM donors WHERE status IN ('approved', 'served') GROUP BY blood_type ORDER BY count DESC");
+        $statusIn = ($donorsTable === 'donors_new') ? "('approved','served','completed')" : "('approved','served')";
+        $stmt = $pdo->query("SELECT blood_type, COUNT(*) as count FROM {$donorsTable} WHERE status IN {$statusIn} GROUP BY blood_type ORDER BY count DESC");
         $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         
@@ -426,7 +437,7 @@ try {
         }
 
         // Registrations per month (donors created) - PostgreSQL compatible
-        $stmt = $pdo->query("SELECT TO_CHAR(created_at, 'YYYY-MM') as ym, COUNT(*) as c FROM donors WHERE created_at >= CURRENT_DATE - INTERVAL '12 months' GROUP BY ym");
+        $stmt = $pdo->query("SELECT TO_CHAR(created_at, 'YYYY-MM') as ym, COUNT(*) as c FROM {$donorsTable} WHERE created_at >= CURRENT_DATE - INTERVAL '12 months' GROUP BY ym");
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
             if (isset($months[$row['ym']])) {
                 $months[$row['ym']]['registrations'] = (int)$row['c'];
@@ -435,11 +446,11 @@ try {
 
         // Donations per month: prefer donors.last_donation_date if available, fallback to blood_inventory.collection_date
         try {
-            $hasLastDonation = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'last_donation_date'")->fetch();
+            $hasLastDonation = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = '{$donorsTable}' AND column_name = 'last_donation_date'")->fetch();
         } catch (Exception $e) { $hasLastDonation = false; }
 
         if ($hasLastDonation) {
-            $stmt = $pdo->query("SELECT TO_CHAR(last_donation_date, 'YYYY-MM') as ym, COUNT(*) as c FROM donors WHERE status='served' AND last_donation_date IS NOT NULL AND last_donation_date >= CURRENT_DATE - INTERVAL '12 months' GROUP BY ym");
+            $stmt = $pdo->query("SELECT TO_CHAR(last_donation_date, 'YYYY-MM') as ym, COUNT(*) as c FROM {$donorsTable} WHERE {$servedStatusCondition} AND last_donation_date IS NOT NULL AND last_donation_date >= CURRENT_DATE - INTERVAL '12 months' GROUP BY ym");
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                 if (isset($months[$row['ym']])) {
                     $months[$row['ym']]['donations'] = (int)$row['c'];
@@ -465,13 +476,13 @@ try {
         $monthlyDonations = array_column($months, 'donations');
         
         // Status distribution
-        $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM donors GROUP BY status");
+        $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM {$donorsTable} GROUP BY status");
         $donorStatusDistribution = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // Recent activity - PostgreSQL compatible
         $recentActivity = $pdo->query("
-                    SELECT 'donor' as type, (d.first_name || ' ' || d.last_name) as name, d.status, d.created_at, d.id::text as reference
-        FROM donors d
+                    SELECT 'donor' as type, (d.first_name || ' ' || d.last_name) as name, d.status, d.created_at, COALESCE(d.reference_code::text, d.id::text) as reference
+        FROM {$donorsTable} d
         WHERE d.created_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
             ORDER BY created_at DESC 
             LIMIT 10
@@ -488,7 +499,7 @@ try {
     }
     
     // Get recent records
-    $recentDonors = $pdo->query("SELECT * FROM donors ORDER BY created_at DESC LIMIT 5")->fetchAll();
+    $recentDonors = $pdo->query("SELECT * FROM {$donorsTable} ORDER BY created_at DESC LIMIT 5")->fetchAll();
     
     // Fetch donors and requests for tabs
     $donors = [];
@@ -509,7 +520,7 @@ try {
         }
         $offset = ($page - 1) * $perPage;
         
-        $sql = 'SELECT d.* FROM donors d WHERE 1=1';
+        $sql = "SELECT d.* FROM {$donorsTable} d WHERE 1=1";
         $params = [];
         
         if ($search) {
@@ -549,7 +560,7 @@ try {
     
     if ($activeTab === 'pending-donors') {
         $search = trim($_GET['donor_search'] ?? '');
-        $sql = "SELECT d.* FROM donors d WHERE d.status = 'pending'";
+        $sql = "SELECT d.* FROM {$donorsTable} d WHERE d.status = 'pending'";
         $params = [];
         
         if ($search) {
@@ -1952,10 +1963,22 @@ function buildPaginationUrl($page) {
                                         <div class="card-header"><h5>Inventory Summary</h5></div>
                                         <div class="card-body">
                                             <?php
-                                            $totalAvailable = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'approved'")->fetchColumn();
-                                            $totalUsed = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'served'")->fetchColumn();
-                                            $totalPending = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'pending'")->fetchColumn();
-                                            $totalDonors = $pdo->query("SELECT COUNT(*) FROM donors")->fetchColumn();
+                                            // Use dynamic donors table and consistent served/completed condition
+                                            try {
+                                                $totalAvailable = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE status = 'approved'")->fetchColumn();
+                                            } catch (Throwable $e) { $totalAvailable = 0; }
+
+                                            try {
+                                                $totalUsed = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE {$servedStatusCondition}")->fetchColumn();
+                                            } catch (Throwable $e) { $totalUsed = 0; }
+
+                                            try {
+                                                $totalPending = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE status = 'pending'")->fetchColumn();
+                                            } catch (Throwable $e) { $totalPending = 0; }
+
+                                            try {
+                                                $totalDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable}")->fetchColumn();
+                                            } catch (Throwable $e) { $totalDonors = 0; }
                                             ?>
                                             <div class="row text-center">
                                                 <div class="col-6 mb-3">
@@ -2015,8 +2038,8 @@ function buildPaginationUrl($page) {
                                             $recentActivity = $pdo->query("
                                                 SELECT 
                                                     d.first_name, d.last_name, d.blood_type, d.status, d.updated_at
-                                                FROM donors d
-                                                WHERE d.status IN ('approved', 'served')
+                                                FROM {$donorsTable} d
+                                                WHERE d.status IN ('approved','served') OR d.status = 'completed'
                                                 ORDER BY d.updated_at DESC
                                                 LIMIT 10
                                             ")->fetchAll();
@@ -2086,14 +2109,14 @@ function buildPaginationUrl($page) {
                             
                             <!-- Quick Stats -->
                             <?php
-                            $totalDonors = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'served'")->fetchColumn();
+                            $totalDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE {$servedStatusCondition}")->fetchColumn();
                             $totalBloodUnits = $pdo->query("
                                 SELECT COUNT(*) FROM blood_inventory bi
-                                INNER JOIN donors d ON bi.donor_id = d.id
-                                WHERE d.status = 'served'
+                                INNER JOIN {$donorsTable} d ON bi.donor_id = d.id
+                                WHERE {$servedStatusCondition}
                             ")->fetchColumn();
-                            $pendingDonors = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'pending'")->fetchColumn();
-                            $bloodTypes = $pdo->query("SELECT COUNT(DISTINCT blood_type) FROM donors WHERE status = 'served'")->fetchColumn();
+                            $pendingDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable} WHERE status = 'pending'")->fetchColumn();
+                            $bloodTypes = (int)$pdo->query("SELECT COUNT(DISTINCT blood_type) FROM {$donorsTable} WHERE {$servedStatusCondition}")->fetchColumn();
                             ?>
                             
                             <div class="row mb-4">

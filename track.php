@@ -2,6 +2,8 @@
 // Include session configuration first - before any output
 require_once __DIR__ . '/includes/session_config.php';
 require_once 'db.php';
+// Ensure PostgreSQL compatibility helpers are available (tableExists, mysql_now)
+require_once __DIR__ . '/pg_compat.php';
 
 $error = '';
 $donor = null;
@@ -11,11 +13,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($_POST['reference'])) {
         $ref = trim($_POST['reference']);
         
-        // Check if it's a donor reference
-        $stmt = $pdo->prepare('SELECT * FROM donors WHERE reference_code = ?');
+        // Determine correct donors table dynamically
+        $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+
+        // Check if it's a donor reference in the appropriate table
+        $stmt = $pdo->prepare("SELECT * FROM {$donorsTable} WHERE reference_code = ?");
         $stmt->execute([$ref]);
         $donor = $stmt->fetch();
-        
+
         if ($donor) {
             $type = 'donor';
         } else {
