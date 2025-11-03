@@ -1,48 +1,80 @@
 <?php
-// Fingerprint the Robust manager file to confirm which version is deployed
-header('Content-Type: text/plain');
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
+// Plain-text fingerprint endpoint to verify live code state
+header('Content-Type: text/plain; charset=UTF-8');
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
 
-$file = __DIR__ . '/includes/BloodInventoryManagerRobust.php';
-if (!file_exists($file)) {
-    echo "Robust file not found at: $file\n";
-    exit;
-}
+$resp = [];
 
-$src = file_get_contents($file);
-$md5 = md5($src);
-$mtime = @date('c', @filemtime($file));
+// Basic environment info
+$resp['env'] = 'render_docker_apache_php';
+$resp['php_version'] = PHP_VERSION;
+$resp['server_software'] = $_SERVER['SERVER_SOFTWARE'] ?? 'unknown';
+$resp['request_time'] = date('c');
 
-// Heuristic feature checks for the fixed implementation
-$hasSetTotalEqCount = (
-    strpos($src, "result['total'] = \$count") !== false
-    || strpos($src, 'result[\'total\'] = $count') !== false
-);
-$hasSourceInventory = (strpos($src, "'source' => 'blood_inventory'") !== false);
-$hasSourceDonors = (strpos($src, "'source' => 'virtual_from_donors'") !== false);
-$hasGetInventoryCountCall = (strpos($src, 'getInventoryCount($filters)') !== false);
-
-$features = [
-    'set_total_equals_count' => $hasSetTotalEqCount,
-    'source_blood_inventory_present' => $hasSourceInventory,
-    'source_virtual_from_donors_present' => $hasSourceDonors,
-    'calls_getInventoryCount_in_getInventory' => $hasGetInventoryCountCall,
+// Files of interest
+$files = [
+    'admin.php',
+    'includes/admin-tabs.php',
+    '.htaccess',
+    'Dockerfile',
+    'render.yaml',
+    'db.php',
+    'db_production.php'
 ];
 
-$isFixed = $hasSetTotalEqCount && $hasSourceInventory && $hasGetInventoryCountCall;
-
-echo "Robust file mtime: $mtime\n";
-echo "Robust file md5: $md5\n\n";
-foreach ($features as $k => $v) {
-    echo $k . ': ' . ($v ? 'true' : 'false') . "\n";
+foreach ($files as $f) {
+    $info = [
+        'exists' => file_exists($f),
+    ];
+    if ($info['exists']) {
+        $info['size'] = filesize($f);
+        $info['mtime'] = @date('c', filemtime($f));
+        $info['sha1'] = @sha1_file($f);
+    }
+    $resp['file'][$f] = $info;
 }
-echo "\nVersion verdict: " . ($isFixed ? 'FIXED' : 'OLD_OR_UNKNOWN') . "\n";
 
-// Show a small snippet around getInventory
-if (preg_match('/function\s+getInventory\s*\(.*\)\s*\{[\s\S]*?\}/m', $src, $m)) {
-    $snippet = substr($m[0], 0, 500);
-    echo "\ngetInventory snippet (first 500 chars):\n";
-    echo $snippet . "\n";
+// Content markers in admin.php to verify Help & Guide changes
+$adminContent = @file_get_contents('admin.php') ?: '';
+$markers = [
+    'help_section_header' => 'Modern Help & Guide Section',
+    'action_center_block' => 'Action Center Quick Actions',
+    'action_center_tab'   => 'data-bs-target="#action-center"',
+    'help_tabs_id'        => 'id="helpTabs"',
+];
+foreach ($markers as $key => $needle) {
+    $resp['marker'][$key] = ($adminContent && strpos($adminContent, $needle) !== false) ? 'present' : 'missing';
 }
+
+// Optional: git commit id if .git is available (may not exist in container)
+$gitHead = null;
+if (is_dir('.git') && file_exists('.git/HEAD')) {
+    $head = trim(@file_get_contents('.git/HEAD'));
+    if (strpos($head, 'ref:') === 0) {
+        $ref = trim(substr($head, 5));
+        $gitHead = @file_get_contents(".git/" . $ref);
+    } else {
+        $gitHead = $head;
+    }
+}
+$resp['git_head'] = $gitHead ? trim($gitHead) : 'not_available';
+
+// Output
+echo "=== Code Fingerprint ===\n";
+foreach ($resp as $section => $value) {
+    if (is_array($value)) {
+        echo "[$section]\n";
+        foreach ($value as $k => $v) {
+            if (is_array($v)) {
+                echo "$k:" . json_encode($v, JSON_UNESCAPED_SLASHES) . "\n";
+            } else {
+                echo "$k: $v\n";
+            }
+        }
+    } else {
+        echo "$section: $value\n";
+    }
+}
+echo "\n";
 ?>
