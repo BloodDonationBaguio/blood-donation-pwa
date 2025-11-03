@@ -7,4 +7,9 @@ require_once __DIR__ . '/../db.php';
 
 // The $pdo variable and database functions (tableExists, getTableStructure)
 // are now available from the included file
+
+// Force application timezone to Asia/Manila to ensure consistent user-facing times
+if (function_exists('date_default_timezone_set')) {
+    @date_default_timezone_set('Asia/Manila');
+}
 ?>
