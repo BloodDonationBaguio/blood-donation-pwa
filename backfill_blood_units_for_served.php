@@ -49,12 +49,15 @@ try {
 
 // Resolve donors table (prefer donors_new when available)
 $donorTable = 'donors';
+$donorStatusCondition = "status = 'served'";
 try {
     if (function_exists('tableExists') && tableExists($pdo, 'donors_new')) {
         $donorTable = 'donors_new';
+        // Accept both served and completed for donors_new
+        $donorStatusCondition = "(status = 'served' OR status = 'completed')";
     }
 } catch (Exception $e) {
-    // Default remains 'donors'
+    // Default remains 'donors' with served-only
 }
 
 // Detect optional columns
@@ -71,8 +74,8 @@ try {
     // Proceed without optional columns
 }
 
-// Build query for served donors without units
-$conditions = ["status = 'served'"];
+// Build query for served/completed donors
+$conditions = [$donorStatusCondition];
 if ($seedFlagColumnExists) {
     $conditions[] = '(seed_flag IS NULL OR seed_flag = 0)';
 }
@@ -92,8 +95,8 @@ $errors = 0;
 
 foreach ($servedDonors as $donor) {
     try {
-        // Check if donor already has any units
-        $checkStmt = $pdo->prepare('SELECT COUNT(*) AS count FROM blood_inventory WHERE donor_id = ?');
+        // Check if donor already has any AVAILABLE units (ignore used-only donors)
+        $checkStmt = $pdo->prepare("SELECT COUNT(*) AS count FROM blood_inventory WHERE donor_id = ? AND status = 'available'");
         $checkStmt->execute([$donor['id']]);
         $count = (int)($checkStmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0);
 
