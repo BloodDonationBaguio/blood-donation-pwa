@@ -2207,6 +2207,83 @@ function buildPaginationUrl($page) {
                                 </div>
                             </div>
                             
+                            <!-- Action Center Quick Actions (surfaced at top) -->
+                            <div class="card border-0 shadow-sm mb-4">
+                                <div class="card-body">
+                                    <h4 class="card-title text-primary mb-3">
+                                        <i class="fas fa-bolt me-2"></i>Action Center
+                                    </h4>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <div class="card h-100 border-0">
+                                                <div class="card-body">
+                                                    <h6 class="text-warning"><i class="fas fa-user-clock me-2"></i>Review Pending Donors</h6>
+                                                    <p class="small text-muted mb-3">Approve or reject with remarks.</p>
+                                                    <a href="?tab=pending-donors" class="btn btn-sm btn-outline-warning">Open</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card h-100 border-0">
+                                                <div class="card-body">
+                                                    <h6 class="text-success"><i class="fas fa-user-check me-2"></i>Mark Donor Served</h6>
+                                                    <p class="small text-muted mb-3">Confirm completed donations.</p>
+                                                    <a href="?tab=donor-list&status_filter=approved" class="btn btn-sm btn-outline-success">Filter Approved</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card h-100 border-0">
+                                                <div class="card-body">
+                                                    <h6 class="text-primary"><i class="fas fa-tint me-2"></i>Manage Inventory</h6>
+                                                    <p class="small text-muted mb-3">Add, update, and search units.</p>
+                                                    <a href="admin_blood_inventory_modern.php" class="btn btn-sm btn-outline-primary">Open Inventory</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card h-100 border-0">
+                                                <div class="card-body">
+                                                    <h6 class="text-info"><i class="fas fa-history me-2"></i>Audit Log</h6>
+                                                    <p class="small text-muted mb-3">Trace actions and changes.</p>
+                                                    <a href="?tab=audit-log" class="btn btn-sm btn-outline-info">Open Audit Log</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card h-100 border-0">
+                                                <div class="card-body">
+                                                    <h6 class="text-danger"><i class="fas fa-search me-2"></i>Find Donors by Type</h6>
+                                                    <div class="input-group input-group-sm">
+                                                        <select id="acTopBloodType" class="form-select form-select-sm">
+                                                            <option value="A+">A+</option>
+                                                            <option value="A-">A-</option>
+                                                            <option value="B+">B+</option>
+                                                            <option value="B-">B-</option>
+                                                            <option value="AB+">AB+</option>
+                                                            <option value="AB-">AB-</option>
+                                                            <option value="O+">O+</option>
+                                                            <option value="O-">O-</option>
+                                                        </select>
+                                                        <button class="btn btn-outline-danger" onclick="viewDonors(document.getElementById('acTopBloodType').value)">View</button>
+                                                    </div>
+                                                    <small class="text-muted d-block mt-2">Redirects to Donor List filtered by blood type.</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card h-100 border-0">
+                                                <div class="card-body">
+                                                    <h6 class="text-secondary"><i class="fas fa-file-pdf me-2"></i>Save Guide as PDF</h6>
+                                                    <p class="small text-muted mb-3">Use Print to save a PDF.</p>
+                                                    <button class="btn btn-sm btn-outline-secondary" onclick="downloadGuide()">Download PDF</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Main Content Tabs -->
                             <div class="row">
                                 <div class="col-lg-8">
