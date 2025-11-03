@@ -118,6 +118,13 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 $inventoryManager = new BloodInventoryManagerComplete($pdo);
 $robustManager = new BloodInventoryManagerRobust($pdo, true);
 
+// Auto-backfill: ensure 1 unit per served/completed donor when missing
+try {
+    $inventoryManager->backfillMissingUnits(500);
+} catch (Throwable $e) {
+    error_log('Backfill invocation failed: ' . $e->getMessage());
+}
+
 // Get user permissions - ALL FEATURES ENABLED
 $userRole = $_SESSION['admin_role'] ?? 'super_admin';
 $canEdit = true; // Always allow editing

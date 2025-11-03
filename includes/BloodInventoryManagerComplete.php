@@ -1022,5 +1022,95 @@ class BloodInventoryManagerComplete {
             return 0;
         }
     }
+
+    /**
+     * Backfill missing blood_inventory units for served/completed donors.
+     * Ensures 1 real unit per eligible donor if none exists yet.
+     */
+    public function backfillMissingUnits($maxInserts = 500) {
+        $inserted = 0;
+        $startedTx = false;
+        try {
+            // Determine donor table dynamically (prefer donors_new when populated)
+            $donorTable = 'donors';
+            try {
+                $stmt = $this->pdo->query("SELECT COUNT(*) AS cnt FROM donors_new");
+                $hasNew = (int)$stmt->fetch(PDO::FETCH_ASSOC)['cnt'] > 0;
+                if ($hasNew) { $donorTable = 'donors_new'; }
+            } catch (Throwable $e) {
+                // fall back to donors
+            }
+
+            // Eligibility condition
+            $eligibility = ($donorTable === 'donors_new')
+                ? "status IN ('served','completed')"
+                : "status = 'served'";
+
+            // Find donors with no existing inventory unit
+            $sql = "
+                SELECT d.id, d.first_name, d.last_name, d.blood_type,
+                       COALESCE(d.created_at, d.registration_date, CURRENT_DATE) AS collection_date
+                FROM {$donorTable} d
+                LEFT JOIN blood_inventory bi ON bi.donor_id = d.id
+                WHERE {$eligibility} AND bi.id IS NULL
+                ORDER BY d.created_at DESC
+                LIMIT ?
+            ";
+            $st = $this->pdo->prepare($sql);
+            $st->execute([$maxInserts]);
+            $missing = $st->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($missing)) { return ['success' => true, 'inserted' => 0]; }
+
+            // Begin transaction if not already in one
+            if (!$this->pdo->inTransaction()) {
+                $this->pdo->beginTransaction();
+                $startedTx = true;
+            }
+
+            // Prepare insert statement
+            $ins = $this->pdo->prepare("INSERT INTO blood_inventory (
+                    unit_id, donor_id, blood_type, collection_date, expiry_date,
+                    status, collection_site, storage_location, created_at
+                ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, CURRENT_TIMESTAMP)");
+
+            foreach ($missing as $d) {
+                $unitId = $this->generateUnitId($d['blood_type'] ?? 'O+');
+                // Align with system rule: 25 days after collection
+                $collectionDate = $d['collection_date'] ?? date('Y-m-d');
+                $expiryDate = date('Y-m-d', strtotime($collectionDate . ' +25 days'));
+                $ins->execute([
+                    $unitId,
+                    $d['id'],
+                    $d['blood_type'] ?? 'Unknown',
+                    $collectionDate,
+                    $expiryDate,
+                    'Main Center',
+                    'Storage A'
+                ]);
+
+                // Audit each insert
+                $this->logAudit($this->pdo->lastInsertId(), 'unit_backfilled', 'Backfilled unit for served donor', [
+                    'unit_id' => $unitId,
+                    'donor_id' => $d['id'],
+                    'donor_name' => trim(($d['first_name'] ?? '') . ' ' . ($d['last_name'] ?? '')),
+                    'blood_type' => $d['blood_type'] ?? 'Unknown'
+                ]);
+                $inserted++;
+            }
+
+            if ($startedTx && $this->pdo->inTransaction()) {
+                try { $this->pdo->commit(); } catch (Throwable $ce) { /* ignore */ }
+            }
+
+            return ['success' => true, 'inserted' => $inserted];
+        } catch (Exception $e) {
+            if ($startedTx && $this->pdo->inTransaction()) {
+                try { $this->pdo->rollBack(); } catch (Throwable $re) { /* ignore */ }
+            }
+            error_log('Backfill error: ' . $e->getMessage());
+            return ['success' => false, 'inserted' => $inserted, 'message' => $e->getMessage()];
+        }
+    }
 }
 ?>
