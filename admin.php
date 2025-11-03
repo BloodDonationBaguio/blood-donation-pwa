@@ -2213,7 +2213,7 @@ function buildPaginationUrl($page) {
                                     <!-- Navigation Tabs -->
                                     <ul class="nav nav-pills nav-fill mb-4" id="helpTabs" role="tablist">
                                         <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="overview-tab" data-bs-toggle="pill" data-bs-target="#overview" type="button" role="tab">
+                                            <button class="nav-link" id="overview-tab" data-bs-toggle="pill" data-bs-target="#overview" type="button" role="tab">
                                                 <i class="fas fa-home me-2"></i>Overview
                                             </button>
                                         </li>
@@ -2233,7 +2233,7 @@ function buildPaginationUrl($page) {
                                             </button>
                                         </li>
                                         <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="action-center-tab" data-bs-toggle="pill" data-bs-target="#action-center" type="button" role="tab">
+                                            <button class="nav-link active" id="action-center-tab" data-bs-toggle="pill" data-bs-target="#action-center" type="button" role="tab">
                                                 <i class="fas fa-bolt me-2"></i>Action Center
                                             </button>
                                         </li>
@@ -2262,7 +2262,7 @@ function buildPaginationUrl($page) {
                                     <!-- Tab Content -->
                                     <div class="tab-content" id="helpTabContent">
                                         <!-- Overview Tab -->
-                                        <div class="tab-pane fade show active help-section" id="overview" role="tabpanel">
+                                        <div class="tab-pane fade help-section" id="overview" role="tabpanel">
                                             <div class="card border-0 shadow-sm">
                                                 <div class="card-body">
                                                     <h4 class="card-title text-primary mb-4">
@@ -2543,7 +2543,7 @@ function buildPaginationUrl($page) {
                                         </div>
 
                                         <!-- Action Center Tab -->
-                                        <div class="tab-pane fade help-section" id="action-center" role="tabpanel">
+                                        <div class="tab-pane fade show active help-section" id="action-center" role="tabpanel">
                                             <div class="card border-0 shadow-sm">
                                                 <div class="card-body">
                                                     <h4 class="card-title text-primary mb-4">
