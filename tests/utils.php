@@ -20,6 +20,18 @@ function t_result($passed, $failed, $skipped = 0) {
     echo "\nSummary: PASS=$passed, FAIL=$failed, SKIP=$skipped\n";
 }
 
+function t_pass($message) {
+    echo "[PASS] $message\n";
+}
+
+function t_fail($message) {
+    echo "[FAIL] $message\n";
+}
+
+function t_skip($message) {
+    echo "[SKIP] $message\n";
+}
+
 /**
  * Extract "Showing X-Y of Z units" from admin_blood_inventory_modern.php HTML
  */

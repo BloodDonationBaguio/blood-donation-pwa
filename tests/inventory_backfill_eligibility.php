@@ -2,7 +2,17 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-require_once __DIR__ . '/../db.php';
+// Prefer production DB config, then fallback
+try {
+    require_once __DIR__ . '/../db_production.php';
+    if (!isset($pdo) || !($pdo instanceof PDO)) {
+        require_once __DIR__ . '/../db.php';
+    }
+} catch (Throwable $e) {
+    if (!isset($pdo) || !($pdo instanceof PDO)) {
+        @require_once __DIR__ . '/../db.php';
+    }
+}
 require_once __DIR__ . '/../includes/BloodInventoryManagerComplete.php';
 require_once __DIR__ . '/utils.php';
 
