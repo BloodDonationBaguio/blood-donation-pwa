@@ -2232,6 +2232,31 @@ function buildPaginationUrl($page) {
                                                 <i class="fas fa-star me-2"></i>Features
                                             </button>
                                         </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="action-center-tab" data-bs-toggle="pill" data-bs-target="#action-center" type="button" role="tab">
+                                                <i class="fas fa-bolt me-2"></i>Action Center
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="sops-tab" data-bs-toggle="pill" data-bs-target="#sops" type="button" role="tab">
+                                                <i class="fas fa-clipboard-check me-2"></i>SOPs & Checklists
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="emergency-tab" data-bs-toggle="pill" data-bs-target="#emergency" type="button" role="tab">
+                                                <i class="fas fa-ambulance me-2"></i>Emergency Protocols
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="templates-tab" data-bs-toggle="pill" data-bs-target="#templates" type="button" role="tab">
+                                                <i class="fas fa-envelope-open-text me-2"></i>Templates
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="faq-tab" data-bs-toggle="pill" data-bs-target="#faq" type="button" role="tab">
+                                                <i class="fas fa-question-circle me-2"></i>FAQ
+                                            </button>
+                                        </li>
                                     </ul>
                                     
                                     <!-- Tab Content -->
@@ -2516,6 +2541,268 @@ function buildPaginationUrl($page) {
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <!-- Action Center Tab -->
+                                        <div class="tab-pane fade help-section" id="action-center" role="tabpanel">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body">
+                                                    <h4 class="card-title text-primary mb-4">
+                                                        <i class="fas fa-bolt me-2"></i>Action Center
+                                                    </h4>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-4">
+                                                            <div class="card h-100 border-0">
+                                                                <div class="card-body">
+                                                                    <h6 class="text-warning"><i class="fas fa-user-clock me-2"></i>Review Pending Donors</h6>
+                                                                    <p class="small text-muted mb-3">Approve or reject with remarks.</p>
+                                                                    <a href="?tab=pending-donors" class="btn btn-sm btn-outline-warning">Open</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="card h-100 border-0">
+                                                                <div class="card-body">
+                                                                    <h6 class="text-success"><i class="fas fa-user-check me-2"></i>Mark Donor Served</h6>
+                                                                    <p class="small text-muted mb-3">Confirm completed donations.</p>
+                                                                    <a href="?tab=donor-list&status_filter=approved" class="btn btn-sm btn-outline-success">Filter Approved</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="card h-100 border-0">
+                                                                <div class="card-body">
+                                                                    <h6 class="text-primary"><i class="fas fa-tint me-2"></i>Manage Inventory</h6>
+                                                                    <p class="small text-muted mb-3">Add, update, and search units.</p>
+                                                                    <a href="admin_blood_inventory_modern.php" class="btn btn-sm btn-outline-primary">Open Inventory</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="card h-100 border-0">
+                                                                <div class="card-body">
+                                                                    <h6 class="text-info"><i class="fas fa-history me-2"></i>Audit Log</h6>
+                                                                    <p class="small text-muted mb-3">Trace actions and changes.</p>
+                                                                    <a href="?tab=audit-log" class="btn btn-sm btn-outline-info">Open Audit Log</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="card h-100 border-0">
+                                                                <div class="card-body">
+                                                                    <h6 class="text-danger"><i class="fas fa-search me-2"></i>Find Donors by Type</h6>
+                                                                    <div class="input-group input-group-sm">
+                                                                        <select id="acBloodType" class="form-select form-select-sm">
+                                                                            <option value="A+">A+</option>
+                                                                            <option value="A-">A-</option>
+                                                                            <option value="B+">B+</option>
+                                                                            <option value="B-">B-</option>
+                                                                            <option value="AB+">AB+</option>
+                                                                            <option value="AB-">AB-</option>
+                                                                            <option value="O+">O+</option>
+                                                                            <option value="O-">O-</option>
+                                                                        </select>
+                                                                        <button class="btn btn-outline-danger" onclick="viewDonors(document.getElementById('acBloodType').value)">
+                                                                            View
+                                                                        </button>
+                                                                    </div>
+                                                                    <small class="text-muted d-block mt-2">Redirects to Donor List filtered by blood type.</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="card h-100 border-0">
+                                                                <div class="card-body">
+                                                                    <h6 class="text-secondary"><i class="fas fa-file-pdf me-2"></i>Save Guide as PDF</h6>
+                                                                    <p class="small text-muted mb-3">Use Print to save a PDF.</p>
+                                                                    <button class="btn btn-sm btn-outline-secondary" onclick="downloadGuide()">Download PDF</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- SOPs & Checklists Tab -->
+                                        <div class="tab-pane fade help-section" id="sops" role="tabpanel">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body">
+                                                    <h4 class="card-title text-primary mb-4">
+                                                        <i class="fas fa-clipboard-check me-2"></i>SOPs & Daily Operations
+                                                    </h4>
+                                                    <div class="row g-4">
+                                                        <div class="col-md-6">
+                                                            <h6 class="text-primary mb-2">Daily Opening</h6>
+                                                            <ul class="list-group list-group-flush">
+                                                                <li class="list-group-item border-0 px-0">
+                                                                    <i class="fas fa-user-clock text-warning me-2"></i>Review pending donors
+                                                                    <a href="?tab=pending-donors" class="btn btn-sm btn-outline-warning ms-2">Open</a>
+                                                                </li>
+                                                                <li class="list-group-item border-0 px-0">
+                                                                    <i class="fas fa-tint text-primary me-2"></i>Check inventory levels
+                                                                    <a href="admin_blood_inventory_modern.php" class="btn btn-sm btn-outline-primary ms-2">Open</a>
+                                                                </li>
+                                                                <li class="list-group-item border-0 px-0">
+                                                                    <i class="fas fa-history text-info me-2"></i>Review audit log highlights
+                                                                    <a href="?tab=audit-log" class="btn btn-sm btn-outline-info ms-2">Open</a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <h6 class="text-success mb-2">Donation Day Flow</h6>
+                                                            <ol class="small mb-0">
+                                                                <li>Pre-screen donor; verify eligibility and recent activity.</li>
+                                                                <li>Approve donor; communicate schedule and instructions.</li>
+                                                                <li>Collect donation; ensure proper labeling and chain-of-custody.</li>
+                                                                <li>Mark donor <strong>Served</strong> with notes for tracking.</li>
+                                                                <li>Add blood unit to Inventory and link donor correctly.</li>
+                                                            </ol>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <h6 class="text-warning mb-2">End-of-Day</h6>
+                                                            <ul class="list-group list-group-flush">
+                                                                <li class="list-group-item border-0 px-0">Update unit statuses (Used/Expired/Quarantined) as applicable.</li>
+                                                                <li class="list-group-item border-0 px-0">Check for discrepancies and reconcile via Audit Log.</li>
+                                                                <li class="list-group-item border-0 px-0">Plan follow-ups for pending or unserved donors.</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Emergency Protocols Tab -->
+                                        <div class="tab-pane fade help-section" id="emergency" role="tabpanel">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body">
+                                                    <h4 class="card-title text-danger mb-4">
+                                                        <i class="fas fa-ambulance me-2"></i>Emergency Protocols
+                                                    </h4>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <div class="border rounded p-3 h-100">
+                                                                <h6 class="text-danger">Critical Blood Shortage</h6>
+                                                                <ol class="small mb-2">
+                                                                    <li>Identify shortage blood type(s) from Inventory.</li>
+                                                                    <li>Filter donors by blood type and eligibility.</li>
+                                                                    <li>Send reminder messages to recent donors.</li>
+                                                                    <li>Coordinate with hospitals for urgent matching.</li>
+                                                                </ol>
+                                                                <div class="d-flex gap-2">
+                                                                    <a href="admin_blood_inventory_modern.php" class="btn btn-sm btn-outline-primary">Open Inventory</a>
+                                                                    <a href="?tab=donor-list" class="btn btn-sm btn-outline-secondary">Open Donor List</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="border rounded p-3 h-100">
+                                                                <h6 class="text-info">Data Discrepancy or Audit</h6>
+                                                                <ol class="small mb-2">
+                                                                    <li>Use Audit Log to trace recent changes.</li>
+                                                                    <li>Verify donor status transitions and inventory links.</li>
+                                                                    <li>Document findings and corrective actions.</li>
+                                                                </ol>
+                                                                <a href="?tab=audit-log" class="btn btn-sm btn-outline-info">Open Audit Log</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Communication Templates Tab -->
+                                        <div class="tab-pane fade help-section" id="templates" role="tabpanel">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body">
+                                                    <h4 class="card-title text-primary mb-4">
+                                                        <i class="fas fa-envelope-open-text me-2"></i>Communication Templates
+                                                    </h4>
+                                                    <div class="mb-3">
+                                                        <h6 class="mb-2">SMS: Donation Reminder</h6>
+                                                        <div class="bg-light p-3 rounded small mb-2">
+Dear [Name], this is the Red Cross Baguio. We are currently in need of [Blood Type] units. If you’re eligible, please reply or visit the center to schedule your donation. Thank you! – Admin
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-primary" onclick="copyTemplate('Dear [Name], this is the Red Cross Baguio. We are currently in need of [Blood Type] units. If you’re eligible, please reply or visit the center to schedule your donation. Thank you! – Admin')">
+                                                            <i class="fas fa-copy me-1"></i>Copy SMS
+                                                        </button>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6 class="mb-2">Email: Shortage Appeal</h6>
+                                                        <div class="bg-light p-3 rounded small mb-2">
+Subject: Urgent Need for [Blood Type] – Red Cross Baguio
+
+Dear Partners,
+We are facing a shortage of [Blood Type] units due to recent emergencies. If your team can assist with donors or units, please contact us at [phone/email]. We appreciate your support.
+
+Regards,
+Admin Team
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-primary" onclick="copyTemplate('Subject: Urgent Need for [Blood Type] – Red Cross Baguio\n\nDear Partners,\nWe are facing a shortage of [Blood Type] units due to recent emergencies. If your team can assist with donors or units, please contact us at [phone/email]. We appreciate your support.\n\nRegards,\nAdmin Team')">
+                                                            <i class="fas fa-copy me-1"></i>Copy Email
+                                                        </button>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-2">Phone Script: Donor Follow-up</h6>
+                                                        <div class="bg-light p-3 rounded small mb-2">
+Hello [Name], this is the Red Cross Baguio. Thank you for your previous donation. We have an upcoming need for [Blood Type]. Are you available to donate this week? We can schedule at your convenience.
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-primary" onclick="copyTemplate('Hello [Name], this is the Red Cross Baguio. Thank you for your previous donation. We have an upcoming need for [Blood Type]. Are you available to donate this week? We can schedule at your convenience.')">
+                                                            <i class="fas fa-copy me-1"></i>Copy Script
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- FAQ & Troubleshooting Tab -->
+                                        <div class="tab-pane fade help-section" id="faq" role="tabpanel">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body">
+                                                    <h4 class="card-title text-primary mb-4">
+                                                        <i class="fas fa-question-circle me-2"></i>FAQ & Troubleshooting
+                                                    </h4>
+                                                    <div class="accordion" id="faqAccordion">
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="faqOne">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqOneCollapse">
+                                                                    How do I save the guide as PDF?
+                                                                </button>
+                                                            </h2>
+                                                            <div id="faqOneCollapse" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                                <div class="accordion-body small">
+                                                                    Click <em>Print Guide</em> then choose <strong>Save as PDF</strong> in the browser print dialog.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="faqTwo">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqTwoCollapse">
+                                                                    I can’t find donors by blood type.
+                                                                </button>
+                                                            </h2>
+                                                            <div id="faqTwoCollapse" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                                <div class="accordion-body small">
+                                                                    Use the <em>Donor List</em> filters or the Action Center quick filter to jump directly to donors by blood type.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="faqThree">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqThreeCollapse">
+                                                                    Why don’t I see units for unserved donors?
+                                                                </button>
+                                                            </h2>
+                                                            <div id="faqThreeCollapse" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                                <div class="accordion-body small">
+                                                                    The inventory only shows units from donors marked <strong>Served</strong> to ensure data accuracy.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
 
