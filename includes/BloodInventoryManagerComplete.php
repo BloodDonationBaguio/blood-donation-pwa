@@ -16,6 +16,20 @@ class BloodInventoryManagerComplete {
      */
     public function getDashboardSummary() {
         try {
+            // Exclude soft-deleted rows from dashboard summary
+            $hasDeletedAt = false;
+            try {
+                if (function_exists('getTableStructure')) {
+                    $cols = getTableStructure($this->pdo, 'blood_inventory');
+                    foreach ($cols as $col) {
+                        $name = strtolower($col['column_name'] ?? $col['Field'] ?? '');
+                        if ($name === 'deleted_at') { $hasDeletedAt = true; break; }
+                    }
+                }
+            } catch (Exception $e) { /* ignore */ }
+
+            $where = $hasDeletedAt ? 'WHERE deleted_at IS NULL' : "WHERE status <> 'deleted'";
+
             $stmt = $this->pdo->query("
                 SELECT 
                     COALESCE(COUNT(*), 0) AS total_units,
@@ -23,6 +37,7 @@ class BloodInventoryManagerComplete {
                     COALESCE(SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END), 0) AS expired_units,
                     COALESCE(SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END), 0) AS used_units
                 FROM blood_inventory
+                $where
             ");
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$row || !isset($row['total_units'])) {
@@ -34,6 +49,7 @@ class BloodInventoryManagerComplete {
                         COALESCE(SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END), 0) AS expired_units,
                         COALESCE(SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END), 0) AS used_units
                     FROM public.blood_inventory
+                    $where
                 ");
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
             }
@@ -144,12 +160,29 @@ class BloodInventoryManagerComplete {
                 $params[] = $filters['blood_type'];
             }
 
+            // Deleted filtering: prefer deleted_at IS NULL if column exists
+            $hasDeletedAt = false;
+            try {
+                if (function_exists('getTableStructure')) {
+                    $cols = getTableStructure($this->pdo, 'blood_inventory');
+                    foreach ($cols as $col) {
+                        $name = strtolower($col['column_name'] ?? $col['Field'] ?? '');
+                        if ($name === 'deleted_at') { $hasDeletedAt = true; break; }
+                    }
+                }
+            } catch (Exception $e) {
+                // ignore detection errors
+            }
+
             if (!empty($filters['status'])) {
                 $whereConditions[] = "bi.status = ?";
                 $params[] = $filters['status'];
+            }
+            // Always exclude soft-deleted rows if deleted_at exists; else fallback to status<> 'deleted'
+            if ($hasDeletedAt) {
+                $whereConditions[] = "(bi.deleted_at IS NULL)";
             } else {
-                // Exclude soft-deleted rows by default
-                $whereConditions[] = "bi.status <> 'deleted'";
+                $whereConditions[] = "(bi.status <> 'deleted')";
             }
 
             if (!empty($filters['search'])) {
@@ -725,9 +758,39 @@ class BloodInventoryManagerComplete {
                 // Continue with deletion even if audit fails
             }
 
-            // Soft-delete unit by marking status as 'deleted'
-            $deleteStmt = $this->pdo->prepare("UPDATE blood_inventory SET status = 'deleted' WHERE unit_id = ?");
-            $deleteStmt->execute([$unitId]);
+            // Ensure soft-delete columns exist and perform soft delete via deleted_at (avoids status constraint violations)
+            try {
+                $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            } catch (Throwable $e) {
+                $driver = 'mysql';
+            }
+
+            // Create columns if missing (driver-aware)
+            try {
+                if ($driver === 'pgsql') {
+                    $this->pdo->exec("ALTER TABLE blood_inventory ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ NULL");
+                    $this->pdo->exec("ALTER TABLE blood_inventory ADD COLUMN IF NOT EXISTS deleted_reason TEXT NULL");
+                } else {
+                    // MySQL/MariaDB: check existence via information_schema
+                    $chk = $this->pdo->query("SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'blood_inventory' AND COLUMN_NAME = 'deleted_at'");
+                    $hasDelAt = (int)($chk->fetch(PDO::FETCH_ASSOC)['c'] ?? 0) > 0;
+                    if (!$hasDelAt) {
+                        $this->pdo->exec("ALTER TABLE blood_inventory ADD COLUMN deleted_at DATETIME NULL");
+                    }
+                    $chk2 = $this->pdo->query("SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'blood_inventory' AND COLUMN_NAME = 'deleted_reason'");
+                    $hasReason = (int)($chk2->fetch(PDO::FETCH_ASSOC)['c'] ?? 0) > 0;
+                    if (!$hasReason) {
+                        $this->pdo->exec("ALTER TABLE blood_inventory ADD COLUMN deleted_reason TEXT NULL");
+                    }
+                }
+            } catch (Exception $ddlEx) {
+                // Log but continue; deletion will still work if column exists
+                error_log('Soft-delete column DDL failed or skipped: ' . $ddlEx->getMessage());
+            }
+
+            // Perform soft delete by setting deleted_at and optional reason; keep status unchanged
+            $deleteStmt = $this->pdo->prepare("UPDATE blood_inventory SET deleted_at = CURRENT_TIMESTAMP, deleted_reason = ? WHERE unit_id = ?");
+            $deleteStmt->execute([$reason, $unitId]);
 
             // Verify update
             if ($deleteStmt->rowCount() === 0) {
@@ -987,13 +1050,31 @@ class BloodInventoryManagerComplete {
                 $params[] = $filters['blood_type'];
             }
             
-            // Status filter
+            // Deleted filtering: prefer deleted_at IS NULL if column exists
+            $hasDeletedAt = false;
+            try {
+                if (function_exists('getTableStructure')) {
+                    $cols = getTableStructure($this->pdo, 'blood_inventory');
+                    foreach ($cols as $col) {
+                        $name = strtolower($col['column_name'] ?? $col['Field'] ?? '');
+                        if ($name === 'deleted_at') { $hasDeletedAt = true; break; }
+                    }
+                }
+            } catch (Exception $e) {
+                // ignore detection errors
+            }
+
+            // Status filter (optional)
             if (!empty($filters['status'])) {
                 $whereConditions[] = 'bi.status = ?';
                 $params[] = $filters['status'];
+            }
+
+            // Always exclude soft-deleted rows if deleted_at exists; else fallback to status<> 'deleted'
+            if ($hasDeletedAt) {
+                $whereConditions[] = '(bi.deleted_at IS NULL)';
             } else {
-                // Exclude soft-deleted rows by default
-                $whereConditions[] = "bi.status <> 'deleted'";
+                $whereConditions[] = "(bi.status <> 'deleted')";
             }
             
             // Search filter

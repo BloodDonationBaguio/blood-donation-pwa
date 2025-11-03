@@ -520,58 +520,84 @@ $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = CURRENT_TIMES
         }
         $offset = ($page - 1) * $perPage;
         
-        $sql = "SELECT d.* FROM {$donorsTable} d WHERE 1=1";
+        // Build shared filters and query across both donors tables
+        $where = ' WHERE 1=1';
         $params = [];
         
         if ($search) {
-            $sql .= ' AND ((d.first_name || \' \' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?)';
+            $where .= " AND ((first_name || ' ' || last_name) LIKE ? OR email LIKE ? OR phone LIKE ?)";
             $params = array_merge($params, array_fill(0, 3, "%$search%"));
         }
         
         if ($statusFilter) {
-            $sql .= ' AND d.status = ?';
+            $where .= ' AND status = ?';
             $params[] = $statusFilter;
         }
         
         if ($bloodTypeFilter) {
-            $sql .= ' AND d.blood_type = ?';
+            $where .= ' AND blood_type = ?';
             $params[] = $bloodTypeFilter;
         }
         
-        // Get total count for pagination
-        $countSql = str_replace('SELECT d.*', 'SELECT COUNT(*) as total', $sql);
-        $countStmt = $pdo->prepare($countSql);
-        $countStmt->execute($params);
-        $totalRecords = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
-        $totalPages = ceil($totalRecords / $perPage);
+        // Fetch from donors_new (if present) and donors, merge and paginate
+        $allDonors = [];
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM donors_new" . $where . " ORDER BY created_at DESC");
+            $stmt->execute($params);
+            $allDonors = array_merge($allDonors, $stmt->fetchAll(PDO::FETCH_ASSOC));
+        } catch (Throwable $e) {
+            // donors_new may not exist; ignore
+        }
         
-        // Calculate pagination info
-        $startRecord = $offset + 1;
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM donors" . $where . " ORDER BY created_at DESC");
+            $stmt->execute($params);
+            $allDonors = array_merge($allDonors, $stmt->fetchAll(PDO::FETCH_ASSOC));
+        } catch (Throwable $e) {
+            // donors may not exist; ignore
+        }
+        
+        usort($allDonors, function($a, $b) {
+            $ta = isset($a['created_at']) ? strtotime($a['created_at']) : 0;
+            $tb = isset($b['created_at']) ? strtotime($b['created_at']) : 0;
+            return $tb <=> $ta;
+        });
+        
+        $totalRecords = count($allDonors);
+        $totalPages = (int)ceil($totalRecords / $perPage);
+        $startRecord = $totalRecords ? ($offset + 1) : 0;
         $endRecord = min($offset + $perPage, $totalRecords);
         
-        $sql .= ' ORDER BY d.created_at DESC LIMIT ? OFFSET ?';
-        $params[] = $perPage;
-        $params[] = $offset;
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $donors = $stmt->fetchAll();
+        $donors = array_slice($allDonors, $offset, $perPage);
     }
     
     if ($activeTab === 'pending-donors') {
         $search = trim($_GET['donor_search'] ?? '');
-        $sql = "SELECT d.* FROM {$donorsTable} d WHERE d.status = 'pending'";
         $params = [];
-        
+        $where = " WHERE status = 'pending'";
         if ($search) {
-            $sql .= " AND ((d.first_name || ' ' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?)";
+            $where .= " AND ((first_name || ' ' || last_name) LIKE ? OR email LIKE ? OR phone LIKE ?)";
             $params = array_fill(0, 3, "%$search%");
         }
         
-        $sql .= ' ORDER BY d.created_at DESC';
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $pendingDonors = $stmt->fetchAll();
+        $pendingDonors = [];
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM donors_new" . $where . " ORDER BY created_at DESC");
+            $stmt->execute($params);
+            $pendingDonors = array_merge($pendingDonors, $stmt->fetchAll(PDO::FETCH_ASSOC));
+        } catch (Throwable $e) {}
+        
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM donors" . $where . " ORDER BY created_at DESC");
+            $stmt->execute($params);
+            $pendingDonors = array_merge($pendingDonors, $stmt->fetchAll(PDO::FETCH_ASSOC));
+        } catch (Throwable $e) {}
+        
+        usort($pendingDonors, function($a, $b) {
+            $ta = isset($a['created_at']) ? strtotime($a['created_at']) : 0;
+            $tb = isset($b['created_at']) ? strtotime($b['created_at']) : 0;
+            return $tb <=> $ta;
+        });
     }
     
     
@@ -1333,6 +1359,7 @@ function buildPaginationUrl($page) {
                                                 <option value="AB-" <?= ($_GET['blood_type_filter'] ?? '') === 'AB-' ? 'selected' : '' ?>>AB-</option>
                                                 <option value="O+" <?= ($_GET['blood_type_filter'] ?? '') === 'O+' ? 'selected' : '' ?>>O+</option>
                                                 <option value="O-" <?= ($_GET['blood_type_filter'] ?? '') === 'O-' ? 'selected' : '' ?>>O-</option>
+                                                <option value="Unknown" <?= ($_GET['blood_type_filter'] ?? '') === 'Unknown' ? 'selected' : '' ?>>Unknown</option>
                                             </select>
                                         </div>
                                         
