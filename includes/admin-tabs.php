@@ -1256,7 +1256,7 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="confirmReject()">Reject</button>
+                <button type="button" id="rejectConfirmBtn" class="btn btn-danger" onclick="confirmReject()">Reject</button>
             </div>
         </div>
     </div>
@@ -1431,6 +1431,13 @@ function confirmReject() {
         const reason = reasonElement.value;
         const customReason = customReasonElement.value;
         const finalReason = reason === 'Other' ? customReason : reason;
+        // Show button-level loading on confirm and disable modal controls
+        try {
+            const confirmBtn = document.getElementById('rejectConfirmBtn');
+            if (confirmBtn) { showLoading(confirmBtn, 'Rejecting...'); }
+            const cancelBtn = document.querySelector('#rejectModal [data-bs-dismiss="modal"]');
+            if (cancelBtn) { cancelBtn.classList.add('disabled'); cancelBtn.disabled = true; }
+        } catch(_) {}
         if (typeof showGlobalLoader === 'function') { showGlobalLoader('Rejecting donor...'); }
         fetch('admin/ajax/donor_actions.php', {
             method: 'POST',
@@ -1880,7 +1887,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const id = this.getAttribute('data-donor-id');
             if (!id) return;
             if (!confirm('Approve this donor?')) return;
+
+            // Show button-level loading and disable sibling action controls
+            try {
+                showLoading(this, 'Approving...');
+                const actionsCell = this.closest('td');
+                if (actionsCell) {
+                    actionsCell.querySelectorAll('a,button').forEach(el => {
+                        if (el !== this) {
+                            el.classList.add('disabled');
+                            el.style.pointerEvents = 'none';
+                        }
+                    });
+                }
+            } catch(_) {}
+
+            // Also show full-page loader for feedback
             showGlobalLoader('Approving donor...');
+
             fetch('admin/ajax/donor_actions.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
