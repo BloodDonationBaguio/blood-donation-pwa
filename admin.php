@@ -2118,6 +2118,20 @@ function buildPaginationUrl($page) {
                                     </button>
                                 </div>
                             </div>
+
+                            <!-- Manila Time notice and Help search -->
+                            <div class="row g-3 align-items-center mb-3">
+                                <div class="col-md-6">
+                                    <div class="small text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        All times shown in Manila (Asia/Manila). Current time:
+                                        <span class="fw-semibold"><?= date('F j, Y g:i A') ?></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="search" id="helpSearch" class="form-control" placeholder="Search help topics…" oninput="filterHelpSections()" />
+                                </div>
+                            </div>
                             
                             <!-- Welcome Banner -->
                             <div class="alert alert-gradient border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
@@ -2223,7 +2237,7 @@ function buildPaginationUrl($page) {
                                     <!-- Tab Content -->
                                     <div class="tab-content" id="helpTabContent">
                                         <!-- Overview Tab -->
-                                        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                                        <div class="tab-pane fade show active help-section" id="overview" role="tabpanel">
                                             <div class="card border-0 shadow-sm">
                                                 <div class="card-body">
                                                     <h4 class="card-title text-primary mb-4">
@@ -2286,7 +2300,7 @@ function buildPaginationUrl($page) {
                                         </div>
                                         
                                         <!-- Donor Management Tab -->
-                                        <div class="tab-pane fade" id="donors" role="tabpanel">
+                                        <div class="tab-pane fade help-section" id="donors" role="tabpanel">
                                             <div class="card border-0 shadow-sm">
                                         <div class="card-body">
                                                     <h4 class="card-title text-primary mb-4">
@@ -2350,7 +2364,7 @@ function buildPaginationUrl($page) {
                                         </div>
                                         
                                         <!-- Blood Inventory Tab -->
-                                        <div class="tab-pane fade" id="inventory" role="tabpanel">
+                                        <div class="tab-pane fade help-section" id="inventory" role="tabpanel">
                                             <div class="card border-0 shadow-sm">
                                                 <div class="card-body">
                                                     <h4 class="card-title text-primary mb-4">
@@ -2413,7 +2427,7 @@ function buildPaginationUrl($page) {
                                             </div>
                                             
                                         <!-- Features Tab -->
-                                        <div class="tab-pane fade" id="features" role="tabpanel">
+                                        <div class="tab-pane fade help-section" id="features" role="tabpanel">
                                             <div class="card border-0 shadow-sm">
                                                 <div class="card-body">
                                                     <h4 class="card-title text-primary mb-4">
@@ -2504,7 +2518,7 @@ function buildPaginationUrl($page) {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Sidebar -->
                                 <div class="col-lg-4">
                                     <!-- Quick Actions -->
@@ -2528,6 +2542,54 @@ function buildPaginationUrl($page) {
                                                 <a href="?tab=audit-log" class="btn btn-outline-info">
                                                     <i class="fas fa-history me-2"></i>Audit Log
                                                 </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Admin Playbooks -->
+                                    <div class="card border-0 shadow-sm mb-4">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0"><i class="fas fa-list-check me-2"></i>Admin Playbooks</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold"><i class="fas fa-user-clock me-2 text-warning"></i>Review Pending Donors</h6>
+                                                <ol class="small mb-2">
+                                                    <li>Open Pending Donors.</li>
+                                                    <li>View full application and screening answers.</li>
+                                                    <li>Approve or Reject with clear remarks.</li>
+                                                    <li>If approved, schedule donation and follow up.</li>
+                                                </ol>
+                                                <a href="?tab=pending-donors" class="btn btn-sm btn-outline-warning">Go to Pending Donors</a>
+                                            </div>
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold"><i class="fas fa-user-check me-2 text-success"></i>Mark Donor Served</h6>
+                                                <ol class="small mb-2">
+                                                    <li>Filter donors by <em>Approved</em> status.</li>
+                                                    <li>Open donor details and confirm donation.</li>
+                                                    <li>Mark as <strong>Served</strong> with notes.</li>
+                                                    <li>Verify linked blood units in Inventory.</li>
+                                                </ol>
+                                                <a href="?tab=donor-list&status_filter=approved" class="btn btn-sm btn-outline-success">Filter Approved Donors</a>
+                                            </div>
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold"><i class="fas fa-tint me-2 text-primary"></i>Manage Blood Inventory</h6>
+                                                <ol class="small mb-2">
+                                                    <li>Add unit from a served donor.</li>
+                                                    <li>Set status: Available/Used/Expired/Quarantined.</li>
+                                                    <li>Search and filter by blood type or status.</li>
+                                                    <li>Export data for reporting if needed.</li>
+                                                </ol>
+                                                <a href="admin_blood_inventory_modern.php" class="btn btn-sm btn-outline-primary">Open Inventory</a>
+                                            </div>
+                                            <div class="mb-1">
+                                                <h6 class="fw-bold"><i class="fas fa-history me-2 text-info"></i>Investigate via Audit Log</h6>
+                                                <ol class="small mb-2">
+                                                    <li>Filter by action type (approve/reject/served).</li>
+                                                    <li>Use timestamps to trace changes.</li>
+                                                    <li>Match admin user and remarks.</li>
+                                                </ol>
+                                                <a href="?tab=audit-log" class="btn btn-sm btn-outline-info">Go to Audit Log</a>
                                             </div>
                                         </div>
                                     </div>
@@ -2598,7 +2660,25 @@ function buildPaginationUrl($page) {
                             }
                             
                             function downloadGuide() {
-                                alert('PDF download feature coming soon!');
+                                // Use browser print dialog; choose "Save as PDF" to download
+                                window.print();
+                            }
+
+                            function filterHelpSections() {
+                                const q = (document.getElementById('helpSearch').value || '').toLowerCase().trim();
+                                const sections = document.querySelectorAll('#helpTabContent .help-section');
+                                if (!q) {
+                                    sections.forEach(s => s.classList.remove('d-none'));
+                                    return;
+                                }
+                                sections.forEach(s => {
+                                    const text = s.innerText.toLowerCase();
+                                    if (text.includes(q)) {
+                                        s.classList.remove('d-none');
+                                    } else {
+                                        s.classList.add('d-none');
+                                    }
+                                });
                             }
                             
                             </script>
