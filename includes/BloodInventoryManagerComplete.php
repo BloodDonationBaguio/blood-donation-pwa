@@ -147,6 +147,9 @@ class BloodInventoryManagerComplete {
             if (!empty($filters['status'])) {
                 $whereConditions[] = "bi.status = ?";
                 $params[] = $filters['status'];
+            } else {
+                // Exclude soft-deleted rows by default
+                $whereConditions[] = "bi.status <> 'deleted'";
             }
 
             if (!empty($filters['search'])) {
@@ -722,11 +725,11 @@ class BloodInventoryManagerComplete {
                 // Continue with deletion even if audit fails
             }
 
-            // Delete unit
-            $deleteStmt = $this->pdo->prepare("DELETE FROM blood_inventory WHERE unit_id = ?");
+            // Soft-delete unit by marking status as 'deleted'
+            $deleteStmt = $this->pdo->prepare("UPDATE blood_inventory SET status = 'deleted' WHERE unit_id = ?");
             $deleteStmt->execute([$unitId]);
 
-            // Verify deletion
+            // Verify update
             if ($deleteStmt->rowCount() === 0) {
                 throw new Exception('Failed to delete blood unit');
             }
@@ -988,6 +991,9 @@ class BloodInventoryManagerComplete {
             if (!empty($filters['status'])) {
                 $whereConditions[] = 'bi.status = ?';
                 $params[] = $filters['status'];
+            } else {
+                // Exclude soft-deleted rows by default
+                $whereConditions[] = "bi.status <> 'deleted'";
             }
             
             // Search filter
@@ -1042,7 +1048,7 @@ class BloodInventoryManagerComplete {
                 $sql = "
                     SELECT d.id, d.first_name, d.last_name, d.blood_type
                     FROM {$table} d
-                    LEFT JOIN blood_inventory bi ON bi.donor_id = d.id AND bi.status = 'available'
+                    LEFT JOIN blood_inventory bi ON bi.donor_id = d.id
                     WHERE {$eligibilityJoin} AND bi.id IS NULL
                     ORDER BY d.id DESC
                     LIMIT ?

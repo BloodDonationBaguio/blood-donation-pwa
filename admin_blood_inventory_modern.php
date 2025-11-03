@@ -118,9 +118,13 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 $inventoryManager = new BloodInventoryManagerComplete($pdo);
 $robustManager = new BloodInventoryManagerRobust($pdo, true);
 
-// Auto-backfill: ensure 1 unit per served/completed donor when missing
+// Auto-backfill DISABLED by default to prevent re-inserting after deletions.
+// Enable only when explicitly requested via `?auto_backfill=1`.
 try {
-    $inventoryManager->backfillMissingUnits(500);
+    $shouldAutoBackfill = isset($_GET['auto_backfill']) && $_GET['auto_backfill'] === '1';
+    if ($shouldAutoBackfill) {
+        $inventoryManager->backfillMissingUnits(500);
+    }
 } catch (Throwable $e) {
     error_log('Backfill invocation failed: ' . $e->getMessage());
 }
