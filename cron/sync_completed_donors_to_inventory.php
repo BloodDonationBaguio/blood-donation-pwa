@@ -118,7 +118,8 @@ function getCompletedDonors(PDO $pdo): array {
 }
 
 function bloodInventoryHasDonor(PDO $pdo, int $donorId): bool {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM blood_inventory WHERE donor_id = ?");
+    // Only consider AVAILABLE units; donors with only USED units should be backfilled
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM blood_inventory WHERE donor_id = ? AND status = 'available'");
     $stmt->execute([$donorId]);
     return ((int)$stmt->fetchColumn()) > 0;
 }
@@ -128,7 +129,8 @@ function insertInventoryForDonor(PDO $pdo, array $donor): bool {
     $bloodType = $donor['blood_type'] ?? 'Unknown';
     $createdAt = $donor['created_at'] ?? mysqlNow();
     $collectionDate = date('Y-m-d', strtotime($createdAt));
-    $expiryDate = date('Y-m-d', strtotime($collectionDate . ' +42 days'));
+    // Align with primary inventory manager (25-day expiry)
+    $expiryDate = date('Y-m-d', strtotime($collectionDate . ' +25 days'));
     $unitId = generateUnitId($pdo, $donorId);
 
     $sql = "INSERT INTO blood_inventory (
@@ -143,11 +145,11 @@ function insertInventoryForDonor(PDO $pdo, array $donor): bool {
         $bloodType,
         $collectionDate,
         $expiryDate,
-        'used', // reflect that donor is already served/completed
+        'available', // ensure stock for served/completed donor
         'Main Center',
         'Storage A',
         'Auto-synced from donors_new completed/served donor',
-        mysqlNow(), // used_date
+        null, // used_date
         mysqlNow(),
         mysqlNow()
     ]);
