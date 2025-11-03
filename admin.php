@@ -2967,6 +2967,26 @@ Hello [Name], this is the Red Cross Baguio. Thank you for your previous donation
                                     }
                                 });
                             }
+
+                            // Copy Communication Templates to clipboard
+                            function copyTemplate(text) {
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(text)
+                                        .then(function() { if (typeof showToast === 'function') showToast('Template copied to clipboard.', 'success'); })
+                                        .catch(function() { fallbackCopy(text); });
+                                } else {
+                                    fallbackCopy(text);
+                                }
+                            }
+                            function fallbackCopy(text) {
+                                var ta = document.createElement('textarea');
+                                ta.value = text;
+                                document.body.appendChild(ta);
+                                ta.select();
+                                try { document.execCommand('copy'); } catch (e) {}
+                                document.body.removeChild(ta);
+                                if (typeof showToast === 'function') showToast('Template copied.', 'success');
+                            }
                             
                             </script>
                         
