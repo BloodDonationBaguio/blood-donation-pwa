@@ -54,7 +54,7 @@ try {
                     first_name, last_name, email, phone, blood_type, 
                     date_of_birth, gender, status, reference_code, 
                     created_at, updated_at, seed_flag
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, 'served', ?, NOW(), NOW(), 0)
+) VALUES (?, ?, ?, ?, ?, ?, ?, 'served', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
             ");
             
             $dateOfBirth = $birthYear . '-01-01'; // Use January 1st as default
@@ -73,7 +73,7 @@ try {
                         unit_id, donor_id, blood_type, collection_date, expiry_date, 
                         status, collection_site, storage_location, volume_ml, 
                         screening_status, units_available, created_at, updated_at, seed_flag
-                    ) VALUES (?, ?, ?, ?, ?, 'available', 'Main Collection Center', 'A1', 450, 'passed', 1, NOW(), NOW(), 0)
+) VALUES (?, ?, ?, ?, ?, 'available', 'Main Collection Center', 'A1', 450, 'passed', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
                 ")->execute([$unitId, $donorId, $bloodType, $collectionDate, $expiryDate]);
                 
                 echo "<p style='color: green;'>✅ Successfully added the real 44-year-old donor!</p>";

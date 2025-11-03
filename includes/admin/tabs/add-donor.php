@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ) VALUES (
                 ?, ?, ?, ?, ?, 
                 ?, ?, ?, ?, 
-                ?, ?, ?, ?, 'active', NOW()
+?, ?, ?, ?, 'active', CURRENT_TIMESTAMP
             )
         ");
         

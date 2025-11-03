@@ -93,7 +93,7 @@ function loginUser($user, $rememberMe = false) {
     
     // Update last login time
     try {
-        $stmt = $pdo->prepare("UPDATE users_new SET updated_at = NOW() WHERE id = ?");
+$stmt = $pdo->prepare("UPDATE users_new SET updated_at = CURRENT_TIMESTAMP WHERE id = ?");
         $stmt->execute([$user['id']]);
     } catch (Exception $e) {
         error_log("Failed to update last login: " . $e->getMessage());
@@ -119,7 +119,7 @@ function checkRememberMeToken() {
             SELECT u.*, rt.token 
             FROM users_new u 
             JOIN user_remember_tokens rt ON u.id = rt.user_id 
-            WHERE rt.token = ? AND rt.expires_at > NOW()
+WHERE rt.token = ? AND rt.expires_at > CURRENT_TIMESTAMP
         ");
         $stmt->execute([$_COOKIE['remember_token']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -256,7 +256,7 @@ function createRememberTokensTable() {
             );");
         } else {
             $pdo->exec("CREATE TABLE IF NOT EXISTS users_new (
-                id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
@@ -282,7 +282,7 @@ function createRememberTokensTable() {
         } else {
             $sql = "
                 CREATE TABLE IF NOT EXISTS user_remember_tokens (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
                     user_id INT NOT NULL,
                     token VARCHAR(64) NOT NULL UNIQUE,
                     expires_at DATETIME NOT NULL,

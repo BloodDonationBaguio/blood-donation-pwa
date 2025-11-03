@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->beginTransaction();
             
             // Update donor status
-            $stmt = $pdo->prepare("UPDATE donors_new SET status = ?, updated_at = NOW() WHERE id = ?");
+$stmt = $pdo->prepare("UPDATE donors_new SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
             $stmt->execute([$status, $donorId]);
             
             // Log status change

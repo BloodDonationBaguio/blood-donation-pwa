@@ -91,7 +91,7 @@ try {
                                   note=?, 
                                   appointment_date=?, 
                                   appointment_time=?,
-                                  updated_at=NOW() 
+updated_at=CURRENT_TIMESTAMP
                               WHERE id=?");
         $stmt->execute([$admin_note, $appointment_date, $appointment_time, $id]);
         // Fetch user info
@@ -166,7 +166,7 @@ try {
     if (isset($_POST['reject_request'])) {
         // Mark as rejected and add admin note
         $admin_note = isset($_POST['admin_note']) ? trim($_POST['admin_note']) : '';
-        $stmt = $pdo->prepare("UPDATE requests SET status='rejected', note=?, updated_at=NOW() WHERE id=?");
+$stmt = $pdo->prepare("UPDATE requests SET status='rejected', note=?, updated_at=CURRENT_TIMESTAMP WHERE id=?");
         $stmt->execute([$admin_note, $id]);
         
         // Fetch user info

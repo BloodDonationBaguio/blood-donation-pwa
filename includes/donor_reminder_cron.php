@@ -48,7 +48,7 @@ foreach ($donors as $donor) {
                "<p>— PRC Baguio Chapter</p>";
 
     if (send_confirmation_email($donor['email'], $subject, $message, $name)) {
-        $upd = $pdo->prepare("UPDATE donors_new SET last_reminder_sent = CURDATE() WHERE id = ?");
+$upd = $pdo->prepare("UPDATE donors_new SET last_reminder_sent = CURRENT_DATE WHERE id = ?");
         $upd->execute([$donor['id']]);
         $sentCount++;
     }

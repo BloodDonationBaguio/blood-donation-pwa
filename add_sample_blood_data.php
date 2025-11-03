@@ -47,7 +47,7 @@ try {
                 INSERT INTO blood_inventory (
                     unit_id, donor_id, blood_type, collection_date, expiry_date,
                     status, collection_site, storage_location, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ");
             
             $stmt->execute([

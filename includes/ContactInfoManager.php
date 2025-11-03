@@ -52,7 +52,7 @@ class ContactInfoManager {
         try {
             $stmt = $this->pdo->prepare("
                 UPDATE contact_info 
-                SET field_value = ?, field_type = ?, updated_at = NOW() 
+SET field_value = ?, field_type = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE field_name = ?
             ");
             return $stmt->execute([$fieldValue, $fieldType, $fieldName]);
@@ -67,15 +67,28 @@ class ContactInfoManager {
      */
     public function addContactInfo($fieldName, $fieldValue, $fieldType = 'text', $displayOrder = 0) {
         try {
-            $stmt = $this->pdo->prepare("
+            $driver = $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+            if ($driver === 'pgsql') {
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO contact_info (field_name, field_value, field_type, display_order) 
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT (field_name) DO UPDATE SET 
+                        field_value = EXCLUDED.field_value,
+                        field_type = EXCLUDED.field_type,
+                        display_order = EXCLUDED.display_order,
+                        updated_at = CURRENT_TIMESTAMP
+                ");
+            } else {
+                $stmt = $this->pdo->prepare("
                 INSERT INTO contact_info (field_name, field_value, field_type, display_order) 
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE 
                 field_value = VALUES(field_value),
                 field_type = VALUES(field_type),
                 display_order = VALUES(display_order),
-                updated_at = NOW()
+updated_at = CURRENT_TIMESTAMP
             ");
+            }
             return $stmt->execute([$fieldName, $fieldValue, $fieldType, $displayOrder]);
         } catch (Exception $e) {
             error_log("Error adding contact info for {$fieldName}: " . $e->getMessage());
@@ -90,7 +103,7 @@ class ContactInfoManager {
         try {
             $stmt = $this->pdo->prepare("
                 UPDATE contact_info 
-                SET is_active = 0, updated_at = NOW() 
+SET is_active = 0, updated_at = CURRENT_TIMESTAMP
                 WHERE field_name = ?
             ");
             return $stmt->execute([$fieldName]);
@@ -140,7 +153,7 @@ class ContactInfoManager {
                 
                 $stmt = $this->pdo->prepare("
                     UPDATE contact_info 
-                    SET field_value = ?, field_type = ?, updated_at = NOW() 
+SET field_value = ?, field_type = ?, updated_at = CURRENT_TIMESTAMP
                     WHERE field_name = ?
                 ");
                 $stmt->execute([$fieldValue, $fieldType, $fieldName]);

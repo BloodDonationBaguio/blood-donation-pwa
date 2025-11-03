@@ -41,7 +41,7 @@ try {
     }
 
     // Update donor status in the database
-    $stmt = $pdo->prepare("UPDATE donors_new SET status = ?, updated_at = NOW() WHERE id = ?");
+$stmt = $pdo->prepare("UPDATE donors_new SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
     $result = $stmt->execute([$status, $donorId]);
 
     if ($result && $stmt->rowCount() > 0) {

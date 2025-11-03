@@ -249,10 +249,10 @@ class BloodInventoryManager {
                    {$donorFields}
                    d.blood_type as donor_blood_type,
                    d.status as donor_status,
-                   DATEDIFF(bi.expiry_date, CURDATE()) as days_to_expire,
+                   bi.expiry_date - CURRENT_DATE as days_to_expire,
                    CASE 
-                       WHEN bi.expiry_date < CURDATE() THEN 'expired'
-                       WHEN DATEDIFF(bi.expiry_date, CURDATE()) <= 5 THEN 'expiring_soon'
+                       WHEN bi.expiry_date < CURRENT_DATE THEN 'expired'
+                       WHEN (bi.expiry_date - CURRENT_DATE) <= 5 THEN 'expiring_soon'
                        ELSE 'normal'
                    END as urgency_status
             FROM blood_inventory bi
@@ -295,7 +295,7 @@ class BloodInventoryManager {
                    {$donorFields}
                    d.reference_code,
                    d.blood_type as donor_blood_type,
-                   DATEDIFF(bi.expiry_date, CURDATE()) as days_to_expire
+                   bi.expiry_date - CURRENT_DATE as days_to_expire
             FROM blood_inventory bi
             LEFT JOIN donors_new d ON bi.donor_id = d.id
             WHERE bi.unit_id = ?
@@ -463,7 +463,7 @@ class BloodInventoryManager {
                 "SELECT unit_id, blood_type, collection_date, expiry_date, status
                  FROM blood_inventory
                  WHERE status = 'available'
-                   AND expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 5 DAY)"
+AND expiry_date BETWEEN CURRENT_DATE AND (CURRENT_DATE + INTERVAL '5 day')"
             );
             $stmt->execute();
             $expiringUnits = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -681,11 +681,11 @@ class BloodInventoryManager {
                        d.blood_type as donor_blood_type,
                        d.status as donor_status,
                        CASE 
-                           WHEN bi.expiry_date < CURDATE() THEN 'expired'
-                           WHEN bi.expiry_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) THEN 'expiring_soon'
+                           WHEN bi.expiry_date < CURRENT_DATE THEN 'expired'
+WHEN bi.expiry_date <= CURRENT_DATE + INTERVAL '7 day' THEN 'expiring_soon'
                            ELSE 'good'
                        END as urgency_status,
-                       DATEDIFF(bi.expiry_date, CURDATE()) as days_to_expiry
+                       bi.expiry_date - CURRENT_DATE as days_to_expiry
                 FROM blood_inventory bi
                 INNER JOIN donors_new d ON bi.donor_id = d.id
                 $whereClause

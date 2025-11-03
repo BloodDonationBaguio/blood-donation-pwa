@@ -98,7 +98,7 @@ try {
         $stmt = $pdo->prepare("
             INSERT INTO donor_messages 
             (donor_id, subject, message, sent_at) 
-            VALUES (?, ?, ?, NOW())
+VALUES (?, ?, ?, CURRENT_TIMESTAMP)
         ");
         $stmt->execute([$donorId, $subject, $message]);
 

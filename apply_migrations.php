@@ -59,7 +59,7 @@ try {
         // Set default value for existing records
         $pdo->exec("
             UPDATE requests 
-            SET desired_date = CURDATE() 
+SET desired_date = CURRENT_DATE
             WHERE desired_date IS NULL
         ");
 

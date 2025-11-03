@@ -29,8 +29,8 @@ function createBloodInventoryTableIfMissing(PDO $pdo) {
                 collection_site VARCHAR(100) DEFAULT 'Main Center',
                 storage_location VARCHAR(100) DEFAULT 'Storage A',
                 notes TEXT,
-                created_at TIMESTAMPTZ DEFAULT NOW(),
-                updated_at TIMESTAMPTZ DEFAULT NOW()
+created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
             )",
             // Indexes
             "CREATE INDEX IF NOT EXISTS idx_unit_id ON blood_inventory(unit_id)",
@@ -81,7 +81,7 @@ function createBloodInventoryTableIfMissing(PDO $pdo) {
         // MySQL/MariaDB-compatible schema
         $sql = "
         CREATE TABLE IF NOT EXISTS blood_inventory (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             unit_id VARCHAR(50) UNIQUE NOT NULL,
             donor_id INT NOT NULL,
             blood_type VARCHAR(10) NOT NULL,

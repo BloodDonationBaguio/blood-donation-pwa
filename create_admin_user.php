@@ -18,7 +18,7 @@ try {
         // Create admin_users table
         $createTable = "
             CREATE TABLE admin_users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
                 username VARCHAR(50) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
                 role ENUM('super_admin', 'inventory_manager', 'medical_staff', 'viewer') DEFAULT 'super_admin',

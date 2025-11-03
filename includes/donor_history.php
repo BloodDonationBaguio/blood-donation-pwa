@@ -6,7 +6,7 @@
 
 function createDonorHistoryTable($pdo) {
     $sql = "CREATE TABLE IF NOT EXISTS donor_history (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
         donor_id INT NOT NULL,
         donation_date DATE NOT NULL,
         blood_type VARCHAR(10) NOT NULL,
@@ -102,11 +102,11 @@ function getDonorStatistics($pdo, $donorId) {
         
         // Monthly donation trend
         $stmt = $pdo->prepare("
-            SELECT DATE_FORMAT(donation_date, '%Y-%m') as month,
+SELECT TO_CHAR(donation_date, 'YYYY-MM') as month,
                    COUNT(*) as donations
             FROM donor_history 
             WHERE donor_id = ? AND status = 'completed'
-            GROUP BY DATE_FORMAT(donation_date, '%Y-%m')
+GROUP BY TO_CHAR(donation_date, 'YYYY-MM')
             ORDER BY month DESC
             LIMIT 12
         ");
@@ -181,4 +181,4 @@ function getDonationCertificate($pdo, $donorId, $donationId) {
         return false;
     }
 }
-?> 
+?>

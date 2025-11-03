@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         try {
             // Update password and clear reset token
             $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
-            $updateStmt = $pdo->prepare("UPDATE admin_users SET password_hash = ?, password = '', reset_token = NULL, reset_token_expiry = NULL, updated_at = NOW() WHERE id = ?");
+$updateStmt = $pdo->prepare("UPDATE admin_users SET password_hash = ?, password = '', reset_token = NULL, reset_token_expiry = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
             
             if ($updateStmt->execute([$newPasswordHash, $adminInfo['id']])) {
                 $success = "Password has been reset successfully! You can now login with your new password.";

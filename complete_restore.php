@@ -15,7 +15,7 @@ try {
     // 2. Create tables
     $tables = [
         "CREATE TABLE users (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             name VARCHAR(100) NOT NULL,
             email VARCHAR(120) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL,
@@ -26,7 +26,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
         
         "CREATE TABLE admins (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             username VARCHAR(50) NOT NULL UNIQUE,
             hashed_password VARCHAR(255) NOT NULL,
             role VARCHAR(20) DEFAULT 'super_admin',
@@ -34,7 +34,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
         
         "CREATE TABLE donors (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             user_id INT NOT NULL,
             blood_type VARCHAR(5) NOT NULL,
             last_donation_date DATE,
@@ -44,7 +44,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
         
         "CREATE TABLE requests (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             user_id INT,
             full_name VARCHAR(100) NOT NULL,
             phone VARCHAR(20) NOT NULL,
@@ -60,7 +60,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
         
         "CREATE TABLE donations (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             donor_id INT NOT NULL,
             recipient_id INT,
             donation_date DATE NOT NULL,
@@ -74,7 +74,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
         
         "CREATE TABLE notifications (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             user_id INT NOT NULL,
             title VARCHAR(255) NOT NULL,
             message TEXT NOT NULL,
@@ -106,7 +106,7 @@ try {
         $user_id = $pdo->lastInsertId();
         
         // Make them donors
-        $pdo->exec("INSERT INTO donors (user_id, blood_type, last_donation_date) VALUES ($user_id, '{$user[2]}', DATE_SUB(CURDATE(), INTERVAL 2 MONTH))");
+$pdo->exec("INSERT INTO donors (user_id, blood_type, last_donation_date) VALUES ($user_id, '{$user[2]}', CURRENT_DATE - INTERVAL '2 months')");
     }
     
     // 5. Add sample blood requests
@@ -126,9 +126,9 @@ try {
     
     // 6. Add sample donations
     $pdo->exec("INSERT INTO donations (donor_id, donation_date, blood_type, units, notes) 
-               VALUES (2, DATE_SUB(CURDATE(), INTERVAL 1 MONTH), 'B-', 1, 'Regular donation')");
+VALUES (2, CURRENT_DATE - INTERVAL '1 month', 'B-', 1, 'Regular donation')");
     $pdo->exec("INSERT INTO donations (donor_id, recipient_id, donation_date, blood_type, units, status, notes) 
-               VALUES (3, 1, DATE_SUB(CURDATE(), INTERVAL 15 DAY), 'O+', 2, 'completed', 'Emergency donation')");
+VALUES (3, 1, CURRENT_DATE - INTERVAL '15 day', 'O+', 2, 'completed', 'Emergency donation')");
     
     // 7. Add sample notifications
     $pdo->exec("INSERT INTO notifications (user_id, title, message) 

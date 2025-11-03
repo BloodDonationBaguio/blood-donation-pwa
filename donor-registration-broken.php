@@ -145,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         INSERT INTO donors_new (
                             first_name, last_name, email, phone, blood_type, date_of_birth, 
                             gender, address, city, province, weight, height, reference_code, status, created_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
                     ");
                     
                     // Split full name into first and last name

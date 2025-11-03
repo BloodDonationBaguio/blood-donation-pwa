@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Create admin_users table
                 $createTable = "
                     CREATE TABLE admin_users (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
                         username VARCHAR(50) UNIQUE NOT NULL,
                         password VARCHAR(255) NOT NULL,
                         role ENUM('super_admin', 'inventory_manager', 'medical_staff', 'viewer') DEFAULT 'super_admin',
@@ -72,11 +72,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($loginUsername === 'admin' && $loginPassword === 'admin123') {
                     // Create default admin user
                     $hashedPassword = password_hash('admin123', PASSWORD_DEFAULT);
-                    $stmt = $pdo->prepare("
+                    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+                    if ($driver === 'pgsql') {
+                        $stmt = $pdo->prepare("
+                            INSERT INTO admin_users (username, password, role, email, full_name, is_active) 
+                            VALUES (?, ?, 'super_admin', 'prc.baguio.blood@gmail.com', 'System Administrator', TRUE)
+                            ON CONFLICT (username) DO UPDATE SET
+                                password = EXCLUDED.password,
+                                role = EXCLUDED.role,
+                                is_active = TRUE
+                        ");
+                    } else {
+                        $stmt = $pdo->prepare("
                         INSERT INTO admin_users (username, password, role, email, full_name, is_active) 
                         VALUES (?, ?, 'super_admin', 'prc.baguio.blood@gmail.com', 'System Administrator', 1)
                         ON DUPLICATE KEY UPDATE password = VALUES(password), role = VALUES(role), is_active = 1
                     ");
+                    }
                     $stmt->execute([$loginUsername, $hashedPassword]);
                     
                     // Try login again

@@ -128,7 +128,7 @@ $donorNotesSql = $isPostgres
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )"
     : "CREATE TABLE IF NOT EXISTS donor_notes (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             donor_id INT NOT NULL,
             note TEXT NOT NULL,
             created_by VARCHAR(100),
@@ -148,7 +148,7 @@ $donationsNewSql = $isPostgres
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )"
     : "CREATE TABLE IF NOT EXISTS donations_new (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             donor_id INT NOT NULL,
             donation_date DATE NOT NULL,
             blood_type VARCHAR(10),
@@ -173,7 +173,7 @@ $adminAuditSql = $isPostgres
             ip_address VARCHAR(64)
         )"
     : "CREATE TABLE IF NOT EXISTS admin_audit_log (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             admin_username VARCHAR(255),
             action_type VARCHAR(255) NOT NULL,
@@ -193,7 +193,7 @@ $medicalSql = $isPostgres
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )"
     : "CREATE TABLE IF NOT EXISTS donor_medical_screening_simple (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             donor_id INT NOT NULL,
             reference_code VARCHAR(50),
             screening_data JSON,

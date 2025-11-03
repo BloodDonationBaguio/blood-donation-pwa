@@ -157,10 +157,10 @@ class PaginationHelper {
                 d.phone as donor_phone,
                 d.blood_type as donor_blood_type,
                 CONCAT(d.first_name, ' ', d.last_name) as donor_full_name,
-                DATEDIFF(bi.expiry_date, CURDATE()) as days_to_expiry,
+bi.expiry_date - CURRENT_DATE as days_to_expiry,
                 CASE 
-                    WHEN bi.expiry_date < CURDATE() THEN 'expired'
-                    WHEN DATEDIFF(bi.expiry_date, CURDATE()) <= 5 THEN 'expiring_soon'
+WHEN bi.expiry_date < CURRENT_DATE THEN 'expired'
+WHEN (bi.expiry_date - CURRENT_DATE) <= 5 THEN 'expiring_soon'
                     ELSE 'good'
                 END as urgency_status
             FROM blood_inventory bi
@@ -302,7 +302,7 @@ class PaginationHelper {
                 unit_id, donor_id, blood_type, collection_date, expiry_date,
                 status, collection_site, storage_location, volume_ml, 
                 screening_status, notes, seed_flag, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ";
         
         $params = [

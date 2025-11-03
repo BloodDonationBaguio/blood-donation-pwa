@@ -148,7 +148,7 @@ class BloodInventoryManagerRobust {
         }
         $expiringSoonExpr = ($driver === 'pgsql')
             ? "CASE WHEN expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND status = 'available' THEN 1 ELSE 0 END"
-            : "CASE WHEN expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) AND status = 'available' THEN 1 ELSE 0 END";
+: "CASE WHEN expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND status = 'available' THEN 1 ELSE 0 END";
 
         // Get data
         $sql = "
@@ -242,7 +242,7 @@ class BloodInventoryManagerRobust {
         }
         $expiryExpr = ($driver === 'pgsql')
             ? "created_at + INTERVAL '35 day'"
-            : "DATE_ADD(created_at, INTERVAL 35 DAY)";
+: "created_at + INTERVAL '35 day'";
         $virtUnitIdExpr = ($driver === 'pgsql')
             ? "('VIRT-' || id)"
             : "CONCAT('VIRT-', id)";
@@ -445,7 +445,7 @@ class BloodInventoryManagerRobust {
             $stmt = $this->pdo->query("
                 SELECT COUNT(*) as count 
                 FROM blood_inventory 
-                WHERE expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) 
+WHERE expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day'
                 AND status = 'available'
             ");
             $expiring = $stmt->fetch(PDO::FETCH_ASSOC)['count'];

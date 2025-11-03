@@ -49,7 +49,7 @@ try {
                 INSERT INTO donors_new (
                     first_name, last_name, email, phone, blood_type, 
                     reference_code, status, seed_flag, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, 'approved', 1, NOW(), NOW())
+) VALUES (?, ?, ?, ?, ?, ?, 'approved', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             ";
             
             $insertStmt = $pdo->prepare($insertQuery);
@@ -112,7 +112,7 @@ try {
                         unit_id, donor_id, blood_type, collection_date, expiry_date, 
                         status, collection_site, storage_location, volume_ml, 
                         screening_status, notes, seed_flag, created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 ";
                 
                 $insertStmt = $pdo->prepare($insertQuery);

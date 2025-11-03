@@ -179,7 +179,7 @@ try {
         
         if ($originalDonor) {
             // Update donor information
-            $updateStmt = $pdo->prepare("\n                UPDATE {$donorsTable} \n                SET first_name = ?, last_name = ?, email = ?, phone = ?, blood_type = ?, status = ?, updated_at = NOW()\n                WHERE id = ?\n            ");
+$updateStmt = $pdo->prepare("\n                UPDATE {$donorsTable} \n                SET first_name = ?, last_name = ?, email = ?, phone = ?, blood_type = ?, status = ?, updated_at = CURRENT_TIMESTAMP\n                WHERE id = ?\n            ");
             
             if ($updateStmt->execute([$firstName, $lastName, $email, $phone, $bloodType, $status, $donorId])) {
                 // Log the changes
@@ -265,7 +265,7 @@ try {
             if ($result) {
                 // Try to update served_date if column exists
                 try {
-                    $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = NOW() WHERE id = ?");
+$dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = CURRENT_TIMESTAMP WHERE id = ?");
                     $dateStmt->execute([$id]);
                 } catch (PDOException $e) {
                     // Column might not exist, that's okay

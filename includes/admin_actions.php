@@ -35,7 +35,7 @@ function ensureAuditLogTableExists($pdo) {
                 )");
             } else {
                 $pdo->exec("CREATE TABLE IF NOT EXISTS admin_audit_log (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     admin_username VARCHAR(255) NULL,
                     action_type VARCHAR(255) NOT NULL,

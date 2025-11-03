@@ -240,7 +240,7 @@ if ($totalRecords > 0 && (empty($inventory) || empty($inventory['data']))) {
         }
         $expiringSoonExpr = ($driver === 'pgsql')
             ? "CASE WHEN bi.expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND bi.status = 'available' THEN 1 ELSE 0 END"
-            : "CASE WHEN bi.expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) AND bi.status = 'available' THEN 1 ELSE 0 END";
+: "CASE WHEN bi.expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND bi.status = 'available' THEN 1 ELSE 0 END";
         $donorNameExpr = ($driver === 'pgsql')
             ? "COALESCE(d.first_name || ' ' || d.last_name, 'Unknown Donor')"
             : "COALESCE(CONCAT(d.first_name, ' ', d.last_name), 'Unknown Donor')";
@@ -291,7 +291,7 @@ if ($totalRecords > 0 && (empty($inventory) || empty($inventory['data']))) {
             // Driver-aware expiry and string concatenation for virtual rows
             $expiryFromCreatedExpr = ($driver === 'pgsql')
                 ? "created_at + INTERVAL '35 day'"
-                : "DATE_ADD(created_at, INTERVAL 35 DAY)";
+: "created_at + INTERVAL '35 day'";
             $virtUnitIdExpr = ($driver === 'pgsql')
                 ? "('VIRT-' || id)"
                 : "CONCAT('VIRT-', id)";

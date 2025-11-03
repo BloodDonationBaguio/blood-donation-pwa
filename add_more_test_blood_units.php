@@ -80,7 +80,7 @@ try {
                     unit_id, donor_id, blood_type, collection_date, expiry_date, 
                     status, collection_site, storage_location, volume_ml, 
                     screening_status, notes, seed_flag, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             ";
             
             $insertStmt = $pdo->prepare($insertQuery);

@@ -96,7 +96,7 @@ function getAuditLogs($pdo, $filters = [], $limit = 50) {
  */
 function clearOldAuditLogs($pdo, $days = 90) {
     try {
-        $sql = "DELETE FROM admin_audit_log WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY)";
+$sql = "DELETE FROM admin_audit_log WHERE created_at < CURRENT_TIMESTAMP - (? * INTERVAL '1 day')";
         $stmt = $pdo->prepare($sql);
         return $stmt->execute([$days]);
     } catch (Exception $e) {

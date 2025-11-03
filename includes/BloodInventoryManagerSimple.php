@@ -69,8 +69,8 @@ class BloodInventoryManagerSimple {
                 FROM blood_inventory bi
                 LEFT JOIN donors_new d ON bi.donor_id = d.id
                 WHERE bi.status = 'available' 
-                AND bi.expiry_date <= DATE_ADD(NOW(), INTERVAL ? DAY)
-                AND bi.expiry_date > NOW()
+AND bi.expiry_date <= CURRENT_TIMESTAMP + (? * INTERVAL '1 day')
+AND bi.expiry_date > CURRENT_TIMESTAMP
                 ORDER BY bi.expiry_date ASC
             ");
             $stmt->execute([$days]);
@@ -285,7 +285,7 @@ class BloodInventoryManagerSimple {
                 INSERT INTO blood_inventory (
                     unit_id, donor_id, blood_type, collection_date, expiry_date,
                     status, collection_site, storage_location, created_at
-                ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, CURRENT_TIMESTAMP)
             ");
             $stmt->execute([
                 $unitId,
@@ -345,7 +345,7 @@ class BloodInventoryManagerSimple {
             // Update status
             $updateStmt = $this->pdo->prepare("
                 UPDATE blood_inventory 
-                SET status = ?, updated_at = NOW() 
+                SET status = ?, updated_at = CURRENT_TIMESTAMP 
                 WHERE id = ?
             ");
             $updateStmt->execute([$newStatus, $unitId]);
@@ -408,7 +408,7 @@ class BloodInventoryManagerSimple {
                 INSERT INTO blood_inventory_audit (
                     unit_id, action_type, description, details, 
                     admin_username, ip_address, user_agent, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ");
             $stmt->execute([
                 $unitId,

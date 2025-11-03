@@ -17,7 +17,7 @@ try {
     echo "<h2>Creating users_new table...</h2>";
     $sql_users = "
     CREATE TABLE IF NOT EXISTS users_new (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
@@ -39,7 +39,7 @@ try {
     echo "<h2>Creating user_remember_tokens table...</h2>";
     $sql_tokens = "
     CREATE TABLE IF NOT EXISTS user_remember_tokens (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
         user_id INT NOT NULL,
         token VARCHAR(64) NOT NULL UNIQUE,
         expires_at DATETIME NOT NULL,
@@ -58,7 +58,7 @@ try {
     echo "<h2>Creating donors_new table...</h2>";
     $sql_donors = "
     CREATE TABLE IF NOT EXISTS donors_new (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,
         last_name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL,
@@ -90,7 +90,7 @@ try {
     echo "<h2>Creating donor_medical_screening_simple table...</h2>";
     $sql_medical = "
     CREATE TABLE IF NOT EXISTS donor_medical_screening_simple (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
         donor_id INT NOT NULL,
         reference_code VARCHAR(20) NOT NULL,
         screening_data JSON NOT NULL,
@@ -109,7 +109,7 @@ try {
     echo "<h2>Creating notifications table...</h2>";
     $sql_notifications = "
     CREATE TABLE IF NOT EXISTS notifications (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
         user_id INT NOT NULL,
         message TEXT NOT NULL,
         type ENUM('info', 'success', 'warning', 'error') DEFAULT 'info',

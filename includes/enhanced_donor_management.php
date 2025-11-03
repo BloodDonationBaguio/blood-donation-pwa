@@ -564,7 +564,7 @@ function createDonorManagementTables($pdo) {
 
         // Create donor_notes table
         $pdo->exec("CREATE TABLE IF NOT EXISTS donor_notes (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             donor_id INT NOT NULL,
             note TEXT NOT NULL,
             created_by VARCHAR(100),
@@ -574,7 +574,7 @@ function createDonorManagementTables($pdo) {
         
         // Create donations_new table if it doesn't exist
         $pdo->exec("CREATE TABLE IF NOT EXISTS donations_new (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+id SERIAL PRIMARY KEY,
             donor_id INT NOT NULL,
             donation_date DATE NOT NULL,
             blood_type VARCHAR(5),
@@ -678,4 +678,4 @@ function getDonorDisplayStatus($status) {
     
     return $displayStatuses[$status] ?? ucfirst($status);
 }
-?> 
+?>

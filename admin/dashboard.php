@@ -45,11 +45,11 @@ try {
     
     // Get monthly registration data for the chart - MySQL compatible
     $stmt = $pdo->query("SELECT 
-                            DATE_FORMAT(created_at, '%Y-%m') as month,
+TO_CHAR(created_at, 'YYYY-MM') as month,
                             COUNT(*) as count
                          FROM donors_new 
-                         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-                         GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '6 months'
+GROUP BY TO_CHAR(created_at, 'YYYY-MM')
                          ORDER BY month");
     $monthlyData = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -58,7 +58,7 @@ try {
     $stmt = $pdo->query("SELECT * FROM blood_requests ORDER BY request_date DESC LIMIT 5");
     $recentRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     // Get monthly requests data for the chart - MySQL compatible
-    $stmt = $pdo->query("SELECT DATE_FORMAT(request_date, '%Y-%m') as month, COUNT(*) as count FROM blood_requests WHERE request_date >= DATE_SUB(NOW(), INTERVAL 6 MONTH) GROUP BY DATE_FORMAT(request_date, '%Y-%m') ORDER BY month");
+$stmt = $pdo->query("SELECT TO_CHAR(request_date, 'YYYY-MM') as month, COUNT(*) as count FROM blood_requests WHERE request_date >= CURRENT_TIMESTAMP - INTERVAL '6 months' GROUP BY TO_CHAR(request_date, 'YYYY-MM') ORDER BY month");
     $monthlyRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log('Database error: ' . $e->getMessage());

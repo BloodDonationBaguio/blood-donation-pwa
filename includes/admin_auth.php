@@ -75,7 +75,7 @@ function adminLogin($username, $password) {
             error_log("Admin login - Role set to: " . $user['role']);
             
             // Update last login
-            $updateStmt = $pdo->prepare("UPDATE admin_users SET last_login = NOW() WHERE id = ?");
+$updateStmt = $pdo->prepare("UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE id = ?");
             $updateStmt->execute([$user['id']]);
             
             return true;

@@ -91,7 +91,7 @@ class BloodInventoryManagerComplete {
             // Check for expiring units
             $stmt = $this->pdo->query("
                 SELECT COUNT(*) as count FROM blood_inventory 
-                WHERE expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) 
+                WHERE expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' 
                 AND status = 'available'
             ");
             $expiring = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
@@ -173,7 +173,7 @@ class BloodInventoryManagerComplete {
                 : "COALESCE(CONCAT(d.first_name, ' ', d.last_name), 'Unknown Donor')";
             $expiringSoonExpr = ($driver === 'pgsql')
                 ? "CASE WHEN bi.expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND bi.status = 'available' THEN 1 ELSE 0 END"
-                : "CASE WHEN bi.expiry_date <= DATE_ADD(NOW(), INTERVAL 5 DAY) AND bi.status = 'available' THEN 1 ELSE 0 END";
+: "CASE WHEN bi.expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND bi.status = 'available' THEN 1 ELSE 0 END";
 
             // Get total count
             $countSql = "
@@ -389,7 +389,7 @@ class BloodInventoryManagerComplete {
                 INSERT INTO blood_inventory (
                     unit_id, donor_id, blood_type, collection_date, expiry_date,
                     status, collection_site, storage_location, created_at
-                ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, CURRENT_TIMESTAMP)
             ");
             $stmt->execute([
                 $unitId,
@@ -492,7 +492,7 @@ class BloodInventoryManagerComplete {
                         INSERT INTO blood_inventory (
                             unit_id, donor_id, blood_type, collection_date, expiry_date,
                             status, collection_site, storage_location, created_at
-                        ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, NOW())
+                        ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, CURRENT_TIMESTAMP)
                     ");
                     // Generate a unit id based on donor blood type
                     $newUnitId = $this->generateUnitId($donor['blood_type']);
@@ -641,7 +641,7 @@ class BloodInventoryManagerComplete {
 
             $updateStmt = $this->pdo->prepare("
                 UPDATE blood_inventory 
-                SET blood_type = ?, updated_at = NOW() 
+                SET blood_type = ?, updated_at = CURRENT_TIMESTAMP 
                 WHERE unit_id = ?
             ");
             $updateStmt->execute([$bloodType, $unitId]);
@@ -806,24 +806,43 @@ class BloodInventoryManagerComplete {
             // Check if we're in a transaction - if so, don't start a new one
             $inTransaction = $this->pdo->inTransaction();
             
-            // Ensure table exists
-            $this->pdo->exec("CREATE TABLE IF NOT EXISTS blood_inventory_audit (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                unit_id VARCHAR(100),
-                action VARCHAR(100),
-                old_values TEXT,
-                new_values TEXT,
-                admin_name VARCHAR(255),
-                ip_address VARCHAR(64),
-                user_agent TEXT,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            // Ensure table exists (driver-aware DDL)
+            try {
+                $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            } catch (Throwable $e) {
+                $driver = 'mysql';
+            }
+            if ($driver === 'pgsql') {
+                $this->pdo->exec("CREATE TABLE IF NOT EXISTS blood_inventory_audit (
+                    id SERIAL PRIMARY KEY,
+                    unit_id VARCHAR(100),
+                    action VARCHAR(100),
+                    old_values TEXT,
+                    new_values TEXT,
+                    admin_name VARCHAR(255),
+                    ip_address VARCHAR(64),
+                    user_agent TEXT,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )");
+            } else {
+                $this->pdo->exec("CREATE TABLE IF NOT EXISTS blood_inventory_audit (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    unit_id VARCHAR(100),
+                    action VARCHAR(100),
+                    old_values TEXT,
+                    new_values TEXT,
+                    admin_name VARCHAR(255),
+                    ip_address VARCHAR(64),
+                    user_agent TEXT,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            }
             
             $stmt = $this->pdo->prepare("
                 INSERT INTO blood_inventory_audit (
                     unit_id, action, old_values, new_values, 
                     admin_name, ip_address, user_agent, timestamp
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ");
             
             $adminUsername = $_SESSION['admin_username'] ?? $_SESSION['username'] ?? 'system';
@@ -849,17 +868,35 @@ class BloodInventoryManagerComplete {
 
         // Mirror into admin_audit_log for the Admin > Audit Log tab
         try {
-            // Ensure table exists
-            $this->pdo->exec("CREATE TABLE IF NOT EXISTS admin_audit_log (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                admin_username VARCHAR(255) NULL,
-                action_type VARCHAR(255) NOT NULL,
-                table_name VARCHAR(255) NULL,
-                record_id VARCHAR(255) NULL,
-                description TEXT NULL,
-                ip_address VARCHAR(64) NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            // Ensure table exists (driver-aware DDL)
+            try {
+                $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            } catch (Throwable $e) {
+                $driver = 'mysql';
+            }
+            if ($driver === 'pgsql') {
+                $this->pdo->exec("CREATE TABLE IF NOT EXISTS admin_audit_log (
+                    id SERIAL PRIMARY KEY,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    admin_username VARCHAR(255) NULL,
+                    action_type VARCHAR(255) NOT NULL,
+                    table_name VARCHAR(255) NULL,
+                    record_id VARCHAR(255) NULL,
+                    description TEXT NULL,
+                    ip_address VARCHAR(64) NULL
+                )");
+            } else {
+                $this->pdo->exec("CREATE TABLE IF NOT EXISTS admin_audit_log (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    admin_username VARCHAR(255) NULL,
+                    action_type VARCHAR(255) NOT NULL,
+                    table_name VARCHAR(255) NULL,
+                    record_id VARCHAR(255) NULL,
+                    description TEXT NULL,
+                    ip_address VARCHAR(64) NULL
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            }
 
             $adminUsername = $_SESSION['admin_username'] ?? $_SESSION['username'] ?? 'system';
             $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';

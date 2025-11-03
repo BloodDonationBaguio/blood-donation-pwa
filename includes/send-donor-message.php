@@ -58,7 +58,7 @@ function sendDonorMessage($donorId, $messageType, $subject, $message, $adminId =
             // Log the message in database
             $logStmt = $pdo->prepare("
                 INSERT INTO donor_messages (donor_id, message_type, subject, message, admin_id, sent_at) 
-                VALUES (?, ?, ?, ?, ?, NOW())
+VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ");
             $logStmt->execute([$donorId, $messageType, $subject, $message, $adminId]);
             

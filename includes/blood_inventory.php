@@ -134,7 +134,7 @@ function checkExpiredUnits($pdo) {
         $stmt = $pdo->prepare("
             UPDATE blood_units 
             SET status = 'expired' 
-            WHERE expiration_date < CURDATE() AND status = 'available'
+            WHERE expiration_date < CURRENT_DATE AND status = 'available'
         ");
         $stmt->execute();
         
@@ -167,7 +167,7 @@ function reserveBloodUnit($pdo, $bloodType, $requestId) {
         $stmt = $pdo->prepare("
             SELECT id, unit_id 
             FROM blood_units 
-            WHERE blood_type = ? AND status = 'available' AND expiration_date > CURDATE()
+            WHERE blood_type = ? AND status = 'available' AND expiration_date > CURRENT_DATE
             ORDER BY expiration_date ASC 
             LIMIT 1
         ");

@@ -1,11 +1,11 @@
 <?php
-// Environment-aware DB config: PostgreSQL on Render (DATABASE_URL), MySQL locally
+// Environment-aware DB config: Prefer PostgreSQL (DATABASE_URL or DB_TYPE=pgsql), fallback to MySQL
 if (getenv('DATABASE_URL')) {
     // In production with DATABASE_URL, delegate to db_production.php
     require_once __DIR__ . '/db_production.php';
     return;
 }
-// Local/dev fallback: MySQL
+// Local/dev fallback: check DB_TYPE to decide pgsql vs mysql
 
 // Check if this file is being included directly
 if (basename(__FILE__) === basename($_SERVER['SCRIPT_FILENAME'])) {
@@ -28,12 +28,13 @@ if (!function_exists('tableExists')) {
     // Set error log location
     ini_set('error_log', $logDir . '/error.log');
 
-    // Database configuration - MySQL (restored after fix)
-    define('DB_TYPE', 'mysql'); // Using MySQL
-    define('DB_HOST', 'localhost:3306'); // Using standard MySQL port
-    define('DB_NAME', 'blood_system');
-    define('DB_USER', 'root');
-    define('DB_PASS', 'password112');
+    // Database configuration (overridable by env); default to PostgreSQL for dev
+    define('DB_TYPE', getenv('DB_TYPE') ?: 'pgsql');
+    define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+    define('DB_PORT', getenv('DB_PORT') ?: (strtolower(DB_TYPE) === 'pgsql' ? '5432' : '3306'));
+    define('DB_NAME', getenv('DB_NAME') ?: 'blood_system');
+    define('DB_USER', getenv('DB_USER') ?: 'postgres');
+    define('DB_PASS', getenv('DB_PASS') ?: 'postgres');
     define('DB_FILE', __DIR__ . '/database/blood_system.db');
 
     // Connection helper with retry to mitigate transient failures on Render
@@ -56,6 +57,20 @@ if (!function_exists('tableExists')) {
                         ]
                     );
                     $pdo->exec('PRAGMA foreign_keys = ON');
+                } elseif (strtolower(DB_TYPE) === 'pgsql' || strtolower(DB_TYPE) === 'postgres' || strtolower(DB_TYPE) === 'postgresql') {
+                    // PostgreSQL non-persistent connection
+                    $options = [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_EMULATE_PREPARES => false,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::ATTR_PERSISTENT => false
+                    ];
+                    $pdo = new PDO(
+                        "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME,
+                        DB_USER,
+                        DB_PASS,
+                        $options
+                    );
                 } else {
                     // MySQL with explicit non-persistent connection and timeout
                     $options = [
@@ -66,8 +81,13 @@ if (!function_exists('tableExists')) {
                         PDO::ATTR_PERSISTENT => false,
                         PDO::ATTR_TIMEOUT => 5
                     ];
+                    // Support host:port format or separate DB_PORT
+                    $hostPart = DB_HOST;
+                    if (strpos(DB_HOST, ':') === false && DB_PORT) {
+                        $hostPart .= ':' . DB_PORT;
+                    }
                     $pdo = new PDO(
-                        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+                        "mysql:host=" . $hostPart . ";dbname=" . DB_NAME . ";charset=utf8mb4",
                         DB_USER,
                         DB_PASS,
                         $options
@@ -136,6 +156,10 @@ if (!function_exists('tableExists')) {
             if (DB_TYPE === 'sqlite') {
                 $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?");
                 $stmt->execute([$table]);
+            } elseif (strtolower(DB_TYPE) === 'pgsql') {
+                $stmt = $pdo->prepare("SELECT to_regclass('public.' || ?) AS regclass");
+                $stmt->execute([$table]);
+                return $stmt->fetchColumn() !== null;
             } else {
                 $stmt = $pdo->prepare("SHOW TABLES LIKE ?");
                 $stmt->execute([$table]);
@@ -158,6 +182,10 @@ if (!function_exists('tableExists')) {
         try {
             if (DB_TYPE === 'sqlite') {
                 $stmt = $pdo->query("PRAGMA table_info(" . $pdo->quote($table) . ")");
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } elseif (strtolower(DB_TYPE) === 'pgsql') {
+                $safe = str_replace("'", "''", $table);
+                $stmt = $pdo->query("SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_schema='public' AND table_name='" . $safe . "'");
                 return $stmt->fetchAll(PDO::FETCH_ASSOC);
             } else {
                 $stmt = $pdo->query("DESCRIBE `" . str_replace('`', '``', $table) . "`");
