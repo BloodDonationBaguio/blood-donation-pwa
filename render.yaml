@@ -5,4 +5,4 @@ services:
     autoDeploy: true
     branch: main
     plan: free
-    preDeployCommand: "php seed_production_db.php > seed.log 2>&1"
+    preDeployCommand: "ls -la > seed.log 2>&1"
