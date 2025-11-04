@@ -644,7 +644,6 @@ $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = CURRENT_TIMES
         // Pending condition:
         // - If status exists: a donor is pending if their status is a pending-like value.
         // - If status does not exist: a donor is pending if their blood type is unknown (legacy fallback).
-        // This is a temporary comment to force a file change.
         $unknownExpr = "(LOWER(TRIM(COALESCE(blood_type,''))) IN ('unknown','unk',''))";
         $pendingStatusExpr = "(status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review'))";
 
