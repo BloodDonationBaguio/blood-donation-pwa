@@ -5,5 +5,3 @@ services:
     branch: main
     autoDeploy: true
     plan: free
-    preDeploy: 
-      command: "php database_diagnostic.php"
