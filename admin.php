@@ -70,6 +70,9 @@ $activeTab = isset($_GET['tab']) && in_array($_GET['tab'], $validTabs)
     ? $_GET['tab'] 
     : 'dashboard';
 
+// Mirror active tab into globals for includes that expect it
+$GLOBALS['activeTab'] = $activeTab;
+
 // Handle success messages
 if (isset($_GET['success'])) {
     $success = $_GET['success'];
@@ -581,60 +584,59 @@ $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = CURRENT_TIMES
         $paramsNew = [];
         $paramsLegacy = [];
 
-        // Detect presence of status column per table
-        $hasStatusNew = false;
-        $hasStatusLegacy = false;
-        try {
-            $hasStatusNew = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors_new' AND column_name = 'status' LIMIT 1")->fetchColumn();
-        } catch (Throwable $e) { $hasStatusNew = false; }
-        try {
-            $hasStatusLegacy = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'status' LIMIT 1")->fetchColumn();
-        } catch (Throwable $e) { $hasStatusLegacy = false; }
+        // Detect presence of status and created_at columns per table
+        $hasStatusNew = false; $hasStatusLegacy = false;
+        $hasCreatedNew = false; $hasCreatedLegacy = false;
+        try { $hasStatusNew   = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors_new' AND column_name = 'status' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasStatusNew = false; }
+        try { $hasStatusLegacy = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'status' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasStatusLegacy = false; }
+        try { $hasCreatedNew   = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors_new' AND column_name = 'created_at' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasCreatedNew = false; }
+        try { $hasCreatedLegacy= (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'created_at' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasCreatedLegacy = false; }
 
         // Pending condition: use status if available; otherwise treat Unknown/NULL blood type as pending
-        if ($hasStatusNew) {
-            $whereNew .= " AND status = 'pending'";
-        } else {
-            $whereNew .= " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
-        }
-        if ($hasStatusLegacy) {
-            $whereLegacy .= " AND status = 'pending'";
-        } else {
-            $whereLegacy .= " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
-        }
+        $whereNew    .= $hasStatusNew   ? " AND status = 'pending'" : " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
+        $whereLegacy .= $hasStatusLegacy? " AND status = 'pending'" : " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
 
         // Optional search filter
         if ($search !== '') {
-            $whereNew    .= " AND ((COALESCE(first_name,'') || ' ' || COALESCE(last_name,'')) LIKE ? OR COALESCE(email,'') LIKE ? OR COALESCE(phone,'') LIKE ?)";
-            $whereLegacy .= " AND ((COALESCE(first_name,'') || ' ' || COALESCE(last_name,'')) LIKE ? OR COALESCE(email,'') LIKE ? OR COALESCE(phone,'') LIKE ?)";
+            // Use portable name matching: attempt CONCAT_WS (MySQL/Postgres), fallback to || (SQLite)
+            $nameExprNew    = "CONCAT_WS(' ', COALESCE(first_name,''), COALESCE(last_name,''))";
+            $nameExprLegacy = $nameExprNew;
+            try { $pdo->query("SELECT " . $nameExprNew . " FROM (SELECT 1 AS first_name, 1 AS last_name) t LIMIT 1"); }
+            catch (Throwable $e) { $nameExprNew = "(COALESCE(first_name,'') || ' ' || COALESCE(last_name,''))"; $nameExprLegacy = $nameExprNew; }
+
+            $whereNew    .= " AND (" . $nameExprNew    . " LIKE ? OR COALESCE(email,'') LIKE ? OR COALESCE(phone,'') LIKE ?)";
+            $whereLegacy .= " AND (" . $nameExprLegacy . " LIKE ? OR COALESCE(email,'') LIKE ? OR COALESCE(phone,'') LIKE ?)";
             $paramsNew     = array_fill(0, 3, "%$search%");
             $paramsLegacy  = array_fill(0, 3, "%$search%");
         }
 
+        // Order by clause per table
+        $orderNew    = $hasCreatedNew    ? " ORDER BY created_at DESC" : " ORDER BY id DESC";
+        $orderLegacy = $hasCreatedLegacy ? " ORDER BY created_at DESC" : " ORDER BY id DESC";
+
         // Query donors_new if present
         try {
-            $stmt = $pdo->prepare("SELECT * FROM donors_new" . $whereNew . " ORDER BY created_at DESC");
+            $stmt = $pdo->prepare("SELECT * FROM donors_new" . $whereNew . $orderNew);
             $stmt->execute($paramsNew);
             $pendingDonors = array_merge($pendingDonors, $stmt->fetchAll(PDO::FETCH_ASSOC));
-        } catch (Throwable $e) {
-            // ignore if table doesn't exist
-        }
+        } catch (Throwable $e) { /* ignore if table doesn't exist or query fails */ }
 
         // Query legacy donors table
         try {
-            $stmt = $pdo->prepare("SELECT * FROM donors" . $whereLegacy . " ORDER BY created_at DESC");
+            $stmt = $pdo->prepare("SELECT * FROM donors" . $whereLegacy . $orderLegacy);
             $stmt->execute($paramsLegacy);
             $pendingDonors = array_merge($pendingDonors, $stmt->fetchAll(PDO::FETCH_ASSOC));
-        } catch (Throwable $e) {
-            // ignore if table doesn't exist
-        }
+        } catch (Throwable $e) { /* ignore if table doesn't exist or query fails */ }
 
-        // Sort newest first
+        // Sort newest-first by available timestamp or id
         usort($pendingDonors, function($a, $b) {
-            $ta = isset($a['created_at']) ? strtotime($a['created_at']) : 0;
-            $tb = isset($b['created_at']) ? strtotime($b['created_at']) : 0;
+            $ta = isset($a['created_at']) ? strtotime($a['created_at']) : (isset($a['id']) ? (int)$a['id'] : 0);
+            $tb = isset($b['created_at']) ? strtotime($b['created_at']) : (isset($b['id']) ? (int)$b['id'] : 0);
             return $tb <=> $ta;
         });
+
+        // Make available to included tab renderer if it expects globals
+        $GLOBALS['pendingDonors'] = $pendingDonors;
     }
     
     
