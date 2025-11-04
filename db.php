@@ -33,13 +33,13 @@ if (!function_exists('tableExists')) {
     ini_set('error_log', $logDir . '/error.log');
 
     // Database configuration (overridable by env); default to PostgreSQL for dev
-    define('DB_TYPE', getenv('DB_TYPE') ?: 'pgsql');
+    define('DB_TYPE', 'sqlite');
     define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
     define('DB_PORT', getenv('DB_PORT') ?: (strtolower(DB_TYPE) === 'pgsql' ? '5432' : '3306'));
     define('DB_NAME', getenv('DB_NAME') ?: 'blood_system');
     define('DB_USER', getenv('DB_USER') ?: 'postgres');
     define('DB_PASS', getenv('DB_PASS') ?: 'postgres');
-    define('DB_FILE', __DIR__ . '/database/blood_system.db');
+    define('DB_FILE', 'c:/xampp/htdocs/blood-donation-pwa-1/database/blood_system.db');
 
     // Connection helper with retry to mitigate transient failures on Render
     $connectWithRetry = function($attempts = 2, $delayMs = 500) {

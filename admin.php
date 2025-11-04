@@ -618,23 +618,42 @@ $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = CURRENT_TIMES
         // Detect presence of status and created_at columns per table
         $hasStatusNew = false; $hasStatusLegacy = false;
         $hasCreatedNew = false; $hasCreatedLegacy = false;
-        try { $hasStatusNew   = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors_new' AND column_name = 'status' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasStatusNew = false; }
-        try { $hasStatusLegacy = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'status' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasStatusLegacy = false; }
-        try { $hasCreatedNew   = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors_new' AND column_name = 'created_at' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasCreatedNew = false; }
-        try { $hasCreatedLegacy= (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'created_at' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasCreatedLegacy = false; }
+        // Portable column existence check
+        function columnExists($pdo, $table, $column) {
+            try {
+                // PRAGMA for SQLite
+                if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+                    $stmt = $pdo->query("PRAGMA table_info(" . $pdo->quote($table) . ")");
+                    $columns = $stmt->fetchAll(PDO::FETCH_COLUMN, 1);
+                    return in_array($column, $columns);
+                }
+                // information_schema for MySQL/PostgreSQL
+                $stmt = $pdo->prepare("SELECT 1 FROM information_schema.columns WHERE table_name = ? AND column_name = ? LIMIT 1");
+                $stmt->execute([$table, $column]);
+                return (bool)$stmt->fetchColumn();
+            } catch (Throwable $e) {
+                return false;
+            }
+        }
+
+        $hasStatusNew     = columnExists($pdo, 'donors_new', 'status');
+        $hasStatusLegacy  = columnExists($pdo, 'donors', 'status');
+        $hasCreatedNew    = columnExists($pdo, 'donors_new', 'created_at');
+        $hasCreatedLegacy = columnExists($pdo, 'donors', 'created_at');
 
         // Pending condition:
-        // - If status exists: include pending-like statuses OR normalized Unknown/NULL blood types,
-        //   and explicitly exclude approved/served/rejected.
-        // - If status does not exist: include normalized Unknown/NULL blood types only.
+        // - If status exists: a donor is pending if their status is a pending-like value.
+        // - If status does not exist: a donor is pending if their blood type is unknown (legacy fallback).
         $unknownExpr = "(blood_type IS NULL OR LOWER(TRIM(COALESCE(blood_type,''))) IN ('unknown','unk',''))";
+        $pendingStatusExpr = "(status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review'))";
+
         if ($hasStatusNew) {
-            $whereNew .= " AND ((status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review')) OR $unknownExpr) AND COALESCE(status,'') NOT IN ('approved','served','rejected')";
+            $whereNew .= " AND " . $pendingStatusExpr;
         } else {
             $whereNew .= " AND " . $unknownExpr;
         }
         if ($hasStatusLegacy) {
-            $whereLegacy .= " AND ((status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review')) OR $unknownExpr) AND COALESCE(status,'') NOT IN ('approved','served','rejected')";
+            $whereLegacy .= " AND " . $pendingStatusExpr;
         } else {
             $whereLegacy .= " AND " . $unknownExpr;
         }
