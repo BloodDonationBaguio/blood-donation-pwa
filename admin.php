@@ -592,9 +592,18 @@ $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = CURRENT_TIMES
         try { $hasCreatedNew   = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors_new' AND column_name = 'created_at' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasCreatedNew = false; }
         try { $hasCreatedLegacy= (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'created_at' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasCreatedLegacy = false; }
 
-        // Pending condition: use status if available; otherwise treat Unknown/NULL blood type as pending
-        $whereNew    .= $hasStatusNew   ? " AND status = 'pending'" : " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
-        $whereLegacy .= $hasStatusLegacy? " AND status = 'pending'" : " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
+        // Pending condition: use status if available (include common pending-like placeholders);
+        // otherwise treat Unknown/UNK or NULL blood type as pending
+        if ($hasStatusNew) {
+            $whereNew .= " AND (status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review'))";
+        } else {
+            $whereNew .= " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
+        }
+        if ($hasStatusLegacy) {
+            $whereLegacy .= " AND (status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review'))";
+        } else {
+            $whereLegacy .= " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
+        }
 
         // Optional search filter
         if ($search !== '') {
@@ -604,10 +613,10 @@ $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = CURRENT_TIMES
             try { $pdo->query("SELECT " . $nameExprNew . " FROM (SELECT 1 AS first_name, 1 AS last_name) t LIMIT 1"); }
             catch (Throwable $e) { $nameExprNew = "(COALESCE(first_name,'') || ' ' || COALESCE(last_name,''))"; $nameExprLegacy = $nameExprNew; }
 
-            $whereNew    .= " AND (" . $nameExprNew    . " LIKE ? OR COALESCE(email,'') LIKE ? OR COALESCE(phone,'') LIKE ?)";
-            $whereLegacy .= " AND (" . $nameExprLegacy . " LIKE ? OR COALESCE(email,'') LIKE ? OR COALESCE(phone,'') LIKE ?)";
-            $paramsNew     = array_fill(0, 3, "%$search%");
-            $paramsLegacy  = array_fill(0, 3, "%$search%");
+            $whereNew    .= " AND (" . $nameExprNew    . " LIKE ? OR COALESCE(email,'') LIKE ? OR COALESCE(phone,'') LIKE ? OR COALESCE(reference_code,'') LIKE ?)";
+            $whereLegacy .= " AND (" . $nameExprLegacy . " LIKE ? OR COALESCE(email,'') LIKE ? OR COALESCE(phone,'') LIKE ? OR COALESCE(reference_code,'') LIKE ?)";
+            $paramsNew     = array_fill(0, 4, "%$search%");
+            $paramsLegacy  = array_fill(0, 4, "%$search%");
         }
 
         // Order by clause per table
