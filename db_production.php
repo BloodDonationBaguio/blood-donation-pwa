@@ -26,17 +26,19 @@ if (file_exists($envFile)) {
     }
 }
 
-// Decide whether to prefer explicit env vars (e.g., MySQL on db4free) over DATABASE_URL.
-// This is helpful on platforms where pgsql driver isn't available or when using
-// an external MySQL provider while a leftover DATABASE_URL exists.
+// Decide preference order based on signals. If DB_TYPE is explicitly set, honor it.
+// Otherwise, if DATABASE_URL exists, prefer PostgreSQL by default.
 $pdo = null;
-$envDbType = getenv('DB_TYPE') ?: '';
+$envDbTypeRaw = getenv('DB_TYPE') ?: '';
+$envDbType = strtolower(trim($envDbTypeRaw));
 $hasExplicitEnv = getenv('DB_HOST') && getenv('DB_NAME') && getenv('DB_USER');
-$preferEnvFirst = $hasExplicitEnv && (strtolower($envDbType) === 'mysql' || stripos((string)getenv('DB_HOST'), 'db4free') !== false);
 
-// Primary: Render/Heroku-style DATABASE_URL (PostgreSQL) unless env vars are preferred
+$preferPostgres = in_array($envDbType, ['pgsql','postgres','postgresql'], true);
+$preferMysql    = in_array($envDbType, ['mysql','mariadb'], true);
+
+// If no explicit DB_TYPE, but DATABASE_URL exists, default to PostgreSQL
 $database_url = getenv('DATABASE_URL');
-if (!$preferEnvFirst && $database_url) {
+if (!$preferMysql && ($preferPostgres || $database_url)) {
     $db = parse_url($database_url);
     $dbHost = $db['host'] ?? 'localhost';
     $dbName = ltrim($db['path'] ?? '', '/');
@@ -54,16 +56,16 @@ if (!$preferEnvFirst && $database_url) {
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
             ]
         );
-        error_log("PostgreSQL connection established successfully (DATABASE_URL)");
+        error_log("DB connect: PostgreSQL via DATABASE_URL");
     } catch (PDOException $e) {
-        error_log("PostgreSQL connection failed (DATABASE_URL): " . $e->getMessage());
+        error_log("DB connect failed (PostgreSQL via DATABASE_URL): " . $e->getMessage());
         $pdo = null; // fall back to other strategies
     }
 }
 
-// Fallback: explicit env vars (DB_TYPE, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS)
+// Next: explicit env vars (DB_TYPE, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS)
 if ($pdo === null) {
-    $envDbType = ($envDbType ?: 'mysql');
+    $envDbType = ($envDbType ?: 'pgsql');
     $envHost   = getenv('DB_HOST') ?: null;
     $envPort   = getenv('DB_PORT') ?: null; // optional
     $envName   = getenv('DB_NAME') ?: null;
@@ -74,8 +76,10 @@ if ($pdo === null) {
         try {
             if (in_array(strtolower($envDbType), ['pgsql','postgres','postgresql'], true)) {
                 $dsn = "pgsql:host={$envHost}" . ($envPort ? ";port={$envPort}" : '') . ";dbname={$envName}";
+                $driverLabel = 'PostgreSQL via explicit env';
             } else {
                 $dsn = "mysql:host={$envHost}" . ($envPort ? ";port={$envPort}" : '') . ";dbname={$envName};charset=utf8mb4";
+                $driverLabel = 'MySQL via explicit env';
             }
 
             $pdo = new PDO(
@@ -88,9 +92,9 @@ if ($pdo === null) {
                     PDO::ATTR_EMULATE_PREPARES => false,
                 ]
             );
-            error_log("Database connection established via explicit env vars ({$envDbType})");
+            error_log("DB connect: {$driverLabel}");
         } catch (PDOException $e) {
-            error_log("Database connection failed via explicit env vars: " . $e->getMessage());
+            error_log("DB connect failed ({$envDbType} via explicit env): " . $e->getMessage());
             $pdo = null;
         }
     }
