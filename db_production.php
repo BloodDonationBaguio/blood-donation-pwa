@@ -26,11 +26,17 @@ if (file_exists($envFile)) {
     }
 }
 
-// Primary: Render/Heroku-style DATABASE_URL (PostgreSQL)
-$database_url = getenv('DATABASE_URL');
+// Decide whether to prefer explicit env vars (e.g., MySQL on db4free) over DATABASE_URL.
+// This is helpful on platforms where pgsql driver isn't available or when using
+// an external MySQL provider while a leftover DATABASE_URL exists.
 $pdo = null;
+$envDbType = getenv('DB_TYPE') ?: '';
+$hasExplicitEnv = getenv('DB_HOST') && getenv('DB_NAME') && getenv('DB_USER');
+$preferEnvFirst = $hasExplicitEnv && (strtolower($envDbType) === 'mysql' || stripos((string)getenv('DB_HOST'), 'db4free') !== false);
 
-if ($database_url) {
+// Primary: Render/Heroku-style DATABASE_URL (PostgreSQL) unless env vars are preferred
+$database_url = getenv('DATABASE_URL');
+if (!$preferEnvFirst && $database_url) {
     $db = parse_url($database_url);
     $dbHost = $db['host'] ?? 'localhost';
     $dbName = ltrim($db['path'] ?? '', '/');
@@ -57,7 +63,7 @@ if ($database_url) {
 
 // Fallback: explicit env vars (DB_TYPE, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS)
 if ($pdo === null) {
-    $envDbType = getenv('DB_TYPE') ?: 'mysql';
+    $envDbType = ($envDbType ?: 'mysql');
     $envHost   = getenv('DB_HOST') ?: null;
     $envPort   = getenv('DB_PORT') ?: null; // optional
     $envName   = getenv('DB_NAME') ?: null;
