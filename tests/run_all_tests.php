@@ -12,6 +12,8 @@ require_once __DIR__ . '/dashboard_summary_consistency.php';
 require_once __DIR__ . '/admin_modern_page_consistency.php';
 require_once __DIR__ . '/inventory_backfill_eligibility.php';
 require_once __DIR__ . '/backfill_run_and_verify.php';
+require_once __DIR__ . '/pending_donors_schema_and_query.php';
+require_once __DIR__ . '/pending_donors_admin_integration.php';
 
 echo "\nAll tests executed. See summaries above.\n";
 ?>

@@ -632,6 +632,11 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                 <button class="btn btn-outline-success" type="submit">Search</button>
             </form>
         </div>
+        <?php if (!empty($pendingDonors) && !empty($GLOBALS['pendingDonorsFallback'])): ?>
+            <div class="alert alert-warning">
+                No pending applications found. Showing <strong><?= htmlspecialchars($GLOBALS['pendingDonorsFallback']) ?></strong> donors awaiting service.
+            </div>
+        <?php endif; ?>
         
         <?php if (!empty($pendingDonors)): ?>
             <form method="POST" action="?tab=pending-donors">
