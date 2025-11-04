@@ -19,7 +19,7 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 // Check if admin is logged in
 if (!isset($_SESSION['admin_logged_in'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header("Location: /blood-donation-pwa/admin/login.php");
+    header("Location: /admin/login.php");
     exit();
 }
 

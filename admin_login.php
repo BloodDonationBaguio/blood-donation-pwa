@@ -18,7 +18,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
         $admin = $stmt->fetch();
         
         if ($admin) {
-            header('Location: admin.php');
+            header('Location: /admin/dashboard.php');
             exit();
         } else {
             // Invalid session, clear it
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     
                     // Redirect to admin dashboard
-                    header('Location: admin.php');
+                    header('Location: /admin/dashboard.php');
                     exit();
                 } else {
                     $error = 'Invalid password';

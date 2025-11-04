@@ -6,3 +6,4 @@ backup/
 *.md
 test_*.php
 fix_*.php
+!test_db.php
