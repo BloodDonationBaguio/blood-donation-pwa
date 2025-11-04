@@ -1,26 +1,21 @@
 <?php
-require_once 'includes/config.php';
+// Include the database configuration file
+require_once __DIR__ . '/includes/config.php';
 
 try {
-    // Establish database connection
-    $pdo = new PDO("mysql:host=$dbHost;dbname=$dbName", $dbUser, $dbPass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    echo "<h3>Database Connection Successful</h3>";
+    // Check the database connection
+    $pdo->query("SELECT 1");
+    echo "<p>Database connection successful.</p>";
 
     // Check for critical tables
     $tables = ['admin_users', 'blood_inventory', 'users_new'];
     foreach ($tables as $table) {
-        $stmt = $pdo->query("SHOW TABLES LIKE '$table'");
-        if ($stmt->rowCount() > 0) {
-            echo "Table '$table' exists.<br>";
-        } else {
-            echo "<strong>Table '$table' is missing!</strong><br>";
-        }
+        $result = $pdo->query("SELECT 1 FROM {$table} LIMIT 1");
+        echo "<p>Table '{$table}' exists and is accessible.</p>";
     }
 } catch (PDOException $e) {
-    // Detailed error message
-    echo "<h3>Could not connect to the database.</h3>";
+    // Output detailed error message
+    echo "<p>Could not connect to the database.</p>";
     echo "<p>Error: " . $e->getMessage() . "</p>";
     echo "<p>Check your database credentials and server configuration.</p>";
 }
