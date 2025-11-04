@@ -5,4 +5,4 @@ services:
     autoDeploy: true
     branch: main
     plan: free
-    preDeployCommand: "php seed_production_db.php; echo 'Pre-deploy script finished. Listing files:'; ls -la"
+    preDeployCommand: "php seed_production_db.php"
