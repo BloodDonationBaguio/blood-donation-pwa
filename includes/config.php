@@ -3,7 +3,7 @@
 define('DB_HOST', '127.0.0.1');
 define('DB_NAME', 'blood_system');
 define('DB_USER', 'root');
-define('DB_PASS', '');  // Default XAMPP has no password
+define('DB_PASS', ''); // Default XAMPP has no password
 
 // PDO Connection Options
 define('DB_OPTIONS', [

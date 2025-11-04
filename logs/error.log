@@ -1183,3 +1183,10 @@ Stack trace:
 [04-Nov-2025 22:29:03 Asia/Manila] Database connection established successfully
 [04-Nov-2025 22:29:23 Asia/Manila] Database connection established successfully
 [04-Nov-2025 22:30:00 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:34:37 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:36:39 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:36:39 Asia/Manila] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin-login.php on line 59
+[04-Nov-2025 22:37:24 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:37:24 Asia/Manila] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin-login.php on line 59
+[04-Nov-2025 22:38:02 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:38:02 Asia/Manila] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin-login.php on line 59
