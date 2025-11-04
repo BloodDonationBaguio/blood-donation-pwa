@@ -174,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <option value="AB-" <?= ($_POST['blood_type'] ?? '') === 'AB-' ? 'selected' : '' ?>>AB-</option>
                         <option value="O+" <?= ($_POST['blood_type'] ?? '') === 'O+' ? 'selected' : '' ?>>O+</option>
                         <option value="O-" <?= ($_POST['blood_type'] ?? '') === 'O-' ? 'selected' : '' ?>>O-</option>
-                        <option value="Unknown" <?= ($_POST['blood_type'] ?? '') === 'Unknown' ? 'selected' : '' ?>>Unknown</option>
+                        <option value="UNK" <?php $bt = $_POST['blood_type'] ?? ''; echo ($bt === 'Unknown' || $bt === 'UNK') ? 'selected' : ''; ?>>Unknown</option>
                     </select>
                 </div>
                 

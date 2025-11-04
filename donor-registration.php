@@ -76,7 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($height < 100) $errors[] = "Please enter a valid height (minimum 100cm)";
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Valid email is required";
     // Validate blood type
-    $validBloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'];
+    // Accept standard types and compact Unknown marker 'UNK'
+    $validBloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown', 'UNK'];
     if (empty($bloodType)) {
         $errors[] = "Blood type is required";
     } elseif (!in_array($bloodType, $validBloodTypes)) {
@@ -165,7 +166,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         try {
             // Check if email already exists and handle repeat donations
-            $checkEmail = $pdo->prepare("SELECT id, first_name, last_name, status, created_at FROM donors WHERE email = ? ORDER BY created_at DESC LIMIT 1");
+            // Use donors_new if present
+            $checkTable = 'donors';
+            if (function_exists('tableExists') && tableExists($pdo, 'donors_new')) {
+                $checkTable = 'donors_new';
+            }
+            $checkEmail = $pdo->prepare("SELECT id, first_name, last_name, status, created_at FROM {$checkTable} WHERE email = ? ORDER BY created_at DESC LIMIT 1");
             $checkEmail->execute([$email]);
             $existingDonor = $checkEmail->fetch();
             
@@ -195,10 +201,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $refNumber = generateReferenceNumber();
                     
                     error_log("Starting registration for: $email with reference: $refNumber");
+                    // Determine target donor table and normalize blood type (Unknown compatibility)
+                    $donorsTable = 'donors';
+                    if (function_exists('tableExists') && tableExists($pdo, 'donors_new')) {
+                        $donorsTable = 'donors_new';
+                    }
+                    $isUnknownSelected = ($bloodType === 'Unknown' || $bloodType === 'UNK');
+                    $dbBloodType = $bloodType;
+                    if ($isUnknownSelected) {
+                        // Default to NULL if column allows it; otherwise use 'Unknown'
+                        $dbBloodType = null;
+                        try {
+                            if (function_exists('getTableStructure')) {
+                                $structure = getTableStructure($pdo, $donorsTable);
+                                foreach ($structure as $col) {
+                                    if (isset($col['column_name']) && strtolower($col['column_name']) === 'blood_type') {
+                                        $nullable = strtoupper($col['is_nullable'] ?? 'YES') !== 'NO';
+                                        if (!$nullable) {
+                                            $dbBloodType = 'Unknown';
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        } catch (Throwable $e) {
+                            // On inspection failure, keep NULL default
+                        }
+                    }
                     
                     // Insert donor information (including weight, height, and reference)
                     $stmt = $pdo->prepare("
-                        INSERT INTO donors (
+                        INSERT INTO {$donorsTable} (
                             first_name, last_name, email, phone, blood_type, date_of_birth,
                             gender, address, city, province, weight, height, reference_code, status, created_at
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
@@ -214,12 +247,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'last_name' => $lastName,
                         'email' => $email,
                         'phone' => $phone,
-                        'blood_type' => $bloodType,
+                        'blood_type' => $dbBloodType ?? 'NULL',
                         'reference' => $refNumber
                     ]));
                     
                     $stmt->execute([
-                        $firstName, $lastName, $email, $phone, $bloodType, $dob,
+                        $firstName, $lastName, $email, $phone, $dbBloodType, $dob,
                         $gender, $address, $city, $province, $weight, $height, $refNumber
                     ]);
 
@@ -228,7 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     error_log("Got donor ID: $donorId, now saving medical screening in same transaction...");
                     
                     // Verify the data was actually saved
-                    $verifyStmt = $pdo->prepare("SELECT id FROM donors WHERE id = ?");
+                    $verifyStmt = $pdo->prepare("SELECT id FROM {$donorsTable} WHERE id = ?");
                     $verifyStmt->execute([$donorId]);
                     $savedDonor = $verifyStmt->fetch();
                     
@@ -826,7 +859,7 @@ ob_clean();
                                     <option value="AB-" <?php echo ($_POST['blood_type'] ?? '') === 'AB-' ? 'selected' : ''; ?>>AB-</option>
                                     <option value="O+" <?php echo ($_POST['blood_type'] ?? '') === 'O+' ? 'selected' : ''; ?>>O+</option>
                                     <option value="O-" <?php echo ($_POST['blood_type'] ?? '') === 'O-' ? 'selected' : ''; ?>>O-</option>
-                                    <option value="Unknown" <?php echo ($_POST['blood_type'] ?? '') === 'Unknown' ? 'selected' : ''; ?>>Unknown (Will be determined during screening)</option>
+                                    <option value="UNK" <?php $bt = $_POST['blood_type'] ?? ''; echo ($bt === 'Unknown' || $bt === 'UNK') ? 'selected' : ''; ?>>Unknown (Will be determined during screening)</option>
                                 </select>
                                 <div class="invalid-feedback">Please select your blood type.</div>
                             </div>

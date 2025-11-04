@@ -612,7 +612,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <option value="AB-" <?php echo ($_POST['blood_type'] ?? '') === 'AB-' ? 'selected' : ''; ?>>AB-</option>
                                     <option value="O+" <?php echo ($_POST['blood_type'] ?? '') === 'O+' ? 'selected' : ''; ?>>O+</option>
                                     <option value="O-" <?php echo ($_POST['blood_type'] ?? '') === 'O-' ? 'selected' : ''; ?>>O-</option>
-                                    <option value="Unknown" <?php echo ($_POST['blood_type'] ?? '') === 'Unknown' ? 'selected' : ''; ?>>Unknown (Will be determined during screening)</option>
+                                    <option value="UNK" <?php $bt = $_POST['blood_type'] ?? ''; echo ($bt === 'Unknown' || $bt === 'UNK') ? 'selected' : ''; ?>>Unknown (Will be determined during screening)</option>
                                 </select>
                                 <div class="invalid-feedback">Please select your blood type.</div>
                             </div>
