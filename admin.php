@@ -623,15 +623,15 @@ $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = CURRENT_TIMES
         try { $hasCreatedNew   = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors_new' AND column_name = 'created_at' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasCreatedNew = false; }
         try { $hasCreatedLegacy= (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'created_at' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasCreatedLegacy = false; }
 
-        // Pending condition: use status if available (include common pending-like placeholders);
-        // otherwise treat Unknown/UNK or NULL blood type as pending
+        // Pending condition: if status is available, include pending-like statuses OR Unknown/NULL blood types;
+        // if status is unavailable, fall back to Unknown/NULL blood type only.
         if ($hasStatusNew) {
-            $whereNew .= " AND (status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review'))";
+            $whereNew .= " AND ((status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review')) OR (blood_type IS NULL OR blood_type IN ('Unknown','UNK')))";
         } else {
             $whereNew .= " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
         }
         if ($hasStatusLegacy) {
-            $whereLegacy .= " AND (status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review'))";
+            $whereLegacy .= " AND ((status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review')) OR (blood_type IS NULL OR blood_type IN ('Unknown','UNK')))";
         } else {
             $whereLegacy .= " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
         }
