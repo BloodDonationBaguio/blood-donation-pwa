@@ -1,3 +1,8 @@
+<?php
+// Ensure DB and helpers are available for header badges and menus
+require_once __DIR__ . '/db.php';
+if (!isset($page)) { $page = 'dashboard'; }
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

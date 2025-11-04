@@ -23,10 +23,10 @@ function isAdminLoggedIn() {
  */
 function requireAdminLogin() {
     if (!isAdminLoggedIn()) {
-        if (basename($_SERVER['REQUEST_URI']) !== 'admin_login.php') {
+        if (basename($_SERVER['REQUEST_URI']) !== 'login.php') {
             $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
         }
-        header('Location: /admin_login.php');
+        header('Location: /admin/login.php');
         exit();
     }
 }
@@ -43,9 +43,9 @@ function adminLogin($username, $password) {
         // Connect to database
         require_once __DIR__ . '/db.php';
         
-        // Check if admin_users table exists
-        $stmt = $pdo->query("SHOW TABLES LIKE 'admin_users'");
-        if ($stmt->rowCount() === 0) {
+        // Check if admin_users table exists (portable)
+        $hasAdminTable = function_exists('tableExists') ? tableExists($pdo, 'admin_users') : true;
+        if (!$hasAdminTable) {
             // Fallback to default credentials if no database table
             if ($username === DEFAULT_ADMIN_USERNAME && $password === DEFAULT_ADMIN_PASSWORD) {
                 $_SESSION['admin_logged_in'] = true;
@@ -139,7 +139,7 @@ function checkAdminSessionTimeout() {
     if (isset($_SESSION['admin_last_activity']) && (time() - $_SESSION['admin_last_activity']) > $timeout) {
         // Last request was more than 30 minutes ago
         adminLogout();
-        header('Location: /admin_login.php?timeout=1');
+        header('Location: /admin/login.php?timeout=1');
         exit();
     }
     

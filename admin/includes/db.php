@@ -1,47 +1,36 @@
 <?php
-/**
- * Database Connection - SQLite
- */
+// Centralize admin DB includes to the main app connection
+// This reuses env-aware connection (PostgreSQL/MySQL/SQLite) and shared helpers
+require_once dirname(__DIR__, 2) . '/includes/db.php';
 
-try {
-    // Create database directory if it doesn't exist
-    $dbDir = dirname(__DIR__, 2) . '/database';
-    if (!file_exists($dbDir)) {
-        mkdir($dbDir, 0755, true);
+// Robust helpers that tolerate table name differences across environments
+if (!function_exists('getDonorCount')) {
+    function getDonorCount(): int {
+        global $pdo;
+        try {
+            $donorTable = tableExists($pdo, 'donors') ? 'donors' : (tableExists($pdo, 'donors_new') ? 'donors_new' : null);
+            if (!$donorTable) return 0;
+            $stmt = $pdo->query("SELECT COUNT(*) FROM {$donorTable}");
+            return (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log('getDonorCount failed: ' . $e->getMessage());
+            return 0;
+        }
     }
-    
-    $dbFile = $dbDir . '/blood_system.db';
-    
-    $dsn = "sqlite:" . $dbFile;
-    
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ];
-    
-    $pdo = new PDO($dsn, null, null, $options);
-    
-    // Enable foreign keys
-    $pdo->exec('PRAGMA foreign_keys = ON');
-    
-} catch (PDOException $e) {
-    error_log("Database connection failed: " . $e->getMessage());
-    die("Connection failed. Please try again later.");
 }
 
-/**
- * Helper function to get donor count
- */
-function getDonorCount() {
-    global $pdo;
-    return $pdo->query("SELECT COUNT(*) FROM donors")->fetchColumn();
-}
-
-/**
- * Helper function to get pending request count
- */
-function getPendingRequestCount() {
-    global $pdo;
-    return $pdo->query("SELECT COUNT(*) FROM requests WHERE status = 'pending'")->fetchColumn();
+if (!function_exists('getPendingRequestCount')) {
+    function getPendingRequestCount(): int {
+        global $pdo;
+        try {
+            $requestsTable = tableExists($pdo, 'blood_requests') ? 'blood_requests' : (tableExists($pdo, 'requests') ? 'requests' : null);
+            if (!$requestsTable) return 0;
+            $stmt = $pdo->query("SELECT COUNT(*) FROM {$requestsTable} WHERE status = 'pending'");
+            return (int)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log('getPendingRequestCount failed: ' . $e->getMessage());
+            return 0;
+        }
+    }
 }
 ?>
