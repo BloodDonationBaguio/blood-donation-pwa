@@ -623,17 +623,20 @@ $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = CURRENT_TIMES
         try { $hasCreatedNew   = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors_new' AND column_name = 'created_at' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasCreatedNew = false; }
         try { $hasCreatedLegacy= (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'created_at' LIMIT 1")->fetchColumn(); } catch (Throwable $e) { $hasCreatedLegacy = false; }
 
-        // Pending condition: if status is available, include pending-like statuses OR Unknown/NULL blood types;
-        // if status is unavailable, fall back to Unknown/NULL blood type only.
+        // Pending condition:
+        // - If status exists: include pending-like statuses OR normalized Unknown/NULL blood types,
+        //   and explicitly exclude approved/served/rejected.
+        // - If status does not exist: include normalized Unknown/NULL blood types only.
+        $unknownExpr = "(blood_type IS NULL OR LOWER(TRIM(COALESCE(blood_type,''))) IN ('unknown','unk',''))";
         if ($hasStatusNew) {
-            $whereNew .= " AND ((status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review')) OR (blood_type IS NULL OR blood_type IN ('Unknown','UNK')))";
+            $whereNew .= " AND ((status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review')) OR $unknownExpr) AND COALESCE(status,'') NOT IN ('approved','served','rejected')";
         } else {
-            $whereNew .= " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
+            $whereNew .= " AND " . $unknownExpr;
         }
         if ($hasStatusLegacy) {
-            $whereLegacy .= " AND ((status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review')) OR (blood_type IS NULL OR blood_type IN ('Unknown','UNK')))";
+            $whereLegacy .= " AND ((status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review')) OR $unknownExpr) AND COALESCE(status,'') NOT IN ('approved','served','rejected')";
         } else {
-            $whereLegacy .= " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
+            $whereLegacy .= " AND " . $unknownExpr;
         }
 
         // Optional search filter
