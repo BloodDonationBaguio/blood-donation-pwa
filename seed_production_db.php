@@ -1,9 +1,24 @@
 <?php
+echo "Starting production database seed script...\n";
+
 require_once 'db_production.php';
 
-function seedTestDonor() {
-    global $pdo;
+if (!isset($pdo) || !$pdo instanceof PDO) {
+    echo "Database connection failed. PDO object not available. Please check db_production.php and environment variables.\n";
+    exit(1);
+}
+
+echo "Database connection appears to be successful.\n";
+
+function seedTestDonor($pdo) {
     try {
+        // Use the helper function from db_production.php to check if the table exists
+        if (!tableExists($pdo, 'donors')) {
+            echo "Error: 'donors' table does not exist in the database.\n";
+            exit(1);
+        }
+        echo "'donors' table exists. Checking for test donor...\n";
+
         // Check if the test donor already exists
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM donors WHERE email = :email");
         $stmt->execute([':email' => 'test.user@example.com']);
@@ -24,13 +39,16 @@ function seedTestDonor() {
             ]);
             echo "Test donor inserted successfully.\n";
         } else {
-            echo "Test donor already exists.\n";
+            echo "Test donor already exists. No action needed.\n";
         }
     } catch (PDOException $e) {
-        echo "Database error: " . $e->getMessage() . "\n";
+        echo "Database error during seeding: " . $e->getMessage() . "\n";
         exit(1);
     }
 }
 
-seedTestDonor();
+seedTestDonor($pdo);
+
+echo "Seed script finished successfully.\n";
+
 ?>
