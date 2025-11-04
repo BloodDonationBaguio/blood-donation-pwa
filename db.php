@@ -39,7 +39,7 @@ if (!function_exists('tableExists')) {
     define('DB_NAME', getenv('DB_NAME') ?: 'blood_system');
     define('DB_USER', getenv('DB_USER') ?: 'postgres');
     define('DB_PASS', getenv('DB_PASS') ?: 'postgres');
-    define('DB_FILE', 'c:/xampp/htdocs/blood-donation-pwa-1/database/blood_system.db');
+    define('DB_FILE', __DIR__ . '/database/blood_system.db');
 
     // Connection helper with retry to mitigate transient failures on Render
     $connectWithRetry = function($attempts = 2, $delayMs = 500) {
