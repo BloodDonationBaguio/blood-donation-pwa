@@ -4,5 +4,6 @@ services:
     env: docker
     branch: main
     autoDeploy: true
-    preDeploy: php seed_production_db.php
+    preDeploy:
+      command: "php seed_production_db.php > seed.log 2>&1"
     plan: free
