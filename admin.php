@@ -137,7 +137,7 @@ usort($pendingDonors, function($a, $b) {
                                 <?php foreach ($pendingDonors as $donor): ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($donor['id']); ?></td>
-                                        <td><?php echo htmlspecialchars($donor['name']); ?></td>
+                                        <td><?php echo htmlspecialchars($donor['name'] ?? ($donor['first_name'] . ' ' . $donor['last_name'])); ?></td>
                                         <td><?php echo htmlspecialchars($donor['email']); ?></td>
                                         <td><?php echo htmlspecialchars($donor['phone']); ?></td>
                                         <td><?php echo htmlspecialchars($donor['blood_type']); ?></td>
