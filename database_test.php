@@ -1,32 +1,27 @@
 <?php
-
-require_once __DIR__ . '/includes/config.php';
+require_once 'includes/config.php';
 
 try {
-    // Connect to the database
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+    // Establish database connection
+    $pdo = new PDO("mysql:host=$dbHost;dbname=$dbName", $dbUser, $dbPass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    echo "Database connection successful!\n";
+    echo "<h3>Database Connection Successful</h3>";
 
-    // List of tables to check
+    // Check for critical tables
     $tables = ['admin_users', 'blood_inventory', 'users_new'];
-
     foreach ($tables as $table) {
-        $stmt = $pdo->query("PRAGMA table_info($table)");
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        if (empty($result)) {
-            echo "Table '$table' does not exist or is empty.\n";
+        $stmt = $pdo->query("SHOW TABLES LIKE '$table'");
+        if ($stmt->rowCount() > 0) {
+            echo "Table '$table' exists.<br>";
         } else {
-            echo "Table '$table' exists and has " . count($result) . " columns.\n";
+            echo "<strong>Table '$table' is missing!</strong><br>";
         }
     }
-
 } catch (PDOException $e) {
-    echo "Database error: " . $e->getMessage() . "\n";
-} catch (Exception $e) {
-    echo "General error: " . $e->getMessage() . "\n";
+    // Detailed error message
+    echo "<h3>Could not connect to the database.</h3>";
+    echo "<p>Error: " . $e->getMessage() . "</p>";
+    echo "<p>Check your database credentials and server configuration.</p>";
 }
-
 ?>
