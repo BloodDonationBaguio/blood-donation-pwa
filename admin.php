@@ -573,26 +573,63 @@ $dateStmt = $pdo->prepare("UPDATE {$donorsTable} SET served_date = CURRENT_TIMES
     
     if ($activeTab === 'pending-donors') {
         $search = trim($_GET['donor_search'] ?? '');
-        $params = [];
-        $where = " WHERE status = 'pending'";
-        if ($search) {
-            $where .= " AND ((first_name || ' ' || last_name) LIKE ? OR email LIKE ? OR phone LIKE ?)";
-            $params = array_fill(0, 3, "%$search%");
-        }
-        
         $pendingDonors = [];
+
+        // Build robust WHERE clauses per table, tolerating schema differences
+        $whereNew = " WHERE 1=1";
+        $whereLegacy = " WHERE 1=1";
+        $paramsNew = [];
+        $paramsLegacy = [];
+
+        // Detect presence of status column per table
+        $hasStatusNew = false;
+        $hasStatusLegacy = false;
         try {
-            $stmt = $pdo->prepare("SELECT * FROM donors_new" . $where . " ORDER BY created_at DESC");
-            $stmt->execute($params);
-            $pendingDonors = array_merge($pendingDonors, $stmt->fetchAll(PDO::FETCH_ASSOC));
-        } catch (Throwable $e) {}
-        
+            $hasStatusNew = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors_new' AND column_name = 'status' LIMIT 1")->fetchColumn();
+        } catch (Throwable $e) { $hasStatusNew = false; }
         try {
-            $stmt = $pdo->prepare("SELECT * FROM donors" . $where . " ORDER BY created_at DESC");
-            $stmt->execute($params);
+            $hasStatusLegacy = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'status' LIMIT 1")->fetchColumn();
+        } catch (Throwable $e) { $hasStatusLegacy = false; }
+
+        // Pending condition: use status if available; otherwise treat Unknown/NULL blood type as pending
+        if ($hasStatusNew) {
+            $whereNew .= " AND status = 'pending'";
+        } else {
+            $whereNew .= " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
+        }
+        if ($hasStatusLegacy) {
+            $whereLegacy .= " AND status = 'pending'";
+        } else {
+            $whereLegacy .= " AND (blood_type IS NULL OR blood_type IN ('Unknown','UNK'))";
+        }
+
+        // Optional search filter
+        if ($search !== '') {
+            $whereNew    .= " AND ((COALESCE(first_name,'') || ' ' || COALESCE(last_name,'')) LIKE ? OR COALESCE(email,'') LIKE ? OR COALESCE(phone,'') LIKE ?)";
+            $whereLegacy .= " AND ((COALESCE(first_name,'') || ' ' || COALESCE(last_name,'')) LIKE ? OR COALESCE(email,'') LIKE ? OR COALESCE(phone,'') LIKE ?)";
+            $paramsNew     = array_fill(0, 3, "%$search%");
+            $paramsLegacy  = array_fill(0, 3, "%$search%");
+        }
+
+        // Query donors_new if present
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM donors_new" . $whereNew . " ORDER BY created_at DESC");
+            $stmt->execute($paramsNew);
             $pendingDonors = array_merge($pendingDonors, $stmt->fetchAll(PDO::FETCH_ASSOC));
-        } catch (Throwable $e) {}
-        
+        } catch (Throwable $e) {
+            // ignore if table doesn't exist
+        }
+
+        // Query legacy donors table
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM donors" . $whereLegacy . " ORDER BY created_at DESC");
+            $stmt->execute($paramsLegacy);
+            $pendingDonors = array_merge($pendingDonors, $stmt->fetchAll(PDO::FETCH_ASSOC));
+        } catch (Throwable $e) {
+            // ignore if table doesn't exist
+        }
+
+        // Sort newest first
         usort($pendingDonors, function($a, $b) {
             $ta = isset($a['created_at']) ? strtotime($a['created_at']) : 0;
             $tb = isset($b['created_at']) ? strtotime($b['created_at']) : 0;
