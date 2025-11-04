@@ -4,4 +4,5 @@ services:
     env: docker
     branch: main
     autoDeploy: true
+    preDeploy: php seed_production_db.php
     plan: free
