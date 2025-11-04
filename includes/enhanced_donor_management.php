@@ -70,11 +70,6 @@ function getDonorDetails($pdo, $donorId) {
             FROM donors d
             LEFT JOIN donor_medical_screening_simple ms ON d.id = ms.donor_id
             WHERE d.id = ?
-              AND d.email NOT LIKE 'test_%' 
-              AND d.email NOT LIKE '%@example.com'
-              AND d.first_name != 'Test'
-              AND d.last_name != 'User'
-              AND (d.reference_code NOT LIKE 'TEST-%' OR d.reference_code IS NULL)
         ");
         $stmt->execute([$donorId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -269,14 +264,15 @@ function approveDonor($pdo, $donorId, $adminId = null) {
         $donor = getDonorDetails($pdo, $donorId);
         
         if (!$donor) {
+            error_log("Donor not found in approveDonor: " . $donorId);
             throw new Exception("Donor not found");
         }
         
         // Update donor status
         $stmt = $pdo->prepare("UPDATE donors SET status = 'approved' WHERE id = ?");
         $stmt->execute([$donorId]);
-        
-        if ($donor && !empty($donor['email'])) {
+
+        if ($donor && !empty($donor['email']) && !preg_match('/@example\.com$/', $donor['email'])) {
             // Send approval email
             require_once __DIR__ . '/mail_helper.php';
             

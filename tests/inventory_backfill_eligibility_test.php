@@ -11,17 +11,16 @@ $complete = new BloodInventoryManagerComplete($pdo);
 
 $donorTable = 'donors_new';
 try { if ((int)$pdo->query("SELECT COUNT(*) FROM donors_new")->fetchColumn() > 0) { $donorTable = 'donors_new'; } } catch (Throwable $e) {}
-// Use different WHERE clauses for single-table vs join to avoid ambiguous column errors
-$servedCondWhere = ($donorTable === 'donors_new') ? "status IN ('served','completed')" : "status = 'served'";
-$servedCondJoin  = ($donorTable === 'donors_new') ? "d.status IN ('served','completed')" : "d.status = 'served'";
 
-$eligibleDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorTable} WHERE {$servedCondWhere}")->fetchColumn();
-$donorsWithAvailable = (int)$pdo->query("SELECT COUNT(DISTINCT d.id) FROM {$donorTable} d JOIN blood_inventory bi ON bi.donor_id = d.id AND bi.status = 'available' WHERE {$servedCondJoin}")->fetchColumn();
+$servedCond = ($donorTable === 'donors_new') ? "status IN ('served','completed')" : "status = 'served'";
+
+$eligibleDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorTable} WHERE {$servedCond}")->fetchColumn();
+$donorsWithAvailable = (int)$pdo->query("SELECT COUNT(DISTINCT d.id) FROM {$donorTable} d JOIN blood_inventory bi ON bi.donor_id = d.id AND bi.status = 'available' WHERE {$servedCond}")->fetchColumn();
 $missingAvailable = max(0, $eligibleDonors - $donorsWithAvailable);
 
-t_pass("Eligible donors: {$eligibleDonors}");
-t_pass("Donors with AVAILABLE unit: {$donorsWithAvailable}");
-t_pass("Donors missing AVAILABLE unit: {$missingAvailable}");
+echo "Eligible donors: {$eligibleDonors}\n";
+echo "Donors with AVAILABLE unit: {$donorsWithAvailable}\n";
+echo "Donors missing AVAILABLE unit: {$missingAvailable}\n";
 
 if ($missingAvailable > 0) {
     t_fail("Found {$missingAvailable} eligible donors without AVAILABLE units — run backfill.");
@@ -30,7 +29,7 @@ if ($missingAvailable > 0) {
 }
 
 $summary = $complete->getDashboardSummary();
-t_pass("Summary: " . json_encode($summary));
+echo "Summary: " . json_encode($summary) . "\n";
 
 if ((int)$summary['total_units'] >= $donorsWithAvailable) {
     t_pass('Dashboard total is consistent with donors who have AVAILABLE units.');

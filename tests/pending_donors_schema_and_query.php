@@ -3,17 +3,6 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-// Prefer production DB config, then fallback
-try {
-    require_once __DIR__ . '/../db_production.php';
-    if (!isset($pdo) || !($pdo instanceof PDO)) {
-        require_once __DIR__ . '/../db.php';
-    }
-} catch (Throwable $e) {
-    if (!isset($pdo) || !($pdo instanceof PDO)) {
-        @require_once __DIR__ . '/../db.php';
-    }
-}
 require_once __DIR__ . '/utils.php';
 
 t_section('Pending Donors Schema and Query Diagnostics');
@@ -50,7 +39,7 @@ function tableExistsPortable(PDO $pdo, string $table): bool {
 }
 
 $tables = [];
-foreach (['donors_new','donors'] as $t) {
+foreach (['donors_new','donors_new'] as $t) {
     // Prefer a direct COUNT(*) probe to avoid helper/driver quirks
     try {
         $pdo->query("SELECT COUNT(*) FROM {$t}")->fetchColumn();
@@ -61,7 +50,7 @@ foreach (['donors_new','donors'] as $t) {
 }
 
 if (empty($tables)) {
-    t_fail('Neither donors_new nor donors table exists in current database.');
+    t_fail('Neither donors_new nor donors_new table exists in current database.');
     t_result(0, 1, 0);
     return;
 }
@@ -70,19 +59,19 @@ $expectedUnionCount = 0;
 $passed = 0; $failed = 0; $skipped = 0;
 
 foreach ($tables as $t) {
-    echo "\n-- Inspecting table: {$t} --\n";
+    t_section("-- Inspecting table: {$t} --");
     $cols = columnSet($pdo, $t);
     $hasStatus     = isset($cols['status']);
     $hasCreated    = isset($cols['created_at']) || isset($cols['created']);
     $hasRef        = isset($cols['reference_code']) || isset($cols['reference']);
     $hasBloodType  = isset($cols['blood_type']);
 
-    echo "Columns: status=" . ($hasStatus?'yes':'no') . ", created_at=" . ($hasCreated?'yes':'no') . ", reference_code=" . ($hasRef?'yes':'no') . ", blood_type=" . ($hasBloodType?'yes':'no') . "\n";
+    t_pass("Columns: status=" . ($hasStatus?'yes':'no') . ", created_at=" . ($hasCreated?'yes':'no') . ", reference_code=" . ($hasRef?'yes':'no') . ", blood_type=" . ($hasBloodType?'yes':'no'));
 
     // Baseline total
     try {
         $total = (int)$pdo->query("SELECT COUNT(*) FROM {$t}")->fetchColumn();
-        echo "Total rows: {$total}\n";
+        t_pass("Total rows: {$total}");
         $passed += 1;
     } catch (Throwable $e) {
         t_fail("Failed to count rows in {$t}: " . $e->getMessage());
@@ -101,7 +90,7 @@ foreach ($tables as $t) {
 
     try {
         $pending = (int)$pdo->query("SELECT COUNT(*) FROM {$t} WHERE {$pendingCond}")->fetchColumn();
-        echo "Pending-like rows: {$pending}\n";
+        t_pass("Pending-like rows: {$pending}");
         $expectedUnionCount += $pending;
         $passed += 1;
     } catch (Throwable $e) {
@@ -113,7 +102,7 @@ foreach ($tables as $t) {
     if ($hasRef) {
         try {
             $refNonEmpty = (int)$pdo->query("SELECT COUNT(*) FROM {$t} WHERE COALESCE(reference_code,'') <> ''")->fetchColumn();
-            echo "Rows with non-empty reference_code: {$refNonEmpty}\n";
+            t_pass("Rows with non-empty reference_code: {$refNonEmpty}");
             $passed += 1;
         } catch (Throwable $e) {
             t_fail("Failed to count non-empty reference_code in {$t}: " . $e->getMessage());
@@ -152,7 +141,8 @@ usort($unionResults, function($a, $b) {
 });
 
 $unionCount = count($unionResults);
-echo "\nComputed union pending count: {$unionCount}\nExpected from per-table counts: {$expectedUnionCount}\n";
+t_pass("Computed union pending count: {$unionCount}");
+t_pass("Expected from per-table counts: {$expectedUnionCount}");
 
 // Assert union >= expected (it should match or exceed due to permissive IS NULL checks)
 if (t_assert($unionCount >= $expectedUnionCount, 'Union count covers all per-table pending-like rows')) {

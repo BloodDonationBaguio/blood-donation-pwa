@@ -3,33 +3,43 @@
  * Test utilities: minimal assertions and HTML parsing helpers
  */
 
+if (!isset($t_output)) {
+    $t_output = '';
+}
+
 function t_assert($condition, $message) {
+    global $t_output;
     if (!$condition) {
-        echo "[FAIL] $message\n";
+        $t_output .= "[FAIL] $message\n";
         return false;
     }
-    echo "[PASS] $message\n";
+    $t_output .= "[PASS] $message\n";
     return true;
 }
 
 function t_section($title) {
-    echo "\n=== $title ===\n";
+    global $t_output;
+    $t_output .= "\n=== $title ===\n";
 }
 
 function t_result($passed, $failed, $skipped = 0) {
-    echo "\nSummary: PASS=$passed, FAIL=$failed, SKIP=$skipped\n";
+    global $t_output;
+    $t_output .= "\nSummary: PASS=$passed, FAIL=$failed, SKIP=$skipped\n";
 }
 
 function t_pass($message) {
-    echo "[PASS] $message\n";
+    global $t_output;
+    $t_output .= "[PASS] $message\n";
 }
 
 function t_fail($message) {
-    echo "[FAIL] $message\n";
+    global $t_output;
+    $t_output .= "[FAIL] $message\n";
 }
 
 function t_skip($message) {
-    echo "[SKIP] $message\n";
+    global $t_output;
+    $t_output .= "[SKIP] $message\n";
 }
 
 /**

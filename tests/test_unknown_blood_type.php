@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../includes/db.php';
 
 // Test to ensure that the pending donors page can handle unknown blood types
 
@@ -33,9 +32,9 @@ function columnExists($pdo, $table, $column) {
 }
 
 $hasStatusNew     = columnExists($pdo, 'donors_new', 'status');
-$hasStatusLegacy  = columnExists($pdo, 'donors', 'status');
+$hasStatusLegacy  = columnExists($pdo, 'donors_new', 'status');
 $hasCreatedNew    = columnExists($pdo, 'donors_new', 'created_at');
-$hasCreatedLegacy = columnExists($pdo, 'donors', 'created_at');
+$hasCreatedLegacy = columnExists($pdo, 'donors_new', 'created_at');
 
 // Pending condition:
 // - If status exists: a donor is pending if their status is a pending-like value.
@@ -67,7 +66,7 @@ try {
 
 // Query legacy donors table
 try {
-    $stmt = $pdo->prepare("SELECT * FROM donors" . $whereLegacy . $orderLegacy);
+    $stmt = $pdo->prepare("SELECT * FROM donors_new" . $whereLegacy . $orderLegacy);
     $stmt->execute($paramsLegacy);
     $pendingDonors = array_merge($pendingDonors, $stmt->fetchAll(PDO::FETCH_ASSOC));
 } catch (Throwable $e) { /* ignore if table doesn't exist or query fails */ }

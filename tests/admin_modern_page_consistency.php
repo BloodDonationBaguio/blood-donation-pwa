@@ -3,7 +3,6 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../includes/BloodInventoryManagerComplete.php';
 require_once __DIR__ . '/../includes/BloodInventoryManagerRobust.php';
 require_once __DIR__ . '/utils.php';
@@ -55,7 +54,7 @@ if ($rows > 0) {
     $ok &= t_assert($rows === ($endRecord - $startRecord + 1), 'Computed rows equal displayed range');
 } else {
     $skipped += 1;
-    echo "[SKIP] No rows; computed row-range assertion skipped\n";
+    t_skip("No rows; computed row-range assertion skipped");
 }
 if ($ok) { $passed += 3; } else { $failed += 1; }
 

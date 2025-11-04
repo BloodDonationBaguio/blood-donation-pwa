@@ -1,0 +1,1077 @@
+
+[04-Nov-2025 21:10:22 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Dashboard summary error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:10:22 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:10:22 Asia/Manila] PHP Warning:  Constant DB_HOST already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 3
+[04-Nov-2025 21:10:22 Asia/Manila] PHP Warning:  Constant DB_NAME already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 4
+[04-Nov-2025 21:10:22 Asia/Manila] PHP Warning:  Constant DB_USER already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 5
+[04-Nov-2025 21:10:22 Asia/Manila] PHP Warning:  Constant DB_PASS already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 6
+[04-Nov-2025 21:10:22 Asia/Manila] Database connection failed: SQLSTATE[HY000] [1045] Access denied for user 'postgres'@'localhost' (using password: YES)
+[04-Nov-2025 21:11:35 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Dashboard summary error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:11:35 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:11:35 Asia/Manila] PHP Warning:  Constant DB_HOST already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 3
+[04-Nov-2025 21:11:35 Asia/Manila] PHP Warning:  Constant DB_NAME already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 4
+[04-Nov-2025 21:11:35 Asia/Manila] PHP Warning:  Constant DB_USER already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 5
+[04-Nov-2025 21:11:35 Asia/Manila] PHP Warning:  Constant DB_PASS already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 6
+[04-Nov-2025 21:11:35 Asia/Manila] Database connection failed: SQLSTATE[HY000] [1045] Access denied for user 'postgres'@'localhost' (using password: YES)
+[04-Nov-2025 21:12:03 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Dashboard summary error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:03 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:12:03 Asia/Manila] PHP Warning:  Constant DB_HOST already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 3
+[04-Nov-2025 21:12:03 Asia/Manila] PHP Warning:  Constant DB_NAME already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 4
+[04-Nov-2025 21:12:03 Asia/Manila] PHP Warning:  Constant DB_USER already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 5
+[04-Nov-2025 21:12:03 Asia/Manila] PHP Warning:  Constant DB_PASS already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 6
+[04-Nov-2025 21:12:03 Asia/Manila] Database connection failed: SQLSTATE[HY000] [1045] Access denied for user 'postgres'@'localhost' (using password: YES)
+[04-Nov-2025 21:12:28 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Dashboard summary error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:12:28 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:12:28 Asia/Manila] PHP Warning:  Constant DB_HOST already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 3
+[04-Nov-2025 21:12:28 Asia/Manila] PHP Warning:  Constant DB_NAME already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 4
+[04-Nov-2025 21:12:28 Asia/Manila] PHP Warning:  Constant DB_USER already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 5
+[04-Nov-2025 21:12:28 Asia/Manila] PHP Warning:  Constant DB_PASS already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 6
+[04-Nov-2025 21:12:28 Asia/Manila] Database connection failed: SQLSTATE[HY000] [1045] Access denied for user 'postgres'@'localhost' (using password: YES)
+[04-Nov-2025 21:16:14 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:16:55 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:17:56 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:17:56 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:17:56 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:17:56 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:56 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:17:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Dashboard summary error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:17:57 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:17:57 Asia/Manila] PHP Warning:  Constant DB_HOST already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 3
+[04-Nov-2025 21:17:57 Asia/Manila] PHP Warning:  Constant DB_NAME already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 4
+[04-Nov-2025 21:17:57 Asia/Manila] PHP Warning:  Constant DB_USER already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 5
+[04-Nov-2025 21:17:57 Asia/Manila] PHP Warning:  Constant DB_PASS already defined in C:\xampp\htdocs\blood-donation-pwa-1\includes\config.php on line 6
+[04-Nov-2025 21:17:57 Asia/Manila] Database connection failed: SQLSTATE[HY000] [1045] Access denied for user 'postgres'@'localhost' (using password: YES)
+[04-Nov-2025 21:20:58 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Dashboard summary error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 21:20:58 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 21:20:58 Asia/Manila] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory in C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_backfill_eligibility.php:19
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_backfill_eligibility.php(19): PDO->query('SELECT COUNT(DI...')
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(16): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\blood-donation-pwa-1\run_all_tests.php(7): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_backfill_eligibility.php on line 19
+[04-Nov-2025 21:25:23 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:28:32 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:28:42 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:28:42 Asia/Manila] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 no such table: donors in C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_backfill_eligibility.php:18
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_backfill_eligibility.php(18): PDO->query('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(16): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\blood-donation-pwa-1\run_all_tests.php(7): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_backfill_eligibility.php on line 18
+[04-Nov-2025 21:29:33 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:29:33 Asia/Manila] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 no such table: donors in C:\xampp\htdocs\blood-donation-pwa-1\tests\backfill_run_and_verify.php:19
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\tests\backfill_run_and_verify.php(19): PDO->query('SELECT COUNT(DI...')
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(17): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\blood-donation-pwa-1\run_all_tests.php(7): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\tests\backfill_run_and_verify.php on line 19
+[04-Nov-2025 21:31:10 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:10 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:31:10 Asia/Manila] PHP Warning:  require_once(includes/functions.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 4
+[04-Nov-2025 21:31:10 Asia/Manila] PHP Fatal error:  Uncaught Error: Failed opening required 'includes/functions.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\blood-donation-pwa-1\admin.php:4
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\tests\pending_donors_admin_integration.php(75): include()
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(19): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\blood-donation-pwa-1\run_all_tests.php(7): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 4
+[04-Nov-2025 21:31:57 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:31:57 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:31:57 Asia/Manila] PHP Warning:  require_once(C:\xampp\htdocs\blood-donation-pwa-1/includes/functions.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 4
+[04-Nov-2025 21:31:57 Asia/Manila] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\blood-donation-pwa-1/includes/functions.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\blood-donation-pwa-1\admin.php:4
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\tests\pending_donors_admin_integration.php(75): include()
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(19): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\blood-donation-pwa-1\run_all_tests.php(7): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 4
+[04-Nov-2025 21:32:45 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:32:45 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:32:45 Asia/Manila] PHP Warning:  require_once(C:\xampp\htdocs\blood-donation-pwa-1\includes\functions.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 4
+[04-Nov-2025 21:32:45 Asia/Manila] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\blood-donation-pwa-1\includes\functions.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\blood-donation-pwa-1\admin.php:4
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\tests\pending_donors_admin_integration.php(75): include()
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(19): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\blood-donation-pwa-1\run_all_tests.php(7): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 4
+[04-Nov-2025 21:33:36 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:33:36 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:33:36 Asia/Manila] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php:9) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 6
+[04-Nov-2025 21:34:31 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:34:31 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:34:31 Asia/Manila] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\utils.php:16) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 6
+[04-Nov-2025 21:35:23 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:23 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:35:23 Asia/Manila] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:40) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 6
+[04-Nov-2025 21:35:46 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:35:46 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:35:46 Asia/Manila] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\admin_modern_page_consistency.php:57) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 6
+[04-Nov-2025 21:36:10 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:10 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:36:10 Asia/Manila] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_backfill_eligibility.php:22) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 6
+[04-Nov-2025 21:36:37 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:36:37 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:36:37 Asia/Manila] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\backfill_run_and_verify.php:22) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 6
+[04-Nov-2025 21:37:07 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:07 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:37:07 Asia/Manila] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\pending_donors_schema_and_query.php:62) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 6
+[04-Nov-2025 21:37:41 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:41 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:37:55 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:38:53 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:39:21 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:05 Asia/Manila] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 21:40:05 Asia/Manila] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php:9) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 6
+[04-Nov-2025 21:40:35 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:40:35 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:41:25 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:25 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:41:43 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:43 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:41:59 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:16 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:33 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:42:54 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:16 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:43:51 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:44:24 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:50:26 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:16 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:51:45 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:51:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:45 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:46 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:46 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:46 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:46 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:46 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:46 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:51:46 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Database connection established successfully
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
+[04-Nov-2025 21:52:34 Asia/Manila] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2

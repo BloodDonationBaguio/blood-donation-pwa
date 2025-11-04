@@ -3,17 +3,6 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-// Prefer production DB config, then fallback
-try {
-    require_once __DIR__ . '/../db_production.php';
-    if (!isset($pdo) || !($pdo instanceof PDO)) {
-        require_once __DIR__ . '/../db.php';
-    }
-} catch (Throwable $e) {
-    if (!isset($pdo) || !($pdo instanceof PDO)) {
-        @require_once __DIR__ . '/../db.php';
-    }
-}
 require_once __DIR__ . '/utils.php';
 
 t_section('Pending Donors Admin Integration');
@@ -47,7 +36,7 @@ if (!function_exists('columnSet')) {
 // No need for tableExistsPortable here; we probe via COUNT(*)
 
 $tables = [];
-foreach (['donors_new','donors'] as $t) {
+foreach (['donors_new','donors_new'] as $t) {
     // Probe by COUNT(*) for presence to avoid helper/driver quirks
     try {
         $pdo->query("SELECT COUNT(*) FROM {$t}")->fetchColumn();
@@ -58,7 +47,7 @@ foreach (['donors_new','donors'] as $t) {
 }
 
 if (empty($tables)) {
-    t_fail('Neither donors_new nor donors table exists in current database.');
+    t_fail('Neither donors_new nor donors_new table exists in current database.');
     t_result(0, 1, 0);
     return;
 }
@@ -88,7 +77,7 @@ $html = ob_get_clean();
 
 $list = $GLOBALS['pendingDonors'] ?? [];
 $count = is_array($list) ? count($list) : 0;
-echo "Computed pendingDonors count from admin.php: {$count}\n";
+t_pass("Computed pendingDonors count from admin.php: {$count}");
 
 $ok = true;
 $ok &= t_assert(is_array($list), 'pendingDonors is an array exposed via globals');

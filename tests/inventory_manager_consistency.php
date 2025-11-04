@@ -3,7 +3,6 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../includes/BloodInventoryManagerComplete.php';
 require_once __DIR__ . '/../includes/BloodInventoryManagerRobust.php';
 require_once __DIR__ . '/utils.php';
@@ -38,7 +37,7 @@ $filterSets = [
 
 foreach ($filterSets as $filters) {
     $label = http_build_query($filters);
-    echo "\n-- Filters: " . ($label ?: 'none') . " --\n";
+    t_section("Filters: " . ($label ?: 'none'));
     $filters = normalize_filters($filters);
 
     // Use limit large enough to often avoid pagination effects, but bounded
