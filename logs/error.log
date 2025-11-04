@@ -1075,3 +1075,111 @@ Stack trace:
 [04-Nov-2025 21:52:34 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 no such table: donors
 [04-Nov-2025 21:52:34 Asia/Manila] Fallback donors served aggregation failed: SQLSTATE[HY000]: General error: 1 no such table: donors
 [04-Nov-2025 21:52:34 Asia/Manila] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 22:09:11 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:09:11 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:09:11 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[04-Nov-2025 22:10:42 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:10:42 Asia/Manila] PHP Fatal error:  Cannot redeclare getTableStructure() (previously declared in C:\xampp\htdocs\blood-donation-pwa-1\db_inspector.php:4) in C:\xampp\htdocs\blood-donation-pwa-1\db.php on line 185
+[04-Nov-2025 22:12:28 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:12:28 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:12:28 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:12:28 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[04-Nov-2025 22:13:33 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:13:33 Asia/Manila] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 no such function: DATABASE in C:\xampp\htdocs\blood-donation-pwa-1\database_self_heal.php:41
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\database_self_heal.php(41): PDO->query('SELECT DATABASE...')
+#1 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\database_self_heal.php on line 41
+[04-Nov-2025 22:13:33 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:13:33 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[04-Nov-2025 22:14:54 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:14:54 Asia/Manila] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 no such table: information_schema.tables in C:\xampp\htdocs\blood-donation-pwa-1\database_self_heal.php:66
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\database_self_heal.php(66): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\blood-donation-pwa-1\database_self_heal.php(91): sh_table_exists(Object(PDO), 'donor_notes', 'main', false)
+#2 C:\xampp\htdocs\blood-donation-pwa-1\database_self_heal.php(207): ensureTable(Object(PDO), 'donor_notes', 'CREATE TABLE IF...', Array, 'main', false)
+#3 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\database_self_heal.php on line 66
+[04-Nov-2025 22:14:54 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:14:54 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[04-Nov-2025 22:15:59 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:15:59 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:15:59 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[04-Nov-2025 22:16:12 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:16:12 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:16:12 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[04-Nov-2025 22:16:48 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory count: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Dashboard summary error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Error getting dashboard summary: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Count error: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory
+[04-Nov-2025 22:16:48 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:16:48 Asia/Manila] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 no such table: blood_inventory in C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_backfill_eligibility.php:19
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_backfill_eligibility.php(19): PDO->query('SELECT COUNT(DI...')
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(18): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\blood-donation-pwa-1\run_all_tests.php(7): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_backfill_eligibility.php on line 19
+[04-Nov-2025 22:16:48 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:16:48 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[04-Nov-2025 22:17:46 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:17:46 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:17:46 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:17:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:17:55 Asia/Manila] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 22:17:55 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:17:55 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:18:14 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] Error getting inventory: SQLSTATE[HY000]: General error: 1 near "'5 day'": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] Inventory error: SQLSTATE[HY000]: General error: 1 near "as": syntax error
+[04-Nov-2025 22:18:14 Asia/Manila] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 2
+[04-Nov-2025 22:18:39 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:18:39 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:18:39 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[04-Nov-2025 22:29:03 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:29:23 Asia/Manila] Database connection established successfully
+[04-Nov-2025 22:30:00 Asia/Manila] Database connection established successfully

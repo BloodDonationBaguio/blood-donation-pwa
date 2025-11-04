@@ -11,24 +11,24 @@ try {
     echo "<p style='color: green;'>✅ Database connected</p>";
     
     // Check if admin_users table exists
-    $stmt = $pdo->query("SHOW TABLES LIKE 'admin_users'");
+    $stmt = $pdo->query("PRAGMA table_info('admin_users')");
     if ($stmt->rowCount() === 0) {
         echo "<p style='color: red;'>❌ admin_users table not found. Creating it...</p>";
         
         // Create admin_users table
         $createTable = "
             CREATE TABLE admin_users (
-id SERIAL PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username VARCHAR(50) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
-                role ENUM('super_admin', 'inventory_manager', 'medical_staff', 'viewer') DEFAULT 'super_admin',
+                role TEXT CHECK(role IN ('super_admin', 'inventory_manager', 'medical_staff', 'viewer')) DEFAULT 'super_admin',
                 email VARCHAR(100),
                 full_name VARCHAR(100),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP NULL,
                 is_active BOOLEAN DEFAULT TRUE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            )
         ";
         
         $pdo->exec($createTable);
