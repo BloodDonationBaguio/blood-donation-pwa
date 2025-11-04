@@ -1,9 +1,10 @@
 <?php
 // Database Configuration
-define('DB_HOST', '127.0.0.1');
+define('DB_HOST', 'dpg-d3ugfe3e5dus739m78ng-a');
+define('DB_PORT', '5432');
 define('DB_NAME', 'blood_system');
-define('DB_USER', 'root');
-define('DB_PASS', ''); // Default XAMPP has no password
+define('DB_USER', 'blood_system_user');
+define('DB_PASS', 'u4iTxHGbiGRYMflR6nLQPFNG02aL6jTJ'); // Password from Render
 
 // PDO Connection Options
 define('DB_OPTIONS', [
@@ -15,7 +16,7 @@ define('DB_OPTIONS', [
 // Create database connection
 try {
     $pdo = new PDO(
-        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME,
         DB_USER,
         DB_PASS,
         DB_OPTIONS
