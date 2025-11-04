@@ -229,7 +229,9 @@ function requireUserLogin($redirectTo = 'login.php') {
     checkRememberMeToken(); // Check for remember me token first
     
     if (!isUserLoggedIn() || !checkSessionTimeout()) {
-        $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+        if (basename($_SERVER['REQUEST_URI']) !== 'login.php') {
+            $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+        }
         header("Location: $redirectTo");
         exit();
     }

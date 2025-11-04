@@ -23,7 +23,9 @@ function isAdminLoggedIn() {
  */
 function requireAdminLogin() {
     if (!isAdminLoggedIn()) {
-        $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+        if (basename($_SERVER['REQUEST_URI']) !== 'login.php') {
+            $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+        }
         header('Location: /blood-donation-pwa/admin_login.php');
         exit();
     }
