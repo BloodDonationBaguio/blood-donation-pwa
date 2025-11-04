@@ -1,31 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/db.php';
 
-echo "--- Running Unknown Blood Type Test ---\n";
-
-// Debugging: Check DB file path
-echo "DB File Path: " . DB_FILE . "\n";
-echo "DB File Exists: " . (file_exists(DB_FILE) ? 'Yes' : 'No') . "\n";
-
-// Debugging: Dump tables
-try {
-    echo "\n--- DUMPING donors TABLE ---\n";
-    $stmt = $pdo->query('SELECT * FROM donors');
-    print_r($stmt->fetchAll(PDO::FETCH_ASSOC));
-
-    echo "\n--- DUMPING donors_new TABLE ---\n";
-    $stmt = $pdo->query('SELECT * FROM donors_new');
-    print_r($stmt->fetchAll(PDO::FETCH_ASSOC));
-} catch (Exception $e) {
-    echo "Error dumping tables: " . $e->getMessage() . "\n";
-}
-
-echo "\n--- TEST LOGIC ---\n";
-
 // Test to ensure that the pending donors page can handle unknown blood types
-
-$pendingDonors = [];
-// ... (rest of the test logic is the same)
 
 $pendingDonors = [];
 
