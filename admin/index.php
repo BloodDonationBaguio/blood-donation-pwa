@@ -4,7 +4,7 @@
  * REDIRECTING TO ORIGINAL COMPLETE ADMIN SYSTEM
  */
 
-// Redirect to legacy/original admin dashboard
+// Redirect to the main admin system
 header("Location: ../admin.php");
 exit();
 ?>

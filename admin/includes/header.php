@@ -1,8 +1,3 @@
-<?php
-// Ensure admin header has access to shared DB connection and helper functions
-// Provides getDonorCount() and getPendingRequestCount() used for sidebar badges
-require_once __DIR__ . '/db.php';
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
