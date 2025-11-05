@@ -10,8 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="../../assets/css/admin.css" rel="stylesheet">
+    <!-- Custom CSS (fallback to project stylesheet) -->
+    <link href="../../css/style.css" rel="stylesheet">
 </head>
 <body>
     <!-- Top Navigation -->
