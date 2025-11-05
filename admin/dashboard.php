@@ -1,66 +1,134 @@
 <?php
-// Enable error reporting
+// Enable error reporting (non-fatal for production)
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 
-// Authenticate admin then route to legacy interface
+// Start session and include database connection
 require_once __DIR__ . '/includes/admin_auth.php';
+$page = 'dashboard';
+require_once __DIR__ . '/includes/header.php';
+
+// Check admin login
 if (!isAdminLoggedIn()) {
-    header('Location: /admin_login.php');
+    header("Location: login.php");
     exit();
 }
 
-// Use legacy/original admin dashboard
-header('Location: ../admin.php');
-exit();
+// Helper: detect driver and month format expressions
+$driver = 'pgsql';
+try { $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)); } catch (Throwable $e) {}
+$monthExpr = function($column) use ($driver) {
+    if ($driver === 'mysql') return "DATE_FORMAT($column, '%Y-%m')";
+    if ($driver === 'sqlite') return "strftime('%Y-%m', $column)";
+    return "TO_CHAR($column, 'YYYY-MM')"; // pgsql default
+};
 
 // Get dashboard statistics
 try {
-    // Get total donors count
-    $stmt = $pdo->query("SELECT COUNT(*) as total_donors FROM donors_new");
-    $totalDonors = $stmt->fetch(PDO::FETCH_ASSOC)['total_donors'];
-    
-    // Get donors by status
-    $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM donors_new GROUP BY status");
+    // Resolve donors table dynamically
+    $donorsTable = null;
+    if (function_exists('tableExists')) {
+        if (tableExists($pdo, 'donors_new')) $donorsTable = 'donors_new';
+        elseif (tableExists($pdo, 'donors')) $donorsTable = 'donors';
+    } else {
+        $donorsTable = 'donors';
+    }
+
+    // Resolve requests table dynamically
+    $requestsTable = null;
+    if (function_exists('tableExists')) {
+        if (tableExists($pdo, 'blood_requests')) $requestsTable = 'blood_requests';
+        elseif (tableExists($pdo, 'requests')) $requestsTable = 'requests';
+    } else {
+        $requestsTable = 'blood_requests';
+    }
+
+    // Defaults
+    $totalDonors = 0;
     $statusCounts = [
         'pending' => 0,
         'approved' => 0,
         'rejected' => 0,
-        'suspended' => 0
+        'suspended' => 0,
+        'active' => 0
     ];
-    
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $statusCounts[$row['status']] = $row['count'];
+    $recentDonors = [];
+    $bloodTypeData = [];
+    $monthlyData = [];
+    $recentRequests = [];
+    $monthlyRequests = [];
+
+    // Donor metrics if table available
+    if ($donorsTable) {
+        // Total donors
+        $totalDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorsTable}")->fetchColumn();
+
+        // Status breakdown (normalize label variants)
+        $stmt = $pdo->query("SELECT COALESCE(status,'') AS status, COUNT(*) AS count FROM {$donorsTable} GROUP BY COALESCE(status,'')");
+        $raw = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($raw as $row) {
+            $s = strtolower(trim($row['status']));
+            $c = (int)$row['count'];
+            if (in_array($s, ['approved','active'], true)) $statusCounts['approved'] += $c; // show as approved/active
+            if (in_array($s, ['active'], true)) $statusCounts['active'] += $c;
+            if (in_array($s, ['pending','new','submitted','awaiting_review','in_review',''], true)) $statusCounts['pending'] += $c;
+            if (in_array($s, ['rejected','denied'], true)) $statusCounts['rejected'] += $c;
+            if (in_array($s, ['suspended','inactive'], true)) $statusCounts['suspended'] += $c;
+        }
+
+        // Determine created column
+        $createdCol = 'created_at';
+        try {
+            if (function_exists('getTableStructure')) {
+                $cols = getTableStructure($pdo, $donorsTable);
+                $names = array_map(function($c){ return strtolower($c['column_name'] ?? ($c['name'] ?? '')); }, $cols);
+                if (!in_array('created_at', $names, true)) {
+                    if (in_array('created', $names, true)) $createdCol = 'created';
+                }
+            }
+        } catch (Throwable $e) {}
+
+        // Recent donors
+        $stmt = $pdo->query("SELECT * FROM {$donorsTable} ORDER BY {$createdCol} DESC LIMIT 5");
+        $recentDonors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Blood type distribution (approved/active)
+        $stmt = $pdo->query("SELECT blood_type, COUNT(*) AS count FROM {$donorsTable} WHERE COALESCE(status,'pending') IN ('approved','active') GROUP BY blood_type");
+        $bloodTypeData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Monthly donor registrations (last 6 months)
+        $monthExprDonor = $monthExpr($createdCol);
+        $interval = ($driver === 'mysql') ? "INTERVAL 6 MONTH" : "INTERVAL '6 months'";
+        $whereRecent = ($driver === 'sqlite') ? "$createdCol >= datetime('now','-6 months')" : "$createdCol >= CURRENT_TIMESTAMP - $interval";
+        $sql = "SELECT $monthExprDonor AS month, COUNT(*) AS count FROM {$donorsTable} WHERE $whereRecent GROUP BY $monthExprDonor ORDER BY month";
+        $monthlyData = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
-    
-    // Get recent donors - MySQL compatible
-    $stmt = $pdo->query("SELECT * FROM donors_new ORDER BY created_at DESC LIMIT 5");
-    $recentDonors = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Get blood type distribution
-    $stmt = $pdo->query("SELECT blood_type, COUNT(*) as count 
-                         FROM donors_new 
-                         WHERE status = 'approved' 
-                         GROUP BY blood_type");
-    $bloodTypeData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Get monthly registration data for the chart - MySQL compatible
-    $stmt = $pdo->query("SELECT 
-TO_CHAR(created_at, 'YYYY-MM') as month,
-                            COUNT(*) as count
-                         FROM donors_new 
-WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '6 months'
-GROUP BY TO_CHAR(created_at, 'YYYY-MM')
-                         ORDER BY month");
-    $monthlyData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Fetch recent requests and monthly request stats
-    // Get recent requests
-    $stmt = $pdo->query("SELECT * FROM blood_requests ORDER BY request_date DESC LIMIT 5");
-    $recentRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // Get monthly requests data for the chart - MySQL compatible
-$stmt = $pdo->query("SELECT TO_CHAR(request_date, 'YYYY-MM') as month, COUNT(*) as count FROM blood_requests WHERE request_date >= CURRENT_TIMESTAMP - INTERVAL '6 months' GROUP BY TO_CHAR(request_date, 'YYYY-MM') ORDER BY month");
-    $monthlyRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Requests metrics if table available
+    if ($requestsTable) {
+        // Determine request date column
+        $requestDateCol = 'request_date';
+        try {
+            if (function_exists('getTableStructure')) {
+                $cols = getTableStructure($pdo, $requestsTable);
+                $names = array_map(function($c){ return strtolower($c['column_name'] ?? ($c['name'] ?? '')); }, $cols);
+                if (!in_array('request_date', $names, true)) {
+                    if (in_array('created_at', $names, true)) $requestDateCol = 'created_at';
+                    elseif (in_array('created', $names, true)) $requestDateCol = 'created';
+                }
+            }
+        } catch (Throwable $e) {}
+
+        // Recent requests
+        $recentRequests = $pdo->query("SELECT * FROM {$requestsTable} ORDER BY {$requestDateCol} DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+
+        // Monthly requests (last 6 months)
+        $monthExprReq = $monthExpr($requestDateCol);
+        $interval = ($driver === 'mysql') ? "INTERVAL 6 MONTH" : "INTERVAL '6 months'";
+        $whereRecent = ($driver === 'sqlite') ? "$requestDateCol >= datetime('now','-6 months')" : "$requestDateCol >= CURRENT_TIMESTAMP - $interval";
+        $sql = "SELECT $monthExprReq AS month, COUNT(*) AS count FROM {$requestsTable} WHERE $whereRecent GROUP BY $monthExprReq ORDER BY month";
+        $monthlyRequests = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
 } catch (PDOException $e) {
     error_log('Database error: ' . $e->getMessage());
     $error = 'Error loading dashboard data. Please try again later.';
