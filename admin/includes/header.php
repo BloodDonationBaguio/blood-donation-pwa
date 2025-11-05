@@ -80,13 +80,13 @@
                         <li class="nav-item">
                             <a class="nav-link <?= ($page === 'donors') ? 'active' : '' ?>" href="../?page=donors">
                                 <i class="fas fa-users me-2"></i> Donors
-                                <span class="badge bg-primary rounded-pill ms-2"><?= getDonorCount(); ?></span>
+                                <span class="badge bg-primary rounded-pill ms-2"><?= function_exists('getDonorCount') ? getDonorCount() : 0; ?></span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?= ($page === 'requests') ? 'active' : '' ?>" href="../?page=requests">
                                 <i class="fas fa-tint me-2"></i> Blood Requests
-                                <span class="badge bg-danger rounded-pill ms-2"><?= getPendingRequestCount(); ?></span>
+                                <span class="badge bg-danger rounded-pill ms-2"><?= function_exists('getPendingRequestCount') ? getPendingRequestCount() : 0; ?></span>
                             </a>
                         </li>
                     </ul>

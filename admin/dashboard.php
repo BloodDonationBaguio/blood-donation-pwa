@@ -8,6 +8,9 @@ requireAdminLogin();
 // Used by header to highlight active menu item
 $page = 'dashboard';
 
+// Load admin DB helpers before rendering header (for badge counts, etc.)
+require_once __DIR__ . '/includes/db.php';
+
 // Render standard admin layout and page content
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/pages/dashboard.php';
