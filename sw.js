@@ -1,19 +1,20 @@
 // Service Worker for Blood Donation PWA
 const CACHE_NAME = 'blood-donation-pwa-v3';
 const urlsToCache = [
-  '/',
-  '/index.php',
-  '/css/style.css',
-  '/manifest.json',
-  '/donor-registration.php',
-  '/login.php'
+  './',
+  './index.php',
+  './css/style.css',
+  './manifest.json',
+  './donor-registration.php',
+  './login.php',
+  './admin.php'
 ];
 
 const adminUrls = [
-  '/admin.php',
-  '/admin-login.php',
-  '/blood-donation-pwa/admin/login.php',
-  '/blood-donation-pwa/admin/'
+  '/legacy-pwa-4/blood-donation-pwa/admin/login.php',
+  '/legacy-pwa-4/blood-donation-pwa/admin/',
+  '/legacy-pwa-4/blood-donation-pwa/admin.php',
+  '/legacy-pwa-4/blood-donation-pwa/admin-login.php'
 ];
 
 // Install event
@@ -60,6 +61,10 @@ self.addEventListener('fetch', function(event) {
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     (async () => {
+      // Enable navigation preload where supported
+      if (self.registration && self.registration.navigationPreload) {
+        try { await self.registration.navigationPreload.enable(); } catch (e) {}
+      }
       const cacheNames = await caches.keys();
       await Promise.all(
         cacheNames.map(function(cacheName) {

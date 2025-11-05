@@ -1,6 +1,9 @@
 # Enable rewrite engine
 RewriteEngine On
 
+# Prevent MultiViews from interfering with asset resolution
+Options -MultiViews -Indexes
+
 # Set default charset
 AddDefaultCharset UTF-8
 
@@ -9,13 +12,20 @@ AddDefaultCharset UTF-8
     SetHandler application/x-httpd-php
 </FilesMatch>
 
+# Explicit MIME types for JSON and JS
+AddType application/javascript .js
+AddType application/json .json
+
 # Redirect index.html to index.php
-RewriteRule ^index\.html$ /index.php [L,R=301]
+RewriteRule ^index\.html$ index.php [L,R=301]
 
 # Handle front controller pattern
 # Allow direct access to debug_latest_donors.php
 RewriteCond %{REQUEST_URI} ^/debug_latest_donors\.php$
 RewriteRule ^ - [L]
+# Bypass rewrite for service worker, manifest, and common static assets
+RewriteRule ^(sw\.js|manifest\.json)$ - [L]
+RewriteRule ^(css/.*|assets/.*|js/.*|images/.*|fonts/.*)$ - [L]
 
 # Allow direct access to diagnostics and test endpoints
 RewriteCond %{REQUEST_URI} ^/debug_inventory_manager_versions\.php$ [NC]
@@ -30,6 +40,9 @@ RewriteCond %{REQUEST_URI} ^/debug_fingerprint_robust\.php$ [NC]
 RewriteRule ^ - [L]
 
 # Allow direct access to admin subdirectory files (login, assets, etc.)
+# Handle both possible mount paths
+RewriteCond %{REQUEST_URI} ^/legacy-pwa-4/blood-donation-pwa/admin/ [NC]
+RewriteRule ^ - [L]
 RewriteCond %{REQUEST_URI} ^/blood-donation-pwa/admin/ [NC]
 RewriteRule ^ - [L]
 

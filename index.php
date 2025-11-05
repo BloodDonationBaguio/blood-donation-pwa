@@ -64,10 +64,10 @@ try {
         echo '<style>' . AccessibilityHelper::generateCSS() . '</style>';
     }
     ?>
-    <link rel="manifest" href="manifest.json?v=2.0.0">
-    <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
-    <link rel="apple-touch-icon" href="/assets/icons/favicon.svg">
+    <link rel="manifest" href="manifest.json?v=2.0.1">
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="assets/icons/favicon.svg">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Removed reference to missing css/modern-redesign.css to fix MIME error -->
@@ -76,8 +76,7 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
       if ('serviceWorker' in navigator) {
-        // Force update of the Service Worker by bumping version
-        navigator.serviceWorker.register('sw.js?v=9').then(function(registration) {
+        navigator.serviceWorker.register('sw.js?v=10').then(function(registration) {
           console.log('Service Worker registered successfully');
         }).catch(function(error) {
           console.log('Service Worker registration failed:', error);
@@ -980,7 +979,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php echo AccessibilityHelper::generateJavaScript(); ?>
 </script>
 <?php endif; ?>
-<!-- Removed duplicate IntersectionObserver script to avoid const redeclaration errors -->
 </body>
 </html>
 <?php
