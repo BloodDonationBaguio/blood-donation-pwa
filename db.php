@@ -4,7 +4,11 @@ if (function_exists('date_default_timezone_set')) {
     @date_default_timezone_set('Asia/Manila');
 }
 // Environment-aware DB config: Prefer PostgreSQL (DATABASE_URL or DB_TYPE=pgsql), fallback to MySQL
-if (getenv('DATABASE_URL')) {
+// In local development (built-in PHP server or XAMPP paths), ignore DATABASE_URL and use local config (SQLite by default)
+$inDevServer = (PHP_SAPI === 'cli-server');
+$forceSqlite = (getenv('FORCE_SQLITE') === '1' || getenv('USE_SQLITE') === '1');
+$inXamppPath = (stripos(__DIR__, 'xampp') !== false);
+if (getenv('DATABASE_URL') && !$inDevServer && !$forceSqlite && !$inXamppPath) {
     // In production with DATABASE_URL, delegate to db_production.php
     require_once __DIR__ . '/db_production.php';
     return;
@@ -32,7 +36,7 @@ if (!function_exists('tableExists')) {
     // Set error log location
     ini_set('error_log', $logDir . '/error.log');
 
-    // Database configuration (overridable by env); default to PostgreSQL for dev
+    // Database configuration (overridable by env); default to SQLite for local dev
     define('DB_TYPE', 'sqlite');
     define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
     define('DB_PORT', getenv('DB_PORT') ?: (strtolower(DB_TYPE) === 'pgsql' ? '5432' : '3306'));
