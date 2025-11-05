@@ -1,19 +1,10 @@
 <?php
-// Enforce Manila timezone for all runtime date operations
-if (function_exists('date_default_timezone_set')) {
-    @date_default_timezone_set('Asia/Manila');
-}
-// Environment-aware DB config: Prefer PostgreSQL (DATABASE_URL or DB_TYPE=pgsql), fallback to MySQL
-// In local development (built-in PHP server or XAMPP paths), ignore DATABASE_URL and use local config (SQLite by default)
-$inDevServer = (PHP_SAPI === 'cli-server');
-$forceSqlite = (getenv('FORCE_SQLITE') === '1' || getenv('USE_SQLITE') === '1');
-$inXamppPath = (stripos(__DIR__, 'xampp') !== false);
-if (getenv('DATABASE_URL') && !$inDevServer && !$forceSqlite && !$inXamppPath) {
-    // In production with DATABASE_URL, delegate to db_production.php
+// Environment-aware DB config: PostgreSQL on Render (DATABASE_URL), MySQL locally
+if (getenv('DATABASE_URL')) {
     require_once __DIR__ . '/db_production.php';
     return;
 }
-// Local/dev fallback: check DB_TYPE to decide pgsql vs mysql
+// Local/dev fallback: MySQL
 
 // Check if this file is being included directly
 if (basename(__FILE__) === basename($_SERVER['SCRIPT_FILENAME'])) {
@@ -36,91 +27,96 @@ if (!function_exists('tableExists')) {
     // Set error log location
     ini_set('error_log', $logDir . '/error.log');
 
-    // Database configuration (overridable by env); default to SQLite for local dev
-    define('DB_TYPE', 'sqlite');
-    define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-    define('DB_PORT', getenv('DB_PORT') ?: (strtolower(DB_TYPE) === 'pgsql' ? '5432' : '3306'));
-    define('DB_NAME', getenv('DB_NAME') ?: 'blood_system');
-    define('DB_USER', getenv('DB_USER') ?: 'postgres');
-    define('DB_PASS', getenv('DB_PASS') ?: 'postgres');
-    define('DB_FILE', __DIR__ . '/database/blood_system.db');
+    // Database configuration - MySQL (environment-aware with fallbacks)
+    define('DB_TYPE', 'mysql'); // Using MySQL
+    // Prefer environment variables if provided
+    $envHost = getenv('DB_HOST') ?: 'localhost';
+    $envUser = getenv('DB_USER') ?: (getenv('DB_USERNAME') ?: 'root');
+    $envPass = getenv('DB_PASS') ?: (getenv('DB_PASSWORD') ?: '');
+    $envDb   = getenv('DB_NAME') ?: 'blood_system';
+    $envPort = getenv('DB_PORT');
+    if (!$envPort && strpos($envHost, ':') !== false) {
+        // Extract port from host if given as host:port
+        [$hostOnly, $portOnly] = explode(':', $envHost, 2);
+        $envHost = $hostOnly;
+        $envPort = $portOnly;
+    }
+    if (!$envPort) { $envPort = 3306; }
 
-    // Connection helper with retry to mitigate transient failures on Render
-    $connectWithRetry = function($attempts = 2, $delayMs = 500) {
-        $lastException = null;
-        for ($i = 0; $i < $attempts; $i++) {
-            try {
-                if (DB_TYPE === 'sqlite') {
-                    $dbDir = __DIR__ . '/database';
-                    if (!file_exists($dbDir)) {
-                        mkdir($dbDir, 0755, true);
-                    }
-                    $pdo = new PDO(
-                        "sqlite:" . DB_FILE,
-                        null,
-                        null,
-                        [
-                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-                        ]
-                    );
-                    $pdo->exec('PRAGMA foreign_keys = ON');
-                } elseif (strtolower(DB_TYPE) === 'pgsql' || strtolower(DB_TYPE) === 'postgres' || strtolower(DB_TYPE) === 'postgresql') {
-                    // PostgreSQL non-persistent connection
-                    $options = [
-                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                        PDO::ATTR_EMULATE_PREPARES => false,
-                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                        PDO::ATTR_PERSISTENT => false
-                    ];
-                    $pdo = new PDO(
-                        "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME,
-                        DB_USER,
-                        DB_PASS,
-                        $options
-                    );
-                } else {
-                    // MySQL with explicit non-persistent connection and timeout
-                    $options = [
-                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                        PDO::ATTR_EMULATE_PREPARES => false,
-                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                        PDO::ATTR_AUTOCOMMIT => true,
-                        PDO::ATTR_PERSISTENT => false,
-                        PDO::ATTR_TIMEOUT => 5
-                    ];
-                    // Support host:port format or separate DB_PORT
-                    $hostPart = DB_HOST;
-                    if (strpos(DB_HOST, ':') === false && DB_PORT) {
-                        $hostPart .= ':' . DB_PORT;
-                    }
-                    $pdo = new PDO(
-                        "mysql:host=" . $hostPart . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-                        DB_USER,
-                        DB_PASS,
-                        $options
-                    );
-                    // Ensure MySQL timeouts at the session level where possible
-                    try {
-                        $pdo->exec("SET SESSION wait_timeout=10");
-                        $pdo->exec("SET SESSION interactive_timeout=10");
-                    } catch (Throwable $t) {
-                        // Ignore if not supported
-                    }
-                }
-                return $pdo;
-            } catch (PDOException $ex) {
-                $lastException = $ex;
-                usleep($delayMs * 1000);
-            }
-        }
-        if ($lastException) throw $lastException;
-        throw new PDOException('Unknown database connection error');
-    };
+    // Candidate connection configurations to try in order
+    $candidates = [
+        ['host' => $envHost, 'port' => (int)$envPort, 'user' => $envUser, 'pass' => $envPass, 'db' => $envDb],
+        ['host' => '127.0.0.1', 'port' => 3306, 'user' => 'root', 'pass' => '',           'db' => 'blood_system'],
+        ['host' => 'localhost',  'port' => 3306, 'user' => 'root', 'pass' => '',           'db' => 'blood_system'],
+        ['host' => '127.0.0.1', 'port' => 3306, 'user' => 'root', 'pass' => 'password112', 'db' => 'blood_system'],
+        ['host' => 'localhost',  'port' => 3306, 'user' => 'root', 'pass' => 'password112','db' => 'blood_system'],
+    ];
 
     try {
-        $pdo = $connectWithRetry(3, 400);
+        if (DB_TYPE === 'sqlite') {
+            // Create database directory if it doesn't exist
+            $dbDir = __DIR__ . '/database';
+            if (!file_exists($dbDir)) {
+                mkdir($dbDir, 0755, true);
+            }
+            
+            // Create PDO instance for SQLite
+            $pdo = new PDO(
+                "sqlite:" . DB_FILE,
+                null,
+                null,
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                ]
+            );
+            
+            // Enable foreign keys
+            $pdo->exec('PRAGMA foreign_keys = ON');
+            
+        } else {
+            // Try each candidate configuration until one succeeds
+            $lastException = null;
+            foreach ($candidates as $cfg) {
+                $dsn = sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $cfg['host'], (int)$cfg['port'], $cfg['db']);
+                try {
+                    $pdo = new PDO(
+                        $dsn,
+                        $cfg['user'],
+                        $cfg['pass'],
+                        [
+                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                            PDO::ATTR_EMULATE_PREPARES => false,
+                            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                            PDO::ATTR_AUTOCOMMIT => true
+                        ]
+                    );
+                    // Verify critical table exists; if not, still allow but warn
+                    try {
+                        $check = $pdo->query("SHOW TABLES LIKE 'admin_users'");
+                        if ($check && $check->rowCount() === 0) {
+                            error_log("Warning: 'admin_users' table not found in DB '" . $cfg['db'] . "'.");
+                        }
+                    } catch (Exception $inner) {
+                        // Non-fatal
+                        error_log("Table check failed: " . $inner->getMessage());
+                    }
+                    // Successful connection; stop trying further candidates
+                    break;
+                } catch (PDOException $eTry) {
+                    $lastException = $eTry;
+                    error_log(sprintf("DB connect failed for %s@%s:%d/%s: %s", $cfg['user'], $cfg['host'], (int)$cfg['port'], $cfg['db'], $eTry->getMessage()));
+                    $pdo = null;
+                }
+            }
+            if (!isset($pdo) || $pdo === null) {
+                throw $lastException ?: new PDOException('Unable to connect using any configured MySQL credentials');
+            }
+        }
+        
+        // Log successful connection
         error_log("Database connection established successfully");
+        
     } catch (PDOException $e) {
         // Log detailed error information
         $error_message = "Database connection failed: " . $e->getMessage();
@@ -129,25 +125,31 @@ if (!function_exists('tableExists')) {
         // Return JSON error for AJAX requests
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
             header('Content-Type: application/json');
-            header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-            header('Pragma: no-cache');
             die(json_encode([
                 'success' => false,
-                'message' => 'Database connection error. Please retry in a moment.',
+                'message' => 'Database connection error',
                 'error' => $error_message
             ]));
         } else {
             // For regular page loads, show a user-friendly error
-            die("<div style='font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; border: 1px solid #f5c6cb; background-color: #f8d7da; color: #721c24; border-radius: 5px;'>
+            // Show a diagnostic with attempted configurations
+            $attemptsHtml = '';
+            foreach ($candidates as $c) {
+                $attemptsHtml .= sprintf('<li>%s@%s:%d/%s</li>', htmlspecialchars($c['user']), htmlspecialchars($c['host']), (int)$c['port'], htmlspecialchars($c['db']));
+            }
+            die("<div style='font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; border: 1px solid #f5c6cb; background-color: #f8d7da; color: #721c24; border-radius: 6px;'>
                 <h2>Database Connection Error</h2>
-                <p>Unable to connect to the database at the moment. This may be due to a temporary network issue or a cold start on the free tier.</p>
+                <p>Unable to connect to MySQL. Please check:</p>
                 <ul>
-                    <li>Is the database server running?</li>
-                    <li>Are the database credentials in <code>db.php</code> correct?</li>
-                    <li>Does the database <code>blood_system</code> exist?</li>
+                    <li>Is MySQL running and listening on the expected port?</li>
+                    <li>Are the credentials in environment variables or <code>db.php</code> correct?</li>
+                    <li>Does the database <code>" . htmlspecialchars($envDb) . "</code> exist?</li>
                 </ul>
-                <p><strong>Error Details:</strong> " . htmlspecialchars($e->getMessage()) . "</p>
-                <p>Please refresh the page to retry. If the problem persists, check the error log at: " . htmlspecialchars(ini_get('error_log')) . "</p>
+                <p><strong>Last Error:</strong> " . htmlspecialchars($e->getMessage()) . "</p>
+                <h3>Attempts Tried:</h3>
+                <ul>" . $attemptsHtml . "</ul>
+                <p>Tip: Set <code>DB_HOST</code>, <code>DB_PORT</code>, <code>DB_NAME</code>, <code>DB_USER</code>, <code>DB_PASS</code> in the environment or configure them here.</p>
+                <p>See <a href='database_diagnostic.php'>database_diagnostic.php</a> for more tests.</p>
             </div>");
         }
     }
@@ -162,17 +164,11 @@ if (!function_exists('tableExists')) {
     function tableExists($pdo, $table) {
         try {
             if (DB_TYPE === 'sqlite') {
-                $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?");
-                $stmt->execute([$table]);
-            } elseif (strtolower(DB_TYPE) === 'pgsql') {
-                $stmt = $pdo->prepare("SELECT to_regclass('public.' || ?) AS regclass");
-                $stmt->execute([$table]);
-                return $stmt->fetchColumn() !== null;
+                $result = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='" . $pdo->quote($table) . "'");
             } else {
-                $stmt = $pdo->prepare("SHOW TABLES LIKE ?");
-                $stmt->execute([$table]);
+                $result = $pdo->query("SHOW TABLES LIKE '" . $pdo->quote($table) . "'");
             }
-            return $stmt->rowCount() > 0;
+            return $result->rowCount() > 0;
         } catch (PDOException $e) {
             error_log("Error checking if table exists: " . $e->getMessage());
             return false;
@@ -191,10 +187,6 @@ if (!function_exists('tableExists')) {
             if (DB_TYPE === 'sqlite') {
                 $stmt = $pdo->query("PRAGMA table_info(" . $pdo->quote($table) . ")");
                 return $stmt->fetchAll(PDO::FETCH_ASSOC);
-            } elseif (strtolower(DB_TYPE) === 'pgsql') {
-                $safe = str_replace("'", "''", $table);
-                $stmt = $pdo->query("SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_schema='public' AND table_name='" . $safe . "'");
-                return $stmt->fetchAll(PDO::FETCH_ASSOC);
             } else {
                 $stmt = $pdo->query("DESCRIBE `" . str_replace('`', '``', $table) . "`");
                 return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -205,3 +197,6 @@ if (!function_exists('tableExists')) {
         }
     }
 }
+
+// Only load production DB config when DATABASE_URL is present (handled at top)
+// Avoid loading db_production.php in local/dev to prevent function redeclarations

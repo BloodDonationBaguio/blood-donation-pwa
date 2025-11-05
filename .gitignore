@@ -1,1 +1,31 @@
-database/blood_system.db
+# Logs
+logs/
+*.log
+
+# Backups
+backup/
+backup_*/
+
+# Sensitive files - DO NOT UPLOAD PASSWORDS!
+# Note: db.php is environment-driven (no hardcoded secrets) and should be tracked
+# to ensure consistent deployment of connection logic across environments.
+config/email_config.json
+config/backup_config.json
+
+# System files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Test files
+test_*.php
+fix_*.php
+*_test.php
+
+# Personal files
+*.txt
