@@ -3,15 +3,16 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Start session and include database connection
+// Authenticate admin then route to legacy interface
 require_once __DIR__ . '/includes/admin_auth.php';
-require_once __DIR__ . '/includes/header.php';
-
-// Check admin login
 if (!isAdminLoggedIn()) {
-    header("Location: login.php");
+    header('Location: login.php');
     exit();
 }
+
+// Use the legacy admin dashboard (admin.php) instead of this page
+header('Location: ../admin.php');
+exit();
 
 // Get dashboard statistics
 try {
