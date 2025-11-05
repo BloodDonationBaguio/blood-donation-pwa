@@ -56,6 +56,71 @@ $error = '';
 if ($skipAutoRedirect) {
     $error = 'A database error occurred. Please log in again.';
 }
+// Ensure admin_users table exists and seed a default admin if missing
+try {
+    // Detect driver
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    if ($driver === 'sqlite') {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS admin_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            role TEXT DEFAULT 'admin',
+            email TEXT,
+            full_name TEXT,
+            last_login DATETIME NULL,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )");
+    } else {
+        // MySQL/PostgreSQL compatible table creation
+        // Try PostgreSQL first, then MySQL syntax if needed
+        try {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS admin_users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(100) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                role VARCHAR(50) DEFAULT 'admin',
+                email VARCHAR(100),
+                full_name VARCHAR(100),
+                last_login TIMESTAMP NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )");
+        } catch (Exception $e) {
+            // Fallback to MySQL engine
+            $pdo->exec("CREATE TABLE IF NOT EXISTS admin_users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(100) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                role VARCHAR(50) DEFAULT 'admin',
+                email VARCHAR(100),
+                full_name VARCHAR(100),
+                last_login TIMESTAMP NULL,
+                is_active TINYINT(1) DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        }
+    }
+
+    // Seed default admin if none exists
+    $existsStmt = $pdo->prepare("SELECT id FROM admin_users WHERE username = ? LIMIT 1");
+    $existsStmt->execute(['admin']);
+    if (!$existsStmt->fetch()) {
+        $defaultPass = password_hash('admin123', PASSWORD_DEFAULT);
+        $ins = $pdo->prepare("INSERT INTO admin_users (username, password, role, email, full_name, is_active) VALUES (?,?,?,?,?,1)");
+        try {
+            $ins->execute(['admin', $defaultPass, 'admin', 'admin@example.com', 'Administrator']);
+        } catch (Exception $e) {
+            // Ignore if constraint issues; user might have been created concurrently
+        }
+    }
+} catch (Exception $e) {
+    error_log('Admin table ensure/seed failed: ' . $e->getMessage());
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     error_log("POST received! Username: " . ($_POST['username'] ?? 'NOT SET'));
     $username = $_POST['username'] ?? '';

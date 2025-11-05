@@ -16,13 +16,8 @@ echo "<!-- Debug: Active tab is: $activeTab -->";
 
 // Dashboard Tab
 if ($activeTab === 'dashboard') {
-    // Reuse the modern admin dashboard content inside tabs layout
-    $dashboardPage = __DIR__ . '/../admin/pages/dashboard.php';
-    if (file_exists($dashboardPage)) {
-        require $dashboardPage;
-    } else {
-        echo '<div class="alert alert-warning">Dashboard content not found.</div>';
-    }
+    // Dashboard removed per user request
+    echo '<div class="alert alert-danger">Dashboard view has been removed from the system.</div>';
 }
 
 // Add Donor Tab
