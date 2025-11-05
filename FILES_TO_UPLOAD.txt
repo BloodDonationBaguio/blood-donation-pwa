@@ -1,0 +1,154 @@
+═══════════════════════════════════════════════════════════════
+  FILES TO UPLOAD TO INFINITY HOSTING
+═══════════════════════════════════════════════════════════════
+
+IMPORTANT: Upload these files from your LOCAL PROJECT to INFINITY
+
+═══════════════════════════════════════════════════════════════
+ REQUIRED FILES (Must Upload)
+═══════════════════════════════════════════════════════════════
+
+1. includes/enhanced_donor_management.php
+   Local:  c:\xampp\htdocs\blood-donation-pwa\includes\enhanced_donor_management.php
+   Remote: /public_html/includes/enhanced_donor_management.php
+   Size:   ~25 KB
+   Status: □ Uploaded
+
+2. includes/admin_actions.php
+   Local:  c:\xampp\htdocs\blood-donation-pwa\includes\admin_actions.php
+   Remote: /public_html/includes/admin_actions.php
+   Size:   ~5 KB
+   Status: □ Uploaded
+
+3. admin_enhanced_donor_management.php
+   Local:  c:\xampp\htdocs\blood-donation-pwa\admin_enhanced_donor_management.php
+   Remote: /public_html/admin_enhanced_donor_management.php
+   Size:   ~45 KB
+   Status: □ Uploaded
+
+4. track.php
+   Local:  c:\xampp\htdocs\blood-donation-pwa\track.php
+   Remote: /public_html/track.php
+   Size:   ~12 KB
+   Status: □ Uploaded
+
+5. fix_all_donor_issues.php (NEW FILE - Migration Script)
+   Local:  c:\xampp\htdocs\blood-donation-pwa\fix_all_donor_issues.php
+   Remote: /public_html/fix_all_donor_issues.php
+   Size:   ~10 KB
+   Status: □ Uploaded
+
+6. fix_donations_table_column.php (NEW FILE - Migration Script)
+   Local:  c:\xampp\htdocs\blood-donation-pwa\fix_donations_table_column.php
+   Remote: /public_html/fix_donations_table_column.php
+   Size:   ~5 KB
+   Status: □ Uploaded
+
+7. fix_blood_type_column.php (NEW FILE - Migration Script)
+   Local:  c:\xampp\htdocs\blood-donation-pwa\fix_blood_type_column.php
+   Remote: /public_html/fix_blood_type_column.php
+   Size:   ~4 KB
+   Status: □ Uploaded
+
+═══════════════════════════════════════════════════════════════
+ OPTIONAL FILES (Documentation)
+═══════════════════════════════════════════════════════════════
+
+8. DONOR_STATUS_UPDATE_FIX.md
+   Local:  c:\xampp\htdocs\blood-donation-pwa\DONOR_STATUS_UPDATE_FIX.md
+   Remote: /public_html/DONOR_STATUS_UPDATE_FIX.md
+   Status: □ Uploaded  □ Skipped
+
+9. TRACK_STATUS_FIX.md
+   Local:  c:\xampp\htdocs\blood-donation-pwa\TRACK_STATUS_FIX.md
+   Remote: /public_html/TRACK_STATUS_FIX.md
+   Status: □ Uploaded  □ Skipped
+
+10. DEPLOYMENT_TO_INFINITY.md
+    Local:  c:\xampp\htdocs\blood-donation-pwa\DEPLOYMENT_TO_INFINITY.md
+    Remote: /public_html/DEPLOYMENT_TO_INFINITY.md
+    Status: □ Uploaded  □ Skipped
+
+11. QUICK_FIX_SUMMARY.md
+    Local:  c:\xampp\htdocs\blood-donation-pwa\QUICK_FIX_SUMMARY.md
+    Remote: /public_html/QUICK_FIX_SUMMARY.md
+    Status: □ Uploaded  □ Skipped
+
+═══════════════════════════════════════════════════════════════
+ UPLOAD METHODS
+═══════════════════════════════════════════════════════════════
+
+Option 1: FTP Client (Recommended)
+- Use FileZilla or similar FTP client
+- Connect to your Infinity FTP server
+- Navigate to /public_html/
+- Upload files maintaining folder structure
+- Overwrite existing files when prompted
+
+Option 2: cPanel File Manager
+- Login to Infinity cPanel
+- Click "File Manager"
+- Navigate to public_html folder
+- Use "Upload" button
+- Upload files one by one
+- Overwrite when asked
+
+Option 3: SFTP (If Available)
+- Use WinSCP or similar SFTP client
+- More secure than regular FTP
+- Same process as FTP
+
+═══════════════════════════════════════════════════════════════
+ FILE PERMISSIONS (Important!)
+═══════════════════════════════════════════════════════════════
+
+After uploading, verify permissions:
+
+PHP Files:  644 (rw-r--r--)
+Folders:    755 (rwxr-xr-x)
+
+How to check:
+1. Right-click file in FTP client
+2. Select "File Permissions"
+3. Set to 644 for PHP files
+
+═══════════════════════════════════════════════════════════════
+ VERIFICATION AFTER UPLOAD
+═══════════════════════════════════════════════════════════════
+
+□ All 7 required files uploaded successfully
+□ Files are in correct directories
+□ File permissions set to 644
+□ No upload errors reported
+
+═══════════════════════════════════════════════════════════════
+ NEXT STEPS AFTER UPLOADING
+═══════════════════════════════════════════════════════════════
+
+1. Run migration script:
+   Visit: https://yourdomain.infinityfreeapp.com/fix_all_donor_issues.php
+
+2. Test the site (see DEPLOYMENT_CHECKLIST.txt)
+
+3. Delete migration scripts after confirming everything works
+
+═══════════════════════════════════════════════════════════════
+ IMPORTANT NOTES
+═══════════════════════════════════════════════════════════════
+
+⚠️  BACKUP FIRST: Create database backup before uploading!
+
+⚠️  TEST LOCAL: Make sure everything works on localhost first!
+
+⚠️  DELETE LATER: Remove migration scripts after use for security!
+
+⚠️  CACHE: Clear browser cache after deployment to see changes!
+
+═══════════════════════════════════════════════════════════════
+
+Upload Date: ____________  Uploaded By: ____________
+
+Notes: ______________________________________________________
+
+═══════════════════════════════════════════════════════════════
+

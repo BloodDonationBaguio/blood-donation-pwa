@@ -1,0 +1,21 @@
+[2025-09-30 13:07:35] markDonorServed called with donorId: 2
+Status column update: SQLSTATE[01000]: Warning: 1265 Data truncated for column 'status' at row 1
+Available tables: admin_actions, admin_audit_log, admin_users, blood_inventory, blood_inventory_audit, blood_inventory_summary, blood_requests, blood_requests_inventory, donations_new, donor_contacts, donor_matching_new, donor_medical_screening_fixed, donor_medical_screening_simple, donor_medical_screening_temp, donor_messages_new, donor_notes, donors_new, expiring_blood_units, request_communications, request_notes, site_settings, user_remember_tokens, users_new
+Using table: donors_new
+Columns in donors_new: id, first_name, last_name, email, phone, blood_type, date_of_birth, gender, address, city, province, emergency_contact, emergency_phone, medical_conditions, medications, last_donation_date, served_date, reference_code, role, created_at, updated_at, weight, height, status
+Updating donor 2 status to 'served'
+Update result: success
+[2025-09-30 13:07:58] markDonorServed called with donorId: 2
+Updated status column to include 'served'
+Available tables: admin_actions, admin_audit_log, admin_users, blood_inventory, blood_inventory_audit, blood_inventory_summary, blood_requests, blood_requests_inventory, donations_new, donor_contacts, donor_matching_new, donor_medical_screening_fixed, donor_medical_screening_simple, donor_medical_screening_temp, donor_messages_new, donor_notes, donors_new, expiring_blood_units, request_communications, request_notes, site_settings, user_remember_tokens, users_new
+Using table: donors_new
+Columns in donors_new: id, first_name, last_name, email, phone, blood_type, date_of_birth, gender, address, city, province, emergency_contact, emergency_phone, medical_conditions, medications, last_donation_date, served_date, reference_code, role, created_at, updated_at, weight, height, status
+Updating donor 2 status to 'served'
+Update result: success
+[2025-09-30 13:09:15] markDonorServed called with donorId: 2
+Updated status column to include 'served'
+Available tables: admin_actions, admin_audit_log, admin_users, blood_inventory, blood_inventory_audit, blood_inventory_summary, blood_requests, blood_requests_inventory, donations_new, donor_contacts, donor_matching_new, donor_medical_screening_fixed, donor_medical_screening_simple, donor_medical_screening_temp, donor_messages_new, donor_notes, donors_new, expiring_blood_units, request_communications, request_notes, site_settings, user_remember_tokens, users_new
+Using table: donors_new
+Columns in donors_new: id, first_name, last_name, email, phone, blood_type, date_of_birth, gender, address, city, province, emergency_contact, emergency_phone, medical_conditions, medications, last_donation_date, served_date, reference_code, role, created_at, updated_at, weight, height, status
+Updating donor 2 status to 'served'
+Update result: success
