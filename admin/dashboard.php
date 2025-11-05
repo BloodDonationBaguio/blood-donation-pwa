@@ -249,61 +249,6 @@ try {
         </div>
     </div>
     
-    <!-- Recent Requests -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-table me-1"></i>
-            Recent Blood Requests
-            <a href="requests.php" class="btn btn-sm btn-primary float-end">View All Requests</a>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="recentRequestsTable">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Patient</th>
-                            <th>Blood Type</th>
-                            <th>Units</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($recentRequests as $req): ?>
-                        <tr>
-                            <td><span class="text-muted"><?php echo htmlspecialchars($req['reference_number']); ?></span></td>
-                            <td><?php echo htmlspecialchars($req['patient_name']); ?></td>
-                            <td><span class="badge bg-danger"><?php echo htmlspecialchars($req['blood_type_needed']); ?></span></td>
-                            <td><?php echo (int)$req['units_required']; ?></td>
-                            <td><span class="badge bg-info"><?php echo ucfirst($req['status']); ?></span></td>
-                            <td><?php echo date('M j, Y', strtotime($req['request_date'])); ?></td>
-                            <td>
-                                <a href="requests.php?action=view&id=<?php echo $req['id']; ?>" class="btn btn-sm btn-info" title="View"><i class="fas fa-eye"></i></a>
-                                <a href="requests.php?action=edit&id=<?php echo $req['id']; ?>" class="btn btn-sm btn-warning" title="Edit"><i class="fas fa-edit"></i></a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <!-- Requests Analysis Chart -->
-    <div class="row mb-4">
-        <div class="col-xl-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-bar me-1"></i>
-                    Monthly Blood Requests
-                </div>
-                <div class="card-body">
-                    <canvas id="monthlyRequestsChart" width="100%" height="40"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
     
 </div>
 
@@ -406,53 +351,6 @@ var bloodTypeChart = new Chart(ctx2, {
     }
 });
 
-// Monthly Requests Chart
-var ctxReq = document.getElementById('monthlyRequestsChart').getContext('2d');
-var monthlyRequestsChart = new Chart(ctxReq, {
-  type: 'bar',
-  data: {
-    labels: [
-      <?php 
-      $reqMonths = [];
-      for ($i = 5; $i >= 0; $i--) {
-        $date = new DateTime("first day of -$i months");
-        $reqMonths[] = $date->format('M Y');
-        echo "'" . $date->format('M Y') . "', ";
-      }
-      ?>
-    ],
-    datasets: [{
-      label: 'Requests',
-      data: [
-        <?php 
-        foreach ($reqMonths as $month) {
-          $count = 0;
-          foreach ($monthlyRequests as $data) {
-            $dataMonth = date('M Y', strtotime($data['month'] . '-01'));
-            if ($dataMonth === $month) {
-              $count = $data['count'];
-              break;
-            }
-          }
-          echo $count . ', ';
-        }
-        ?>
-      ],
-      backgroundColor: 'rgba(33, 150, 243, 0.5)',
-      borderColor: 'rgba(33, 150, 243, 1)',
-      borderWidth: 1
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      legend: { display: false }
-    },
-    scales: {
-      y: { beginAtZero: true, ticks: { stepSize: 1 } }
-    }
-  }
-});
 </script>
 
 <?php
