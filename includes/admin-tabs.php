@@ -14,6 +14,17 @@ if (!isset($activeTab)) {
 // Debug: Show current active tab
 echo "<!-- Debug: Active tab is: $activeTab -->";
 
+// Dashboard Tab
+if ($activeTab === 'dashboard') {
+    // Reuse the modern admin dashboard content inside tabs layout
+    $dashboardPage = __DIR__ . '/../admin/pages/dashboard.php';
+    if (file_exists($dashboardPage)) {
+        require $dashboardPage;
+    } else {
+        echo '<div class="alert alert-warning">Dashboard content not found.</div>';
+    }
+}
+
 // Add Donor Tab
 if ($activeTab === 'add-donor'): ?>
     <div class="tab-pane fade show active" id="add-donor" role="tabpanel">
