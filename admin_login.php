@@ -1,4 +1,8 @@
 <?php
+// Redirect to canonical legacy admin login
+header('Location: /legacy-pwa-4/blood-donation-pwa/admin_login.php', true, 302);
+exit;
+
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);

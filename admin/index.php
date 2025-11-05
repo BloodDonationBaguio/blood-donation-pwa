@@ -1,10 +1,4 @@
 <?php
-/**
- * Admin Dashboard - Main Entry Point
- * REDIRECTING TO ORIGINAL COMPLETE ADMIN SYSTEM
- */
-
-// Redirect to the main admin system
-header("Location: ../admin.php");
-exit();
-?>
+// Canonical redirect to legacy admin dashboard
+header('Location: /legacy-pwa-4/blood-donation-pwa/admin.php', true, 302);
+exit;
