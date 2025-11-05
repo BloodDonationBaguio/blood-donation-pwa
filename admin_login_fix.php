@@ -8,7 +8,7 @@ session_start();
 
 // If already logged in, redirect to dashboard
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    header('Location: admin_dashboard.php');
+header('Location: admin.php');
     exit();
 }
 
@@ -50,7 +50,7 @@ $updateStmt = $pdo->prepare("UPDATE admin_users SET last_login = CURRENT_TIMESTA
                 $updateStmt->execute([$user['id']]);
                 
                 // Redirect to dashboard
-                header('Location: admin_dashboard.php');
+    header('Location: admin.php');
                 exit();
             } else {
                 $error = 'Invalid username or password';

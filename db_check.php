@@ -82,7 +82,7 @@ if (in_array('mysql', $pdoDrivers)) {
 $filesToCheck = [
     __DIR__ . '/db.php',
     __DIR__ . '/pending-actions.php',
-    __DIR__ . '/../admin-dashboard.php'
+    __DIR__ . '/admin.php'
 ];
 
 echo "<h2>File Permissions:</h2>";
@@ -330,7 +330,7 @@ if (!empty($criticalIssues)) {
 echo "<hr>";
 echo "<h2>Quick Actions:</h2>";
 echo "<ul>";
-echo "<li><a href='admin-dashboard.php'>Go to Admin Dashboard</a></li>";
+echo "<li><a href='admin.php'>Go to Admin Dashboard</a></li>";
 echo "<li><a href='index.php'>Go to Home Page</a></li>";
 echo "<li><a href='db_check.php?phpinfo=1'>Show PHP Info</a></li>";
 echo "</ul>";

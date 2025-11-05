@@ -24,19 +24,19 @@ $confirm_password = $_POST['confirm_password'] ?? '';
 // Validate inputs
 if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
     $_SESSION['error'] = 'All fields are required';
-    header('Location: ../admin-dashboard.php?tab=dashboard&password_error=1');
+    header('Location: ../admin.php?tab=dashboard&password_error=1');
     exit();
 }
 
 if ($new_password !== $confirm_password) {
     $_SESSION['error'] = 'New passwords do not match';
-    header('Location: ../admin-dashboard.php?tab=dashboard&password_error=1');
+    header('Location: ../admin.php?tab=dashboard&password_error=1');
     exit();
 }
 
 if (strlen($new_password) < 8) {
     $_SESSION['error'] = 'New password must be at least 8 characters long';
-    header('Location: ../admin-dashboard.php?tab=dashboard&password_error=1');
+    header('Location: ../admin.php?tab=dashboard&password_error=1');
     exit();
 }
 
@@ -47,14 +47,14 @@ $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$admin) {
     $_SESSION['error'] = 'Admin user not found';
-    header('Location: ../admin-dashboard.php?tab=dashboard&password_error=1');
+    header('Location: ../admin.php?tab=dashboard&password_error=1');
     exit();
 }
 
 // Verify current password
 if (!password_verify($current_password, $admin['password'])) {
     $_SESSION['error'] = 'Current password is incorrect';
-    header('Location: ../admin-dashboard.php?tab=dashboard&password_error=1');
+    header('Location: ../admin.php?tab=dashboard&password_error=1');
     exit();
 }
 
@@ -67,10 +67,10 @@ $result = $stmt->execute([$hashed_password]);
 
 if ($result) {
     $_SESSION['success'] = 'Password updated successfully';
-    header('Location: ../admin-dashboard.php?tab=dashboard&password_success=1');
+    header('Location: ../admin.php?tab=dashboard&password_success=1');
 } else {
     $_SESSION['error'] = 'Failed to update password. Please try again.';
-    header('Location: ../admin-dashboard.php?tab=dashboard&password_error=1');
+    header('Location: ../admin.php?tab=dashboard&password_error=1');
 }
 
 exit();

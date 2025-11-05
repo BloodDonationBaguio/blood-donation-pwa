@@ -1,31 +1,17 @@
 <?php
 // Database Configuration
-define('DB_HOST', 'dpg-d3ugfe3e5dus739m78ng-a');
-define('DB_PORT', '5432');
-define('DB_NAME', 'blood_system');
-define('DB_USER', 'blood_system_user');
-define('DB_PASS', 'u4iTxHGbiGRYMflR6nLQPFNG02aL6jTJ'); // Password from Render
+$dbHost = getenv('DB_HOST');
+$dbPort = 5432; // Default PostgreSQL port
+$dbName = getenv('DB_NAME');
+$dbUser = getenv('DB_USER');
+$dbPass = getenv('DB_PASS');
 
-// PDO Connection Options
-define('DB_OPTIONS', [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
-]);
-
-// Create database connection
 try {
-    $pdo = new PDO(
-        "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME,
-        DB_USER,
-        DB_PASS,
-        DB_OPTIONS
-    );
+    $pdo = new PDO("pgsql:host=$dbHost;port=$dbPort;dbname=$dbName", $dbUser, $dbPass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    // Log the actual error for debugging
-    error_log("Database connection failed: " . $e->getMessage());
-    // Show user-friendly message
-    die("Could not connect to the database. Please try again later.");
+    error_log("Database connection error: " . $e->getMessage());
+    die("A database error occurred. Please try again later.");
 }
 
 // reCAPTCHA Configuration

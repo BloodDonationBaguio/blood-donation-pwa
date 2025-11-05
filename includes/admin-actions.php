@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $settings['contact']['address'] = trim($_POST['address']);
         $settings['contact']['facebook'] = trim($_POST['facebook']);
         save_site_settings($settings);
-        header('Location: ../admin-dashboard.php?tab=update-contact&success=1');
+        header('Location: ../admin.php?tab=update-contact&success=1');
         exit();
     }
     // Update Page Content
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $content = trim($_POST['content']);
         $settings['pages'][$page] = $content;
         save_site_settings($settings);
-        header('Location: ../admin-dashboard.php?tab=manage-pages&success=1');
+        header('Location: ../admin.php?tab=manage-pages&success=1');
         exit();
     }
 }

@@ -6,8 +6,6 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 
 // Enforce admin authentication using centralized guard
 requireAdminLogin();
 
-// Legacy admin is the default entry; no redirect to modern UI
-
 $page = $_GET['page'] ?? 'dashboard';
 
 // Logic from debug_pending_donors.php
@@ -93,7 +91,7 @@ usort($pendingDonors, function($a, $b) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin (Legacy) - Blood Donation</title>
+    <title>Admin - Blood Donation</title>
     <link rel="stylesheet" href="css/style.css?v=<?php echo time(); ?>">
 </head>
 <body>

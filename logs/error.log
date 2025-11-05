@@ -1190,3 +1190,73 @@ Stack trace:
 [04-Nov-2025 22:37:24 Asia/Manila] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin-login.php on line 59
 [04-Nov-2025 22:38:02 Asia/Manila] Database connection established successfully
 [04-Nov-2025 22:38:02 Asia/Manila] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin-login.php on line 59
+[05-Nov-2025 01:31:19 Asia/Manila] Database connection established successfully
+[05-Nov-2025 01:31:20 Asia/Manila] Database connection established successfully
+[05-Nov-2025 01:31:20 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 01:34:55 Asia/Manila] Database connection established successfully
+[05-Nov-2025 01:34:55 Asia/Manila] PHP Warning:  Undefined variable $pdo in C:\xampp\htdocs\blood-donation-pwa-1\includes\admin_auth.php on line 47
+[05-Nov-2025 01:34:55 Asia/Manila] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in C:\xampp\htdocs\blood-donation-pwa-1\db.php:161
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\includes\admin_auth.php(47): tableExists(NULL, 'admin_users')
+#1 C:\xampp\htdocs\blood-donation-pwa-1\admin\login.php(20): adminLogin('admin', 'admin123')
+#2 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\db.php on line 161
+[05-Nov-2025 01:34:55 Asia/Manila] Database connection established successfully
+[05-Nov-2025 01:34:55 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 10:38:44 Asia/Manila] Database connection established successfully
+[05-Nov-2025 10:38:44 Asia/Manila] Database connection established successfully
+[05-Nov-2025 10:38:44 Asia/Manila] Database connection established successfully
+[05-Nov-2025 10:38:44 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 10:39:58 Asia/Manila] Database connection established successfully
+[05-Nov-2025 10:39:58 Asia/Manila] Database connection established successfully
+[05-Nov-2025 10:39:58 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 10:52:26 Asia/Manila] Database connection established successfully
+[05-Nov-2025 10:52:26 Asia/Manila] Database connection established successfully
+[05-Nov-2025 10:52:26 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 11:16:22 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:16:22 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:16:22 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 11:16:56 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:16:56 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:16:56 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:16:56 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 11:23:21 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:23:21 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:23:21 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 11:36:06 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:36:06 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:36:06 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:36:06 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 11:44:58 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:44:58 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:44:58 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 11:57:07 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:57:07 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:57:07 Asia/Manila] Database connection established successfully
+[05-Nov-2025 11:57:07 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 12:24:00 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:24:00 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:24:00 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 12:24:34 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:24:34 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:24:34 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 12:24:42 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:24:42 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:24:42 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 12:24:49 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:24:49 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:24:50 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:24:50 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 12:27:02 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:27:02 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:27:02 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 12:28:05 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:28:05 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:28:05 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 12:28:36 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:28:36 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:28:37 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:28:37 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 12:41:56 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:41:56 Asia/Manila] Database connection established successfully
+[05-Nov-2025 12:41:56 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error

@@ -80,7 +80,7 @@ $_SESSION['test_user'] = 'test_user';
     <h2>5. Next Steps</h2>
     <ul>
         <li><a href="admin-test.php">Test Admin Page</a> (simplified version)</li>
-        <li><a href="admin-dashboard.php">Original Admin Dashboard</a></li>
+        <li><a href="admin.php">Original Admin Dashboard</a></li>
         <li><a href="admin-fixed.php">Fixed Admin Dashboard</a></li>
     </ul>
 </body>

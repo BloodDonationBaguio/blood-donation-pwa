@@ -158,7 +158,7 @@ updated_at=CURRENT_TIMESTAMP
                 'request_id' => $id
             ]);
         } else {
-            header('Location: ../admin-dashboard.php?tab=' . urlencode($tab) . '&success=1');
+            header('Location: ../admin.php?tab=' . urlencode($tab) . '&success=1');
             exit();
         }
     }
@@ -221,7 +221,7 @@ $stmt = $pdo->prepare("UPDATE requests SET status='rejected', note=?, updated_at
                 'request_id' => $id
             ]);
         } else {
-            header('Location: ../admin-dashboard.php?tab=' . urlencode($tab) . '&rejected=1');
+            header('Location: ../admin.php?tab=' . urlencode($tab) . '&rejected=1');
             exit();
         }
         
@@ -233,11 +233,11 @@ $stmt = $pdo->prepare("UPDATE requests SET status='rejected', note=?, updated_at
             echo json_encode([
                 'success' => true,
                 'message' => 'Action completed successfully',
-                'redirect' => '../admin-dashboard.php?tab=' . urlencode($tab) . '&success=1'
+                'redirect' => '../admin.php?tab=' . urlencode($tab) . '&success=1'
             ]);
         } else {
             // Regular form submission - redirect
-            header('Location: ../admin-dashboard.php?tab=' . urlencode($tab) . '&success=1');
+            header('Location: ../admin.php?tab=' . urlencode($tab) . '&success=1');
         }
         exit();
     }
@@ -263,7 +263,7 @@ $stmt = $pdo->prepare("UPDATE requests SET status='rejected', note=?, updated_at
         ]);
     } else {
         // Regular form submission - show error
-        header('Location: ../admin-dashboard.php?tab=blood-requests&error=' . urlencode('An error occurred: ' . $e->getMessage()));
+        header('Location: ../admin.php?tab=blood-requests&error=' . urlencode('An error occurred: ' . $e->getMessage()));
     }
     exit();
 }

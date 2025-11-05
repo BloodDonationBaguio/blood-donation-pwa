@@ -10,7 +10,7 @@ if (!isAdminLoggedIn()) {
     exit();
 }
 
-// Use legacy admin dashboard
+// Use legacy/original admin dashboard
 header('Location: ../admin.php');
 exit();
 

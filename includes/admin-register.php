@@ -14,15 +14,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validate city, chapter, and phone
     if ($city !== "Baguio") {
-        header("Location: ../admin-dashboard.php?tab=add-donor&adddonor_error=".urlencode("Registration is only allowed for Baguio residents."));
+        header("Location: ../admin.php?tab=add-donor&adddonor_error=".urlencode("Registration is only allowed for Baguio residents."));
         exit();
     }
     if ($chapter !== "Philippine Red Cross - Baguio Chapter") {
-        header("Location: ../admin-dashboard.php?tab=add-donor&adddonor_error=".urlencode("Please select the correct Red Cross chapter."));
+        header("Location: ../admin.php?tab=add-donor&adddonor_error=".urlencode("Please select the correct Red Cross chapter."));
         exit();
     }
     if (!preg_match('/^(09\\d{9}|\\+639\\d{9})$/', $phone)) {
-        header("Location: ../admin-dashboard.php?tab=add-donor&adddonor_error=".urlencode("Please enter a valid Philippine mobile number (09XXXXXXXXX or +639XXXXXXXXX)."));
+        header("Location: ../admin.php?tab=add-donor&adddonor_error=".urlencode("Please enter a valid Philippine mobile number (09XXXXXXXXX or +639XXXXXXXXX)."));
         exit();
     }
 
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Commit transaction
             $pdo->commit();
             
-            header("Location: ../admin-dashboard.php?tab=add-donor&adddonor_success=1");
+            header("Location: ../admin.php?tab=add-donor&adddonor_success=1");
             exit();
             
         } catch (Exception $e) {
@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $pdo->rollBack();
             }
             error_log("Admin donor registration error: " . $e->getMessage());
-            header("Location: ../admin-dashboard.php?tab=add-donor&adddonor_error=".urlencode("An error occurred while saving the donor record. Please try again."));
+            header("Location: ../admin.php?tab=add-donor&adddonor_error=".urlencode("An error occurred while saving the donor record. Please try again."));
             exit();
         }
     } else {
@@ -70,11 +70,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($age < 18) $error .= "Donor must be at least 18 years old. ";
         if (!$donated_before) $error .= "Please specify if donor has donated before. ";
         
-        header("Location: ../admin-dashboard.php?tab=add-donor&adddonor_error=".urlencode(trim($error)));
+        header("Location: ../admin.php?tab=add-donor&adddonor_error=".urlencode(trim($error)));
         exit();
     }
 } else {
-    header("Location: ../admin-dashboard.php?tab=add-donor");
+    header("Location: ../admin.php?tab=add-donor");
     exit();
 }
 ?>
