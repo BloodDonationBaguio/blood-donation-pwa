@@ -18,7 +18,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
         $admin = $stmt->fetch();
         
         if ($admin) {
-            header('Location: /admin/dashboard.php');
+            header('Location: /admin.php');
             exit();
         } else {
             // Invalid session, clear it
@@ -71,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         error_log("Last login update failed: " . $e->getMessage());
                     }
                     
-                    // Redirect to admin dashboard
-                    header('Location: /admin/dashboard.php');
+                    // Redirect to legacy admin dashboard
+                    header('Location: /admin.php');
                     exit();
                 } else {
                     $error = 'Invalid password';
