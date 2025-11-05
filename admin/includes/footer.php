@@ -1,4 +1,4 @@
-            </main>
+</main>
         </div>
     </div>
 
@@ -19,8 +19,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
-    <!-- Custom Scripts -->
-    <script src="/assets/js/admin.js"></script>
+    <!-- Custom Scripts: remove broken asset reference -->
+    <!-- (admin.js not present) -->
     
     <!-- Page-specific scripts -->
     <?php if (file_exists(__DIR__ . "/../assets/js/pages/$page.js")): ?>

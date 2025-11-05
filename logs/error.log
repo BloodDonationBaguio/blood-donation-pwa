@@ -1260,3 +1260,62 @@ Stack trace:
 [05-Nov-2025 12:41:56 Asia/Manila] Database connection established successfully
 [05-Nov-2025 12:41:56 Asia/Manila] Database connection established successfully
 [05-Nov-2025 12:41:56 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 16:13:37 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:13:37 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:13:37 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:13:37 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 16:15:32 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:15:32 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:15:32 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 16:29:25 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:29:25 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:29:25 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:29:25 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 16:30:02 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:30:02 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:30:02 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:30:02 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 16:30:03 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:30:03 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:30:03 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:30:03 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 16:30:11 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:30:11 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:30:11 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:30:11 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 16:42:09 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:42:09 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:42:09 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 16:56:11 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:56:11 Asia/Manila] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 no such table: requests in C:\xampp\htdocs\blood-donation-pwa-1\admin\pages\dashboard_new.php:9
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\admin\pages\dashboard_new.php(9): PDO->query('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\blood-donation-pwa-1\admin\dashboard.php(8): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\admin\pages\dashboard_new.php on line 9
+[05-Nov-2025 16:56:11 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:56:11 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 16:57:33 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:57:33 Asia/Manila] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 no such table: requests in C:\xampp\htdocs\blood-donation-pwa-1\admin\pages\dashboard_new.php:9
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\admin\pages\dashboard_new.php(9): PDO->query('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\blood-donation-pwa-1\admin\dashboard.php(8): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\admin\pages\dashboard_new.php on line 9
+[05-Nov-2025 16:57:33 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:57:33 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 16:57:33 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:57:33 Asia/Manila] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 no such table: requests in C:\xampp\htdocs\blood-donation-pwa-1\admin\pages\dashboard_new.php:9
+Stack trace:
+#0 C:\xampp\htdocs\blood-donation-pwa-1\admin\pages\dashboard_new.php(9): PDO->query('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\blood-donation-pwa-1\admin\dashboard.php(8): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\blood-donation-pwa-1\admin\pages\dashboard_new.php on line 9
+[05-Nov-2025 16:57:34 Asia/Manila] Database connection established successfully
+[05-Nov-2025 16:57:34 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[05-Nov-2025 17:02:25 Asia/Manila] Database connection established successfully
+[05-Nov-2025 17:02:25 Asia/Manila] Dashboard stats error: SQLSTATE[HY000]: General error: 1 no such table: requests
+[05-Nov-2025 17:02:25 Asia/Manila] Recent donors error: SQLSTATE[HY000]: General error: 1 no such table: users
+[05-Nov-2025 17:02:25 Asia/Manila] Recent requests error: SQLSTATE[HY000]: General error: 1 no such table: requests
+[05-Nov-2025 17:02:25 Asia/Manila] Database connection established successfully
+[05-Nov-2025 17:02:25 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error

@@ -1,8 +1,3 @@
-<?php
-// Ensure DB and helpers are available for header badges and menus
-require_once __DIR__ . '/db.php';
-if (!isset($page)) { $page = 'dashboard'; }
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,6 +33,11 @@ if (!isset($page)) { $page = 'dashboard'; }
                     <li class="nav-item">
                         <a class="nav-link <?= ($page === 'donors') ? 'active' : '' ?>" href="../?page=donors">
                             <i class="fas fa-users me-1"></i> Donors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= ($page === 'requests') ? 'active' : '' ?>" href="../?page=requests">
+                            <i class="fas fa-tint me-1"></i> Blood Requests
                         </a>
                     </li>
                 </ul>
@@ -81,6 +81,12 @@ if (!isset($page)) { $page = 'dashboard'; }
                             <a class="nav-link <?= ($page === 'donors') ? 'active' : '' ?>" href="../?page=donors">
                                 <i class="fas fa-users me-2"></i> Donors
                                 <span class="badge bg-primary rounded-pill ms-2"><?= getDonorCount(); ?></span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($page === 'requests') ? 'active' : '' ?>" href="../?page=requests">
+                                <i class="fas fa-tint me-2"></i> Blood Requests
+                                <span class="badge bg-danger rounded-pill ms-2"><?= getPendingRequestCount(); ?></span>
                             </a>
                         </li>
                     </ul>
