@@ -3,17 +3,16 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Authenticate admin and render modern dashboard
+// Authenticate admin then route to legacy interface
 require_once __DIR__ . '/includes/admin_auth.php';
 if (!isAdminLoggedIn()) {
     header('Location: /admin_login.php');
     exit();
 }
 
-// Shared DB connection and layout
-require_once __DIR__ . '/includes/db.php';
-$page = 'dashboard';
-require_once __DIR__ . '/includes/header.php';
+// Use legacy admin dashboard
+header('Location: ../admin.php');
+exit();
 
 // Get dashboard statistics
 try {

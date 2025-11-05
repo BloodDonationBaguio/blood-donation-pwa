@@ -6,11 +6,7 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 
 // Enforce admin authentication using centralized guard
 requireAdminLogin();
 
-// Route to modern admin interface by default
-if (!isset($_GET['legacy']) || $_GET['legacy'] !== '1') {
-    header('Location: /admin/dashboard.php');
-    exit();
-}
+// Legacy admin is the default entry; no redirect to modern UI
 
 $page = $_GET['page'] ?? 'dashboard';
 
