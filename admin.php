@@ -28,6 +28,21 @@ if ($chosen) {
     return;
 }
 
+// Graceful fallback: if restore bundle is missing, redirect to root admin
+if ($docroot) {
+    $rootAdminIndex = '/admin/index.php';
+    $rootAdminPhp   = '/admin.php';
+    // Prefer index.php if it exists under the document root
+    if (file_exists($docroot . $rootAdminIndex)) {
+        header('Location: ' . $rootAdminIndex, true, 302);
+        exit;
+    }
+    if (file_exists($docroot . $rootAdminPhp)) {
+        header('Location: ' . $rootAdminPhp, true, 302);
+        exit;
+    }
+}
+
 http_response_code(500);
 echo "<div style='font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; border: 1px solid #f5c6cb; background-color: #f8d7da; color: #721c24; border-radius: 6px;'>";
 echo "<h2>Admin Dashboard Unavailable</h2>";
