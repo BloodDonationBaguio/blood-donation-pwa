@@ -4,7 +4,7 @@ require_once __DIR__ . '/../includes/admin_auth.php';
 
 // Redirect to dashboard if already logged in
 if (isAdminLoggedIn()) {
-    header('Location: /admin/dashboard.php');
+    header('Location: /blood-donation-pwa/admin/');
     exit();
 }
 
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter both username and password';
     } elseif (adminLogin($username, $password)) {
         // Redirect to the originally requested page or dashboard
-        $redirect = $_SESSION['redirect_after_login'] ?? '/admin/dashboard.php';
+        $redirect = $_SESSION['redirect_after_login'] ?? '/blood-donation-pwa/admin/';
         unset($_SESSION['redirect_after_login']);
         header('Location: ' . $redirect);
         exit();

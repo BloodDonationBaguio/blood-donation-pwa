@@ -1,8 +1,64 @@
 <?php
-// Legacy entry point: redirect to the modern admin dashboard
 session_start();
-header('Location: /admin/dashboard.php');
-exit();
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'db.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'admin_auth.php';
+
+// Enforce admin authentication using centralized guard
+requireAdminLogin();
+
+$page = $_GET['page'] ?? 'dashboard';
+
+// Logic from debug_pending_donors.php
+$pendingDonors = [];
+
+// Build robust WHERE clauses per table, tolerating schema differences
+$whereNew = " WHERE 1=1";
+$whereLegacy = " WHERE 1=1";
+$paramsNew = [];
+$paramsLegacy = [];
+
+// Detect presence of status and created_at columns per table
+$hasStatusNew = false; $hasStatusLegacy = false;
+$hasCreatedNew = false; $hasCreatedLegacy = false;
+// Portable column existence check
+function columnExists($pdo, $table, $column) {
+    try {
+        // PRAGMA for SQLite
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            $stmt = $pdo->query("PRAGMA table_info(" . $pdo->quote($table) . ")");
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN, 1);
+            return in_array($column, $columns);
+        }
+        // information_schema for MySQL/PostgreSQL
+        $stmt = $pdo->prepare("SELECT 1 FROM information_schema.columns WHERE table_name = ? AND column_name = ? LIMIT 1");
+        $stmt->execute([$table, $column]);
+        return (bool)$stmt->fetchColumn();
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+$hasStatusNew     = columnExists($pdo, 'donors_new', 'status');
+$hasStatusLegacy  = columnExists($pdo, 'donors', 'status');
+$hasCreatedNew    = columnExists($pdo, 'donors_new', 'created_at');
+$hasCreatedLegacy = columnExists($pdo, 'donors', 'created_at');
+
+// Pending condition:
+// - If status exists: a donor is pending if their status is a pending-like value.
+// - If status does not exist: a donor is pending if their blood type is unknown (legacy fallback).
+$unknownExpr = "(LOWER(TRIM(COALESCE(blood_type,''))) IN ('unknown','unk',''))";
+$pendingStatusExpr = "(status IS NULL OR status IN ('pending','new','submitted','awaiting_review','in_review'))";
+
+if ($hasStatusNew) {
+    $whereNew .= " AND (" . $pendingStatusExpr . " OR " . $unknownExpr . ")";
+} else {
+    $whereNew .= " AND " . $unknownExpr;
+}
+if ($hasStatusLegacy) {
+    $whereLegacy .= " AND (" . $pendingStatusExpr . " OR " . $unknownExpr . ")";
+} else {
+    $whereLegacy .= " AND " . $unknownExpr;
+}
 
 // Order by clause per table
 $orderNew    = $hasCreatedNew    ? " ORDER BY created_at DESC" : " ORDER BY id DESC";
