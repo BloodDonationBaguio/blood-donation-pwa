@@ -6,7 +6,8 @@ ini_set('display_errors', 1);
 // Authenticate admin then route to legacy interface
 require_once __DIR__ . '/includes/admin_auth.php';
 if (!isAdminLoggedIn()) {
-    header('Location: login.php');
+    // Redirect to legacy login
+    header('Location: /admin_login.php');
     exit();
 }
 
