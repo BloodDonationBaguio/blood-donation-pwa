@@ -351,7 +351,7 @@ class BloodInventoryManagerComplete {
                     $auditStmt = $this->pdo->prepare("
                         SELECT * FROM blood_inventory_audit
                         WHERE unit_id = ?
-                        ORDER BY timestamp DESC
+                        ORDER BY COALESCE(created_at, timestamp) DESC
                     ");
                     $auditStmt->execute([$unit['id']]);
                     $unit['audit_log'] = $auditStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -360,7 +360,7 @@ class BloodInventoryManagerComplete {
                     $auditStmt2 = $this->pdo->prepare("
                         SELECT * FROM blood_inventory_audit
                         WHERE unit_id = ? OR new_values LIKE ? OR old_values LIKE ?
-                        ORDER BY timestamp DESC
+                        ORDER BY COALESCE(created_at, timestamp) DESC
                     ");
                     $like = '%"' . $unit['unit_id'] . '"%';
                     $auditStmt2->execute([$unit['unit_id'], $like, $like]);
@@ -888,7 +888,8 @@ class BloodInventoryManagerComplete {
                     admin_name VARCHAR(255),
                     ip_address VARCHAR(64),
                     user_agent TEXT,
-                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )");
             } else {
                 $this->pdo->exec("CREATE TABLE IF NOT EXISTS blood_inventory_audit (
@@ -900,7 +901,8 @@ class BloodInventoryManagerComplete {
                     admin_name VARCHAR(255),
                     ip_address VARCHAR(64),
                     user_agent TEXT,
-                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
             }
             
