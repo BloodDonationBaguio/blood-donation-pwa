@@ -14,7 +14,12 @@ const adminUrls = [
   '/legacy-pwa-4/blood-donation-pwa/admin/login.php',
   '/legacy-pwa-4/blood-donation-pwa/admin/',
   '/legacy-pwa-4/blood-donation-pwa/admin.php',
-  '/legacy-pwa-4/blood-donation-pwa/admin-login.php'
+  '/legacy-pwa-4/blood-donation-pwa/admin-login.php',
+  // root admin paths
+  '/admin.php',
+  '/admin-login.php',
+  '/admin_login.php',
+  '/admin/'
 ];
 
 // Install event
@@ -61,9 +66,9 @@ self.addEventListener('fetch', function(event) {
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     (async () => {
-      // Enable navigation preload where supported
+      // Disable navigation preload to avoid preloadResponse warnings when not using respondWith for navigations
       if (self.registration && self.registration.navigationPreload) {
-        try { await self.registration.navigationPreload.enable(); } catch (e) {}
+        try { await self.registration.navigationPreload.disable(); } catch (e) {}
       }
       const cacheNames = await caches.keys();
       await Promise.all(

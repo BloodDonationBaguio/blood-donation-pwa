@@ -64,7 +64,13 @@ try {
         echo '<style>' . AccessibilityHelper::generateCSS() . '</style>';
     }
     ?>
-    <link rel="manifest" href="manifest.json?v=2.0.1">
+    <?php
+      $localManifest = __DIR__ . '/manifest.json';
+      $manifestHref = file_exists($localManifest)
+        ? 'manifest.json?v=2.0.1'
+        : '/manifest.json?v=2.0.1';
+    ?>
+    <link rel="manifest" href="<?php echo $manifestHref; ?>">
     <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
     <link rel="apple-touch-icon" href="assets/icons/favicon.svg">
@@ -75,12 +81,27 @@ try {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=10').then(function(registration) {
-          console.log('Service Worker registered successfully');
-        }).catch(function(error) {
-          console.log('Service Worker registration failed:', error);
-        });
+      // Avoid registering service worker on admin pages
+      const isAdminPath = /(^\/admin|\/admin_|\/admin\.|\/admin\/.+|\/blood-donation-pwa\/admin|\/legacy-pwa-4\/blood-donation-pwa\/admin)/.test(location.pathname);
+      if ('serviceWorker' in navigator && !isAdminPath) {
+        const tryRegister = async (scriptUrl) => {
+          try {
+            const reg = await navigator.serviceWorker.register(scriptUrl);
+            console.log('Service Worker registered:', reg.scope);
+            return true;
+          } catch (err) {
+            console.warn('SW registration failed for', scriptUrl, err);
+            return false;
+          }
+        };
+
+        // Prefer local sw.js; fallback to root sw.js if local missing/misconfigured
+        (async () => {
+          const localOk = await tryRegister('sw.js?v=10');
+          if (!localOk) {
+            await tryRegister('/sw.js?v=10');
+          }
+        })();
       }
     </script>
     <style>
