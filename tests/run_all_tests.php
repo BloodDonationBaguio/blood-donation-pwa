@@ -7,6 +7,10 @@ ini_set('display_errors', '1');
 session_start();
 $_SESSION['user_id'] = 1; // A dummy user ID for testing
 $_SESSION['role'] = 'admin';
+// Ensure admin.php sees a valid admin session during web execution
+$_SESSION['admin_logged_in'] = true;
+$_SESSION['admin_username'] = $_SESSION['admin_username'] ?? 'admin';
+$_SESSION['admin_id'] = $_SESSION['admin_id'] ?? 1;
 
 // Include the database connection
 require_once dirname(__DIR__) . '/db.php';
