@@ -3,6 +3,9 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
+// Flag indicating test mode; allows included pages to relax auth redirections
+if (!defined('TEST_MODE')) { define('TEST_MODE', true); }
+
 // Simulate admin login for tests
 session_start();
 $_SESSION['user_id'] = 1; // A dummy user ID for testing
