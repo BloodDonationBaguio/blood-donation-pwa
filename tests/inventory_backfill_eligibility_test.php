@@ -16,10 +16,11 @@ try {
     if ($countNew >= 0) { $donorTable = 'donors_new'; }
 } catch (Throwable $e) {}
 
-$servedCond = ($donorTable === 'donors_new') ? "status IN ('served','completed')" : "status = 'served'";
+$servedCondNoAlias = ($donorTable === 'donors_new') ? "status IN ('served','completed')" : "status = 'served'";
+$servedCondWithAlias = ($donorTable === 'donors_new') ? "d.status IN ('served','completed')" : "d.status = 'served'";
 
-$eligibleDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorTable} WHERE {$servedCond}")->fetchColumn();
-$donorsWithAvailable = (int)$pdo->query("SELECT COUNT(DISTINCT d.id) FROM {$donorTable} d JOIN blood_inventory bi ON bi.donor_id = d.id AND bi.status = 'available' WHERE {$servedCond}")->fetchColumn();
+$eligibleDonors = (int)$pdo->query("SELECT COUNT(*) FROM {$donorTable} WHERE {$servedCondNoAlias}")->fetchColumn();
+$donorsWithAvailable = (int)$pdo->query("SELECT COUNT(DISTINCT d.id) FROM {$donorTable} d JOIN blood_inventory bi ON bi.donor_id = d.id AND LOWER(bi.status) = 'available' WHERE {$servedCondWithAlias}")->fetchColumn();
 $missingAvailable = max(0, $eligibleDonors - $donorsWithAvailable);
 
 echo "Eligible donors: {$eligibleDonors}\n";
