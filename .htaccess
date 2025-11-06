@@ -39,6 +39,14 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_URI} ^/legacy-pwa-4/blood-donation-pwa/run_all_tests\.php$ [NC]
 RewriteRule ^ - [L]
 
+# Allow direct access to all test scripts in tests directories
+RewriteCond %{REQUEST_URI} ^/tests/ [NC]
+RewriteRule ^ - [L]
+RewriteCond %{REQUEST_URI} ^/blood-donation-pwa/tests/ [NC]
+RewriteRule ^ - [L]
+RewriteCond %{REQUEST_URI} ^/legacy-pwa-4/blood-donation-pwa/tests/ [NC]
+RewriteRule ^ - [L]
+
 # Allow direct access to robust code fingerprint endpoint
 RewriteCond %{REQUEST_URI} ^/debug_fingerprint_robust\.php$ [NC]
 RewriteRule ^ - [L]
