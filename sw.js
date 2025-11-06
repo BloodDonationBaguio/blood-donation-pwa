@@ -1,5 +1,5 @@
 // Service Worker for Blood Donation PWA
-const CACHE_NAME = 'blood-donation-pwa-v3';
+const CACHE_NAME = 'blood-donation-pwa-v4';
 const urlsToCache = [
   './',
   './index.php',
@@ -7,7 +7,7 @@ const urlsToCache = [
   './manifest.json',
   './donor-registration.php',
   './login.php',
-  './admin.php'
+  // removed admin.php to avoid caching authenticated pages
 ];
 
 const adminUrls = [
@@ -47,6 +47,11 @@ self.addEventListener('fetch', function(event) {
   const isAdminUrl = adminUrls.some(url => requestUrl.pathname.endsWith(url));
   if (isAdminUrl) {
     return; // don't call respondWith — let the browser handle navigation/redirects
+  }
+
+  // Never intercept the web app manifest; let the browser fetch it
+  if (requestUrl.pathname.endsWith('/manifest.json')) {
+    return;
   }
 
   // Do not intercept top-level navigations to avoid redirect mode issues
