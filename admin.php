@@ -795,7 +795,7 @@ function buildPaginationUrl($page) {
                         </a>
                     </li>
                     <li class="nav-item mt-4">
-                        <a class="nav-link text-danger" href="admin_logout.php">
+                        <a class="nav-link text-danger" href="/admin_logout.php">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </a>
                     </li>

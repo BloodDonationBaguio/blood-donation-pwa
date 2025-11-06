@@ -55,7 +55,7 @@
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item text-danger" href="logout.php">
+                                <a class="dropdown-item text-danger" href="/admin_logout.php">
                                     <i class="fas fa-sign-out-alt me-2"></i>Logout
                                 </a>
                             </li>
@@ -101,7 +101,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="logout.php">
+                            <a class="nav-link" href="/admin_logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i> Logout
                             </a>
                         </li>
