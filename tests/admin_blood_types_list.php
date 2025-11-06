@@ -34,23 +34,25 @@ function dbDriver(PDO $pdo) {
     try { return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME); } catch (Throwable $e) { return 'mysql'; }
 }
 
-function tableExists(PDO $pdo, $table) {
-    $driver = dbDriver($pdo);
-    try {
-        if ($driver === 'mysql') {
-            $stmt = $pdo->prepare("SHOW TABLES LIKE ?");
-            $stmt->execute([$table]);
-            return $stmt->fetch() !== false;
-        } elseif ($driver === 'pgsql') {
-            $stmt = $pdo->prepare("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = :t)");
-            $stmt->execute([':t' => $table]);
-            return (bool)$stmt->fetchColumn();
-        } else { // sqlite
-            $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = :t");
-            $stmt->execute([':t' => $table]);
-            return $stmt->fetch() !== false;
-        }
-    } catch (Throwable $e) { return false; }
+if (!function_exists('tableExists')) {
+    function tableExists(PDO $pdo, $table) {
+        $driver = dbDriver($pdo);
+        try {
+            if ($driver === 'mysql') {
+                $stmt = $pdo->prepare("SHOW TABLES LIKE ?");
+                $stmt->execute([$table]);
+                return $stmt->fetch() !== false;
+            } elseif ($driver === 'pgsql') {
+                $stmt = $pdo->prepare("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = :t)");
+                $stmt->execute([':t' => $table]);
+                return (bool)$stmt->fetchColumn();
+            } else { // sqlite
+                $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = :t");
+                $stmt->execute([':t' => $table]);
+                return $stmt->fetch() !== false;
+            }
+        } catch (Throwable $e) { return false; }
+    }
 }
 
 function getTableColumns(PDO $pdo, $table) {
