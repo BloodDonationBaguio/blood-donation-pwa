@@ -49,8 +49,12 @@ self.addEventListener('fetch', function(event) {
     return; // don't call respondWith — let the browser handle navigation/redirects
   }
 
-  // Never intercept the web app manifest; let the browser fetch it
-  if (requestUrl.pathname.endsWith('/manifest.json')) {
+  // Never intercept the web app manifest or test assets
+  if (
+    event.request.destination === 'manifest' ||
+    requestUrl.pathname.endsWith('/manifest.json') ||
+    requestUrl.pathname.includes('/tests/')
+  ) {
     return;
   }
 

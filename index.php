@@ -131,9 +131,9 @@ try {
 
         // Prefer local sw.js; fallback to root sw.js if local missing/misconfigured
         (async () => {
-          const localOk = await tryRegister('sw.js?v=10');
+          const localOk = await tryRegister('sw.js?v=11');
           if (!localOk) {
-            await tryRegister('/sw.js?v=10');
+            await tryRegister('/sw.js?v=11');
           }
         })();
       }
