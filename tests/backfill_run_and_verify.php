@@ -2,6 +2,13 @@
 // Test: Run backfill (non-dry) and verify counts improve
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
+// Initialize DB and test session for standalone execution
+if (!defined('TEST_MODE')) { define('TEST_MODE', true); }
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
+$_SESSION['admin_logged_in'] = true;
+$_SESSION['admin_username'] = $_SESSION['admin_username'] ?? 'admin';
+$_SESSION['admin_id'] = $_SESSION['admin_id'] ?? 1;
+require_once dirname(__DIR__) . '/db.php';
 
 require_once __DIR__ . '/../includes/BloodInventoryManagerComplete.php';
 require_once __DIR__ . '/utils.php';
@@ -49,5 +56,8 @@ if ($missingAfter < $missingBefore) {
 } else {
     t_fail('Backfill did not improve missing AVAILABLE units.');
 }
+
+// Print accumulated test output when run standalone
+echo $t_output;
 
 ?>
