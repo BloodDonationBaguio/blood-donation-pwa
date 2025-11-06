@@ -145,14 +145,14 @@ $expectedTables = [
     'admin_users' => ['id','username','password','role','created_at','updated_at'],
     'donors' => ['id','reference_number','first_name','last_name','email','status','created_at'],
     'donor_medical_screening_simple' => ['id','donor_id','hemoglobin_level','blood_pressure','medical_condition','created_at'],
-    'notifications' => ['id','user_id','message','type','is_read','created_at'],
+    'notifications' => ['id','user_id','message','is_read','created_at'],
     'blood_units' => ['id','donor_id','blood_type','rh_factor','collection_date','status'],
     'blood_inventory' => ['id','unit_id','blood_type','status','expiry_date','created_at'],
     'users_new' => ['id','name','email','password','role','status','created_at'],
     'user_remember_tokens' => ['id','user_id','token','expires_at','created_at'],
     'donations_new' => ['id','donor_id','unit_id','status','donated_at'],
-    'admin_audit_log' => ['id','admin_user_id','action','details','created_at'],
-    'blood_inventory_audit' => ['id','unit_id','action','details','created_at'],
+    'admin_audit_log' => ['id','created_at','admin_username','action_type','table_name','record_id','description','ip_address'],
+    'blood_inventory_audit' => ['id','unit_id','action','timestamp','old_values','new_values','admin_name','ip_address','user_agent'],
     // legacy/common names that appear in code
     'users' => ['id'],
     'admins' => ['id'],
@@ -188,6 +188,17 @@ $dirsToCheck = [
     __DIR__ . '/cache',
     __DIR__ . '/blood-donation-pwa/logs',
 ];
+$autoFix = isset($_GET['auto_fix']) && ($_GET['auto_fix'] === '1' || strtolower((string)$_GET['auto_fix']) === 'true');
+if ($autoFix) {
+    foreach ($dirsToCheck as $d) {
+        if (!file_exists($d)) {
+            @mkdir($d, 0775, true);
+            if (stripos(PHP_OS_FAMILY ?? php_uname('s'), 'Windows') === false) {
+                @chmod($d, 0775);
+            }
+        }
+    }
+}
 $dirStatus = [];
 foreach ($dirsToCheck as $d) {
     $dirStatus[$d] = [
@@ -318,7 +329,7 @@ if ($format === 'json') {
  </head>
  <body>
     <h1>System Diagnostics</h1>
-    <div class="meta">Generated: <?= h($result['timestamp']) ?> | Driver: <?= h($driver) ?> | PHP: <?= h(PHP_VERSION) ?> | <a href="?format=json">JSON</a></div>
+    <div class="meta">Generated: <?= h($result['timestamp']) ?> | Driver: <?= h($driver) ?> | PHP: <?= h(PHP_VERSION) ?> | <a href="?format=json">JSON</a> | <a href="?auto_fix=1">Auto-fix dirs</a></div>
 
     <div class="card">
         <h2>Retired Feature: Blood Requests</h2>
