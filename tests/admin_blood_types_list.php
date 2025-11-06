@@ -244,3 +244,10 @@ try {
 t_result($passed, $failed, $skipped);
 
 ?>
+<?php
+// If accessed directly (not via tests/run_all_tests.php), render the buffered output
+if ((isset($_SERVER['SCRIPT_FILENAME']) && realpath($_SERVER['SCRIPT_FILENAME']) === __FILE__) || php_sapi_name() === 'cli') {
+    $safe = htmlspecialchars($t_output ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    echo "<pre>" . $safe . "</pre>";
+}
+?>
