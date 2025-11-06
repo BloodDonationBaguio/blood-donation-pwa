@@ -9,6 +9,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
+// Ensure all PHPMailer dates use Asia/Manila timezone
+if (function_exists('date_default_timezone_set')) {
+    @date_default_timezone_set('Asia/Manila');
+}
+
 /**
  * Send a confirmation email using PHPMailer with SMTP
  * 

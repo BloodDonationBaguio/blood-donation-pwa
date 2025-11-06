@@ -8,6 +8,11 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
+// Force email runtime timezone to Asia/Manila to ensure correct headers/content
+if (function_exists('date_default_timezone_set')) {
+    @date_default_timezone_set('Asia/Manila');
+}
+
 // Prevent direct access through web browser, but allow from our debug script and password reset pages
 if (php_sapi_name() !== 'cli') {
 	$is_debug_script = in_array(basename($_SERVER['SCRIPT_FILENAME']), ['debug_email.php', 'test_mail_debug.php']);
