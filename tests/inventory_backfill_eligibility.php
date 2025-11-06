@@ -9,8 +9,14 @@ t_section('Inventory Backfill Eligibility');
 
 $complete = new BloodInventoryManagerComplete($pdo);
 
-$donorTable = 'donors_new';
-try { if ((int)$pdo->query("SELECT COUNT(*) FROM donors_new")->fetchColumn() > 0) { $donorTable = 'donors_new'; } } catch (Throwable $e) {}
+// Resolve donor table robustly: default to legacy 'donors', prefer 'donors_new' when present and populated
+$donorTable = 'donors';
+try {
+    $cntNew = (int)$pdo->query("SELECT COUNT(*) FROM donors_new")->fetchColumn();
+    if ($cntNew > 0) { $donorTable = 'donors_new'; }
+} catch (Throwable $e) {
+    // donors_new not available; keep fallback 'donors'
+}
 // Use different WHERE clauses for single-table vs join to avoid ambiguous column errors
 $servedCondWhere = ($donorTable === 'donors_new') ? "status IN ('served','completed')" : "status = 'served'";
 $servedCondJoin  = ($donorTable === 'donors_new') ? "d.status IN ('served','completed')" : "d.status = 'served'";
