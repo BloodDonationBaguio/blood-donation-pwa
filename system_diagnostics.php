@@ -140,6 +140,7 @@ function probe_one(PDO $pdo, string $name): array {
 }
 
 // Expected tables and key columns (minimal set; adapt across environments)
+// Exclude blood_requests-related tables/views as the system no longer handles requests
 $expectedTables = [
     'admin_users' => ['id','username','password','role','created_at','updated_at'],
     'donors' => ['id','reference_number','first_name','last_name','email','status','created_at'],
@@ -147,8 +148,6 @@ $expectedTables = [
     'notifications' => ['id','user_id','message','type','is_read','created_at'],
     'blood_units' => ['id','donor_id','blood_type','rh_factor','collection_date','status'],
     'blood_inventory' => ['id','unit_id','blood_type','status','expiry_date','created_at'],
-    'blood_requests' => ['id','user_id','blood_type','quantity','status','created_at'],
-    'blood_requests_inventory' => ['id','request_id','unit_id','blood_type','created_at'],
     'users_new' => ['id','name','email','password','role','status','created_at'],
     'user_remember_tokens' => ['id','user_id','token','expires_at','created_at'],
     'donations_new' => ['id','donor_id','unit_id','status','donated_at'],
@@ -157,14 +156,12 @@ $expectedTables = [
     // legacy/common names that appear in code
     'users' => ['id'],
     'admins' => ['id'],
-    'requests' => ['id'],
 ];
 
 // Views commonly defined in migration scripts
 $expectedViews = [
     'blood_inventory_summary',
     'expiring_blood_units',
-    'requests', // sometimes a view; probe safely
 ];
 
 // Environment and extensions
@@ -225,52 +222,33 @@ foreach ($expectedViews as $view) {
     $viewsReport[$view] = probe_one($pdo, $view);
 }
 
+// Retired feature: Blood Requests — confirm absence and report residuals
+$retiredReport = [];
+// Tables that should no longer exist
+$retiredTables = ['requests', 'blood_requests', 'blood_requests_inventory'];
+foreach ($retiredTables as $rt) {
+    $retiredReport[$rt] = [
+        'type' => 'table',
+        'exists' => table_exists($pdo, $rt),
+    ];
+}
+// A possible view named 'requests' may exist; probe generically
+$retiredReport['requests_view'] = [
+    'type' => 'view',
+    'ok' => probe_one($pdo, 'requests')['ok'],
+];
+
+// Summarize retired feature status
+$retiredFeatureStatus = 'removed';
+foreach ($retiredReport as $name => $rr) {
+    if (($rr['type'] === 'table' && !empty($rr['exists'])) || ($rr['type'] === 'view' && !empty($rr['ok']))) {
+        $retiredFeatureStatus = 'residuals_found';
+        break;
+    }
+}
+
 // Referential integrity checks (orphan detection)
 $integrityReport = [];
-// blood_requests_inventory.request_id -> blood_requests.id
-if (table_exists($pdo, 'blood_requests_inventory') && table_exists($pdo, 'blood_requests')) {
-    try {
-        $stmt = $pdo->query(
-            'SELECT COUNT(*) AS orphan_count FROM blood_requests_inventory bri '
-            . 'LEFT JOIN blood_requests br ON bri.request_id = br.id '
-            . 'WHERE br.id IS NULL'
-        );
-        $integrityReport['blood_requests_inventory.request_id->blood_requests.id'] = [
-            'ok' => true,
-            'orphan_count' => (int)$stmt->fetchColumn()
-        ];
-    } catch (Throwable $e) {
-        $integrityReport['blood_requests_inventory.request_id->blood_requests.id'] = [
-            'ok' => false,
-            'error' => $e->getMessage(),
-        ];
-    }
-}
-
-// blood_requests_inventory.unit_id -> blood_inventory.id or unit_id
-if (table_exists($pdo, 'blood_requests_inventory') && table_exists($pdo, 'blood_inventory')) {
-    $biCols = table_columns($pdo, 'blood_inventory');
-    $joinField = in_array('id', $biCols, true) ? 'id' : (in_array('unit_id', $biCols, true) ? 'unit_id' : null);
-    if ($joinField) {
-        try {
-            $stmt = $pdo->query(
-                'SELECT COUNT(*) AS orphan_count FROM blood_requests_inventory bri '
-                . 'LEFT JOIN blood_inventory bi ON bri.unit_id = bi.' . $joinField . ' '
-                . 'WHERE bi.' . $joinField . ' IS NULL'
-            );
-            $integrityReport['blood_requests_inventory.unit_id->blood_inventory.' . $joinField] = [
-                'ok' => true,
-                'orphan_count' => (int)$stmt->fetchColumn()
-            ];
-        } catch (Throwable $e) {
-            $integrityReport['blood_requests_inventory.unit_id->blood_inventory.' . $joinField] = [
-                'ok' => false,
-                'error' => $e->getMessage(),
-            ];
-        }
-    }
-}
-
 // donor_notes.donor_id -> donors.id
 if (table_exists($pdo, 'donor_notes') && table_exists($pdo, 'donors')) {
     try {
@@ -301,6 +279,11 @@ $result = [
     ],
     'tables' => $tablesReport,
     'views' => $viewsReport,
+    'retired_requests' => [
+        'status' => $retiredFeatureStatus,
+        'artifacts' => $retiredReport,
+        'remediation' => 'If residuals are found, run remove_blood_requests_feature.php',
+    ],
     'integrity' => $integrityReport,
 ];
 
@@ -336,6 +319,35 @@ if ($format === 'json') {
  <body>
     <h1>System Diagnostics</h1>
     <div class="meta">Generated: <?= h($result['timestamp']) ?> | Driver: <?= h($driver) ?> | PHP: <?= h(PHP_VERSION) ?> | <a href="?format=json">JSON</a></div>
+
+    <div class="card">
+        <h2>Retired Feature: Blood Requests</h2>
+        <p>Status: <span class="<?= $result['retired_requests']['status'] === 'removed' ? 'ok' : 'warn' ?>">
+            <?= h($result['retired_requests']['status']) ?></span></p>
+        <table>
+            <thead><tr><th>Name</th><th>Type</th><th>Present</th></tr></thead>
+            <tbody>
+                <?php foreach ($result['retired_requests']['artifacts'] as $name => $info): ?>
+                    <tr>
+                        <td><code><?= h($name) ?></code></td>
+                        <td><?= h($info['type']) ?></td>
+                        <td>
+                            <?php if ($info['type'] === 'table'): ?>
+                                <span class="<?= $info['exists'] ? 'warn' : 'ok' ?>"><?= $info['exists'] ? 'yes' : 'no' ?></span>
+                            <?php else: ?>
+                                <span class="<?= $info['ok'] ? 'warn' : 'ok' ?>"><?= $info['ok'] ? 'yes' : 'no' ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php if ($result['retired_requests']['status'] !== 'removed'): ?>
+            <p class="warn">Residual request artifacts detected. Run <code>remove_blood_requests_feature.php</code> to clean up.</p>
+        <?php else: ?>
+            <p class="ok">No request-related tables or views detected.</p>
+        <?php endif; ?>
+    </div>
 
     <div class="card">
         <h2>Environment</h2>
