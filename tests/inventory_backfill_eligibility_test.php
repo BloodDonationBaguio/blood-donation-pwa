@@ -2,15 +2,19 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
+require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../includes/BloodInventoryManagerComplete.php';
 require_once __DIR__ . '/utils.php';
 
-t_section('Inventory Backfill Eligibility');
+t_section('Inventory Backfill Eligibility (Variant)');
 
 $complete = new BloodInventoryManagerComplete($pdo);
 
-$donorTable = 'donors_new';
-try { if ((int)$pdo->query("SELECT COUNT(*) FROM donors_new")->fetchColumn() > 0) { $donorTable = 'donors_new'; } } catch (Throwable $e) {}
+$donorTable = 'donors';
+try {
+    $countNew = (int)$pdo->query("SELECT COUNT(*) FROM donors_new")->fetchColumn();
+    if ($countNew >= 0) { $donorTable = 'donors_new'; }
+} catch (Throwable $e) {}
 
 $servedCond = ($donorTable === 'donors_new') ? "status IN ('served','completed')" : "status = 'served'";
 
