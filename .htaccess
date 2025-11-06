@@ -29,6 +29,17 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_URI} ^/debug_fingerprint_robust\.php$ [NC]
 RewriteRule ^ - [L]
 
+# Allow direct access to all test scripts in tests directories
+RewriteCond %{REQUEST_URI} ^/tests/ [NC]
+RewriteRule ^ - [L]
+RewriteCond %{REQUEST_URI} ^/blood-donation-pwa/tests/ [NC]
+RewriteRule ^ - [L]
+RewriteCond %{REQUEST_URI} ^/legacy-pwa-4/blood-donation-pwa/tests/ [NC]
+RewriteRule ^ - [L]
+
+# Allow direct access to diagnostics scripts under /scripts/diagnostics
+RewriteRule ^scripts/diagnostics/ - [L]
+
 # Allow direct access to admin subdirectory files (login, assets, etc.)
 RewriteCond %{REQUEST_URI} ^/blood-donation-pwa/admin/ [NC]
 RewriteRule ^ - [L]
