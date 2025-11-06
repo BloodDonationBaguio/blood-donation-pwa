@@ -27,6 +27,9 @@ require_once __DIR__ . '/inventory_backfill_eligibility_test.php';
 require_once __DIR__ . '/backfill_run_and_verify.php';
 require_once __DIR__ . '/pending_donors_schema_and_query.php';
 require_once __DIR__ . '/pending_donors_admin_integration.php';
+require_once __DIR__ . '/data_orphans_and_duplicates.php';
+require_once __DIR__ . '/blood_type_normalization.php';
+require_once __DIR__ . '/status_inventory_invariants.php';
 
 echo $t_output;
 
