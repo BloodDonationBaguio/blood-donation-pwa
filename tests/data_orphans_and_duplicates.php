@@ -7,8 +7,10 @@ require_once __DIR__ . '/utils.php';
 
 t_section('Data Integrity: Orphans & Duplicates');
 
-function hasTable($pdo, $table) {
-    try { $pdo->query("SELECT 1 FROM {$table} LIMIT 1"); return true; } catch (Throwable $e) { return false; }
+if (!function_exists('hasTable')) {
+    function hasTable($pdo, $table) {
+        try { $pdo->query("SELECT 1 FROM {$table} LIMIT 1"); return true; } catch (Throwable $e) { return false; }
+    }
 }
 
 // Detect donor table

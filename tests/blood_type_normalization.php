@@ -7,13 +7,17 @@ require_once __DIR__ . '/utils.php';
 
 t_section('Blood Type Normalization');
 
-function hasTable($pdo, $table) { try { $pdo->query("SELECT 1 FROM {$table} LIMIT 1"); return true; } catch (Throwable $e) { return false; } }
-function columnExists($pdo, $table, $column) {
-    try {
-        $q = $pdo->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?");
-        $q->execute([$table, $column]);
-        return ((int)$q->fetchColumn()) > 0;
-    } catch (Throwable $e) { return false; }
+if (!function_exists('hasTable')) {
+    function hasTable($pdo, $table) { try { $pdo->query("SELECT 1 FROM {$table} LIMIT 1"); return true; } catch (Throwable $e) { return false; } }
+}
+if (!function_exists('columnExists')) {
+    function columnExists($pdo, $table, $column) {
+        try {
+            $q = $pdo->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?");
+            $q->execute([$table, $column]);
+            return ((int)$q->fetchColumn()) > 0;
+        } catch (Throwable $e) { return false; }
+    }
 }
 
 function normalize_blood_type($val) {
