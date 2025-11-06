@@ -17,6 +17,40 @@ if (extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
 
 session_start();
 
+// Allow running test suite via query param when redirected to index.php by front-controller rules
+if (isset($_GET['__run_tests'])) {
+    // Require admin session to run tests from production
+    if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        header('HTTP/1.1 403 Forbidden');
+        echo 'Access denied. Please log in as admin first.';
+        exit;
+    }
+
+    if (!defined('TEST_MODE')) { define('TEST_MODE', true); }
+    $_SESSION['admin_logged_in'] = true;
+    $_SESSION['admin_username'] = $_SESSION['admin_username'] ?? 'admin';
+    $_SESSION['admin_id'] = $_SESSION['admin_id'] ?? 1;
+
+    $suite = isset($_GET['suite']) ? $_GET['suite'] : 'legacy';
+    $candidates = [
+        'legacy' => __DIR__ . '/legacy-pwa-4/blood-donation-pwa/tests/run_all_tests.php',
+        'pwa'    => __DIR__ . '/blood-donation-pwa/tests/run_all_tests.php',
+    ];
+    $path = isset($candidates[$suite]) ? $candidates[$suite] : $candidates['legacy'];
+    if (!file_exists($path)) {
+        header('HTTP/1.1 404 Not Found');
+        echo 'Test runner not found for suite: ' . htmlspecialchars($suite);
+        exit;
+    }
+
+    ob_start();
+    include $path;
+    $output = ob_get_clean();
+    header('Content-Type: text/plain; charset=utf-8');
+    echo $output;
+    exit;
+}
+
 // Production features
 require_once 'includes/ssl_config.php';
 require_once 'includes/local_ssl_config.php';
