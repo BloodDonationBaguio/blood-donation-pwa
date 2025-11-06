@@ -36,7 +36,8 @@ if (!function_exists('columnSet')) {
 // No need for tableExistsPortable here; we probe via COUNT(*)
 
 $tables = [];
-foreach (['donors_new','donors_new'] as $t) {
+// Probe available donor tables, prioritizing 'donors_new' then falling back to legacy 'donors'
+foreach (['donors_new','donors'] as $t) {
     // Probe by COUNT(*) for presence to avoid helper/driver quirks
     try {
         $pdo->query("SELECT COUNT(*) FROM {$t}")->fetchColumn();
@@ -47,7 +48,7 @@ foreach (['donors_new','donors_new'] as $t) {
 }
 
 if (empty($tables)) {
-    t_fail('Neither donors_new nor donors_new table exists in current database.');
+    t_fail('Neither donors_new nor donors table exists in current database.');
     t_result(0, 1, 0);
     return;
 }
