@@ -74,6 +74,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $weight, $height, $status, 
             $donorId
         ]);
+
+        // Automatically create a blood unit if status becomes served/completed
+        if (in_array(strtolower($status), ['served', 'completed'])) {
+            try {
+                // Avoid duplicate available units for this donor
+                $dupCheck = $pdo->prepare("SELECT COUNT(*) FROM blood_inventory WHERE donor_id = ? AND status = 'available'");
+                $dupCheck->execute([$donorId]);
+                $hasAvailable = (int)$dupCheck->fetchColumn() > 0;
+            } catch (Exception $e) {
+                // If table is missing or check fails, proceed optimistically
+                $hasAvailable = false;
+                error_log('admin_edit_donor: duplicate unit check failed - ' . $e->getMessage());
+            }
+
+            if (!$hasAvailable) {
+                try {
+                    require_once __DIR__ . '/blood-donation-pwa/includes/BloodInventoryManagerComplete.php';
+                    $inventoryManager = new BloodInventoryManagerComplete($pdo);
+
+                    $unitData = [
+                        'donor_id' => $donorId,
+                        'collection_date' => date('Y-m-d'),
+                        'collection_site' => 'Main Center',
+                        'storage_location' => 'Storage A'
+                    ];
+
+                    $createResult = $inventoryManager->addBloodUnit($unitData);
+                    if (!empty($createResult['success'])) {
+                        $success .= ($success ? ' ' : '') . 'Blood unit auto-created.';
+                    } else {
+                        error_log('admin_edit_donor: auto-create blood unit failed - ' . ($createResult['message'] ?? 'unknown error'));
+                    }
+                } catch (Exception $e) {
+                    error_log('admin_edit_donor: error auto-creating blood unit - ' . $e->getMessage());
+                }
+            }
+        }
         
         // Log the change
         $newData = json_encode([
