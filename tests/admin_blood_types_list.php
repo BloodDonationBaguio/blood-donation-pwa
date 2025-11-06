@@ -5,6 +5,18 @@ ini_set('display_errors', '1');
 
 require_once __DIR__ . '/utils.php';
 
+// Fallback: if $pdo is not set (direct access), include a DB config
+if (!isset($pdo) || !$pdo instanceof PDO) {
+    $dbCandidates = [
+        dirname(__DIR__) . '/db.php',
+        dirname(__DIR__) . '/db_production.php',
+        dirname(__DIR__) . '/blood-donation-pwa/db.php'
+    ];
+    foreach ($dbCandidates as $dbPath) {
+        if (file_exists($dbPath)) { require_once $dbPath; break; }
+    }
+}
+
 t_section('Admin Blood Types List Coverage');
 
 $passed = 0; $failed = 0; $skipped = 0;
