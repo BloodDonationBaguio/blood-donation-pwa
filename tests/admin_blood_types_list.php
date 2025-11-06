@@ -2,6 +2,19 @@
 // Admin Blood Types Coverage Test
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
+// Ensure we always render something even if a fatal occurs
+$__direct_access = (isset($_SERVER['SCRIPT_FILENAME']) && realpath($_SERVER['SCRIPT_FILENAME']) === __FILE__);
+register_shutdown_function(function() use ($__direct_access) {
+    if ($__direct_access) {
+        $safe = htmlspecialchars(($GLOBALS['t_output'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        if ($safe !== '') { echo "<pre>" . $safe . "</pre>"; }
+        $err = error_get_last();
+        if ($err && in_array($err['type'] ?? 0, [E_ERROR, E_PARSE, E_COMPILE_ERROR, E_CORE_ERROR, E_USER_ERROR])) {
+            $msg = sprintf("Fatal: %s in %s on line %d", $err['message'] ?? '', $err['file'] ?? '', (int)($err['line'] ?? 0));
+            echo "<pre>" . htmlspecialchars($msg, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "</pre>";
+        }
+    }
+});
 
 require_once __DIR__ . '/utils.php';
 
@@ -15,6 +28,8 @@ if (!isset($pdo) || !$pdo instanceof PDO) {
     foreach ($dbCandidates as $dbPath) {
         if (file_exists($dbPath)) { require_once $dbPath; break; }
     }
+    // Re-enable display errors in case included db config disables it
+    ini_set('display_errors', '1');
 }
 
 t_section('Admin Blood Types List Coverage');
