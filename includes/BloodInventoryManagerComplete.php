@@ -1122,17 +1122,18 @@ class BloodInventoryManagerComplete {
         try {
             // Helper to fetch eligible donors who lack an AVAILABLE unit from a given table
             $fetchMissing = function (string $table, int $limit) {
-                // Eligibility per table — qualify with donor alias to avoid ambiguous column errors
-                $eligibilityJoin = ($table === 'donors_new')
-                    ? "d.status IN ('served','completed')"
-                    : "d.status = 'served'";
+                // Eligibility per table — treat both 'served' and 'completed' as eligible (robust to case/spacing)
+                $eligibilityWhere = "LOWER(TRIM(d.status)) IN ('served','completed')";
 
-                // Join only on AVAILABLE units; donors with none will have bi.id IS NULL
+                // Robust missing detection using NOT EXISTS to avoid LEFT JOIN edge cases
                 $sql = "
                     SELECT d.id, d.first_name, d.last_name, d.blood_type
                     FROM {$table} d
-                    LEFT JOIN blood_inventory bi ON bi.donor_id = d.id
-                    WHERE {$eligibilityJoin} AND bi.id IS NULL
+                    WHERE {$eligibilityWhere}
+                      AND NOT EXISTS (
+                        SELECT 1 FROM blood_inventory bi
+                        WHERE bi.donor_id = d.id AND bi.status = 'available'
+                      )
                     ORDER BY d.id DESC
                     LIMIT ?
                 ";
