@@ -1,4 +1,19 @@
 <?php
+// Feature retired: Blood Requests — show message and exit immediately
+require_once __DIR__ . '/../includes/admin_auth.php';
+require_once __DIR__ . '/../includes/header.php';
+if (!isAdminLoggedIn()) {
+    header('Location: /admin_login.php');
+    exit();
+}
+echo '<div class="alert alert-info mt-4">'
+    . '<h4 class="alert-heading">Blood Requests Feature Removed</h4>'
+    . '<p>This system no longer handles blood requests. All related pages and data have been retired. Please use the donor and inventory modules instead.</p>'
+    . '<hr>'
+    . '<p class="mb-0">Return to the <a href="/admin.php">Admin Dashboard</a>.</p>'
+    . '</div>';
+require_once __DIR__ . '/../includes/footer.php';
+exit;
 // Check if we're viewing/editing a request
 $action = $_GET['action'] ?? 'list';
 $requestId = $_GET['id'] ?? 0;

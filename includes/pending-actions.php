@@ -1,4 +1,12 @@
 <?php
+// Blood Requests feature retired: immediately respond and exit to avoid DB operations
+header('Content-Type: application/json');
+http_response_code(410);
+echo json_encode([
+    'success' => false,
+    'message' => 'Blood Requests feature has been removed. No actions are available.',
+]);
+exit;
 // Enable error reporting
 error_reporting(E_ALL);
 ini_set('display_errors', 1);

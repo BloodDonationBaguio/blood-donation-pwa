@@ -111,7 +111,8 @@ if ($activeTab === 'add-donor'): ?>
                         </div>
                         <div class="card-body">
                             <?php
-                            $pendingRequests = $pdo->query("SELECT * FROM blood_requests WHERE status = 'pending' ORDER BY created_at DESC")->fetchAll();
+                            // Blood Requests feature retired — avoid querying non-existent tables
+                            $pendingRequests = [];
                             ?>
                             
                             <?php if (!empty($pendingRequests)): ?>
