@@ -19,17 +19,37 @@ $_SESSION['admin_id'] = $_SESSION['admin_id'] ?? 1;
 require_once dirname(__DIR__) . '/db.php';
 require_once __DIR__ . '/utils.php';
 
-require_once __DIR__ . '/inventory_manager_consistency.php';
-require_once __DIR__ . '/dashboard_summary_consistency.php';
-require_once __DIR__ . '/admin_modern_page_consistency.php';
-require_once __DIR__ . '/inventory_backfill_eligibility.php';
-require_once __DIR__ . '/inventory_backfill_eligibility_test.php';
-require_once __DIR__ . '/backfill_run_and_verify.php';
-require_once __DIR__ . '/pending_donors_schema_and_query.php';
-require_once __DIR__ . '/pending_donors_admin_integration.php';
-require_once __DIR__ . '/data_orphans_and_duplicates.php';
-require_once __DIR__ . '/blood_type_normalization.php';
-require_once __DIR__ . '/status_inventory_invariants.php';
+// Preferred order for core tests; any remaining files will be auto-included
+$preferred = [
+  'inventory_manager_consistency.php',
+  'dashboard_summary_consistency.php',
+  'admin_modern_page_consistency.php',
+  'inventory_backfill_eligibility.php',
+  'inventory_backfill_eligibility_test.php',
+  'backfill_run_and_verify.php',
+  'pending_donors_schema_and_query.php',
+  'pending_donors_admin_integration.php',
+  'data_orphans_and_duplicates.php',
+  'blood_type_normalization.php',
+  'status_inventory_invariants.php',
+  'test_donor_approval.php',
+  'test_unknown_blood_type.php',
+];
+
+foreach ($preferred as $file) {
+  $path = __DIR__ . '/' . $file;
+  if (file_exists($path)) { require_once $path; }
+}
+
+// Auto-include any other tests in this directory, excluding self and utils
+$excluded = ['run_all_tests.php', 'utils.php'];
+$already = array_flip($preferred);
+foreach (glob(__DIR__ . '/*.php') as $path) {
+  $name = basename($path);
+  if (in_array($name, $excluded)) { continue; }
+  if (isset($already[$name])) { continue; }
+  require_once $path;
+}
 
 echo $t_output;
 
