@@ -10,18 +10,20 @@ t_section('Pending Donors Unknown Blood Type');
 
 $pendingDonors = [];
 
-function columnExists($pdo, $table, $column) {
-    try {
-        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-        if ($driver === 'sqlite') {
-            $stmt = $pdo->query("PRAGMA table_info(" . $table . ")");
-            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN, 1);
-            return in_array($column, $columns, true);
-        }
-        $stmt = $pdo->prepare("SELECT 1 FROM information_schema.columns WHERE table_name = ? AND column_name = ? LIMIT 1");
-        $stmt->execute([$table, $column]);
-        return (bool)$stmt->fetchColumn();
-    } catch (Throwable $e) { return false; }
+if (!function_exists('columnExists')) {
+    function columnExists($pdo, $table, $column) {
+        try {
+            $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+            if ($driver === 'sqlite') {
+                $stmt = $pdo->query("PRAGMA table_info(" . $table . ")");
+                $columns = $stmt->fetchAll(PDO::FETCH_COLUMN, 1);
+                return in_array($column, $columns, true);
+            }
+            $stmt = $pdo->prepare("SELECT 1 FROM information_schema.columns WHERE table_name = ? AND column_name = ? LIMIT 1");
+            $stmt->execute([$table, $column]);
+            return (bool)$stmt->fetchColumn();
+        } catch (Throwable $e) { return false; }
+    }
 }
 
 $hasDonorsNew = false;
