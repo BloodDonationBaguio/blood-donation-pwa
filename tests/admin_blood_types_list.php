@@ -90,21 +90,30 @@ function getTableColumns(PDO $pdo, $table) {
     return array_values(array_filter($cols));
 }
 
-function ensureTestDonor(PDO $pdo) {
-    // Try existing donor
-    try {
-        $stmt = $pdo->query("SELECT id FROM donors_new ORDER BY id LIMIT 1");
-        $id = $stmt->fetchColumn();
-        if ($id) { return (int)$id; }
-    } catch (Throwable $e) {}
+function pickDonorTable(PDO $pdo) {
+    // Prefer donors_new, fallback to donors
+    if (tableExists($pdo, 'donors_new')) { return 'donors_new'; }
+    if (tableExists($pdo, 'donors')) { return 'donors'; }
+    return null;
+}
 
-    if (!tableExists($pdo, 'donors_new')) { return null; }
+function ensureTestDonor(PDO $pdo) {
+    $table = pickDonorTable($pdo);
+    if ($table === null) { return null; }
+
+    // Try existing donor by common PK names
+    foreach (['id','donor_id'] as $pk) {
+        try {
+            $stmt = $pdo->query("SELECT {$pk} FROM {$table} ORDER BY {$pk} LIMIT 1");
+            $id = $stmt->fetchColumn();
+            if ($id) { return (int)$id; }
+        } catch (Throwable $e) {}
+    }
 
     // Create a minimal test donor
     $now = date('Y-m-d H:i:s');
-    $fields = getTableColumns($pdo, 'donors_new');
+    $fields = getTableColumns($pdo, $table);
     $columns = [];
-    $values = [];
     $params = [];
 
     $defaults = [
@@ -126,14 +135,38 @@ function ensureTestDonor(PDO $pdo) {
 
     if (!$columns) { return null; }
 
-    $sql = "INSERT INTO donors_new (" . implode(',', $columns) . ") VALUES (" . rtrim(str_repeat('?,', count($columns)), ',') . ")";
+    $placeholders = rtrim(str_repeat('?,', count($columns)), ',');
+    $driver = dbDriver($pdo);
+    $pk = in_array('id', $fields, true) ? 'id' : (in_array('donor_id', $fields, true) ? 'donor_id' : null);
+
     try {
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        return (int)$pdo->lastInsertId();
+        if ($driver === 'pgsql' && $pk) {
+            $sql = "INSERT INTO {$table} (" . implode(',', $columns) . ") VALUES ({$placeholders}) RETURNING {$pk}";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $newId = $stmt->fetchColumn();
+            if ($newId) { return (int)$newId; }
+        } else {
+            $sql = "INSERT INTO {$table} (" . implode(',', $columns) . ") VALUES ({$placeholders})";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $newId = (int)$pdo->lastInsertId();
+            if ($newId) { return $newId; }
+        }
     } catch (Throwable $e) {
-        return null;
+        // fall through to a final attempt
     }
+
+    // Final attempt: read the most recent row
+    foreach (['id','donor_id'] as $pk2) {
+        if (!in_array($pk2, $fields, true)) { continue; }
+        try {
+            $stmt = $pdo->query("SELECT {$pk2} FROM {$table} ORDER BY {$pk2} DESC LIMIT 1");
+            $id = $stmt->fetchColumn();
+            if ($id) { return (int)$id; }
+        } catch (Throwable $e) {}
+    }
+    return null;
 }
 
 function ensureUnitForType(PDO $pdo, $donorId, $bloodType, $columnsCache) {
