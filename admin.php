@@ -8,14 +8,16 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Secure session
-session_start([
-    'cookie_httponly' => true,
-    'cookie_secure' => false, // Set to false for HTTP, true for HTTPS
-    'use_strict_mode' => true,
-    'cookie_lifetime' => 3600, // 1 hour
-    'gc_maxlifetime' => 3600   // 1 hour
-]);
+// Secure session (guard duplicate starts to avoid notices in tests or includes)
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start([
+        'cookie_httponly' => true,
+        'cookie_secure' => false, // Set to false for HTTP, true for HTTPS
+        'use_strict_mode' => true,
+        'cookie_lifetime' => 3600, // 1 hour
+        'gc_maxlifetime' => 3600   // 1 hour
+    ]);
+}
 
 // Security headers
 header('X-Content-Type-Options: nosniff');

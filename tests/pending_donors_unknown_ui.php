@@ -18,6 +18,12 @@ $_SESSION['admin_last_activity'] = $_SESSION['admin_last_activity'] ?? time();
 
 require_once __DIR__ . '/utils.php';
 
+// Ensure we always print a minimal header early so the browser never shows blank
+if (php_sapi_name() !== 'cli') {
+    echo "<meta charset=\"utf-8\"><title>Pending Donors Unknown UI Test</title>\n";
+    echo "<pre>Pending Donors UI shows Unknown for blank blood_type</pre>\n";
+}
+
 // Prefer using $pdo provided by tests/run_all_tests.php; fall back to project db.php
 if (!isset($pdo) || !$pdo instanceof PDO) {
     $dbCandidates = [
@@ -32,6 +38,9 @@ if (!isset($pdo) || !$pdo instanceof PDO) {
 }
 
 t_section('Pending Donors UI shows Unknown for blank blood_type');
+
+// Predefine captured HTML so we can safely echo it conditionally later
+$html = '';
 
 if (!isset($pdo) || !$pdo instanceof PDO) {
     t_assert(false, 'Database connection (PDO) is available');
@@ -183,6 +192,7 @@ $id = ensurePendingUnknownDonor($pdo);
 if ($id === null) {
     t_skip('Could not ensure pending donor with blank blood_type (table or schema mismatch).');
     t_result(0, 0, 1);
+    // Do not return before printing; the early header above ensures non-blank output
     return;
 }
 
@@ -190,8 +200,16 @@ if ($id === null) {
 $_GET['tab'] = 'pending-donors';
 unset($_GET['donor_search']);
 ob_start();
-include_once dirname(__DIR__) . '/admin.php';
-$html = ob_get_clean();
+try {
+    include_once dirname(__DIR__) . '/admin.php';
+    $html = ob_get_clean();
+} catch (Throwable $e) {
+    // Surface exception details to the browser to avoid a silent blank page
+    $err = htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    $trace = htmlspecialchars($e->getTraceAsString(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    ob_end_clean();
+    $html = "<pre>Exception during admin render: {$err}\n{$trace}</pre>";
+}
 
 $renderOk = t_assert(strlen(trim($html)) > 0, 'Admin Pending Donors HTML rendered');
 
@@ -231,9 +249,7 @@ t_result($renderOk ? 2 : 1, ($renderOk ? 0 : 1) + ($showsUnknown ? 0 : 1), 0);
 
 // After assertions, print a small header so the page isn’t blank in browser
 if (php_sapi_name() !== 'cli') {
-    echo "<meta charset=\"utf-8\"><title>Pending Donors Unknown UI Test</title>\n";
-    echo "<pre>Pending Donors UI shows Unknown for blank blood_type</pre>\n";
-    echo $html; // show captured admin output if any
+    if (strlen(trim($html)) > 0) { echo $html; }
 }
 
 // Flush any buffered output at end
