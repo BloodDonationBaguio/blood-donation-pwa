@@ -163,8 +163,8 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS blood_requests (
         id SERIAL PRIMARY KEY,
         patient_name VARCHAR(100) NOT NULL,
-        blood_type VARCHAR(5),
-        blood_type_needed VARCHAR(5),
+        blood_type VARCHAR(10),
+        blood_type_needed VARCHAR(10),
         units_required INT DEFAULT 1,
         hospital_name VARCHAR(255),
         hospital_address TEXT,
