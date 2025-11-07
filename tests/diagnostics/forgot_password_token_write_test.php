@@ -18,9 +18,6 @@ $result = [
 ];
 
 require_once __DIR__ . '/../../includes/db.php';
-if (file_exists(__DIR__ . '/../../includes/mail.php')) {
-    require_once __DIR__ . '/../../includes/mail.php';
-}
 
 $email = isset($_GET['email']) ? trim($_GET['email']) : '';
 $dryRun = isset($_GET['dry_run']) ? filter_var($_GET['dry_run'], FILTER_VALIDATE_BOOLEAN) : true; // default: do not update
@@ -56,12 +53,17 @@ try {
         if (!in_array('reset_token_expiry', $columns, true)) {
             $pdo->exec($driver === 'mysql' ? 'ALTER TABLE admin_users ADD COLUMN reset_token_expiry DATETIME NULL' : 'ALTER TABLE admin_users ADD COLUMN reset_token_expiry TEXT');
         }
+        if (!in_array('is_active', $columns, true)) {
+            if ($driver === 'mysql') { $pdo->exec('ALTER TABLE admin_users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1'); }
+            elseif ($driver === 'pgsql') { $pdo->exec('ALTER TABLE admin_users ADD COLUMN is_active INT NOT NULL DEFAULT 1'); }
+            else { $pdo->exec('ALTER TABLE admin_users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1'); }
+        }
     } catch (Exception $schemaEx) {
         // Proceed; we will still try update to surface errors
     }
 
     // Lookup admin by email
-    $stmt = $pdo->prepare('SELECT id, username, email, is_active FROM admin_users WHERE email = ?');
+    $stmt = $pdo->prepare('SELECT * FROM admin_users WHERE email = ?');
     $stmt->execute([$email]);
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$admin) { throw new Exception('Admin not found for that email'); }
@@ -85,11 +87,17 @@ try {
     }
 
     // Optional mail send
-    if ($doSend && function_exists('send_confirmation_email')) {
+    if ($doSend) {
+        // Bypass direct access guard in mail_helper by defining INCLUDES_PATH
+        if (!defined('INCLUDES_PATH')) { define('INCLUDES_PATH', __DIR__ . '/../../includes'); }
+        if (file_exists(__DIR__ . '/../../includes/mail.php')) { require_once __DIR__ . '/../../includes/mail.php'; }
+        
         $result['mail_attempted'] = true;
         $subject = 'Admin Password Reset';
         $body = '<p>You requested a password reset.</p><p>Reset Link: <a href="' . htmlspecialchars($result['reset_link']) . '">Reset Password</a></p>';
-        $result['mail_sent'] = (bool)send_confirmation_email($email, $subject, $body);
+        if (function_exists('send_confirmation_email')) {
+            $result['mail_sent'] = (bool)send_confirmation_email($email, $subject, $body);
+        }
     }
 
     $result['ok'] = true;

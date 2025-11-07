@@ -29,6 +29,41 @@ if (!empty($token)) {
         if (!isset($pdo)) {
             throw new Exception('Database connection not initialized');
         }
+
+        // Ensure columns used in queries exist before referencing them
+        try {
+            $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+            $columns = [];
+            if (function_exists('getTableStructure')) {
+                try {
+                    $struct = getTableStructure($pdo, 'admin_users');
+                    foreach ($struct as $col) {
+                        if (isset($col['Field'])) { $columns[] = strtolower($col['Field']); }
+                        elseif (isset($col['column_name'])) { $columns[] = strtolower($col['column_name']); }
+                        elseif (isset($col['name'])) { $columns[] = strtolower($col['name']); }
+                    }
+                } catch (Exception $ignore) { /* noop */ }
+            }
+            if (!in_array('reset_token', $columns, true)) {
+                if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token VARCHAR(255) NULL"); }
+                else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token TEXT"); }
+            }
+            if (!in_array('reset_token_expiry', $columns, true)) {
+                if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry DATETIME NULL"); }
+                else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry TEXT"); }
+            }
+            if (!in_array('password_hash', $columns, true)) {
+                if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash VARCHAR(255) NULL"); }
+                else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash TEXT"); }
+            }
+            if (!in_array('is_active', $columns, true)) {
+                if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1"); }
+                elseif ($driver === 'pgsql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN is_active INT NOT NULL DEFAULT 1"); }
+                else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1"); }
+            }
+        } catch (Exception $schemaEx) {
+            error_log("admin_users schema ensure (reset) failed: " . $schemaEx->getMessage());
+        }
         
         // Check if token is valid and not expired
         $stmt = $pdo->prepare("SELECT id, username, email, full_name, reset_token, reset_token_expiry FROM admin_users WHERE reset_token = ? AND is_active = 1");

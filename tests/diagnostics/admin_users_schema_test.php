@@ -79,7 +79,9 @@ try {
 
     // Sample rows
     try {
-        $stmt = $pdo->query('SELECT id, username, email, is_active FROM admin_users ORDER BY id LIMIT 5');
+        $selectCols = 'id, username, email';
+        if (in_array('is_active', $columns, true)) { $selectCols .= ', is_active'; }
+        $stmt = $pdo->query('SELECT ' . $selectCols . ' FROM admin_users ORDER BY id LIMIT 5');
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         safeEcho('sample_rows', $rows);
     } catch (Exception $e) {
