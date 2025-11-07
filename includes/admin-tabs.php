@@ -1,6 +1,6 @@
 <?php
 // Get variables from global scope
-$activeTab = $GLOBALS['activeTab'] ?? 'dashboard';
+$activeTab = $GLOBALS['activeTab'] ?? 'blood-requests';
 $donors = $GLOBALS['donors'] ?? [];
 $pendingDonors = $GLOBALS['pendingDonors'] ?? [];
 $requests = $GLOBALS['requests'] ?? [];
@@ -8,7 +8,7 @@ $requests = $GLOBALS['requests'] ?? [];
 // Debug: Check if activeTab is defined
 if (!isset($activeTab)) {
     echo '<div class="alert alert-danger">Error: $activeTab variable is not defined!</div>';
-    $activeTab = 'dashboard'; // Fallback
+    $activeTab = 'blood-requests'; // Fallback
 }
 
 // Debug: Show current active tab
@@ -105,7 +105,8 @@ if ($activeTab === 'add-donor'): ?>
                         </div>
                         <div class="card-body">
                             <?php
-                            $pendingRequests = $pdo->query("SELECT * FROM blood_requests WHERE status = 'pending' ORDER BY created_at DESC")->fetchAll();
+                            // Blood Requests feature retired — avoid querying non-existent tables
+                            $pendingRequests = [];
                             ?>
                             
                             <?php if (!empty($pendingRequests)): ?>
@@ -263,15 +264,28 @@ if ($activeTab === 'add-donor'): ?>
                     </div>
                     <div class="card-body">
                         <?php
-                        $donorStats = $pdo->query("
-                            SELECT 
-                                COUNT(*) as total,
-                                COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
-                                COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved,
-                                COUNT(CASE WHEN status = 'served' THEN 1 END) as served,
-                                COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected
-                            FROM donors_new
-                        ")->fetch();
+                        // Revert to original donors_new-based aggregation to maintain previous behavior
+                        try {
+                            $sql = "
+                                SELECT 
+                                    COUNT(*) as total,
+                                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                                    SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
+                                    SUM(CASE WHEN status IN ('served','completed') THEN 1 ELSE 0 END) as served,
+                                    SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+                                FROM donors_new
+                            ";
+                            $donorStats = $pdo->query($sql)->fetch();
+                        } catch (Throwable $e) {
+                            error_log('Error computing donorStats: ' . $e->getMessage());
+                            $donorStats = [
+                                'total' => 0,
+                                'pending' => 0,
+                                'approved' => 0,
+                                'served' => 0,
+                                'rejected' => 0,
+                            ];
+                        }
                         ?>
                         <div class="row text-center">
                             <div class="col-4">
@@ -298,13 +312,20 @@ if ($activeTab === 'add-donor'): ?>
                     </div>
                     <div class="card-body">
                         <?php
-                        $bloodTypeStats = $pdo->query("
-                            SELECT blood_type, COUNT(*) as count 
-                            FROM donors_new 
-                            WHERE status = 'served' 
-                            GROUP BY blood_type 
-                            ORDER BY count DESC
-                        ")->fetchAll();
+                        // Revert to original donors_new-based blood type distribution
+                        try {
+                            $sql = "
+                                SELECT blood_type, COUNT(*) as count 
+                                FROM donors_new
+                                WHERE status IN ('served','completed')
+                                GROUP BY blood_type 
+                                ORDER BY count DESC
+                            ";
+                            $bloodTypeStats = $pdo->query($sql)->fetchAll();
+                        } catch (Throwable $e) {
+                            error_log('Error computing bloodTypeStats: ' . $e->getMessage());
+                            $bloodTypeStats = [];
+                        }
                         ?>
                         <div class="table-responsive">
                             <table class="table table-sm">
@@ -1419,6 +1440,8 @@ if (selectAllElement) {
 let currentRejectId = null;
 function showRejectModal(id, name) {
     currentRejectId = id;
+    // Graceful fallback when name is missing
+    name = (name && String(name).trim()) ? name : 'this donor';
     const rejectDonorNameElement = document.getElementById('rejectDonorName');
     if (rejectDonorNameElement) {
         rejectDonorNameElement.textContent = name;
@@ -1470,6 +1493,8 @@ function confirmReject() {
 let currentUnservedId = null;
 function showUnservedModal(id, name) {
     currentUnservedId = id;
+    // Graceful fallback when name is missing
+    name = (name && String(name).trim()) ? name : 'this donor';
     const unservedDonorNameElement = document.getElementById('unservedDonorName');
     if (unservedDonorNameElement) {
         unservedDonorNameElement.textContent = name;
@@ -1621,6 +1646,8 @@ function updateMatchStatus(matchId, status) {
 let currentDeferRequestId = null;
 function showDeferModal(id, name) {
     currentDeferRequestId = id;
+    // Graceful fallback when name is missing
+    name = (name && String(name).trim()) ? name : 'this request';
     const deferRequestNameElement = document.getElementById('deferRequestName');
     if (deferRequestNameElement) {
         deferRequestNameElement.textContent = name;
@@ -1646,6 +1673,8 @@ function confirmDefer() {
 let currentServedRequestId = null;
 function showServedModal(id, name) {
     currentServedRequestId = id;
+    // Graceful fallback when name is missing
+    name = (name && String(name).trim()) ? name : 'this request';
     const servedRequestNameElement = document.getElementById('servedRequestName');
     if (servedRequestNameElement) {
         servedRequestNameElement.textContent = name;
@@ -1664,6 +1693,8 @@ function confirmServed() {
 let currentUnservedRequestId = null;
 function showUnservedRequestModal(id, name) {
     currentUnservedRequestId = id;
+    // Graceful fallback when name is missing
+    name = (name && String(name).trim()) ? name : 'this request';
     const unservedRequestNameElement = document.getElementById('unservedRequestName');
     if (unservedRequestNameElement) {
         unservedRequestNameElement.textContent = name;
