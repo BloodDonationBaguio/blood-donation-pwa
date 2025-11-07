@@ -25,8 +25,8 @@ session_destroy();
 
 // Redirect based on user type
 if ($isAdminLogout) {
-    // Redirect admin to admin login page
-    header('Location: /admin_login.php?logout=success');
+    // Redirect admin to canonical admin login page
+    header('Location: /admin-login.php?logout=success');
 } else {
     // Redirect regular user to homepage
     header('Location: /index.php?logout=success');

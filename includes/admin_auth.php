@@ -26,7 +26,7 @@ function requireAdminLogin() {
         if (basename($_SERVER['REQUEST_URI']) !== 'admin_login.php') {
             $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
         }
-        header('Location: /admin_login.php');
+        header('Location: /admin-login.php');
         exit();
     }
 }
@@ -139,7 +139,7 @@ function checkAdminSessionTimeout() {
     if (isset($_SESSION['admin_last_activity']) && (time() - $_SESSION['admin_last_activity']) > $timeout) {
         // Last request was more than 30 minutes ago
         adminLogout();
-        header('Location: /admin_login.php?timeout=1');
+        header('Location: /admin-login.php?timeout=1');
         exit();
     }
     
