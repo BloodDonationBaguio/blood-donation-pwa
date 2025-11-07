@@ -42,6 +42,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if (!$admin) {
                 $error = "No admin account found with that email address.";
             } else {
+                // Ensure required columns exist to support password reset
+                try {
+                    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+                    // Get current columns
+                    $columns = [];
+                    if (function_exists('getTableStructure')) {
+                        try {
+                            $struct = getTableStructure($pdo, 'admin_users');
+                            foreach ($struct as $col) {
+                                if (isset($col['Field'])) { $columns[] = strtolower($col['Field']); } // MySQL DESCRIBE
+                                elseif (isset($col['name'])) { $columns[] = strtolower($col['name']); } // SQLite PRAGMA
+                            }
+                        } catch (Exception $ignore) { /* noop */ }
+                    }
+                    $hasResetToken = in_array('reset_token', $columns, true);
+                    $hasResetExpiry = in_array('reset_token_expiry', $columns, true);
+                    $hasPasswordHash = in_array('password_hash', $columns, true);
+
+                    if (!$hasResetToken) {
+                        if ($driver === 'mysql') {
+                            $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token VARCHAR(255) NULL");
+                        } else {
+                            $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token TEXT");
+                        }
+                    }
+                    if (!$hasResetExpiry) {
+                        if ($driver === 'mysql') {
+                            $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry DATETIME NULL");
+                        } else {
+                            $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry TEXT");
+                        }
+                    }
+                    if (!$hasPasswordHash) {
+                        if ($driver === 'mysql') {
+                            $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash VARCHAR(255) NULL");
+                        } else {
+                            $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash TEXT");
+                        }
+                    }
+                } catch (Exception $schemaEx) {
+                    error_log("admin_users schema ensure failed: " . $schemaEx->getMessage());
+                }
+
                 // Generate reset token
                 $resetToken = bin2hex(random_bytes(32));
                 $expiryTime = date('Y-m-d H:i:s', strtotime('+1 hour'));

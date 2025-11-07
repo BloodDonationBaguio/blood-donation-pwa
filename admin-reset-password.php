@@ -61,11 +61,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $error = "New password must be at least 8 characters long.";
     } else {
         try {
-            // Update password and clear reset token
+            // Ensure columns exist for compatibility
+            try {
+                $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+                $columns = [];
+                if (function_exists('getTableStructure')) {
+                    try {
+                        $struct = getTableStructure($pdo, 'admin_users');
+                        foreach ($struct as $col) {
+                            if (isset($col['Field'])) { $columns[] = strtolower($col['Field']); }
+                            elseif (isset($col['name'])) { $columns[] = strtolower($col['name']); }
+                        }
+                    } catch (Exception $ignore) { /* noop */ }
+                }
+                if (!in_array('reset_token', $columns, true)) {
+                    if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token VARCHAR(255) NULL"); }
+                    else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token TEXT"); }
+                }
+                if (!in_array('reset_token_expiry', $columns, true)) {
+                    if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry DATETIME NULL"); }
+                    else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry TEXT"); }
+                }
+                if (!in_array('password_hash', $columns, true)) {
+                    if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash VARCHAR(255) NULL"); }
+                    else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash TEXT"); }
+                }
+            } catch (Exception $schemaEx) {
+                error_log("admin_users schema ensure (reset) failed: " . $schemaEx->getMessage());
+            }
+
+            // Update password in both legacy and new columns; clear reset token
             $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
-$updateStmt = $pdo->prepare("UPDATE admin_users SET password_hash = ?, password = '', reset_token = NULL, reset_token_expiry = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+            $updateStmt = $pdo->prepare("UPDATE admin_users SET password = ?, password_hash = ?, reset_token = NULL, reset_token_expiry = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
             
-            if ($updateStmt->execute([$newPasswordHash, $adminInfo['id']])) {
+            if ($updateStmt->execute([$newPasswordHash, $newPasswordHash, $adminInfo['id']])) {
                 $success = "Password has been reset successfully! You can now login with your new password.";
                 $validToken = false; // Hide the form
                 error_log("Password reset successful for admin: " . $adminInfo['username']);
