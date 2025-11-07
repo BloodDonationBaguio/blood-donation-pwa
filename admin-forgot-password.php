@@ -11,6 +11,50 @@ require_once __DIR__ . '/includes/db.php';
 // Start session
 session_start();
 
+// Re-enable error display after DB include (production DB bootstrap turns it off)
+// This helps diagnose the current white-page issue safely.
+ini_set('display_errors', 1);
+
+// Lightweight diagnostics: visit this page with ?diag=1 to see runtime status
+if (isset($_GET['diag']) && $_GET['diag'] == '1') {
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Admin Forgot Password Diagnostics\n";
+    echo "PHP version: " . phpversion() . "\n";
+    try {
+        if (!isset($pdo)) {
+            echo "PDO: NOT INITIALIZED\n";
+        } else {
+            echo "PDO: initialized\n";
+            $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+            echo "Driver: " . $driver . "\n";
+            // Basic connectivity check
+            try {
+                $pdo->query('SELECT 1');
+                echo "Connectivity: OK (SELECT 1)\n";
+            } catch (Exception $exSel) {
+                echo "Connectivity error: " . $exSel->getMessage() . "\n";
+            }
+            // Table existence and row count
+            try {
+                $exists = function_exists('tableExists') ? tableExists($pdo, 'admin_users') : false;
+                echo "admin_users exists: " . ($exists ? 'YES' : 'NO') . "\n";
+                if ($exists) {
+                    $c = $pdo->query('SELECT COUNT(*) FROM admin_users')->fetchColumn();
+                    echo "admin_users row count: " . (string)$c . "\n";
+                    $one = $pdo->query('SELECT id, username, email, is_active FROM admin_users LIMIT 1')->fetch();
+                    echo "sample row: " . json_encode($one) . "\n";
+                }
+            } catch (Exception $exTbl) {
+                echo "admin_users check error: " . $exTbl->getMessage() . "\n";
+            }
+        }
+    } catch (Exception $ex) {
+        echo "Diagnostics exception: " . $ex->getMessage() . "\n";
+    }
+    echo "\nTip: You can also view logs at tests/diagnostics/log_tail.php?lines=300\n";
+    exit;
+}
+
 // Check if already logged in
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
     header('Location: admin.php');
@@ -230,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <?= htmlspecialchars($success) ?>
                 </div>
                 <div class="text-center mt-3">
-                    <a href="admin_login.php" class="back-link">
+                    <a href="/admin-login.php" class="back-link">
                         <i class="fas fa-arrow-left me-2"></i>Back to Login
                     </a>
                 </div>
@@ -257,7 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </form>
                 
                 <div class="text-center mt-4">
-                    <a href="admin_login.php" class="back-link">
+                    <a href="/admin-login.php" class="back-link">
                         <i class="fas fa-arrow-left me-2"></i>Back to Login
                     </a>
                 </div>
