@@ -26,8 +26,12 @@ foreach (array_keys($tables) as $t) {
         if ($driver === 'sqlite') {
             $stmt = $pdo->query("PRAGMA table_info({$t})");
             foreach ($stmt->fetchAll() as $row) { $cols[] = $row['name']; }
+        } elseif ($driver === 'pgsql') {
+            $stmt = $pdo->prepare("SELECT column_name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = ? ORDER BY ordinal_position");
+            $stmt->execute([$t]);
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) { $cols[] = $row['column_name']; }
         } else {
-            // MySQL/MariaDB fallback
+            // MySQL/MariaDB
             $stmt = $pdo->query("DESCRIBE {$t}");
             foreach ($stmt->fetchAll() as $row) { $cols[] = $row['Field'] ?? $row['COLUMN_NAME'] ?? ''; }
         }
@@ -46,6 +50,10 @@ foreach (array_keys($tables) as $t) {
         if ($driver === 'sqlite') {
             $stmt = $pdo->query("PRAGMA table_info({$t})");
             foreach ($stmt->fetchAll() as $row) { $cols[strtolower($row['name'])] = true; }
+        } elseif ($driver === 'pgsql') {
+            $stmt = $pdo->prepare("SELECT column_name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = ?");
+            $stmt->execute([$t]);
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) { $name = strtolower($row['column_name'] ?? ''); if ($name) $cols[$name] = true; }
         } else {
             $stmt = $pdo->query("DESCRIBE {$t}");
             foreach ($stmt->fetchAll() as $row) { $name = strtolower($row['Field'] ?? $row['COLUMN_NAME'] ?? ''); if ($name) $cols[$name] = true; }

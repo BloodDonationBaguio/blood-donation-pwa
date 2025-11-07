@@ -22,8 +22,9 @@ function sendDonorMessage($donorId, $messageType, $subject, $message, $adminId =
     global $pdo;
     
     try {
-        // Get donor information
-        $stmt = $pdo->prepare("SELECT * FROM donors_new WHERE id = ?");
+        // Get donor information (support deployments without donors_new)
+        $donorsTable = (function_exists('tableExists') && isset($pdo) && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+        $stmt = $pdo->prepare("SELECT * FROM " . $donorsTable . " WHERE id = ?");
         $stmt->execute([$donorId]);
         $donor = $stmt->fetch(PDO::FETCH_ASSOC);
         

@@ -14,6 +14,13 @@ if (!isset($activeTab)) {
 // Debug: Show current active tab
 echo "<!-- Debug: Active tab is: $activeTab -->";
 
+// Determine active donors table (prefer donors_new if available)
+// Uses tableExists helper from db.php; falls back to legacy donors
+try {
+    if (!isset($pdo)) { require_once __DIR__ . '/../db.php'; }
+} catch (Throwable $e) { /* ignore */ }
+$donorsTable = (function_exists('tableExists') && isset($pdo) && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+
 // Helper: Normalize blood type for consistent display
 if (!function_exists('fmtBloodType')) {
     function fmtBloodType($bt) {
@@ -298,9 +305,9 @@ if ($activeTab === 'add-donor'): ?>
                                 COUNT(*) as total,
                                 COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
                                 COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved,
-                                COUNT(CASE WHEN status = 'served' THEN 1 END) as served,
+                                COUNT(CASE WHEN status IN ('served','completed') THEN 1 END) as served,
                                 COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected
-                            FROM donors_new
+                            FROM {$donorsTable}
                         ")->fetch();
                         ?>
                         <div class="row text-center">
@@ -330,8 +337,8 @@ if ($activeTab === 'add-donor'): ?>
                         <?php
                         $bloodTypeStats = $pdo->query("
                             SELECT blood_type, COUNT(*) as count 
-                            FROM donors_new 
-                            WHERE status = 'served' 
+                            FROM {$donorsTable} 
+                            WHERE status IN ('served','completed') 
                             GROUP BY blood_type 
                             ORDER BY count DESC
                         ")->fetchAll();
@@ -633,17 +640,26 @@ require_once __DIR__ . '/admin_actions.php';
 
 // Handle bulk actions
 if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
+    // Resolve donor table dynamically (prefer donors_new if it exists)
+    $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+
     $action = $_POST['bulk_action'];
     $selectedIds = $_POST['selected_donors'];
+    if (!is_array($selectedIds)) { $selectedIds = [$selectedIds]; }
+    $selectedIds = array_values(array_filter($selectedIds, fn($v) => $v !== null && $v !== ''));
+    if (count($selectedIds) === 0) {
+        header('Location: ?tab=pending-donors&error=No donors selected.');
+        exit();
+    }
     
     if ($action === 'approve') {
-        $stmt = $pdo->prepare('UPDATE donors_new SET status = "approved" WHERE id IN (' . str_repeat('?,', count($selectedIds) - 1) . '?)');
+        $stmt = $pdo->prepare('UPDATE ' . $donorsTable . ' SET status = \'approved\' WHERE id IN (' . str_repeat('?,', count($selectedIds) - 1) . '?)');
         $stmt->execute($selectedIds);
         header('Location: ?tab=pending-donors&success=Bulk approval completed.');
         exit();
     } elseif ($action === 'reject') {
         $reason = $_POST['rejection_reason'] ?? 'Bulk rejection';
-        $stmt = $pdo->prepare('UPDATE donors_new SET status = "rejected", rejection_reason = ? WHERE id IN (' . str_repeat('?,', count($selectedIds) - 1) . '?)');
+        $stmt = $pdo->prepare('UPDATE ' . $donorsTable . ' SET status = \'rejected\', rejection_reason = ? WHERE id IN (' . str_repeat('?,', count($selectedIds) - 1) . '?)');
         $stmt->execute(array_merge([$reason], $selectedIds));
         header('Location: ?tab=pending-donors&success=Bulk rejection completed.');
         exit();
@@ -945,7 +961,7 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
 <?php if ($activeTab === 'edit-donor'): 
     $donorId = $_GET['id'] ?? 0;
     if ($donorId) {
-        $stmt = $pdo->prepare('SELECT * FROM donors_new WHERE id = ?');
+        $stmt = $pdo->prepare('SELECT * FROM ' . $donorsTable . ' WHERE id = ?');
         $stmt->execute([$donorId]);
         $editDonor = $stmt->fetch();
     }

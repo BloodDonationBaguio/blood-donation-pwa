@@ -1,0 +1,680 @@
+<meta charset="utf-8"><title>Admin Pending Donors Render Test</title>
+<pre>Admin Pending Donors tab renders non-blank HTML</pre>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Blood Donation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #dc3545;
+            --secondary-color: #f8d7da;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+        }
+        body { 
+            background: #f5f5f5; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .sidebar { 
+            min-height: 100vh; 
+            background: var(--dark-color);
+            color: white;
+        }
+        .sidebar .nav-link { 
+            color: rgba(255,255,255,.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin: 0.25rem 0.5rem;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,.1);
+            color: white;
+        }
+        .sidebar .nav-link.active { 
+            background: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+        .sidebar .nav-link i {
+            width: 20px;
+            text-align: center;
+            margin-right: 8px;
+        }
+        .card { 
+            border: none; 
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+            margin-bottom: 1.5rem;
+            border-radius: 0.5rem;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .card-header {
+            background: white;
+            border-bottom: 1px solid rgba(0,0,0,.05);
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+        }
+        .stat-card {
+            border-left: 4px solid var(--primary-color);
+        }
+        .stat-card .card-body {
+            padding: 1.25rem;
+        }
+        .stat-card .stat-number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .stat-card .stat-label {
+            color: #6c757d;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            border-top: none;
+        }
+        .badge {
+            padding: 0.4em 0.65em;
+            font-weight: 500;
+        }
+        .badge-pending {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .badge-approved {
+            background-color: #198754;
+        }
+        .badge-rejected {
+            background-color: #dc3545;
+        }
+        .main-content {
+            padding: 1.5rem 0;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+        }
+        .user-dropdown img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1100;
+        }
+        .stat-card {
+            transition: transform 0.2s;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .main-content {
+            overflow-x: hidden;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            border: none;
+        }
+        .progress {
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+        .progress-bar {
+            border-radius: 10px;
+        }
+        .list-group-item {
+            border: none;
+            border-bottom: 1px solid #f8f9fa;
+            padding: 1rem;
+        }
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+        /* Prevent unwanted scrolling */
+        body {
+            scroll-behavior: smooth;
+        }
+        .dashboard-container {
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        /* Chart container improvements */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        canvas {
+            max-height: 300px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar p-0">
+                <div class="p-3 text-white border-bottom">
+                    <i class="fas fa-heartbeat me-2"></i>Blood Donation
+                </div>
+                <ul class="nav flex-column mt-3">
+                    <li class="nav-item">
+                        <a class="nav-link " href="?tab=dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="?tab=pending-donors">
+                            <i class="fas fa-clock"></i> Pending Donors
+                                                    </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link " href="?tab=donor-list">
+                            <i class="fas fa-users"></i> All Donors
+                        </a>
+                    </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="admin_blood_inventory_modern.php">
+                <i class="fas fa-tint"></i> Blood Inventory
+            </a>
+        </li>
+                    <li class="nav-item">
+                        <a class="nav-link " href="?tab=audit-log">
+                            <i class="fas fa-history"></i> Audit Log
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link " href="?tab=help">
+                            <i class="fas fa-question-circle"></i> Help & Guide
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link " href="?tab=settings">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <a class="nav-link text-danger" href="/admin_logout.php">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 p-4 main-content">
+                <div class="dashboard-container">
+                    <!-- Admin Role Display -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-user-shield me-2"></i>
+                                    <strong>Logged in as:</strong> 
+                                    <span class="badge bg-primary ms-2">
+                                        Super admin Admin                                    </span>
+                                </div>
+                                <div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>
+                                        test-admin                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                                        
+                    
+                                            <!-- Direct tab content loading -->
+                                                    <h2 class="mb-4">Pending Donors</h2>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Reference</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Age</th>
+                                            <th>Sex</th>
+                                            <th>Weight</th>
+                                            <th>Height</th>
+                                            <th>Blood Type</th>
+                                            <th>Registration Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                                                            </tbody>
+                                </table>
+                            </div>
+
+                            </div>
+                        
+                        
+                        <script>
+                        function findDonors(bloodType, requestId) {
+                            alert('Finding donors with blood type: ' + bloodType + ' for request ID: ' + requestId);
+                            // You can implement actual donor matching logic here
+                        }
+                        
+                        function refreshInventory() {
+                            location.reload();
+                        }
+                        
+                        function viewDonors(bloodType) {
+                            // Redirect to donor list filtered by blood type
+                            window.location.href = '?tab=donor-list&blood_type=' + encodeURIComponent(bloodType);
+                        }
+                        </script>
+                                    </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container">
+        <!-- Toasts will be added here dynamically -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global audit log functions - available for all tabs
+        window.clearAuditLogFilters = function() {
+            try {
+                console.log('clearAuditLogFilters called from global scope');
+                
+                // Clear all form inputs
+                const actionType = document.getElementById('action_type');
+                const dateFrom = document.getElementById('date_from');
+                const dateTo = document.getElementById('date_to');
+                
+                console.log('Found elements:', {
+                    actionType: actionType ? 'yes' : 'no',
+                    dateFrom: dateFrom ? 'yes' : 'no',
+                    dateTo: dateTo ? 'yes' : 'no'
+                });
+                
+                if (actionType) actionType.value = '';
+                if (dateFrom) dateFrom.value = '';
+                if (dateTo) dateTo.value = '';
+                
+                console.log('Cleared form values');
+                
+                // Redirect to the audit log tab WITHOUT any filter parameters
+                console.log('Redirecting to clean URL without filter parameters');
+                window.location.href = 'admin.php?tab=audit-log';
+            } catch (error) {
+                console.error('Error clearing audit log filters:', error);
+                // Fallback: redirect anyway
+                window.location.href = 'admin.php?tab=audit-log';
+            }
+        };
+        
+        // Simple direct function for clearing filters
+        window.clearAuditLogFiltersDirect = function() {
+            console.log('clearAuditLogFiltersDirect called');
+            try {
+                // Clear form inputs
+                const actionType = document.getElementById('action_type');
+                const dateFrom = document.getElementById('date_from');
+                const dateTo = document.getElementById('date_to');
+                
+                console.log('Found elements for clearing:', {
+                    actionType: actionType ? 'yes' : 'no',
+                    dateFrom: dateFrom ? 'yes' : 'no',
+                    dateTo: dateTo ? 'yes' : 'no'
+                });
+                
+                // Clear each element and log the result
+                if (actionType) {
+                    actionType.value = '';
+                    console.log('Cleared action_type, new value:', actionType.value);
+                }
+                if (dateFrom) {
+                    dateFrom.value = '';
+                    console.log('Cleared date_from, new value:', dateFrom.value);
+                }
+                if (dateTo) {
+                    dateTo.value = '';
+                    console.log('Cleared date_to, new value:', dateTo.value);
+                }
+                
+                console.log('All form elements cleared successfully');
+                console.log('Redirecting to clean URL without filter parameters...');
+                
+                // Force a hard refresh by adding a timestamp to prevent caching
+                const timestamp = new Date().getTime();
+                const cleanURL = 'admin.php?tab=audit-log&_t=' + timestamp;
+                console.log('Redirecting to:', cleanURL);
+                
+                // Redirect to the audit log tab WITHOUT any filter parameters
+                // This ensures the server-side PHP code doesn't see any filter values
+                window.location.href = cleanURL;
+            } catch (error) {
+                console.error('Error in clearAuditLogFiltersDirect:', error);
+                // Just redirect anyway
+                console.log('Error occurred, redirecting anyway...');
+                window.location.href = 'admin.php?tab=audit-log';
+            }
+        };
+        
+        // Test function for debugging
+        window.testAuditLogFunction = function() {
+            console.log('testAuditLogFunction called');
+            
+            // Test if we can find the form elements
+            const actionType = document.getElementById('action_type');
+            const dateFrom = document.getElementById('date_from');
+            const dateTo = document.getElementById('date_to');
+            
+            console.log('Form elements found:', {
+                actionType: actionType ? 'yes' : 'no',
+                dateFrom: dateFrom ? 'yes' : 'no',
+                dateTo: dateTo ? 'yes' : 'no'
+            });
+            
+            // Show current values
+            if (actionType) {
+                console.log('Current action_type value:', actionType.value);
+            }
+            if (dateFrom) {
+                console.log('Current date_from value:', dateFrom.value);
+            }
+            if (dateTo) {
+                console.log('Current date_to value:', dateTo.value);
+            }
+            
+            alert('Test function works! clearAuditLogFiltersDirect is available: ' + (typeof window.clearAuditLogFiltersDirect === 'function') + 
+                  '\n\nCurrent form values:' +
+                  '\naction_type: ' + (actionType ? actionType.value : 'not found') +
+                  '\ndate_from: ' + (dateFrom ? dateFrom.value : 'not found') +
+                  '\ndate_to: ' + (dateTo ? dateTo.value : 'not found'));
+        };
+        
+        // Test version that doesn't redirect immediately
+        window.testClearFunction = function() {
+            console.log('testClearFunction called');
+            try {
+                // Clear form inputs
+                const actionType = document.getElementById('action_type');
+                const dateFrom = document.getElementById('date_from');
+                const dateTo = document.getElementById('date_to');
+                
+                console.log('Before clearing - Form values:', {
+                    actionType: actionType ? actionType.value : 'not found',
+                    dateFrom: dateFrom ? dateFrom.value : 'not found',
+                    dateTo: dateTo ? dateTo.value : 'not found'
+                });
+                
+                // Clear each element
+                if (actionType) {
+                    actionType.value = '';
+                }
+                if (dateFrom) {
+                    dateFrom.value = '';
+                }
+                if (dateTo) {
+                    dateTo.value = '';
+                }
+                
+                console.log('After clearing - Form values:', {
+                    actionType: actionType ? actionType.value : 'not found',
+                    dateFrom: dateFrom ? dateFrom.value : 'not found',
+                    dateTo: dateTo ? dateTo.value : 'not found'
+                });
+                
+                alert('Form cleared! Check console for details. Click OK to redirect to clean URL.');
+                window.location.href = 'admin.php?tab=audit-log';
+            } catch (error) {
+                console.error('Error in testClearFunction:', error);
+                alert('Error: ' + error.message);
+            }
+        };
+        
+        // Function to force a complete page reload
+        window.forceReload = function() {
+            console.log('Force reloading page...');
+            // Force a complete page reload by changing location and reloading
+            window.location.href = 'admin.php?tab=audit-log&_reload=' + new Date().getTime();
+        };
+        
+        // Function to show current URL parameters
+        window.showCurrentURLParams = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            console.log('Current URL parameters:');
+            for (let [key, value] of urlParams) {
+                console.log(key + ': ' + value);
+            }
+            
+            alert('Current URL parameters:\n' + 
+                  Array.from(urlParams.entries())
+                    .map(([key, value]) => key + ': ' + value)
+                    .join('\n') || 'No parameters');
+        };
+        
+        window.exportAuditLog = function() {
+            try {
+                console.log('exportAuditLog called from global scope');
+                
+                // Get current filter parameters
+                const params = new URLSearchParams(window.location.search);
+                params.set('export', '1');
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.href = window.location.pathname + '?' + params.toString();
+                link.download = 'audit_log_' + new Date().toISOString().split('T')[0] + '.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log('Export link created and clicked');
+            } catch (error) {
+                console.error('Error exporting audit log:', error);
+                alert('Error exporting audit log. Please try again.');
+            }
+        };
+        
+        // Ensure functions are available immediately
+        console.log('Audit log functions initialized globally');
+        console.log('clearAuditLogFilters available:', typeof window.clearAuditLogFilters === 'function');
+        console.log('exportAuditLog available:', typeof window.exportAuditLog === 'function');
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Function to show toast notifications
+        function showToast(message, type = 'success') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.role = 'alert';
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.id = toastId;
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Remove toast from DOM after it's hidden
+            toast.addEventListener('hidden.bs.toast', function () {
+                toast.remove();
+            });
+        }
+
+        // Show any success/error messages from PHP in toasts
+        document.addEventListener('DOMContentLoaded', function() {
+                        
+                    });
+
+        // Donor Matching Functions
+        function findDonors(bloodType, requestId) {
+            // Show loading state
+            showToast('Searching for compatible donors...', 'info');
+            
+            // Redirect to donor matching page with request details
+            window.location.href = `admin.php?tab=donor-matching&request_id=${requestId}&blood_type=${bloodType}`;
+        }
+
+        function viewRequestDetails(requestId) {
+            // Show request details in a modal or redirect to details page
+            showToast('Loading request details...', 'info');
+            
+            // For now, just show a simple alert with the request ID
+            // In a full implementation, this would open a modal with detailed information
+            alert(`Viewing details for Blood Request #${requestId}\n\nThis would show:\n- Patient information\n- Hospital details\n- Contact information\n- Request history\n- Current status`);
+        }
+
+        function createDonorMatch(requestId, donorId, matchScore) {
+            if (confirm('Create match between this donor and blood request?')) {
+                // Send AJAX request to create match
+                fetch('admin_actions_handler.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=create_match&request_id=${requestId}&donor_id=${donorId}&match_score=${matchScore}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Donor match created successfully!', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast('Failed to create match: ' + data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error creating match. Please try again.', 'danger');
+                });
+            }
+        }
+
+        // UI loading helpers
+        function showLoading(button, loadingText) {
+            try {
+                const original = button.innerHTML;
+                button.dataset.originalText = original;
+                button.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${loadingText}`;
+                button.classList.add('disabled');
+                button.disabled = true;
+                button.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    if (!button) return;
+                    button.innerHTML = button.dataset.originalText || original;
+                    button.classList.remove('disabled');
+                    button.disabled = false;
+                    button.style.pointerEvents = '';
+                }, 10000);
+            } catch (_) {}
+        }
+
+        function showGlobalLoader(message) {
+            const overlay = document.getElementById('globalLoader');
+            if (!overlay) return;
+            const msg = overlay.querySelector('.global-loader-message');
+            if (msg) msg.textContent = message || 'Processing...';
+            overlay.style.display = 'flex';
+        }
+
+        function updateMatchStatus(matchId, newStatus) {
+            if (confirm(`Update match status to "${newStatus}"?`)) {
+                fetch('admin_actions_handler.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=update_match_status&match_id=${matchId}&status=${newStatus}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Match status updated successfully!', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast('Failed to update status: ' + data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error updating status. Please try again.', 'danger');
+                });
+            }
+        }
+    </script>
+
+    <div id="globalLoader" style="position:fixed;inset:0;background:rgba(255,255,255,0.7);display:none;align-items:center;justify-content:center;z-index:2000;">
+        <div class="text-center">
+            <div class="spinner-border text-danger" role="status" style="width:3rem;height:3rem;"></div>
+            <div class="mt-3 global-loader-message">Processing...</div>
+        </div>
+    </div>
+    <script>
+        window.hideGlobalLoader = function() {
+            const overlay = document.getElementById('globalLoader');
+            if (overlay) overlay.style.display = 'none';
+        };
+        window.addEventListener('pageshow', hideGlobalLoader);
+    </script>
+</body>
+</html>
+
+

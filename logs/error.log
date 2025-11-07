@@ -1823,3 +1823,175 @@ Stack trace:
                 'blood_inventory' as data...' at line 3
 [07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
 [07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:51:06 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:06 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:06 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:06 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:51:42 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 06:51:42 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:56:36 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:36 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:36 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:36 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:56:36 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 132
+[07-Nov-2025 06:56:37 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:37 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:37 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:37 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:56:43 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 06:56:43 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:03:02 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 132
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:03:08 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 07:03:08 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:30:58 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 07:30:58 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:31:04 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 134
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:40:27 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 07:40:27 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:41:04 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 07:41:04 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:02:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:32 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:32 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:02:33 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:33 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:33 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:33 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:04:52 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 134
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:11:18 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:11:18 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:11:18 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:11:19 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:11:19 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 134
+[07-Nov-2025 08:12:39 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:39 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:39 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:39 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:12:39 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 134
+[07-Nov-2025 08:12:40 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:40 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:40 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:40 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:35:35 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 134
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 16:36:47 Asia/Manila] PHP Warning:  Undefined array key "status" in C:\xampp\htdocs\blood-donation-pwa-1\includes\admin-tabs.php on line 708
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 12:04:57 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:57 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:57 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:57 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 12:04:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 12:05:17 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:05:17 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:05:17 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:05:17 Europe/Berlin] Database connection established successfully
