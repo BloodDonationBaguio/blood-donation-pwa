@@ -5,6 +5,19 @@ ini_set('display_errors', '1');
 
 require_once __DIR__ . '/utils.php';
 
+// When accessed directly via browser, print a simple header so the page is not blank
+if (php_sapi_name() !== 'cli') {
+    echo "<meta charset=\"utf-8\"><title>Admin Pending Donors Render Test</title>\n";
+    echo "<pre>Admin Pending Donors tab renders non-blank HTML</pre>\n";
+}
+
+// Enable relaxed auth for admin.php when running outside the aggregator
+if (!defined('TEST_MODE')) { define('TEST_MODE', true); }
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
+$_SESSION['admin_user'] = $_SESSION['admin_user'] ?? 'admin';
+$_SESSION['is_admin'] = $_SESSION['is_admin'] ?? true;
+$_SESSION['login_success'] = $_SESSION['login_success'] ?? true;
+
 t_section('Admin Pending Donors tab renders non-blank HTML');
 
 // Simulate access to the page and capture output
