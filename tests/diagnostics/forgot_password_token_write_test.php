@@ -62,8 +62,8 @@ try {
         // Proceed; we will still try update to surface errors
     }
 
-    // Lookup admin by email
-    $stmt = $pdo->prepare('SELECT * FROM admin_users WHERE email = ?');
+    // Lookup admin by email (case-insensitive)
+    $stmt = $pdo->prepare('SELECT * FROM admin_users WHERE LOWER(email) = LOWER(?)');
     $stmt->execute([$email]);
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$admin) { throw new Exception('Admin not found for that email'); }

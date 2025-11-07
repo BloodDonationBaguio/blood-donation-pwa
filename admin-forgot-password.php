@@ -74,8 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 error_log("admin_users schema ensure (forgot) failed: " . $schemaEx->getMessage());
             }
 
-            // Check if email exists (guard against missing is_active by ensuring above)
-            $stmt = $pdo->prepare("SELECT id, username, email, full_name FROM admin_users WHERE email = ? AND is_active = 1");
+            // Check if email exists (case-insensitive, guard against missing is_active by ensuring above)
+            $stmt = $pdo->prepare("SELECT id, username, email, full_name FROM admin_users WHERE LOWER(email) = LOWER(?) AND is_active = 1");
             $stmt->execute([$email]);
             $admin = $stmt->fetch();
             
