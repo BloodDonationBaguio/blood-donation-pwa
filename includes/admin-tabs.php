@@ -671,10 +671,10 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
         <?php if (!empty($pendingDonors)): ?>
             <form method="POST" action="?tab=pending-donors" id="pendingDonorsForm">
                 <div class="mb-3">
-                    <button type="submit" name="bulk_action" value="approve" class="btn btn-success btn-sm me-2" onclick="return confirm('Approve selected donors?')">
+                    <button type="submit" name="bulk_action" value="approve" class="btn btn-success btn-sm me-2" onclick="if(!confirm('Approve selected donors?')){return false;} showGlobalLoader('Approving selected donors...'); showLoading(this, 'Approving...');">
                         <i class="fas fa-check"></i> Approve Selected
                     </button>
-                    <button type="submit" name="bulk_action" value="reject" class="btn btn-danger btn-sm" onclick="return confirm('Reject selected donors?')">
+                    <button type="submit" name="bulk_action" value="reject" class="btn btn-danger btn-sm" onclick="if(!confirm('Reject selected donors?')){return false;} showGlobalLoader('Rejecting selected donors...'); showLoading(this, 'Rejecting...');">
                         <i class="fas fa-times"></i> Reject Selected
                     </button>
                     <input type="text" name="rejection_reason" placeholder="Rejection reason (optional)" class="form-control d-inline-block w-auto ms-2">
@@ -716,7 +716,8 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                                         <a href="?tab=pending-donors&approve_donor=<?= $donor['id'] ?>" 
                                            class="btn btn-sm btn-success action-btn ajax-approve" 
                                            data-donor-id="<?= $donor['id'] ?>"
-                                           title="Approve">
+                                           title="Approve"
+                                           onclick="if(!confirm('Approve this donor?')){return false;} showGlobalLoader('Approving donor...'); showLoading(this, 'Approving...');">
                                             <i class="fas fa-check me-2"></i>Approve Donor
                                         </a>
                                         <button type="button" class="btn btn-sm btn-danger" title="Reject" onclick="showRejectModal(<?= $donor['id'] ?>, '<?= addslashes($donor['first_name'] . ' ' . $donor['last_name']) ?>')">
