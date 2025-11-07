@@ -5,11 +5,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Database configuration
-define('DB_HOST', 'localhost:3306');
-define('DB_NAME', 'blood_system');
-define('DB_USER', 'root');
-define('DB_PASS', 'password112');
+// Use centralized DB connection
+require_once __DIR__ . '/includes/db.php';
 
 // Start session
 session_start();
@@ -29,15 +26,9 @@ $adminInfo = null;
 // Validate token
 if (!empty($token)) {
     try {
-        $pdo = new PDO(
-            "mysql:host=localhost;port=3306;dbname=" . DB_NAME . ";charset=utf8mb4",
-            DB_USER,
-            DB_PASS,
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            ]
-        );
+        if (!isset($pdo)) {
+            throw new Exception('Database connection not initialized');
+        }
         
         // Check if token is valid and not expired
         $stmt = $pdo->prepare("SELECT id, username, email, full_name, reset_token, reset_token_expiry FROM admin_users WHERE reset_token = ? AND is_active = 1");

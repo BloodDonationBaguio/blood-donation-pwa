@@ -5,11 +5,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Database configuration
-define('DB_HOST', 'localhost:3306');
-define('DB_NAME', 'blood_system');
-define('DB_USER', 'root');
-define('DB_PASS', 'password112');
+// Use centralized DB connection
+require_once __DIR__ . '/includes/db.php';
 
 // Start session
 session_start();
@@ -33,15 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $error = "Please enter a valid email address.";
     } else {
         try {
-            $pdo = new PDO(
-                "mysql:host=localhost;port=3306;dbname=" . DB_NAME . ";charset=utf8mb4",
-                DB_USER,
-                DB_PASS,
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                ]
-            );
+            if (!isset($pdo)) {
+                throw new Exception('Database connection not initialized');
+            }
             
             // Check if email exists
             $stmt = $pdo->prepare("SELECT id, username, email, full_name FROM admin_users WHERE email = ? AND is_active = 1");
@@ -60,7 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $updateStmt->execute([$resetToken, $expiryTime, $admin['id']]);
                 
                 // Send reset email
-                $resetLink = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/admin-reset-password.php?token=" . $resetToken;
+                // Build canonical reset link
+                $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $resetLink = $scheme . "://" . $_SERVER['HTTP_HOST'] . "/admin-reset-password.php?token=" . $resetToken;
                 
                 $subject = "Password Reset Request - Blood Donation System";
                 $message = "
