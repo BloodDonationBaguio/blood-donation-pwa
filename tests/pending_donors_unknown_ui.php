@@ -10,9 +10,11 @@ if (ob_get_level() === 0) { ob_start(); }
 // Enable relaxed auth for admin.php when running outside the aggregator
 if (!defined('TEST_MODE')) { define('TEST_MODE', true); }
 if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
-$_SESSION['admin_user'] = $_SESSION['admin_user'] ?? 'admin';
-$_SESSION['is_admin'] = $_SESSION['is_admin'] ?? true;
-$_SESSION['login_success'] = $_SESSION['login_success'] ?? true;
+// Align with site admin auth keys so admin.php doesn't redirect
+$_SESSION['admin_logged_in'] = true;
+$_SESSION['admin_username'] = $_SESSION['admin_username'] ?? 'test-admin';
+$_SESSION['admin_role'] = $_SESSION['admin_role'] ?? 'super_admin';
+$_SESSION['admin_last_activity'] = $_SESSION['admin_last_activity'] ?? time();
 
 require_once __DIR__ . '/utils.php';
 
