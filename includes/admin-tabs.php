@@ -14,6 +14,29 @@ if (!isset($activeTab)) {
 // Debug: Show current active tab
 echo "<!-- Debug: Active tab is: $activeTab -->";
 
+// Helper: Normalize blood type for consistent display
+if (!function_exists('fmtBloodType')) {
+    function fmtBloodType($bt) {
+        if ($bt === null) return 'Unknown';
+        $val = trim((string)$bt);
+        if ($val === '') return 'Unknown';
+        $upper = strtoupper($val);
+        // Common variants and misspellings mapped to Unknown
+        $unknowns = [
+            'UNKNOWN','UNKNOW','UNK','NOT SURE','NOT_SURE','NONE','N/A','NA','NOT AVAILABLE','UNSPECIFIED','NULL','-','--','PENDING','TBD'
+        ];
+        if (in_array($upper, $unknowns, true)) return 'Unknown';
+        // Normalize spacing/case for valid types
+        $normalized = str_replace(' ', '', $upper);
+        $valid = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+        foreach ($valid as $v) {
+            if ($normalized === str_replace(' ', '', strtoupper($v))) return $v;
+        }
+        // Fallback: show original value
+        return $val;
+    }
+}
+
 // Dashboard Tab
 if ($activeTab === 'dashboard') {
     // Dashboard removed per user request
@@ -646,7 +669,7 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
         <?php endif; ?>
         
         <?php if (!empty($pendingDonors)): ?>
-            <form method="POST" action="?tab=pending-donors">
+            <form method="POST" action="?tab=pending-donors" id="pendingDonorsForm">
                 <div class="mb-3">
                     <button type="submit" name="bulk_action" value="approve" class="btn btn-success btn-sm me-2" onclick="return confirm('Approve selected donors?')">
                         <i class="fas fa-check"></i> Approve Selected
@@ -679,7 +702,7 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                                     <td><?= htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) ?></td>
                                     <td><?= htmlspecialchars($donor['email']) ?></td>
                                     <td><?= htmlspecialchars($donor['phone']) ?></td>
-                                    <td><?= htmlspecialchars($donor['blood_type']) ?></td>
+                                    <td><?= htmlspecialchars(fmtBloodType($donor['blood_type'] ?? null)) ?></td>
                                     <td>
                                         <?= date('M d, Y', strtotime($donor['created_at'])) ?>
                                         <?php if ($donor['status'] === 'served' && !empty($donor['served_date'])): ?>
@@ -747,7 +770,7 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                         <p><strong>Name:</strong> <?= htmlspecialchars($donor['full_name']) ?></p>
                         <p><strong>Email:</strong> <?= htmlspecialchars($donor['email']) ?></p>
                         <p><strong>Phone:</strong> <?= htmlspecialchars($donor['phone']) ?></p>
-                        <p><strong>Blood Type:</strong> <?= htmlspecialchars($donor['blood_type']) ?></p>
+                        <p><strong>Blood Type:</strong> <?= htmlspecialchars(fmtBloodType($donor['blood_type'] ?? null)) ?></p>
                         <p><strong>Status:</strong> 
                             <span class="badge bg-<?= getDonorStatusColor($donor['status']) ?>">
                                 <?= getDonorDisplayStatus($donor['status'] ?? 'pending') ?>
@@ -1938,6 +1961,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // Bulk actions: show loading on submit
+    const bulkForm = document.getElementById('pendingDonorsForm');
+    if (bulkForm) {
+        bulkForm.addEventListener('submit', function(e) {
+            try {
+                const submitter = e.submitter || document.activeElement;
+                if (submitter && submitter.tagName && submitter.tagName.toLowerCase() === 'button') {
+                    const isReject = (submitter.value || '').toLowerCase() === 'reject';
+                    showLoading(submitter, isReject ? 'Rejecting...' : 'Approving...');
+                }
+            } catch(_) {}
+            if (typeof showGlobalLoader === 'function') { showGlobalLoader('Processing selected donors...'); }
+            // Disable all controls to prevent repeated submits
+            this.querySelectorAll('button, input, a, select').forEach(el => {
+                el.classList.add('disabled');
+                if ('disabled' in el) el.disabled = true;
+                el.style.pointerEvents = 'none';
+            });
+        });
+    }
 
     // Intercept delete via AJAX
     document.querySelectorAll('.ajax-delete').forEach(btn => {
