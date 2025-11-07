@@ -20,6 +20,8 @@ $_SESSION['admin_last_activity'] = $_SESSION['admin_last_activity'] ?? time();
 if (php_sapi_name() !== 'cli') {
     echo "<meta charset=\"utf-8\"><title>Pending Donors Unknown UI Test</title>\n";
     echo "<pre>Pending Donors UI shows Unknown for blank blood_type</pre>\n";
+    if (function_exists('ob_flush')) { @ob_flush(); }
+    @flush();
 }
 
 // Safely include utils if present; otherwise continue without it
