@@ -36,8 +36,9 @@ if (!$donor) {
 // Format the creation date if donor found
 if (!empty($donor)) {
     // Display submission time in Manila timezone regardless of server/database timezone
+    // Treat DB timestamp as UTC to avoid server/DB timezone confusion
     $tzManila = new DateTimeZone('Asia/Manila');
-    $createdAt = new DateTime($donor['created_at']);
+    $createdAt = new DateTime($donor['created_at'], new DateTimeZone('UTC'));
     $createdAt->setTimezone($tzManila);
     $formattedDate = $createdAt->format('F j, Y \a\t g:i A');
 }
