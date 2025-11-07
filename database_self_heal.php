@@ -138,6 +138,56 @@ function ensureColumn(PDO $pdo, string $table, string $column, string $definitio
     }
 }
 
+function ensureVarcharWidth(PDO $pdo, string $table, string $column, int $minLength, array &$results, string $schema, bool $isPostgres, bool $isSqlite)
+{
+    if (!sh_table_exists($pdo, $table, $schema, $isPostgres, $isSqlite)) {
+        addResult($results, "Width: $table.$column", 'error', 'Cannot check width because table is missing.');
+        return;
+    }
+
+    if (!sh_column_exists($pdo, $table, $column, $schema, $isPostgres, $isSqlite)) {
+        addResult($results, "Width: $table.$column", 'info', 'Column missing—skipped width check.');
+        return;
+    }
+
+    if ($isSqlite) {
+        addResult($results, "Width: $table.$column", 'info', 'SQLite uses dynamic typing; width check skipped.');
+        return;
+    }
+
+    try {
+        if ($isPostgres) {
+            $stmt = $pdo->prepare(
+                'SELECT data_type, character_maximum_length FROM information_schema.columns WHERE table_schema = :schema AND table_name = :table AND column_name = :column'
+            );
+            $stmt->execute(['schema' => $schema, 'table' => $table, 'column' => $column]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $len = $row['character_maximum_length'] ?? null;
+
+            if ($len !== null && (int)$len < $minLength) {
+                $pdo->exec("ALTER TABLE $table ALTER COLUMN $column TYPE VARCHAR($minLength)");
+                addResult($results, "Width: $table.$column", 'fixed', "Increased to VARCHAR($minLength).");
+                return;
+            }
+        } else {
+            // MySQL/MariaDB
+            $stmt = $pdo->prepare(
+                'SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns WHERE table_schema = :schema AND table_name = :table AND column_name = :column'
+            );
+            $stmt->execute(['schema' => $schema, 'table' => $table, 'column' => $column]);
+            $len = $stmt->fetchColumn();
+            if ($len !== false && (int)$len < $minLength) {
+                $pdo->exec("ALTER TABLE $table MODIFY $column VARCHAR($minLength)");
+                addResult($results, "Width: $table.$column", 'fixed', "Increased to VARCHAR($minLength).");
+                return;
+            }
+        }
+        addResult($results, "Width: $table.$column", 'ok', 'Sufficient width.');
+    } catch (Throwable $e) {
+        addResult($results, "Width: $table.$column", 'error', 'Failed to adjust width: ' . $e->getMessage());
+    }
+}
+
 // Ensure supporting tables exist (definitions vary per driver)
 $donorNotesSql = $isPostgres
     ? "CREATE TABLE IF NOT EXISTS donor_notes (
@@ -287,6 +337,13 @@ $donorColumns = [
 foreach ($donorColumns as $column => $definition) {
     ensureColumn($pdo, 'donors', $column, $definition, $results, $schema, $isPostgres, $isSqlite);
 }
+
+// Ensure key blood_type fields are wide enough for values like 'Unknown'
+ensureVarcharWidth($pdo, 'donors', 'blood_type', 10, $results, $schema, $isPostgres, $isSqlite);
+ensureVarcharWidth($pdo, 'donors_new', 'blood_type', 10, $results, $schema, $isPostgres, $isSqlite);
+ensureVarcharWidth($pdo, 'donations_new', 'blood_type', 10, $results, $schema, $isPostgres, $isSqlite);
+ensureVarcharWidth($pdo, 'blood_requests', 'blood_type', 10, $results, $schema, $isPostgres, $isSqlite);
+ensureVarcharWidth($pdo, 'blood_requests', 'blood_type_needed', 10, $results, $schema, $isPostgres, $isSqlite);
 
 // Backfill missing reference_code for existing donors
 try {

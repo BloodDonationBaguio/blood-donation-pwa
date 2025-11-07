@@ -35,7 +35,7 @@ try {
         last_name VARCHAR(50) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         phone VARCHAR(20),
-        blood_type VARCHAR(5),
+        blood_type VARCHAR(10),
         date_of_birth DATE,
         gender VARCHAR(10),
         address TEXT,
@@ -51,7 +51,7 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS blood_units (
         id SERIAL PRIMARY KEY,
         donor_id INTEGER REFERENCES donors(id) ON DELETE CASCADE,
-        blood_type VARCHAR(5) NOT NULL,
+        blood_type VARCHAR(10) NOT NULL,
         donation_date DATE NOT NULL,
         expiry_date DATE,
         status VARCHAR(20) DEFAULT 'available',
