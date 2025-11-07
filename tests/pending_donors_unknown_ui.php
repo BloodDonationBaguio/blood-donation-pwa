@@ -16,12 +16,19 @@ $_SESSION['admin_username'] = $_SESSION['admin_username'] ?? 'test-admin';
 $_SESSION['admin_role'] = $_SESSION['admin_role'] ?? 'super_admin';
 $_SESSION['admin_last_activity'] = $_SESSION['admin_last_activity'] ?? time();
 
-require_once __DIR__ . '/utils.php';
-
-// Ensure we always print a minimal header early so the browser never shows blank
+// Print a minimal header BEFORE any includes to avoid a fully blank page on fatal
 if (php_sapi_name() !== 'cli') {
     echo "<meta charset=\"utf-8\"><title>Pending Donors Unknown UI Test</title>\n";
     echo "<pre>Pending Donors UI shows Unknown for blank blood_type</pre>\n";
+}
+
+// Safely include utils if present; otherwise continue without it
+if (file_exists(__DIR__ . '/utils.php')) {
+    require_once __DIR__ . '/utils.php';
+} else {
+    if (php_sapi_name() !== 'cli') {
+        echo "<pre>Note: tests/utils.php not found. Continuing without test helpers.</pre>\n";
+    }
 }
 
 // Prefer using $pdo provided by tests/run_all_tests.php; fall back to project db.php
