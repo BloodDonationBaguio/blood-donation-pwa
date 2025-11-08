@@ -396,8 +396,25 @@ try {
     
     // Enhanced blood inventory analytics
     try {
-        // Blood type distribution for approved and served donors
-        $stmt = $pdo->query("SELECT blood_type, COUNT(*) as count FROM donors WHERE status IN ('approved', 'served') GROUP BY blood_type ORDER BY count DESC");
+        // Blood type distribution for approved/served/completed donors across donors and donors_new (if exists)
+        $hasDonorsNew = false;
+        try { $pdo->query("SELECT 1 FROM donors_new LIMIT 1"); $hasDonorsNew = true; } catch (Exception $e) { $hasDonorsNew = false; }
+
+        if ($hasDonorsNew) {
+            $stmt = $pdo->query(
+                "SELECT blood_type, COUNT(*) AS count FROM (
+                    SELECT blood_type FROM donors 
+                    WHERE status IN ('approved','served','completed') 
+                      AND blood_type IS NOT NULL AND blood_type <> ''
+                    UNION ALL
+                    SELECT blood_type FROM donors_new 
+                    WHERE status IN ('approved','served','completed') 
+                      AND blood_type IS NOT NULL AND blood_type <> ''
+                ) AS t GROUP BY blood_type ORDER BY count DESC"
+            );
+        } else {
+            $stmt = $pdo->query("SELECT blood_type, COUNT(*) as count FROM donors WHERE status IN ('approved', 'served', 'completed') AND blood_type IS NOT NULL AND blood_type <> '' GROUP BY blood_type ORDER BY count DESC");
+        }
         $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         
@@ -415,8 +432,8 @@ try {
             ];
         }
 
-        // Registrations per month (donors created) - PostgreSQL compatible
-        $stmt = $pdo->query("SELECT TO_CHAR(created_at, 'YYYY-MM') as ym, COUNT(*) as c FROM donors WHERE created_at >= CURRENT_DATE - INTERVAL '12 months' GROUP BY ym");
+        // Registrations per month (donors created) - MySQL compatible
+        $stmt = $pdo->query("SELECT DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as c FROM donors WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY ym");
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
             if (isset($months[$row['ym']])) {
                 $months[$row['ym']]['registrations'] = (int)$row['c'];
@@ -429,7 +446,7 @@ try {
         } catch (Exception $e) { $hasLastDonation = false; }
 
         if ($hasLastDonation) {
-            $stmt = $pdo->query("SELECT TO_CHAR(last_donation_date, 'YYYY-MM') as ym, COUNT(*) as c FROM donors WHERE status='served' AND last_donation_date IS NOT NULL AND last_donation_date >= CURRENT_DATE - INTERVAL '12 months' GROUP BY ym");
+            $stmt = $pdo->query("SELECT DATE_FORMAT(last_donation_date, '%Y-%m') as ym, COUNT(*) as c FROM donors WHERE status='served' AND last_donation_date IS NOT NULL AND last_donation_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY ym");
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                 if (isset($months[$row['ym']])) {
                     $months[$row['ym']]['donations'] = (int)$row['c'];
@@ -438,7 +455,7 @@ try {
         } else {
             // Fallback: count blood units collected per month
             try {
-                $stmt = $pdo->query("SELECT TO_CHAR(collection_date, 'YYYY-MM') as ym, COUNT(*) as c FROM blood_inventory WHERE collection_date >= CURRENT_DATE - INTERVAL '12 months' GROUP BY ym");
+                $stmt = $pdo->query("SELECT DATE_FORMAT(collection_date, '%Y-%m') as ym, COUNT(*) as c FROM blood_inventory WHERE collection_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY ym");
                 foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                     if (isset($months[$row['ym']])) {
                         $months[$row['ym']]['donations'] = (int)$row['c'];
@@ -460,10 +477,10 @@ try {
         
         // Recent activity - show proper reference when available
         $recentActivity = $pdo->query("
-                    SELECT 'donor' as type, (d.first_name || ' ' || d.last_name) as name, d.status, d.created_at,
-                           COALESCE(d.reference_code, d.reference, CAST(d.id AS TEXT)) AS reference
+                    SELECT 'donor' as type, CONCAT(d.first_name, ' ', d.last_name) as name, d.status, d.created_at,
+                           COALESCE(d.reference_code, d.reference, CAST(d.id AS CHAR)) AS reference
         FROM donors d
-        WHERE d.created_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+        WHERE d.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
             ORDER BY created_at DESC 
             LIMIT 10
         ")->fetchAll(PDO::FETCH_ASSOC);
@@ -509,7 +526,7 @@ try {
             try { $pdo->query("SELECT reference_code FROM donors LIMIT 1"); $hasRefCode = true; } catch (Exception $e) {}
             try { $pdo->query("SELECT reference FROM donors LIMIT 1"); $hasRef = true; } catch (Exception $e) {}
 
-            $sql .= ' AND ((d.first_name || \' \' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?';
+            $sql .= " AND (CONCAT(d.first_name, ' ', d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?";
             $params = array_merge($params, array_fill(0, 3, "%$search%"));
             if ($hasRefCode) {
                 $sql .= ' OR d.reference_code LIKE ?';
