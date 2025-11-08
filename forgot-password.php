@@ -70,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log('Forgot password error: ' . $e->getMessage());
             $error = 'An error occurred while processing your request. Please try again later.';
         }
-        }
     }
 }
 ?>
