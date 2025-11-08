@@ -253,6 +253,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     </style>
 </head>
 <body>
+    <style>
+        .btn-loading{
+            position: relative;
+            pointer-events: none;
+            opacity: .85;
+        }
+        .btn-loading .spinner-border{ width: 1rem; height: 1rem; border-width: .2rem; margin-right: .5rem; }
+    </style>
     <div class="forgot-container">
         <div class="forgot-header">
             <i class="fas fa-key fa-3x mb-3"></i>
@@ -294,8 +302,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     </div>
                     
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane me-2"></i>Send Reset Instructions
+                        <button id="submitBtn" type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i><span class="btn-text">Send Reset Instructions</span>
                         </button>
                     </div>
                 </form>
@@ -311,22 +319,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Form validation
-        document.getElementById('forgotForm').addEventListener('submit', function(e) {
-            const email = document.getElementById('email').value;
-            
-            if (!email) {
-                e.preventDefault();
-                alert('Please enter your email address.');
-                return false;
-            }
-            
-            if (!email.includes('@')) {
-                e.preventDefault();
-                alert('Please enter a valid email address.');
-                return false;
-            }
-        });
+        // Form validation and loading state
+        (function(){
+            const form = document.getElementById('forgotForm');
+            if (!form) return;
+            const btn = document.getElementById('submitBtn');
+            form.addEventListener('submit', function(e){
+                const email = document.getElementById('email').value.trim();
+                if (!email) {
+                    e.preventDefault();
+                    alert('Please enter your email address.');
+                    return false;
+                }
+                if (!email.includes('@')) {
+                    e.preventDefault();
+                    alert('Please enter a valid email address.');
+                    return false;
+                }
+                // Loading state (do not prevent default; allow normal submit)
+                if (btn){
+                    btn.classList.add('btn-loading');
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+                }
+            });
+        })();
     </script>
 </body>
 </html>

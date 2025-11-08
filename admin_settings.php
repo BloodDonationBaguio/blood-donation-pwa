@@ -14,9 +14,12 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 
 require_once 'includes/db.php';
 require_once 'includes/admin_auth.php';
+require_once 'includes/authorization_config.php';
 
 $error = '';
 $success = '';
+// Load authorization config
+$authConfig = AuthorizationConfig::getConfig();
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -80,6 +83,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } catch (Exception $e) {
                 $error = 'Database error: ' . $e->getMessage();
+            }
+        }
+    }
+    elseif ($action === 'update_auth_password') {
+        // Only super admins can update the authorization password
+        $role = $_SESSION['admin_role'] ?? 'viewer';
+        if ($role !== 'super_admin') {
+            $error = 'Only Super Admin can update the authorization password.';
+        } else {
+            $newAuthPassword = $_POST['new_auth_password'] ?? '';
+            $confirmAuthPassword = $_POST['confirm_auth_password'] ?? '';
+
+            if (empty($newAuthPassword)) {
+                $error = 'Authorization password is required';
+            } elseif (strlen($newAuthPassword) < 8) {
+                $error = 'Authorization password must be at least 8 characters long';
+            } elseif ($newAuthPassword !== $confirmAuthPassword) {
+                $error = 'Authorization password and confirmation do not match';
+            } else {
+                try {
+                    AuthorizationConfig::setPassword($newAuthPassword, $_SESSION['admin_username'] ?? 'unknown');
+                    $success = 'Authorization password updated successfully!';
+                    $authConfig = AuthorizationConfig::getConfig();
+                } catch (Exception $e) {
+                    $error = 'Failed to update authorization password: ' . $e->getMessage();
+                }
             }
         }
     }
@@ -275,6 +304,57 @@ try {
                             </a>
                         </div>
                     </form>
+
+                    <!-- Authorization Password (Super Admin only) -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h5 class="mb-3"><i class="fas fa-shield-alt me-2"></i>Authorization Password</h5>
+                        <p class="text-muted">This password is used for sensitive actions that require an extra level of authorization. Only Super Admin can set or update it.</p>
+
+                        <div class="info-card mb-3">
+                            <div class="info-item">
+                                <span class="info-label">Status:</span>
+                                <span class="info-value"><?= !empty($authConfig['password_hash']) ? 'Set' : 'Not Set' ?></span>
+                            </div>
+                            <?php if (!empty($authConfig['last_updated_at'])): ?>
+                            <div class="info-item">
+                                <span class="info-label">Last Updated:</span>
+                                <span class="info-value"><?= htmlspecialchars(date('M d, Y H:i', strtotime($authConfig['last_updated_at']))) ?></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Updated By:</span>
+                                <span class="info-value"><?= htmlspecialchars($authConfig['last_updated_by'] ?? '') ?></span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if (($_SESSION['admin_role'] ?? 'viewer') !== 'super_admin'): ?>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-lock me-2"></i>Only Super Admin can update the authorization password.
+                            </div>
+                        <?php else: ?>
+                            <form method="POST" class="needs-validation" novalidate>
+                                <input type="hidden" name="action" value="update_auth_password">
+                                <div class="mb-3">
+                                    <label for="new_auth_password" class="form-label">New Authorization Password <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="new_auth_password" name="new_auth_password" required>
+                                    <div class="invalid-feedback">Please enter a new authorization password (at least 8 characters).</div>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="confirm_auth_password" class="form-label">Confirm Authorization Password <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="confirm_auth_password" name="confirm_auth_password" required>
+                                    <div class="invalid-feedback">Please confirm the authorization password.</div>
+                                </div>
+                                <div class="d-flex gap-3">
+                                    <button type="submit" class="btn btn-update">
+                                        <i class="fas fa-save me-2"></i>Update Authorization Password
+                                    </button>
+                                    <a href="admin.php" class="btn btn-back">
+                                        <i class="fas fa-arrow-left me-2"></i>Back to Admin
+                                    </a>
+                                </div>
+                            </form>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>

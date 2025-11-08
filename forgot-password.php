@@ -8,6 +8,54 @@ $success = '';
 $error = '';
 $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
+// Lightweight diagnostics: visit this page with ?diag=1 to check runtime status
+if (isset($_GET['diag']) && $_GET['diag'] == '1') {
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Forgot Password Diagnostics\n";
+    echo "PHP version: " . phpversion() . "\n";
+    try {
+        if (!isset($pdo)) {
+            echo "PDO: NOT INITIALIZED\n";
+        } else {
+            echo "PDO: initialized\n";
+            $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+            echo "Driver: " . $driver . "\n";
+            // Basic connectivity
+            try {
+                $pdo->query('SELECT 1');
+                echo "Connectivity: OK (SELECT 1)\n";
+            } catch (Exception $exSel) {
+                echo "Connectivity error: " . $exSel->getMessage() . "\n";
+            }
+            // Check users_new table and key columns
+            try {
+                $exists = function_exists('tableExists') ? tableExists($pdo, 'users_new') : false;
+                echo "users_new exists: " . ($exists ? 'YES' : 'NO') . "\n";
+                if ($exists) {
+                    $one = $pdo->query('SELECT id, name, email FROM users_new LIMIT 1')->fetch();
+                    echo "sample row: " . json_encode($one) . "\n";
+                    // Columns snapshot
+                    $cols = [];
+                    if (function_exists('getTableStructure')) {
+                        foreach (getTableStructure($pdo, 'users_new') as $c) {
+                            if (isset($c['Field'])) { $cols[] = strtolower($c['Field']); }
+                            elseif (isset($c['column_name'])) { $cols[] = strtolower($c['column_name']); }
+                            elseif (isset($c['name'])) { $cols[] = strtolower($c['name']); }
+                        }
+                    }
+                    echo "columns: " . implode(', ', $cols) . "\n";
+                }
+            } catch (Exception $exTbl) {
+                echo "users_new check error: " . $exTbl->getMessage() . "\n";
+            }
+        }
+    } catch (Exception $ex) {
+        echo "Diagnostics exception: " . $ex->getMessage() . "\n";
+    }
+    echo "\nTip: Mail logs are in logs/mail_debug.log and logs/email_errors.log\n";
+    exit;
+}
+
 // Ensure required columns exist on users_new to prevent SQL errors
 try {
     if (isset($pdo)) {

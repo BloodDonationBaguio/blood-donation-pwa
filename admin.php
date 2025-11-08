@@ -897,7 +897,7 @@ function buildPaginationUrl($page) {
                             <div class="col-lg-8">
                                 <div class="card h-100">
                                     <div class="card-header">
-                                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Blood Inventory Analysis</h5>
+                                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Blood Inventory Analytics</h5>
                                     </div>
                                     <div class="card-body">
                                         <?php if (!empty($bloodInventory)): ?>
