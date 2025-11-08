@@ -6,6 +6,7 @@ define('INCLUDES_PATH', true);
 session_start();
 require_once __DIR__ . "/includes/db.php";
 require_once __DIR__ . "/includes/mail_helper.php";
+require_once __DIR__ . "/includes/session_manager.php";
 
 // Enable error reporting but don't display to prevent output before DOCTYPE
 error_reporting(E_ALL);
@@ -25,6 +26,30 @@ function isEligibleAge($birthDate) {
 $errors = [];
 $success = false;
 $refNumber = '';
+
+// Prefill registration form from profile on initial load
+try {
+    if (isUserLoggedIn() && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $stmt = $pdo->prepare('SELECT * FROM users_new WHERE id = ?');
+        $stmt->execute([$_SESSION['user_id']]);
+        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($profile) {
+            $_POST['full_name']  = $_POST['full_name']  ?? ($profile['name'] ?? $profile['full_name'] ?? '');
+            $_POST['gender']     = $_POST['gender']     ?? ($profile['gender'] ?? '');
+            $_POST['birth_date'] = $_POST['birth_date'] ?? ($profile['birth_date'] ?? '');
+            $_POST['weight']     = $_POST['weight']     ?? ($profile['weight'] ?? '');
+            $_POST['height']     = $_POST['height']     ?? ($profile['height'] ?? '');
+            $_POST['blood_type'] = $_POST['blood_type'] ?? ($profile['blood_type'] ?? '');
+            $_POST['email']      = $_POST['email']      ?? ($profile['email'] ?? '');
+            $_POST['phone']      = $_POST['phone']      ?? ($profile['phone'] ?? '');
+            $_POST['address']    = $_POST['address']    ?? ($profile['address'] ?? '');
+            $_POST['postal_code']= $_POST['postal_code']?? ($profile['postal_code'] ?? '');
+            // City and province are fixed in the form; no need to prefill here
+        }
+    }
+} catch (Throwable $t) {
+    error_log('Prefill from profile failed: ' . $t->getMessage());
+}
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
