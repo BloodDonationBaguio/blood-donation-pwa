@@ -350,6 +350,10 @@ if (isset($_SESSION['user_id'])) {
                         Remember me for 30 days
                     </label>
                 </div>
+
+                <div class="text-end mb-3">
+                    <a href="forgot-password.php" class="text-danger text-decoration-none fw-semibold">Forgot password?</a>
+                </div>
                 
                 <button type="submit" class="btn btn-login">
                     <i class="fas fa-sign-in-alt me-2"></i>Sign In

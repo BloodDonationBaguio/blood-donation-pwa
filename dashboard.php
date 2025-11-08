@@ -173,7 +173,7 @@ try {
     <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
     <link rel="manifest" href="manifest.json">
-    <title>Dashboard</title>
+    <title>History</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
@@ -219,26 +219,8 @@ try {
 <!-- Main Content -->
 <div class="container py-5">
     <div class="row justify-content-center g-4">
-        <!-- Profile Card -->
-        <div class="col-lg-6 col-md-12">
-            <div class="card border-0 shadow-sm rounded-4 p-4">
-                <div class="d-flex justify-content-center align-items-center mb-3">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="background:#f5f6fa;width:56px;height:56px;">
-                        <i class="bi bi-person-circle fs-2 text-primary"></i>
-                    </span>
-                </div>
-                <h5 class="fw-semibold mb-3 text-center">Profile</h5>
-                <div class="mb-2"><b>Name:</b> <?= htmlspecialchars($user['name']) ?></div>
-                <div class="mb-2"><b>Email:</b> <?= htmlspecialchars($user['email']) ?></div>
-                <div class="mb-3"><b>Joined:</b> <?= htmlspecialchars($user['created_at']) ?></div>
-                <button class="btn btn-outline-primary w-100 rounded-pill" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                    <i class="bi bi-pencil-square me-1"></i> Edit Profile
-                </button>
-            </div>
-        </div>
-
         <!-- Donation History Card -->
-        <div class="col-lg-6 col-md-12">
+        <div class="col-lg-8 col-md-12">
             <div class="card border-0 shadow-sm rounded-4 p-4">
                 <div class="d-flex justify-content-center align-items-center mb-3">
                     <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="background:#f5f6fa;width:56px;height:56px;">
@@ -274,85 +256,9 @@ try {
         </div>
     </div>
 
-    <!-- Edit Profile Modal -->
-    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <form method="post" action="dashboard.php">
-              <div class="modal-header">
-                <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="mb-3">
-                  <label for="editName" class="form-label">Full Name</label>
-                  <input type="text" class="form-control" id="editName" name="edit_name" value="<?= htmlspecialchars($user['name']) ?>" required>
-                </div>
-                <div class="mb-3">
-                  <label for="editEmail" class="form-label">Email</label>
-                  <input type="email" class="form-control" id="editEmail" name="edit_email" value="<?= htmlspecialchars($user['email']) ?>" required>
-                </div>
-                <div class="mb-3">
-                  <label for="editPassword" class="form-label">New Password</label>
-                  <input type="password" class="form-control" id="editPassword" name="edit_password" placeholder="Leave blank to keep current password">
-                </div>
-                <div class="mb-3">
-                  <label for="currentPassword" class="form-label">Current Password <span class="text-danger">*</span></label>
-                  <input type="password" class="form-control" id="currentPassword" name="current_password" required>
-                  <div class="form-text">Enter your current password to save changes.</div>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-              </div>
-            </form>
-          </div>
-        </div>
-    </div>
 </div>
 
-<?php
-// Handle profile update
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_name'], $_POST['edit_email'], $_POST['current_password'])) {
-  $edit_name = trim($_POST['edit_name']);
-  $edit_email = trim($_POST['edit_email']);
-  $edit_password = $_POST['edit_password'];
-  $current_password = $_POST['current_password'];
-  $error = '';
-  $success = '';
-  // Check current password
-  if (!password_verify($current_password, $user['password'])) {
-    $error = 'Current password is incorrect.';
-  } else {
-    $update_query = 'UPDATE users_new SET name = ?, email = ?';
-    $params = [$edit_name, $edit_email];
-    if (!empty($edit_password)) {
-      $update_query .= ', password = ?';
-      $params[] = password_hash($edit_password, PASSWORD_DEFAULT);
-    }
-    $update_query .= ' WHERE id = ?';
-    $params[] = $user_id;
-    $update = $pdo->prepare($update_query);
-    if ($update->execute($params)) {
-      $success = 'Profile updated successfully!';
-      $_SESSION['user_name'] = $edit_name;
-      $_SESSION['user_email'] = $edit_email;
-      // Refresh user data
-      $stmt = $pdo->prepare('SELECT * FROM users_new WHERE id = ?');
-      $stmt->execute([$user_id]);
-      $user = $stmt->fetch();
-    } else {
-      $error = 'Failed to update profile.';
-    }
-  }
-  if ($error) {
-    echo '<div class="alert alert-danger mt-3">' . htmlspecialchars($error) . '</div>';
-  } elseif ($success) {
-    echo '<div class="alert alert-success mt-3">' . htmlspecialchars($success) . '</div>';
-  }
-}
-?>
+<?php /* Profile editing removed per request; page now shows history only. */ ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
