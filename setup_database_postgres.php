@@ -129,7 +129,7 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS blood_units (
         id SERIAL PRIMARY KEY,
         donor_id INTEGER REFERENCES donors(id) ON DELETE CASCADE,
-        blood_type VARCHAR(5) NOT NULL,
+        blood_type VARCHAR(10) NOT NULL,
         donation_date DATE NOT NULL,
         expiry_date DATE,
         status VARCHAR(20) DEFAULT 'available',
@@ -163,8 +163,8 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS blood_requests (
         id SERIAL PRIMARY KEY,
         patient_name VARCHAR(100) NOT NULL,
-        blood_type VARCHAR(5),
-        blood_type_needed VARCHAR(5),
+        blood_type VARCHAR(10),
+        blood_type_needed VARCHAR(10),
         units_required INT DEFAULT 1,
         hospital_name VARCHAR(255),
         hospital_address TEXT,

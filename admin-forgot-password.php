@@ -5,14 +5,55 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Database configuration
-define('DB_HOST', 'localhost:3306');
-define('DB_NAME', 'blood_system');
-define('DB_USER', 'root');
-define('DB_PASS', 'password112');
+// Use centralized DB connection
+require_once __DIR__ . '/includes/db.php';
 
 // Start session
 session_start();
+
+// Re-enable error display after DB include (production DB bootstrap turns it off)
+// This helps diagnose the current white-page issue safely.
+ini_set('display_errors', 1);
+
+// Lightweight diagnostics: visit this page with ?diag=1 to see runtime status
+if (isset($_GET['diag']) && $_GET['diag'] == '1') {
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Admin Forgot Password Diagnostics\n";
+    echo "PHP version: " . phpversion() . "\n";
+    try {
+        if (!isset($pdo)) {
+            echo "PDO: NOT INITIALIZED\n";
+        } else {
+            echo "PDO: initialized\n";
+            $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+            echo "Driver: " . $driver . "\n";
+            // Basic connectivity check
+            try {
+                $pdo->query('SELECT 1');
+                echo "Connectivity: OK (SELECT 1)\n";
+            } catch (Exception $exSel) {
+                echo "Connectivity error: " . $exSel->getMessage() . "\n";
+            }
+            // Table existence and row count
+            try {
+                $exists = function_exists('tableExists') ? tableExists($pdo, 'admin_users') : false;
+                echo "admin_users exists: " . ($exists ? 'YES' : 'NO') . "\n";
+                if ($exists) {
+                    $c = $pdo->query('SELECT COUNT(*) FROM admin_users')->fetchColumn();
+                    echo "admin_users row count: " . (string)$c . "\n";
+                    $one = $pdo->query('SELECT id, username, email, is_active FROM admin_users LIMIT 1')->fetch();
+                    echo "sample row: " . json_encode($one) . "\n";
+                }
+            } catch (Exception $exTbl) {
+                echo "admin_users check error: " . $exTbl->getMessage() . "\n";
+            }
+        }
+    } catch (Exception $ex) {
+        echo "Diagnostics exception: " . $ex->getMessage() . "\n";
+    }
+    echo "\nTip: You can also view logs at tests/diagnostics/log_tail.php?lines=300\n";
+    exit;
+}
 
 // Check if already logged in
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
@@ -33,24 +74,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $error = "Please enter a valid email address.";
     } else {
         try {
-            $pdo = new PDO(
-                "mysql:host=localhost;port=3306;dbname=" . DB_NAME . ";charset=utf8mb4",
-                DB_USER,
-                DB_PASS,
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                ]
-            );
-            
-            // Check if email exists
-            $stmt = $pdo->prepare("SELECT id, username, email, full_name FROM admin_users WHERE email = ? AND is_active = 1");
+            if (!isset($pdo)) {
+                throw new Exception('Database connection not initialized');
+            }
+
+            // Ensure required columns exist BEFORE any queries that reference them
+            try {
+                $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+                $columns = [];
+                if (function_exists('getTableStructure')) {
+                    try {
+                        $struct = getTableStructure($pdo, 'admin_users');
+                        foreach ($struct as $col) {
+                            if (isset($col['Field'])) { $columns[] = strtolower($col['Field']); } // MySQL DESCRIBE
+                            elseif (isset($col['column_name'])) { $columns[] = strtolower($col['column_name']); } // PgSQL information_schema
+                            elseif (isset($col['name'])) { $columns[] = strtolower($col['name']); } // SQLite PRAGMA
+                        }
+                    } catch (Exception $ignore) { /* noop */ }
+                }
+                $hasResetToken   = in_array('reset_token', $columns, true);
+                $hasResetExpiry  = in_array('reset_token_expiry', $columns, true);
+                $hasPasswordHash = in_array('password_hash', $columns, true);
+                $hasIsActive     = in_array('is_active', $columns, true);
+
+                if (!$hasResetToken) {
+                    if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token VARCHAR(255) NULL"); }
+                    else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token TEXT"); }
+                }
+                if (!$hasResetExpiry) {
+                    if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry DATETIME NULL"); }
+                    else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry TEXT"); }
+                }
+                if (!$hasPasswordHash) {
+                    if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash VARCHAR(255) NULL"); }
+                    else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash TEXT"); }
+                }
+                if (!$hasIsActive) {
+                    if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1"); }
+                    elseif ($driver === 'pgsql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN is_active INT NOT NULL DEFAULT 1"); }
+                    else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1"); }
+                }
+            } catch (Exception $schemaEx) {
+                error_log("admin_users schema ensure (forgot) failed: " . $schemaEx->getMessage());
+            }
+
+            // Check if email exists (case-insensitive, guard against missing is_active by ensuring above)
+            $stmt = $pdo->prepare("SELECT id, username, email, full_name FROM admin_users WHERE LOWER(email) = LOWER(?) AND is_active = 1");
             $stmt->execute([$email]);
             $admin = $stmt->fetch();
             
             if (!$admin) {
                 $error = "No admin account found with that email address.";
             } else {
+                // Columns ensured above
+
                 // Generate reset token
                 $resetToken = bin2hex(random_bytes(32));
                 $expiryTime = date('Y-m-d H:i:s', strtotime('+1 hour'));
@@ -60,7 +137,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $updateStmt->execute([$resetToken, $expiryTime, $admin['id']]);
                 
                 // Send reset email
-                $resetLink = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/admin-reset-password.php?token=" . $resetToken;
+                // Build canonical reset link
+                $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $resetLink = $scheme . "://" . $_SERVER['HTTP_HOST'] . "/admin-reset-password.php?token=" . $resetToken;
                 
                 $subject = "Password Reset Request - Blood Donation System";
                 $message = "
@@ -195,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <?= htmlspecialchars($success) ?>
                 </div>
                 <div class="text-center mt-3">
-                    <a href="admin_login.php" class="back-link">
+                    <a href="/admin-login.php" class="back-link">
                         <i class="fas fa-arrow-left me-2"></i>Back to Login
                     </a>
                 </div>
@@ -222,7 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </form>
                 
                 <div class="text-center mt-4">
-                    <a href="admin_login.php" class="back-link">
+                    <a href="/admin-login.php" class="back-link">
                         <i class="fas fa-arrow-left me-2"></i>Back to Login
                     </a>
                 </div>

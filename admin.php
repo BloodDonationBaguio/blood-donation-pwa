@@ -8,14 +8,16 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Secure session
-session_start([
-    'cookie_httponly' => true,
-    'cookie_secure' => false, // Set to false for HTTP, true for HTTPS
-    'use_strict_mode' => true,
-    'cookie_lifetime' => 3600, // 1 hour
-    'gc_maxlifetime' => 3600   // 1 hour
-]);
+// Secure session (guard duplicate starts to avoid notices in tests or includes)
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start([
+        'cookie_httponly' => true,
+        'cookie_secure' => false, // Set to false for HTTP, true for HTTPS
+        'use_strict_mode' => true,
+        'cookie_lifetime' => 3600, // 1 hour
+        'gc_maxlifetime' => 3600   // 1 hour
+    ]);
+}
 
 // Security headers
 header('X-Content-Type-Options: nosniff');
@@ -1599,10 +1601,10 @@ function buildPaginationUrl($page) {
                                                 <td><span class="badge bg-danger"><?= htmlspecialchars($donor['blood_type']) ?></span></td>
                                                 <td><?= date('M d, Y', strtotime($donor['created_at'])) ?></td>
                                                 <td>
-                                                    <a href="?tab=pending-donors&approve_donor=<?= $donor['id'] ?>" class="btn btn-sm btn-success" onclick="return confirm('Approve this donor?')">
+                                                    <a href="?tab=pending-donors&approve_donor=<?= $donor['id'] ?>" class="btn btn-sm btn-success" onclick="if(!confirm('Approve this donor?')) return false; showLoading(this, 'Approving...'); showGlobalLoader('Approving donor...');">
                                                         <i class="fas fa-check"></i> Approve
                                                     </a>
-                                                    <a href="?tab=pending-donors&reject_donor=<?= $donor['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Reject this donor?')">
+                                                    <a href="?tab=pending-donors&reject_donor=<?= $donor['id'] ?>" class="btn btn-sm btn-danger" onclick="if(!confirm('Reject this donor?')) return false; showLoading(this, 'Rejecting...'); showGlobalLoader('Rejecting donor...');">
                                                         <i class="fas fa-times"></i> Reject
                                                     </a>
                                                 </td>
@@ -2876,6 +2878,33 @@ function buildPaginationUrl($page) {
                     showToast('Error creating match. Please try again.', 'danger');
                 });
             }
+        }
+
+        // UI loading helpers
+        function showLoading(button, loadingText) {
+            try {
+                const original = button.innerHTML;
+                button.dataset.originalText = original;
+                button.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${loadingText}`;
+                button.classList.add('disabled');
+                button.disabled = true;
+                button.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    if (!button) return;
+                    button.innerHTML = button.dataset.originalText || original;
+                    button.classList.remove('disabled');
+                    button.disabled = false;
+                    button.style.pointerEvents = '';
+                }, 10000);
+            } catch (_) {}
+        }
+
+        function showGlobalLoader(message) {
+            const overlay = document.getElementById('globalLoader');
+            if (!overlay) return;
+            const msg = overlay.querySelector('.global-loader-message');
+            if (msg) msg.textContent = message || 'Processing...';
+            overlay.style.display = 'flex';
         }
 
         function updateMatchStatus(matchId, newStatus) {

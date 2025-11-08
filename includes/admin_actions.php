@@ -88,43 +88,68 @@ function logAdminAction($pdo, $actionType, $tableName, $recordId, $actionDetails
 }
 
 function getAdminActionLog($pdo, $filters = []) {
-    $sql = "SELECT aal.*, 
-            CASE 
-                WHEN aal.table_name = 'donors_new' THEN CONCAT(d.first_name, ' ', d.last_name)
-                ELSE 'Unknown'
-            END as record_name
+    // Determine available donors table for resilient join
+    $donorsTable = null;
+    if (function_exists('tableExists')) {
+        try {
+            if (tableExists($pdo, 'donors_new')) {
+                $donorsTable = 'donors_new';
+            } elseif (tableExists($pdo, 'donors')) {
+                $donorsTable = 'donors';
+            }
+        } catch (Throwable $e) {
+            // ignore and leave as null
+        }
+    }
+
+    $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+
+    // Build join and record_name expression based on driver and available table
+    $joinClause = '';
+    $recordNameExpr = "'Unknown'";
+    if ($donorsTable) {
+        if ($driver === 'pgsql') {
+            $joinClause = "LEFT JOIN {$donorsTable} d ON aal.table_name = '{$donorsTable}' AND CAST(d.id AS TEXT) = aal.record_id";
+            $recordNameExpr = "CASE WHEN aal.table_name = '{$donorsTable}' THEN COALESCE(d.first_name,'') || ' ' || COALESCE(d.last_name,'') ELSE 'Unknown' END";
+        } else {
+            $joinClause = "LEFT JOIN {$donorsTable} d ON aal.table_name = '{$donorsTable}' AND d.id = CAST(aal.record_id AS UNSIGNED)";
+            $recordNameExpr = "CASE WHEN aal.table_name = '{$donorsTable}' THEN CONCAT(d.first_name, ' ', d.last_name) ELSE 'Unknown' END";
+        }
+    }
+
+    $sql = "SELECT aal.*, {$recordNameExpr} as record_name
             FROM admin_audit_log aal
-            LEFT JOIN donors_new d ON aal.table_name = 'donors_new' AND aal.record_id = d.id
+            {$joinClause}
             WHERE 1=1";
-    
+
     $params = [];
-    
+
     if (!empty($filters['action_type'])) {
         $sql .= " AND aal.action_type = ?";
         $params[] = $filters['action_type'];
     }
-    
+
     if (!empty($filters['table_name'])) {
         $sql .= " AND aal.table_name = ?";
         $params[] = $filters['table_name'];
     }
-    
+
     if (!empty($filters['date_from'])) {
         $sql .= " AND DATE(aal.created_at) >= ?";
         $params[] = $filters['date_from'];
     }
-    
+
     if (!empty($filters['date_to'])) {
         $sql .= " AND DATE(aal.created_at) <= ?";
         $params[] = $filters['date_to'];
     }
-    
+
     $sql .= " ORDER BY aal.created_at DESC";
-    
+
     if (!empty($filters['limit'])) {
         $sql .= " LIMIT " . (int)$filters['limit'];
     }
-    
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll();

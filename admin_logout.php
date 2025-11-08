@@ -19,7 +19,7 @@ if (ini_get("session.use_cookies")) {
 // Destroy the session
 session_destroy();
 
-// Redirect to login page
-header('Location: admin_login.php');
+// Redirect to canonical admin login page
+header('Location: /admin-login.php');
 exit();
 ?>

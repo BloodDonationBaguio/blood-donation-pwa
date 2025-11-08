@@ -20,7 +20,7 @@ $donorId = (int)$_POST['donor_id'];
 $status = $_POST['status'];
 
 // Validate status
-$validStatuses = ['pending', 'approved', 'served', 'unserved', 'rejected', 'suspended'];
+$validStatuses = ['pending', 'approved', 'served', 'completed', 'unserved', 'rejected', 'suspended'];
 if (!in_array($status, $validStatuses)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Invalid status']);
@@ -30,8 +30,11 @@ if (!in_array($status, $validStatuses)) {
 try {
     require_once __DIR__ . '/db.php';
     
+    // Resolve donors table dynamically (prefer donors_new if available)
+    $donorsTable = (function_exists('tableExists') && isset($pdo) && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+    
     // Prepare and execute the update query
-    $stmt = $pdo->prepare("UPDATE donors_new SET status = ? WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE " . $donorsTable . " SET status = ? WHERE id = ?");
     $result = $stmt->execute([$status, $donorId]);
     
     if ($result && $stmt->rowCount() > 0) {
@@ -41,8 +44,8 @@ try {
             'status' => $status
         ];
         
-        // AUTOMATICALLY CREATE BLOOD UNIT if status is changed to 'served'
-        if ($status === 'served') {
+        // AUTOMATICALLY CREATE BLOOD UNIT if status is 'served' or 'completed'
+        if ($status === 'served' || $status === 'completed') {
             try {
                 require_once __DIR__ . '/BloodInventoryManagerComplete.php';
                 $inventoryManager = new BloodInventoryManagerComplete($pdo);

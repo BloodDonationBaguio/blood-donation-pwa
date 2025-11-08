@@ -3,7 +3,8 @@
 ob_start();
 
 define('INCLUDES_PATH', true);
-session_start();
+require_once __DIR__ . "/includes/session_config.php";
+require_once __DIR__ . "/includes/session_manager.php";
 require_once __DIR__ . "/includes/db.php";
 require_once __DIR__ . "/includes/mail_helper.php";
 
@@ -25,6 +26,27 @@ function isEligibleAge($birthDate) {
 $errors = [];
 $success = false;
 $refNumber = '';
+// Prefill defaults from logged-in user's profile if available
+$prefill = [];
+if (function_exists('getCurrentUser')) {
+    $currentUser = getCurrentUser();
+    if ($currentUser) {
+        $prefill = [
+            'full_name'   => $currentUser['name'] ?? '',
+            'gender'      => $currentUser['gender'] ?? '',
+            'birth_date'  => $currentUser['date_of_birth'] ?? '',
+            'weight'      => $currentUser['weight'] ?? '',
+            'height'      => $currentUser['height'] ?? '',
+            'blood_type'  => $currentUser['blood_type'] ?? '',
+            'email'       => $currentUser['email'] ?? '',
+            'phone'       => $currentUser['phone'] ?? '',
+            'address'     => $currentUser['address'] ?? '',
+            'city'        => $currentUser['city'] ?? 'City of Baguio',
+            'province'    => $currentUser['province'] ?? 'Benguet',
+            'postal_code' => $currentUser['postal_code'] ?? ''
+        ];
+    }
+}
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -799,7 +821,7 @@ ob_clean();
                             <div class="mb-3">
                                 <label for="full_name" class="form-label required">Full Name</label>
                                 <input type="text" class="form-control" id="full_name" name="full_name" 
-                                       value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>" required>
+                                       value="<?php echo htmlspecialchars($_POST['full_name'] ?? ($prefill['full_name'] ?? '')); ?>" required>
                                 <div class="invalid-feedback">Please enter your full name.</div>
                             </div>
                             
@@ -808,8 +830,8 @@ ob_clean();
                                 <label for="gender" class="form-label required">Gender</label>
                                 <select class="form-select" id="gender" name="gender" required>
                                     <option value="">Select Gender</option>
-                                    <option value="Male" <?php echo ($_POST['gender'] ?? '') === 'Male' ? 'selected' : ''; ?>>Male</option>
-                                    <option value="Female" <?php echo ($_POST['gender'] ?? '') === 'Female' ? 'selected' : ''; ?>>Female</option>
+                                    <option value="Male" <?php $g = $_POST['gender'] ?? ($prefill['gender'] ?? ''); echo $g === 'Male' ? 'selected' : ''; ?>>Male</option>
+                                    <option value="Female" <?php $g = $_POST['gender'] ?? ($prefill['gender'] ?? ''); echo $g === 'Female' ? 'selected' : ''; ?>>Female</option>
                                 </select>
                                 <div class="invalid-feedback">Please select your gender.</div>
                             </div>
@@ -818,7 +840,7 @@ ob_clean();
                             <div class="mb-3">
                                 <label for="birth_date" class="form-label required">Date of Birth</label>
                                 <input type="date" class="form-control" id="birth_date" name="birth_date" 
-                                       value="<?php echo htmlspecialchars($_POST['birth_date'] ?? ''); ?>" required>
+                                       value="<?php echo htmlspecialchars($_POST['birth_date'] ?? ($prefill['birth_date'] ?? '')); ?>" required>
                                 <div class="invalid-feedback">Please enter your date of birth.</div>
                             </div>
                             
@@ -828,7 +850,7 @@ ob_clean();
                                 <div class="input-group">
                                     <input type="number" class="form-control" id="weight" name="weight" 
                                            min="50" step="0.1"
-                                           value="<?php echo htmlspecialchars($_POST['weight'] ?? ''); ?>" required>
+                                           value="<?php echo htmlspecialchars($_POST['weight'] ?? ($prefill['weight'] ?? '')); ?>" required>
                                     <span class="input-group-text">kg (minimum 50 kg)</span>
                                 </div>
                                 <div class="invalid-feedback">Minimum weight requirement is 50 kg.</div>
@@ -840,7 +862,7 @@ ob_clean();
                                 <div class="input-group">
                                     <input type="number" class="form-control" id="height" name="height" 
                                            min="100" max="250" step="0.1"
-                                           value="<?php echo htmlspecialchars($_POST['height'] ?? ''); ?>" required>
+                                           value="<?php echo htmlspecialchars($_POST['height'] ?? ($prefill['height'] ?? '')); ?>" required>
                                     <span class="input-group-text">cm</span>
                                 </div>
                                 <div class="invalid-feedback">Please enter your height in centimeters.</div>
@@ -851,15 +873,16 @@ ob_clean();
                                 <label for="blood_type" class="form-label required">Blood Type</label>
                                 <select id="blood_type" name="blood_type" class="form-select" required>
                                     <option value="">Select Blood Type</option>
-                                    <option value="A+" <?php echo ($_POST['blood_type'] ?? '') === 'A+' ? 'selected' : ''; ?>>A+</option>
-                                    <option value="A-" <?php echo ($_POST['blood_type'] ?? '') === 'A-' ? 'selected' : ''; ?>>A-</option>
-                                    <option value="B+" <?php echo ($_POST['blood_type'] ?? '') === 'B+' ? 'selected' : ''; ?>>B+</option>
-                                    <option value="B-" <?php echo ($_POST['blood_type'] ?? '') === 'B-' ? 'selected' : ''; ?>>B-</option>
-                                    <option value="AB+" <?php echo ($_POST['blood_type'] ?? '') === 'AB+' ? 'selected' : ''; ?>>AB+</option>
-                                    <option value="AB-" <?php echo ($_POST['blood_type'] ?? '') === 'AB-' ? 'selected' : ''; ?>>AB-</option>
-                                    <option value="O+" <?php echo ($_POST['blood_type'] ?? '') === 'O+' ? 'selected' : ''; ?>>O+</option>
-                                    <option value="O-" <?php echo ($_POST['blood_type'] ?? '') === 'O-' ? 'selected' : ''; ?>>O-</option>
-                                    <option value="UNK" <?php $bt = $_POST['blood_type'] ?? ''; echo ($bt === 'Unknown' || $bt === 'UNK') ? 'selected' : ''; ?>>Unknown (Will be determined during screening)</option>
+                                    <?php $bt = $_POST['blood_type'] ?? ($prefill['blood_type'] ?? ''); ?>
+                                    <option value="A+" <?php echo $bt === 'A+' ? 'selected' : ''; ?>>A+</option>
+                                    <option value="A-" <?php echo $bt === 'A-' ? 'selected' : ''; ?>>A-</option>
+                                    <option value="B+" <?php echo $bt === 'B+' ? 'selected' : ''; ?>>B+</option>
+                                    <option value="B-" <?php echo $bt === 'B-' ? 'selected' : ''; ?>>B-</option>
+                                    <option value="AB+" <?php echo $bt === 'AB+' ? 'selected' : ''; ?>>AB+</option>
+                                    <option value="AB-" <?php echo $bt === 'AB-' ? 'selected' : ''; ?>>AB-</option>
+                                    <option value="O+" <?php echo $bt === 'O+' ? 'selected' : ''; ?>>O+</option>
+                                    <option value="O-" <?php echo $bt === 'O-' ? 'selected' : ''; ?>>O-</option>
+                                    <option value="UNK" <?php echo ($bt === 'Unknown' || $bt === 'UNK') ? 'selected' : ''; ?>>Unknown (Will be determined during screening)</option>
                                 </select>
                                 <div class="invalid-feedback">Please select your blood type.</div>
                             </div>
@@ -871,7 +894,7 @@ ob_clean();
                             <div class="mb-3">
                                 <label for="email" class="form-label required">Email</label>
                                 <input type="email" class="form-control" id="email" name="email" 
-                                       value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
+                                       value="<?php echo htmlspecialchars($_POST['email'] ?? ($prefill['email'] ?? '')); ?>" required>
                                 <div class="invalid-feedback">Please enter a valid email address.</div>
                             </div>
                             
@@ -879,7 +902,7 @@ ob_clean();
                             <div class="mb-3">
                                 <label for="phone" class="form-label required">Phone Number</label>
                                 <input type="tel" class="form-control" id="phone" name="phone" 
-                                       value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>" required>
+                                       value="<?php echo htmlspecialchars($_POST['phone'] ?? ($prefill['phone'] ?? '')); ?>" required>
                                 <div class="invalid-feedback">Please enter your phone number.</div>
                             </div>
                             
@@ -887,7 +910,7 @@ ob_clean();
                             <div class="mb-3">
                                 <label for="address" class="form-label required">Address</label>
                                 <input type="text" class="form-control" id="address" name="address" 
-                                       value="<?php echo htmlspecialchars($_POST['address'] ?? ''); ?>" required>
+                                       value="<?php echo htmlspecialchars($_POST['address'] ?? ($prefill['address'] ?? '')); ?>" required>
                                 <div class="invalid-feedback">Please enter your address.</div>
                             </div>
                             
@@ -895,8 +918,8 @@ ob_clean();
                             <div class="mb-3">
                                 <label class="form-label">City</label>
                                 <div class="form-control bg-light">
-                                    <span class="text-muted">City of Baguio</span>
-                                    <input type="hidden" name="city" value="City of Baguio">
+                                    <span class="text-muted"><?php echo htmlspecialchars($prefill['city'] ?? 'City of Baguio'); ?></span>
+                                    <input type="hidden" name="city" value="<?php echo htmlspecialchars($prefill['city'] ?? 'City of Baguio'); ?>">
                                 </div>
                             </div>
                             
@@ -904,8 +927,8 @@ ob_clean();
                             <div class="mb-3">
                                 <label class="form-label">Province</label>
                                 <div class="form-control bg-light">
-                                    <span class="text-muted">Benguet</span>
-                                    <input type="hidden" name="province" value="Benguet">
+                                    <span class="text-muted"><?php echo htmlspecialchars($prefill['province'] ?? 'Benguet'); ?></span>
+                                    <input type="hidden" name="province" value="<?php echo htmlspecialchars($prefill['province'] ?? 'Benguet'); ?>">
                                 </div>
                             </div>
                             
@@ -913,7 +936,7 @@ ob_clean();
                             <div class="mb-3">
                                 <label for="postal_code" class="form-label required">Postal Code</label>
                                 <input type="text" class="form-control" id="postal_code" name="postal_code" 
-                                       value="<?php echo htmlspecialchars($_POST['postal_code'] ?? ''); ?>" required>
+                                       value="<?php echo htmlspecialchars($_POST['postal_code'] ?? ($prefill['postal_code'] ?? '')); ?>" required>
                                 <div class="invalid-feedback">Please enter your postal code.</div>
                             </div>
                         </div>

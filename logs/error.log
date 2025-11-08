@@ -1329,3 +1329,669 @@ Stack trace:
 [06-Nov-2025 01:46:23 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
 [06-Nov-2025 01:46:23 Asia/Manila] Database connection established successfully
 [06-Nov-2025 01:46:23 Asia/Manila] Failed to create remember tokens table: SQLSTATE[HY000]: General error: 1 near "'user'": syntax error
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:32 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:33 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:33 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:33 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:33 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:35 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:35 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:35 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:35 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:35 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:35 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:36 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:36 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:36 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:36 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:36 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:36 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:36 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:36 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:36 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:36 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:36 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:36 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:40 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:40 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:40 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:40 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:38:43 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:43 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:43 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:38:43 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:44:00 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:44:00 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:44:00 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:44:00 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:44:00 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:44:00 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:44:00 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:44:00 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:50:14 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:50:14 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:50:14 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:50:14 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:14 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:14 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 12
+[07-Nov-2025 05:50:14 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 21
+[07-Nov-2025 05:50:14 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 22
+[07-Nov-2025 05:50:14 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 23
+[07-Nov-2025 05:50:14 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 24
+[07-Nov-2025 05:50:14 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 79
+[07-Nov-2025 05:50:14 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 132
+[07-Nov-2025 05:50:14 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 138
+[07-Nov-2025 05:50:14 Europe/Berlin] Donor not found in approveDonor: 122
+[07-Nov-2025 05:50:14 Europe/Berlin] Error approving donor: Donor not found
+[07-Nov-2025 05:50:14 Europe/Berlin] Error updating donor status: Donor not found
+[07-Nov-2025 05:50:14 Europe/Berlin] Stack trace: #0 C:\xampp\htdocs\blood-donation-pwa-1\tests\test_donor_approval.php(43): updateDonorStatus(Object(PDO), 123, 'rejected', 'Test rejection ...', 1)
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(41): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+[07-Nov-2025 05:50:14 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'blood_inventory''' at line 1
+[07-Nov-2025 05:50:14 Europe/Berlin] PHP Fatal error:  Cannot redeclare buildPaginationUrl() (previously declared in C:\xampp\htdocs\blood-donation-pwa-1\admin.php:560) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 563
+[07-Nov-2025 05:50:48 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:50:48 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:50:48 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:50:49 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:49 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:49 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 12
+[07-Nov-2025 05:50:49 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 21
+[07-Nov-2025 05:50:49 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 22
+[07-Nov-2025 05:50:49 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 23
+[07-Nov-2025 05:50:49 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 24
+[07-Nov-2025 05:50:49 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 79
+[07-Nov-2025 05:50:49 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 132
+[07-Nov-2025 05:50:49 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 138
+[07-Nov-2025 05:50:49 Europe/Berlin] Donor not found in approveDonor: 124
+[07-Nov-2025 05:50:49 Europe/Berlin] Error approving donor: Donor not found
+[07-Nov-2025 05:50:49 Europe/Berlin] Error updating donor status: Donor not found
+[07-Nov-2025 05:50:49 Europe/Berlin] Stack trace: #0 C:\xampp\htdocs\blood-donation-pwa-1\tests\test_donor_approval.php(43): updateDonorStatus(Object(PDO), 125, 'rejected', 'Test rejection ...', 1)
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(41): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'blood_inventory''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:49 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:49 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:49 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:50:49 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:50:49 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:50:49 Europe/Berlin] PHP Fatal error:  Cannot redeclare dbDriver() (previously declared in C:\xampp\htdocs\blood-donation-pwa-1\tests\admin_blood_types_list.php:48) in C:\xampp\htdocs\blood-donation-pwa-1\tests\pending_donors_unknown_ui.php on line 31
+[07-Nov-2025 05:51:30 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:51:30 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:51:30 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 05:51:30 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 05:51:30 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:30 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:51:30 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:30 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:51:30 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:30 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:51:30 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:30 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:51:30 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:30 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:51:30 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:30 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:51:30 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:51:31 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:51:31 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 12
+[07-Nov-2025 05:51:31 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 21
+[07-Nov-2025 05:51:31 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 22
+[07-Nov-2025 05:51:31 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 23
+[07-Nov-2025 05:51:31 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 24
+[07-Nov-2025 05:51:31 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 79
+[07-Nov-2025 05:51:31 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 132
+[07-Nov-2025 05:51:31 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 138
+[07-Nov-2025 05:51:31 Europe/Berlin] Donor not found in approveDonor: 126
+[07-Nov-2025 05:51:31 Europe/Berlin] Error approving donor: Donor not found
+[07-Nov-2025 05:51:31 Europe/Berlin] Error updating donor status: Donor not found
+[07-Nov-2025 05:51:31 Europe/Berlin] Stack trace: #0 C:\xampp\htdocs\blood-donation-pwa-1\tests\test_donor_approval.php(43): updateDonorStatus(Object(PDO), 127, 'rejected', 'Test rejection ...', 1)
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(41): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'blood_inventory''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:51:31 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:51:31 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:51:31 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 05:51:31 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 05:51:31 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:45:57 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:45:57 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:45:57 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:45:57 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:45:57 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 12
+[07-Nov-2025 06:45:57 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 21
+[07-Nov-2025 06:45:57 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 22
+[07-Nov-2025 06:45:57 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 23
+[07-Nov-2025 06:45:57 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 24
+[07-Nov-2025 06:45:57 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 79
+[07-Nov-2025 06:45:57 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 132
+[07-Nov-2025 06:45:57 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 138
+[07-Nov-2025 06:45:57 Europe/Berlin] Donor not found in approveDonor: 128
+[07-Nov-2025 06:45:57 Europe/Berlin] Error approving donor: Donor not found
+[07-Nov-2025 06:45:57 Europe/Berlin] Error updating donor status: Donor not found
+[07-Nov-2025 06:45:57 Europe/Berlin] Stack trace: #0 C:\xampp\htdocs\blood-donation-pwa-1\tests\test_donor_approval.php(43): updateDonorStatus(Object(PDO), 129, 'rejected', 'Test rejection ...', 1)
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(41): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'blood_inventory''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:45:57 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:45:57 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:45:57 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:45:57 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 06:45:57 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:46:26 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:46:26 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:46:26 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:46:26 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:47:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:47:02 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:47:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:47:02 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:47:02 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 06:47:02 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:47:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:47:02 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:47:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:47:02 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:50:44 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:50:44 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:50:44 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:50:44 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:50:44 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:50:44 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 12
+[07-Nov-2025 06:50:44 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 21
+[07-Nov-2025 06:50:44 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 22
+[07-Nov-2025 06:50:44 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 23
+[07-Nov-2025 06:50:44 Europe/Berlin] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\blood-donation-pwa-1\tests\inventory_manager_consistency.php:100) in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 24
+[07-Nov-2025 06:50:44 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 79
+[07-Nov-2025 06:50:44 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 132
+[07-Nov-2025 06:50:44 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 138
+[07-Nov-2025 06:50:44 Europe/Berlin] Donor not found in approveDonor: 130
+[07-Nov-2025 06:50:44 Europe/Berlin] Error approving donor: Donor not found
+[07-Nov-2025 06:50:44 Europe/Berlin] Error updating donor status: Donor not found
+[07-Nov-2025 06:50:44 Europe/Berlin] Stack trace: #0 C:\xampp\htdocs\blood-donation-pwa-1\tests\test_donor_approval.php(43): updateDonorStatus(Object(PDO), 131, 'rejected', 'Test rejection ...', 1)
+#1 C:\xampp\htdocs\blood-donation-pwa-1\tests\run_all_tests.php(41): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'blood_inventory''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:50:44 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:50:44 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:50:44 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error getting inventory: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon
+                FROM blood_inventory bi
+...' at line 8
+[07-Nov-2025 06:50:44 Europe/Berlin] Inventory error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'THEN 1 ELSE 0 END as expiring_soon,
+                'blood_inventory' as data...' at line 3
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 06:50:44 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:51:06 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:06 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:06 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:06 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:51:42 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 06:51:42 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:51:42 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:56:36 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:36 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:36 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:36 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:56:36 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 132
+[07-Nov-2025 06:56:37 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:37 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:37 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:37 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 06:56:43 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 06:56:43 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 06:56:43 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:03:02 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 132
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:02 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:03:08 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 07:03:08 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:03:08 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:30:58 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 07:30:58 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:30:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:31:04 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 134
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:31:04 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:40:27 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 07:40:27 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:40:27 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 07:41:04 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors''' at line 1
+[07-Nov-2025 07:41:04 Europe/Berlin] Error checking if table exists: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'donors_new''' at line 1
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 07:41:04 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:02:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:32 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:32 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:32 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:02:33 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:33 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:33 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:02:33 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:04:52 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 134
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:04:52 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:11:18 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:11:18 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:11:18 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:11:19 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:11:19 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 134
+[07-Nov-2025 08:12:39 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:39 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:39 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:39 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 08:12:39 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 134
+[07-Nov-2025 08:12:40 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:40 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:40 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 08:12:40 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:16:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:35:35 Europe/Berlin] PHP Warning:  Constant INCLUDES_PATH already defined in C:\xampp\htdocs\blood-donation-pwa-1\admin.php on line 134
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:35:35 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:41 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 16:36:47 Asia/Manila] PHP Warning:  Undefined array key "status" in C:\xampp\htdocs\blood-donation-pwa-1\includes\admin-tabs.php on line 708
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 09:36:47 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 12:04:57 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:57 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:57 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:57 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 12:04:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:58 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:58 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:04:58 Europe/Berlin] Database connection established successfully
+[07-Nov-2025 12:05:17 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:05:17 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:05:17 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[07-Nov-2025 12:05:17 Europe/Berlin] Database connection established successfully

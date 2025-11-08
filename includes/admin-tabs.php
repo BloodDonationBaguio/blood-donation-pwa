@@ -1,6 +1,6 @@
 <?php
 // Get variables from global scope
-$activeTab = $GLOBALS['activeTab'] ?? 'dashboard';
+$activeTab = $GLOBALS['activeTab'] ?? 'blood-requests';
 $donors = $GLOBALS['donors'] ?? [];
 $pendingDonors = $GLOBALS['pendingDonors'] ?? [];
 $requests = $GLOBALS['requests'] ?? [];
@@ -8,11 +8,41 @@ $requests = $GLOBALS['requests'] ?? [];
 // Debug: Check if activeTab is defined
 if (!isset($activeTab)) {
     echo '<div class="alert alert-danger">Error: $activeTab variable is not defined!</div>';
-    $activeTab = 'dashboard'; // Fallback
+    $activeTab = 'blood-requests'; // Fallback
 }
 
 // Debug: Show current active tab
 echo "<!-- Debug: Active tab is: $activeTab -->";
+
+// Determine active donors table (prefer donors_new if available)
+// Uses tableExists helper from db.php; falls back to legacy donors
+try {
+    if (!isset($pdo)) { require_once __DIR__ . '/../db.php'; }
+} catch (Throwable $e) { /* ignore */ }
+$donorsTable = (function_exists('tableExists') && isset($pdo) && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+
+// Helper: Normalize blood type for consistent display
+if (!function_exists('fmtBloodType')) {
+    function fmtBloodType($bt) {
+        if ($bt === null) return 'Unknown';
+        $val = trim((string)$bt);
+        if ($val === '') return 'Unknown';
+        $upper = strtoupper($val);
+        // Common variants and misspellings mapped to Unknown
+        $unknowns = [
+            'UNKNOWN','UNKNOW','UNK','NOT SURE','NOT_SURE','NONE','N/A','NA','NOT AVAILABLE','UNSPECIFIED','NULL','-','--','PENDING','TBD'
+        ];
+        if (in_array($upper, $unknowns, true)) return 'Unknown';
+        // Normalize spacing/case for valid types
+        $normalized = str_replace(' ', '', $upper);
+        $valid = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+        foreach ($valid as $v) {
+            if ($normalized === str_replace(' ', '', strtoupper($v))) return $v;
+        }
+        // Fallback: show original value
+        return $val;
+    }
+}
 
 // Dashboard Tab
 if ($activeTab === 'dashboard') {
@@ -275,9 +305,9 @@ if ($activeTab === 'add-donor'): ?>
                                 COUNT(*) as total,
                                 COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
                                 COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved,
-                                COUNT(CASE WHEN status = 'served' THEN 1 END) as served,
+                                COUNT(CASE WHEN status IN ('served','completed') THEN 1 END) as served,
                                 COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected
-                            FROM donors_new
+                            FROM {$donorsTable}
                         ")->fetch();
                         ?>
                         <div class="row text-center">
@@ -307,8 +337,8 @@ if ($activeTab === 'add-donor'): ?>
                         <?php
                         $bloodTypeStats = $pdo->query("
                             SELECT blood_type, COUNT(*) as count 
-                            FROM donors_new 
-                            WHERE status = 'served' 
+                            FROM {$donorsTable} 
+                            WHERE status IN ('served','completed') 
                             GROUP BY blood_type 
                             ORDER BY count DESC
                         ")->fetchAll();
@@ -610,17 +640,26 @@ require_once __DIR__ . '/admin_actions.php';
 
 // Handle bulk actions
 if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
+    // Resolve donor table dynamically (prefer donors_new if it exists)
+    $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+
     $action = $_POST['bulk_action'];
     $selectedIds = $_POST['selected_donors'];
+    if (!is_array($selectedIds)) { $selectedIds = [$selectedIds]; }
+    $selectedIds = array_values(array_filter($selectedIds, fn($v) => $v !== null && $v !== ''));
+    if (count($selectedIds) === 0) {
+        header('Location: ?tab=pending-donors&error=No donors selected.');
+        exit();
+    }
     
     if ($action === 'approve') {
-        $stmt = $pdo->prepare('UPDATE donors_new SET status = "approved" WHERE id IN (' . str_repeat('?,', count($selectedIds) - 1) . '?)');
+        $stmt = $pdo->prepare('UPDATE ' . $donorsTable . ' SET status = \'approved\' WHERE id IN (' . str_repeat('?,', count($selectedIds) - 1) . '?)');
         $stmt->execute($selectedIds);
         header('Location: ?tab=pending-donors&success=Bulk approval completed.');
         exit();
     } elseif ($action === 'reject') {
         $reason = $_POST['rejection_reason'] ?? 'Bulk rejection';
-        $stmt = $pdo->prepare('UPDATE donors_new SET status = "rejected", rejection_reason = ? WHERE id IN (' . str_repeat('?,', count($selectedIds) - 1) . '?)');
+        $stmt = $pdo->prepare('UPDATE ' . $donorsTable . ' SET status = \'rejected\', rejection_reason = ? WHERE id IN (' . str_repeat('?,', count($selectedIds) - 1) . '?)');
         $stmt->execute(array_merge([$reason], $selectedIds));
         header('Location: ?tab=pending-donors&success=Bulk rejection completed.');
         exit();
@@ -646,12 +685,12 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
         <?php endif; ?>
         
         <?php if (!empty($pendingDonors)): ?>
-            <form method="POST" action="?tab=pending-donors">
+            <form method="POST" action="?tab=pending-donors" id="pendingDonorsForm">
                 <div class="mb-3">
-                    <button type="submit" name="bulk_action" value="approve" class="btn btn-success btn-sm me-2" onclick="return confirm('Approve selected donors?')">
+                    <button type="submit" name="bulk_action" value="approve" class="btn btn-success btn-sm me-2" onclick="if(!confirm('Approve selected donors?')){return false;} showGlobalLoader('Approving selected donors...'); showLoading(this, 'Approving...');">
                         <i class="fas fa-check"></i> Approve Selected
                     </button>
-                    <button type="submit" name="bulk_action" value="reject" class="btn btn-danger btn-sm" onclick="return confirm('Reject selected donors?')">
+                    <button type="submit" name="bulk_action" value="reject" class="btn btn-danger btn-sm" onclick="if(!confirm('Reject selected donors?')){return false;} showGlobalLoader('Rejecting selected donors...'); showLoading(this, 'Rejecting...');">
                         <i class="fas fa-times"></i> Reject Selected
                     </button>
                     <input type="text" name="rejection_reason" placeholder="Rejection reason (optional)" class="form-control d-inline-block w-auto ms-2">
@@ -679,7 +718,7 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                                     <td><?= htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) ?></td>
                                     <td><?= htmlspecialchars($donor['email']) ?></td>
                                     <td><?= htmlspecialchars($donor['phone']) ?></td>
-                                    <td><?= htmlspecialchars($donor['blood_type']) ?></td>
+                                    <td><?= htmlspecialchars(fmtBloodType($donor['blood_type'] ?? null)) ?></td>
                                     <td>
                                         <?= date('M d, Y', strtotime($donor['created_at'])) ?>
                                         <?php if ($donor['status'] === 'served' && !empty($donor['served_date'])): ?>
@@ -693,7 +732,8 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                                         <a href="?tab=pending-donors&approve_donor=<?= $donor['id'] ?>" 
                                            class="btn btn-sm btn-success action-btn ajax-approve" 
                                            data-donor-id="<?= $donor['id'] ?>"
-                                           title="Approve">
+                                           title="Approve"
+                                           onclick="if(!confirm('Approve this donor?')){return false;} showGlobalLoader('Approving donor...'); showLoading(this, 'Approving...');">
                                             <i class="fas fa-check me-2"></i>Approve Donor
                                         </a>
                                         <button type="button" class="btn btn-sm btn-danger" title="Reject" onclick="showRejectModal(<?= $donor['id'] ?>, '<?= addslashes($donor['first_name'] . ' ' . $donor['last_name']) ?>')">
@@ -747,7 +787,7 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                         <p><strong>Name:</strong> <?= htmlspecialchars($donor['full_name']) ?></p>
                         <p><strong>Email:</strong> <?= htmlspecialchars($donor['email']) ?></p>
                         <p><strong>Phone:</strong> <?= htmlspecialchars($donor['phone']) ?></p>
-                        <p><strong>Blood Type:</strong> <?= htmlspecialchars($donor['blood_type']) ?></p>
+                        <p><strong>Blood Type:</strong> <?= htmlspecialchars(fmtBloodType($donor['blood_type'] ?? null)) ?></p>
                         <p><strong>Status:</strong> 
                             <span class="badge bg-<?= getDonorStatusColor($donor['status']) ?>">
                                 <?= getDonorDisplayStatus($donor['status'] ?? 'pending') ?>
@@ -921,7 +961,7 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
 <?php if ($activeTab === 'edit-donor'): 
     $donorId = $_GET['id'] ?? 0;
     if ($donorId) {
-        $stmt = $pdo->prepare('SELECT * FROM donors_new WHERE id = ?');
+        $stmt = $pdo->prepare('SELECT * FROM ' . $donorsTable . ' WHERE id = ?');
         $stmt->execute([$donorId]);
         $editDonor = $stmt->fetch();
     }
@@ -1426,6 +1466,8 @@ if (selectAllElement) {
 let currentRejectId = null;
 function showRejectModal(id, name) {
     currentRejectId = id;
+    // Graceful fallback when name is missing
+    name = (name && String(name).trim()) ? name : 'this donor';
     const rejectDonorNameElement = document.getElementById('rejectDonorName');
     if (rejectDonorNameElement) {
         rejectDonorNameElement.textContent = name;
@@ -1477,6 +1519,8 @@ function confirmReject() {
 let currentUnservedId = null;
 function showUnservedModal(id, name) {
     currentUnservedId = id;
+    // Graceful fallback when name is missing
+    name = (name && String(name).trim()) ? name : 'this donor';
     const unservedDonorNameElement = document.getElementById('unservedDonorName');
     if (unservedDonorNameElement) {
         unservedDonorNameElement.textContent = name;
@@ -1628,6 +1672,8 @@ function updateMatchStatus(matchId, status) {
 let currentDeferRequestId = null;
 function showDeferModal(id, name) {
     currentDeferRequestId = id;
+    // Graceful fallback when name is missing
+    name = (name && String(name).trim()) ? name : 'this request';
     const deferRequestNameElement = document.getElementById('deferRequestName');
     if (deferRequestNameElement) {
         deferRequestNameElement.textContent = name;
@@ -1653,6 +1699,8 @@ function confirmDefer() {
 let currentServedRequestId = null;
 function showServedModal(id, name) {
     currentServedRequestId = id;
+    // Graceful fallback when name is missing
+    name = (name && String(name).trim()) ? name : 'this request';
     const servedRequestNameElement = document.getElementById('servedRequestName');
     if (servedRequestNameElement) {
         servedRequestNameElement.textContent = name;
@@ -1671,6 +1719,8 @@ function confirmServed() {
 let currentUnservedRequestId = null;
 function showUnservedRequestModal(id, name) {
     currentUnservedRequestId = id;
+    // Graceful fallback when name is missing
+    name = (name && String(name).trim()) ? name : 'this request';
     const unservedRequestNameElement = document.getElementById('unservedRequestName');
     if (unservedRequestNameElement) {
         unservedRequestNameElement.textContent = name;
@@ -1938,6 +1988,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // Bulk actions: show loading on submit
+    const bulkForm = document.getElementById('pendingDonorsForm');
+    if (bulkForm) {
+        bulkForm.addEventListener('submit', function(e) {
+            try {
+                const submitter = e.submitter || document.activeElement;
+                if (submitter && submitter.tagName && submitter.tagName.toLowerCase() === 'button') {
+                    const isReject = (submitter.value || '').toLowerCase() === 'reject';
+                    showLoading(submitter, isReject ? 'Rejecting...' : 'Approving...');
+                }
+            } catch(_) {}
+            if (typeof showGlobalLoader === 'function') { showGlobalLoader('Processing selected donors...'); }
+            // Disable all controls to prevent repeated submits
+            this.querySelectorAll('button, input, a, select').forEach(el => {
+                el.classList.add('disabled');
+                if ('disabled' in el) el.disabled = true;
+                el.style.pointerEvents = 'none';
+            });
+        });
+    }
 
     // Intercept delete via AJAX
     document.querySelectorAll('.ajax-delete').forEach(btn => {

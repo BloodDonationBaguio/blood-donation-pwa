@@ -5,11 +5,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Database configuration
-define('DB_HOST', 'localhost:3306');
-define('DB_NAME', 'blood_system');
-define('DB_USER', 'root');
-define('DB_PASS', 'password112');
+// Use centralized DB connection
+require_once __DIR__ . '/includes/db.php';
 
 // Start session
 session_start();
@@ -29,15 +26,44 @@ $adminInfo = null;
 // Validate token
 if (!empty($token)) {
     try {
-        $pdo = new PDO(
-            "mysql:host=localhost;port=3306;dbname=" . DB_NAME . ";charset=utf8mb4",
-            DB_USER,
-            DB_PASS,
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            ]
-        );
+        if (!isset($pdo)) {
+            throw new Exception('Database connection not initialized');
+        }
+
+        // Ensure columns used in queries exist before referencing them
+        try {
+            $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+            $columns = [];
+            if (function_exists('getTableStructure')) {
+                try {
+                    $struct = getTableStructure($pdo, 'admin_users');
+                    foreach ($struct as $col) {
+                        if (isset($col['Field'])) { $columns[] = strtolower($col['Field']); }
+                        elseif (isset($col['column_name'])) { $columns[] = strtolower($col['column_name']); }
+                        elseif (isset($col['name'])) { $columns[] = strtolower($col['name']); }
+                    }
+                } catch (Exception $ignore) { /* noop */ }
+            }
+            if (!in_array('reset_token', $columns, true)) {
+                if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token VARCHAR(255) NULL"); }
+                else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token TEXT"); }
+            }
+            if (!in_array('reset_token_expiry', $columns, true)) {
+                if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry DATETIME NULL"); }
+                else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry TEXT"); }
+            }
+            if (!in_array('password_hash', $columns, true)) {
+                if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash VARCHAR(255) NULL"); }
+                else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash TEXT"); }
+            }
+            if (!in_array('is_active', $columns, true)) {
+                if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1"); }
+                elseif ($driver === 'pgsql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN is_active INT NOT NULL DEFAULT 1"); }
+                else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1"); }
+            }
+        } catch (Exception $schemaEx) {
+            error_log("admin_users schema ensure (reset) failed: " . $schemaEx->getMessage());
+        }
         
         // Check if token is valid and not expired
         $stmt = $pdo->prepare("SELECT id, username, email, full_name, reset_token, reset_token_expiry FROM admin_users WHERE reset_token = ? AND is_active = 1");
@@ -70,11 +96,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $error = "New password must be at least 8 characters long.";
     } else {
         try {
-            // Update password and clear reset token
+            // Ensure columns exist for compatibility
+            try {
+                $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+                $columns = [];
+                if (function_exists('getTableStructure')) {
+                    try {
+                        $struct = getTableStructure($pdo, 'admin_users');
+                        foreach ($struct as $col) {
+                            if (isset($col['Field'])) { $columns[] = strtolower($col['Field']); }
+                            elseif (isset($col['name'])) { $columns[] = strtolower($col['name']); }
+                        }
+                    } catch (Exception $ignore) { /* noop */ }
+                }
+                if (!in_array('reset_token', $columns, true)) {
+                    if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token VARCHAR(255) NULL"); }
+                    else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token TEXT"); }
+                }
+                if (!in_array('reset_token_expiry', $columns, true)) {
+                    if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry DATETIME NULL"); }
+                    else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN reset_token_expiry TEXT"); }
+                }
+                if (!in_array('password_hash', $columns, true)) {
+                    if ($driver === 'mysql') { $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash VARCHAR(255) NULL"); }
+                    else { $pdo->exec("ALTER TABLE admin_users ADD COLUMN password_hash TEXT"); }
+                }
+            } catch (Exception $schemaEx) {
+                error_log("admin_users schema ensure (reset) failed: " . $schemaEx->getMessage());
+            }
+
+            // Update password in both legacy and new columns; clear reset token
             $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
-$updateStmt = $pdo->prepare("UPDATE admin_users SET password_hash = ?, password = '', reset_token = NULL, reset_token_expiry = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+            $updateStmt = $pdo->prepare("UPDATE admin_users SET password = ?, password_hash = ?, reset_token = NULL, reset_token_expiry = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
             
-            if ($updateStmt->execute([$newPasswordHash, $adminInfo['id']])) {
+            if ($updateStmt->execute([$newPasswordHash, $newPasswordHash, $adminInfo['id']])) {
                 $success = "Password has been reset successfully! You can now login with your new password.";
                 $validToken = false; // Hide the form
                 error_log("Password reset successful for admin: " . $adminInfo['username']);

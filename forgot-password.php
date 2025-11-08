@@ -42,28 +42,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter your email address.';
     } else {
         // Check if user exists (case-insensitive) on users_new
-        $stmt = $pdo->prepare('SELECT id, name, email FROM users_new WHERE LOWER(email) = LOWER(?)');
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
-        if (!$user) {
-            // Explicitly inform when email is not registered
-            $error = 'The entered email is not registered.';
-        } else {
-            // Generate token and expiry
-            $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour
-            $stmt = $pdo->prepare('UPDATE users_new SET reset_token = ?, reset_token_expires = ? WHERE id = ?');
-            $stmt->execute([$token, $expires, $user['id']]);
-            // Send email
-            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $resetLink = $scheme . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . "/reset-password.php?token=$token";
-            $subject = 'Password Reset Request';
-            $message = "<p>Hello " . htmlspecialchars($user['name']) . ",</p>" .
-                "<p>We received a request to reset your password. Click the link below to set a new password:</p>" .
-                "<p><a href='$resetLink'>$resetLink</a></p>" .
-                "<p>If you did not request this, you can ignore this email.</p>";
-            send_confirmation_email($user['email'] ?? $email, $subject, $message, $user['name']);
-            $success = 'A reset link has been sent to your email.';
+        try {
+            $stmt = $pdo->prepare('SELECT id, name, email FROM users_new WHERE LOWER(email) = LOWER(?)');
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+            if (!$user) {
+                // Explicitly inform when email is not registered
+                $error = 'The entered email is not registered.';
+            } else {
+                // Generate token and expiry
+                $token = bin2hex(random_bytes(32));
+                $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour
+                $stmt = $pdo->prepare('UPDATE users_new SET reset_token = ?, reset_token_expires = ? WHERE id = ?');
+                $stmt->execute([$token, $expires, $user['id']]);
+                // Send email
+                $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $resetLink = $scheme . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . "/reset-password.php?token=$token";
+                $subject = 'Password Reset Request';
+                $message = "<p>Hello " . htmlspecialchars($user['name']) . ",</p>" .
+                    "<p>We received a request to reset your password. Click the link below to set a new password:</p>" .
+                    "<p><a href='$resetLink'>$resetLink</a></p>" .
+                    "<p>If you did not request this, you can ignore this email.</p>";
+                send_confirmation_email($user['email'] ?? $email, $subject, $message, $user['name']);
+                $success = 'A reset link has been sent to your email.';
+            }
+        } catch (Exception $e) {
+            error_log('Forgot password error: ' . $e->getMessage());
+            $error = 'An error occurred while processing your request. Please try again later.';
         }
     }
 }
