@@ -396,26 +396,39 @@ try {
     
     // Enhanced blood inventory analytics
     try {
-        // Blood type distribution for approved/served/completed donors across donors and donors_new (if exists)
-        $hasDonorsNew = false;
-        try { $pdo->query("SELECT 1 FROM donors_new LIMIT 1"); $hasDonorsNew = true; } catch (Exception $e) { $hasDonorsNew = false; }
+        // Blood type distribution prioritizing actual donation records from donor_history
+        $bloodInventory = [];
+        $hasDonorHistory = false;
+        try { $pdo->query("SELECT 1 FROM donor_history LIMIT 1"); $hasDonorHistory = true; } catch (Exception $e) { $hasDonorHistory = false; }
 
-        if ($hasDonorsNew) {
-            $stmt = $pdo->query(
-                "SELECT blood_type, COUNT(*) AS count FROM (
-                    SELECT blood_type FROM donors 
-                    WHERE status IN ('approved','served','completed') 
-                      AND blood_type IS NOT NULL AND blood_type <> ''
-                    UNION ALL
-                    SELECT blood_type FROM donors_new 
-                    WHERE status IN ('approved','served','completed') 
-                      AND blood_type IS NOT NULL AND blood_type <> ''
-                ) AS t GROUP BY blood_type ORDER BY count DESC"
-            );
-        } else {
-            $stmt = $pdo->query("SELECT blood_type, COUNT(*) as count FROM donors WHERE status IN ('approved', 'served', 'completed') AND blood_type IS NOT NULL AND blood_type <> '' GROUP BY blood_type ORDER BY count DESC");
+        if ($hasDonorHistory) {
+            // Use completed donation records as the most reliable source
+            $stmt = $pdo->query("SELECT blood_type, COUNT(*) AS count FROM donor_history WHERE status='completed' AND blood_type IS NOT NULL AND blood_type <> '' GROUP BY blood_type ORDER BY count DESC");
+            $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
-        $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Fallback to donors/donors_new when donor_history is not present or empty
+        if (empty($bloodInventory)) {
+            $hasDonorsNew = false;
+            try { $pdo->query("SELECT 1 FROM donors_new LIMIT 1"); $hasDonorsNew = true; } catch (Exception $e) { $hasDonorsNew = false; }
+
+            if ($hasDonorsNew) {
+                $stmt = $pdo->query(
+                    "SELECT blood_type, COUNT(*) AS count FROM (
+                        SELECT blood_type FROM donors 
+                        WHERE status IN ('approved','served','completed') 
+                          AND blood_type IS NOT NULL AND blood_type <> ''
+                        UNION ALL
+                        SELECT blood_type FROM donors_new 
+                        WHERE status IN ('approved','served','completed') 
+                          AND blood_type IS NOT NULL AND blood_type <> ''
+                    ) AS t GROUP BY blood_type ORDER BY count DESC"
+                );
+            } else {
+                $stmt = $pdo->query("SELECT blood_type, COUNT(*) as count FROM donors WHERE status IN ('approved', 'served', 'completed') AND blood_type IS NOT NULL AND blood_type <> '' GROUP BY blood_type ORDER BY count DESC");
+            }
+            $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
         
         
         // Monthly trends
