@@ -33,7 +33,7 @@ try {
         }
     }
 } catch (Exception $schemaEx) {
-    error_log('users_new schema ensure (legacy forgot-password) failed: ' . $schemaEx->getMessage());
+    error_log('users_new schema ensure (__zip_restore forgot-password) failed: ' . $schemaEx->getMessage());
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -69,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (Exception $e) {
             error_log('Forgot password error: ' . $e->getMessage());
             $error = 'An error occurred while processing your request. Please try again later.';
+        }
         }
     }
 }
