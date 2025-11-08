@@ -6,6 +6,7 @@ require_once 'includes/mail_helper.php';
 
 $success = '';
 $error = '';
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
 // Ensure required columns exist on users_new to prevent SQL errors
 try {
@@ -71,6 +72,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'An error occurred while processing your request. Please try again later.';
         }
     }
+
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => (bool)$success,
+            'message' => $success ?: $error,
+        ]);
+        exit;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -81,6 +91,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/style.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .btn-loading{
+      position: relative;
+      pointer-events: none;
+      opacity: .85;
+    }
+    .btn-loading .spinner-border{ width: 1rem; height: 1rem; border-width: .2rem; margin-right: .5rem; }
+  </style>
 </head>
 <body class="bg-light">
 <?php include 'navbar.php'; ?>
@@ -97,12 +115,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <?php elseif ($error): ?>
             <div class="alert alert-danger text-center"><?php echo $error; ?></div>
           <?php endif; ?>
-          <form action="" method="POST" autocomplete="on">
+          <form id="forgotForm" action="" method="POST" autocomplete="on">
             <div class="mb-3">
               <label for="email" class="form-label">Enter your registered email address</label>
               <input type="email" class="form-control" id="email" name="email" required autofocus>
             </div>
-            <button type="submit" class="btn btn-danger w-100">Send Reset Link</button>
+            <button id="submitBtn" type="submit" class="btn btn-danger w-100">
+              <span class="btn-text">Send Reset Link</span>
+            </button>
           </form>
           <div class="mt-3 text-center">
             <a href="login.php">Back to Login</a>
@@ -113,5 +133,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function(){
+    const form = document.getElementById('forgotForm');
+    const btn  = document.getElementById('submitBtn');
+    const btnText = btn.querySelector('.btn-text');
+    form?.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if(!email){ return; }
+
+      // loading state
+      btn.classList.add('btn-loading');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+
+      try {
+        const res = await fetch('', {
+          method: 'POST',
+          headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ email })
+        });
+        const data = await res.json().catch(()=>({ success:false, message:'Unexpected response' }));
+
+        // Show message
+        const container = document.querySelector('.card-body');
+        if (container){
+          const alert = document.createElement('div');
+          alert.className = 'alert text-center ' + (data.success ? 'alert-success' : 'alert-danger');
+          alert.textContent = data.message || (data.success ? 'A reset link has been sent to your email.' : 'An error occurred.');
+          // Replace any existing alerts
+          container.querySelectorAll('.alert').forEach(el=>el.remove());
+          container.prepend(alert);
+        }
+      } catch(err) {
+        console.error(err);
+      } finally {
+        // restore button state
+        btn.disabled = false;
+        btn.classList.remove('btn-loading');
+        btn.innerHTML = '<span class="btn-text">Send Reset Link</span>';
+      }
+    });
+  })();
+</script>
 </body>
 </html>
