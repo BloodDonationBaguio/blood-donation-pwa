@@ -15,15 +15,18 @@ $success = $error = '';
 
 // Ensure extended profile columns exist (safe for MySQL)
 function ensureUserProfileColumns(PDO $pdo) {
+    $driver = 'mysql';
+    try { $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql'; } catch (Throwable $e) {}
     try {
         $structure = function_exists('getTableStructure') ? getTableStructure($pdo, 'users_new') : [];
         $existing = [];
         foreach ($structure as $col) {
-            // MySQL DESCRIBE returns 'Field'
             if (isset($col['Field'])) {
                 $existing[] = strtolower($col['Field']);
             } elseif (isset($col['column_name'])) {
                 $existing[] = strtolower($col['column_name']);
+            } elseif (isset($col['name'])) {
+                $existing[] = strtolower($col['name']);
             }
         }
 
@@ -42,11 +45,13 @@ function ensureUserProfileColumns(PDO $pdo) {
 
         foreach ($defs as $col => $type) {
             if (!in_array($col, $existing, true)) {
-                $pdo->exec("ALTER TABLE users_new ADD COLUMN `$col` $type");
+                $sql = $driver === 'mysql'
+                    ? "ALTER TABLE `users_new` ADD COLUMN `$col` $type"
+                    : "ALTER TABLE users_new ADD COLUMN $col $type";
+                try { $pdo->exec($sql); } catch (Throwable $inner) { error_log('add column failed: ' . $inner->getMessage()); }
             }
         }
     } catch (Throwable $e) {
-        // Non-fatal: log and continue
         error_log('ensureUserProfileColumns failed: ' . $e->getMessage());
     }
 }
@@ -128,9 +133,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 }
 
 // Fetch user info
-$stmt = $pdo->prepare('SELECT name, email, gender, date_of_birth, phone, address, city, province, postal_code, weight, height, blood_type FROM users_new WHERE id=?');
-$stmt->execute([$user_id]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$user = [];
+try {
+    $stmt = $pdo->prepare('SELECT name, email, gender, date_of_birth, phone, address, city, province, postal_code, weight, height, blood_type FROM users_new WHERE id=?');
+    $stmt->execute([$user_id]);
+    $tmp = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (is_array($tmp)) { $user = $tmp; }
+} catch (Throwable $e) {
+    try {
+        $stmt = $pdo->prepare('SELECT name, email FROM users_new WHERE id=?');
+        $stmt->execute([$user_id]);
+        $tmp = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (is_array($tmp)) { $user = $tmp; }
+    } catch (Throwable $e2) {
+        error_log('Profile select error: ' . $e->getMessage());
+        $user = [];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
