@@ -67,7 +67,7 @@ if ($user_id) {
             <span class="user-name"><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></span>
           </a>
           <div id="userDropdown" class="dropdown-menu" aria-labelledby="userDropdownToggle" role="menu">
-            <a href="dashboard.php" class="dropdown-item" role="menuitem">Dashboard</a>
+            <a href="dashboard.php" class="dropdown-item" role="menuitem">History</a>
             <a href="profile.php" class="dropdown-item" role="menuitem">Profile</a>
             <hr class="dropdown-divider">
             <a href="logout.php" class="dropdown-item text-danger" role="menuitem">Logout</a>
