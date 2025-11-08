@@ -69,6 +69,7 @@ if ($user_id) {
           <div id="userDropdown" class="dropdown-menu" aria-labelledby="userDropdownToggle" role="menu">
             <a href="dashboard.php" class="dropdown-item" role="menuitem">History</a>
             <a href="profile.php" class="dropdown-item" role="menuitem">Profile</a>
+            <a href="profile.php?tab=settings" class="dropdown-item" role="menuitem">Settings</a>
             <hr class="dropdown-divider">
             <a href="logout.php" class="dropdown-item text-danger" role="menuitem">Logout</a>
           </div>

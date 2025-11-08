@@ -161,6 +161,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 $stmt = $pdo->prepare('SELECT * FROM users_new WHERE id = ?');
 $stmt->execute([$user_id]);
 $user = $stmt->fetch();
+
+// Determine active tab from query string
+$activeTab = 'profile';
+if (isset($_GET['tab'])) {
+    $tab = strtolower(trim($_GET['tab']));
+    if ($tab === 'settings') { $activeTab = 'settings'; }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -182,16 +189,16 @@ $user = $stmt->fetch();
 
                     <ul class="nav nav-tabs" id="profileTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">Profile</button>
+                            <button class="nav-link <?= $activeTab === 'profile' ? 'active' : '' ?>" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="<?= $activeTab === 'profile' ? 'true' : 'false' ?>">Profile</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Settings</button>
+                            <button class="nav-link <?= $activeTab === 'settings' ? 'active' : '' ?>" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="<?= $activeTab === 'settings' ? 'true' : 'false' ?>">Settings</button>
                         </li>
                     </ul>
 
                     <div class="tab-content pt-3" id="profileTabsContent">
                         <!-- Profile Tab: Personal Information -->
-                        <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        <div class="tab-pane fade <?= $activeTab === 'profile' ? 'show active' : '' ?>" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                             <form method="POST">
                                 <div class="row g-3">
                                     <div class="col-md-6">
@@ -273,7 +280,7 @@ $user = $stmt->fetch();
                         </div>
 
                         <!-- Settings Tab: Change Password -->
-                        <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                        <div class="tab-pane fade <?= $activeTab === 'settings' ? 'show active' : '' ?>" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                             <h5>Change Password</h5>
                             <form method="POST">
                                 <div class="mb-3">
