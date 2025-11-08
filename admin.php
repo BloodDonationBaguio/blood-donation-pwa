@@ -458,9 +458,10 @@ try {
         $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM donors GROUP BY status");
         $donorStatusDistribution = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Recent activity - PostgreSQL compatible
+        // Recent activity - show proper reference when available
         $recentActivity = $pdo->query("
-                    SELECT 'donor' as type, (d.first_name || ' ' || d.last_name) as name, d.status, d.created_at, d.id::text as reference
+                    SELECT 'donor' as type, (d.first_name || ' ' || d.last_name) as name, d.status, d.created_at,
+                           COALESCE(d.reference_code, d.reference, CAST(d.id AS TEXT)) AS reference
         FROM donors d
         WHERE d.created_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
             ORDER BY created_at DESC 
@@ -503,8 +504,23 @@ try {
         $params = [];
         
         if ($search) {
-            $sql .= ' AND ((d.first_name || \' \' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?)';
+            // Detect reference columns safely
+            $hasRefCode = false; $hasRef = false;
+            try { $pdo->query("SELECT reference_code FROM donors LIMIT 1"); $hasRefCode = true; } catch (Exception $e) {}
+            try { $pdo->query("SELECT reference FROM donors LIMIT 1"); $hasRef = true; } catch (Exception $e) {}
+
+            $sql .= ' AND ((d.first_name || \' \' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?';
             $params = array_merge($params, array_fill(0, 3, "%$search%"));
+            if ($hasRefCode) {
+                $sql .= ' OR d.reference_code LIKE ?';
+                $params[] = "%$search%";
+            } elseif ($hasRef) {
+                $sql .= ' OR d.reference LIKE ?';
+                $params[] = "%$search%";
+            }
+            // Always allow searching by numeric/text ID as a fallback
+            $sql .= ' OR CAST(d.id AS TEXT) LIKE ?)';
+            $params[] = "%$search%";
         }
         
         if ($statusFilter) {
@@ -546,8 +562,21 @@ try {
         $params = [];
         
         if ($search) {
-            $sql .= " AND ((d.first_name || ' ' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?)";
+            // Detect reference columns safely
+            $hasRefCode = false; $hasRef = false;
+            try { $pdo->query("SELECT reference_code FROM donors LIMIT 1"); $hasRefCode = true; } catch (Exception $e) {}
+            try { $pdo->query("SELECT reference FROM donors LIMIT 1"); $hasRef = true; } catch (Exception $e) {}
+            $sql .= " AND ((d.first_name || ' ' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?";
             $params = array_fill(0, 3, "%$search%");
+            if ($hasRefCode) {
+                $sql .= ' OR d.reference_code LIKE ?';
+                $params[] = "%$search%";
+            } elseif ($hasRef) {
+                $sql .= ' OR d.reference LIKE ?';
+                $params[] = "%$search%";
+            }
+            $sql .= ' OR CAST(d.id AS TEXT) LIKE ?)';
+            $params[] = "%$search%";
         }
         
         $sql .= ' ORDER BY d.created_at DESC';
@@ -1389,7 +1418,7 @@ function buildPaginationUrl($page) {
                                         <?php foreach ($donors as $donor): ?>
                                             <tr>
                                                 <td><?= htmlspecialchars($donor['id']) ?></td>
-                                                <td><code><?= htmlspecialchars($donor['id'] ?? 'N/A') ?></code></td>
+                                                <td><code><?= htmlspecialchars($donor['reference_code'] ?? $donor['reference'] ?? ($donor['id'] ?? 'N/A')) ?></code></td>
                                                 <td><strong><?= htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) ?></strong></td>
                                                 <td><?= htmlspecialchars($donor['email']) ?></td>
                                                 <td><?= htmlspecialchars($donor['phone'] ?? 'N/A') ?></td>
@@ -1558,7 +1587,7 @@ function buildPaginationUrl($page) {
                                         <?php foreach ($pendingDonors as $donor): ?>
                                             <tr>
                                                 <td><?= htmlspecialchars($donor['id']) ?></td>
-                                                <td><code><?= htmlspecialchars($donor['id'] ?? 'N/A') ?></code></td>
+                                                <td><code><?= htmlspecialchars($donor['reference_code'] ?? $donor['reference'] ?? ($donor['id'] ?? 'N/A')) ?></code></td>
                                                 <td><strong><?= htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) ?></strong></td>
                                                 <td><?= htmlspecialchars($donor['email']) ?></td>
                                                 <td><?= htmlspecialchars($donor['phone'] ?? 'N/A') ?></td>
@@ -2934,7 +2963,7 @@ function buildPaginationUrl($page) {
                 });
             }
         }
-    </script>
+</script>
 
     <div id="globalLoader" style="position:fixed;inset:0;background:rgba(255,255,255,0.7);display:none;align-items:center;justify-content:center;z-index:2000;">
         <div class="text-center">
@@ -2942,6 +2971,92 @@ function buildPaginationUrl($page) {
             <div class="mt-3 global-loader-message">Processing...</div>
         </div>
     </div>
+    
+    <!-- Authorization Modal -->
+    <div class="modal fade" id="authorizationModal" tabindex="-1" aria-labelledby="authorizationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authorizationModalLabel"><i class="fas fa-lock me-2"></i>Authorization Required</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Enter the authorization password to edit donor records.</p>
+                    <div class="mb-2">
+                        <input type="password" name="auth_password" class="form-control" placeholder="Authorization password" autocomplete="off">
+                    </div>
+                    <div class="text-danger small auth-error"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary authorize-submit"><i class="fas fa-check me-1"></i>Authorize</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Client-side gate for donor edit actions
+        (function() {
+            let authorizationValid = <?php
+                $authValid = isset($_SESSION['authorization_verified_expires']) && $_SESSION['authorization_verified_expires'] >= time();
+                echo $authValid ? 'true' : 'false';
+            ?>;
+
+            function attachEditGate() {
+                const links = document.querySelectorAll('a[href*="admin_edit_donor.php"]');
+                links.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        if (authorizationValid) return; // allow
+                        e.preventDefault();
+                        const targetHref = this.href;
+                        const modalEl = document.getElementById('authorizationModal');
+                        if (!modalEl) return (window.location.href = targetHref);
+                        const modal = new bootstrap.Modal(modalEl);
+                        const input = modalEl.querySelector('input[name="auth_password"]');
+                        const errorEl = modalEl.querySelector('.auth-error');
+                        const submitBtn = modalEl.querySelector('.authorize-submit');
+                        input.value = '';
+                        errorEl.textContent = '';
+                        modal.show();
+                        submitBtn.onclick = function() {
+                            const pwd = input.value.trim();
+                            if (!pwd) {
+                                errorEl.textContent = 'Please enter the authorization password.';
+                                return;
+                            }
+                            submitBtn.disabled = true;
+                            fetch('includes/verify_authorization.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ password: pwd })
+                            })
+                            .then(r => r.json())
+                            .then(data => {
+                                submitBtn.disabled = false;
+                                if (data && data.success) {
+                                    authorizationValid = true;
+                                    modal.hide();
+                                    window.location.href = targetHref;
+                                } else {
+                                    errorEl.textContent = (data && data.message) ? data.message : 'Authorization failed.';
+                                }
+                            })
+                            .catch(err => {
+                                submitBtn.disabled = false;
+                                errorEl.textContent = 'Error verifying authorization.';
+                            });
+                        };
+                    }, { once: true });
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', attachEditGate);
+            } else {
+                attachEditGate();
+            }
+        })();
+    </script>
     <script>
         window.hideGlobalLoader = function() {
             const overlay = document.getElementById('globalLoader');
