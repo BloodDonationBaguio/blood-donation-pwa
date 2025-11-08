@@ -7,32 +7,67 @@ require_once 'includes/mail_helper.php';
 $success = '';
 $error = '';
 
+// Ensure required columns exist on users_new to prevent SQL errors
+try {
+    if (isset($pdo)) {
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $columns = [];
+        if (function_exists('getTableStructure')) {
+            $struct = getTableStructure($pdo, 'users_new');
+            foreach ($struct as $col) {
+                if (isset($col['Field'])) { $columns[] = strtolower($col['Field']); }
+                elseif (isset($col['column_name'])) { $columns[] = strtolower($col['column_name']); }
+                elseif (isset($col['name'])) { $columns[] = strtolower($col['name']); }
+            }
+        }
+        $hasResetToken   = in_array('reset_token', $columns, true);
+        $hasResetExpires = in_array('reset_token_expires', $columns, true);
+
+        if (!$hasResetToken) {
+            if ($driver === 'mysql') { $pdo->exec("ALTER TABLE users_new ADD COLUMN reset_token VARCHAR(255) NULL"); }
+            else { $pdo->exec("ALTER TABLE users_new ADD COLUMN reset_token TEXT"); }
+        }
+        if (!$hasResetExpires) {
+            if ($driver === 'mysql') { $pdo->exec("ALTER TABLE users_new ADD COLUMN reset_token_expires DATETIME NULL"); }
+            else { $pdo->exec("ALTER TABLE users_new ADD COLUMN reset_token_expires TEXT"); }
+        }
+    }
+} catch (Exception $schemaEx) {
+    error_log('users_new schema ensure (pwa forgot-password) failed: ' . $schemaEx->getMessage());
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     if (!$email) {
         $error = 'Please enter your email address.';
     } else {
-        // Check if user exists
-        $stmt = $pdo->prepare('SELECT id, name FROM users WHERE email = ?');
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
-        if (!$user) {
-            $error = 'If that email is registered, a reset link will be sent.';
-        } else {
-            // Generate token and expiry
-            $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour
-            $stmt = $pdo->prepare('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?');
-            $stmt->execute([$token, $expires, $user['id']]);
-            // Send email
-            $resetLink = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . "/reset-password.php?token=$token";
-            $subject = 'Password Reset Request';
-            $message = "<p>Hello " . htmlspecialchars($user['name']) . ",</p>" .
-                "<p>We received a request to reset your password. Click the link below to set a new password:</p>" .
-                "<p><a href='$resetLink'>$resetLink</a></p>" .
-                "<p>If you did not request this, you can ignore this email.</p>";
-            send_confirmation_email($email, $subject, $message, $user['name']);
-            $success = 'If that email is registered, a reset link will be sent.';
+        try {
+            // Check if user exists (case-insensitive)
+            $stmt = $pdo->prepare('SELECT id, name, email FROM users_new WHERE LOWER(email) = LOWER(?)');
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+            if (!$user) {
+                $error = 'If that email is registered, a reset link will be sent.';
+            } else {
+                // Generate token and expiry
+                $token = bin2hex(random_bytes(32));
+                $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour
+                $stmt = $pdo->prepare('UPDATE users_new SET reset_token = ?, reset_token_expires = ? WHERE id = ?');
+                $stmt->execute([$token, $expires, $user['id']]);
+                // Send email
+                $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $resetLink = $scheme . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . "/reset-password.php?token=$token";
+                $subject = 'Password Reset Request';
+                $message = "<p>Hello " . htmlspecialchars($user['name']) . ",</p>" .
+                    "<p>We received a request to reset your password. Click the link below to set a new password:</p>" .
+                    "<p><a href='$resetLink'>$resetLink</a></p>" .
+                    "<p>If you did not request this, you can ignore this email.</p>";
+                send_confirmation_email($user['email'], $subject, $message, $user['name']);
+                $success = 'If that email is registered, a reset link will be sent.';
+            }
+        } catch (Exception $e) {
+            error_log('Forgot password (PWA) error: ' . $e->getMessage());
+            $error = 'An error occurred while processing your request. Please try again later.';
         }
     }
 }
@@ -78,4 +113,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>

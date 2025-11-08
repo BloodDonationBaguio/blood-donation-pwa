@@ -9,29 +9,34 @@ $success = '';
 $error = '';
 
 if ($token) {
-    $stmt = $pdo->prepare('SELECT id, reset_token_expires FROM users WHERE reset_token = ?');
-    $stmt->execute([$token]);
-    $user = $stmt->fetch();
-    if ($user && strtotime($user['reset_token_expires']) > time()) {
-        $showForm = true;
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $password = $_POST['password'] ?? '';
-            $confirm = $_POST['confirm_password'] ?? '';
-            if (!$password || !$confirm) {
-                $error = 'Please fill in all fields.';
-            } elseif ($password !== $confirm) {
-                $error = 'Passwords do not match.';
-            } elseif (strlen($password) < 6) {
-                $error = 'Password must be at least 6 characters.';
-            } else {
-                $hash = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare('UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?');
-                $stmt->execute([$hash, $user['id']]);
-                $success = 'Your password has been reset. You can now <a href="login.php">login</a>.';
-                $showForm = false;
+    try {
+        $stmt = $pdo->prepare('SELECT id, reset_token_expires FROM users_new WHERE reset_token = ?');
+        $stmt->execute([$token]);
+        $user = $stmt->fetch();
+        if ($user && !empty($user['reset_token_expires']) && strtotime($user['reset_token_expires']) > time()) {
+            $showForm = true;
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $password = $_POST['password'] ?? '';
+                $confirm = $_POST['confirm_password'] ?? '';
+                if (!$password || !$confirm) {
+                    $error = 'Please fill in all fields.';
+                } elseif ($password !== $confirm) {
+                    $error = 'Passwords do not match.';
+                } elseif (strlen($password) < 6) {
+                    $error = 'Password must be at least 6 characters.';
+                } else {
+                    $hash = password_hash($password, PASSWORD_DEFAULT);
+                    $stmt = $pdo->prepare('UPDATE users_new SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?');
+                    $stmt->execute([$hash, $user['id']]);
+                    $success = 'Your password has been reset. You can now <a href="login.php">login</a>.';
+                    $showForm = false;
+                }
             }
+        } else {
+            $error = 'Invalid or expired reset link.';
         }
-    } else {
+    } catch (Exception $e) {
+        error_log('Reset password (PWA) error: ' . $e->getMessage());
         $error = 'Invalid or expired reset link.';
     }
 } else {
@@ -85,4 +90,4 @@ if ($token) {
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>
