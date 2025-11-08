@@ -9,11 +9,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = isset($_POST['name']) ? trim($_POST['name']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
+    $confirm = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : null;
 
     if (!$name || !$email || !$password) {
         header('Location: signup.php?error=empty');
         exit();
     }
+    // If confirm password is provided, ensure it matches
+    if ($confirm !== null && $password !== $confirm) {
+        header('Location: signup.php?error=pwd_mismatch');
+        exit();
+    }
+
     try {
         // Check if email exists
         $stmt = $pdo->prepare('SELECT id FROM users_new WHERE email = ?');

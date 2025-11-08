@@ -326,6 +326,7 @@ require_once __DIR__ . '/includes/session_config.php';
                 elseif ($_GET['error'] === 'exists') $msg = 'That email is already registered.';
                 elseif ($_GET['error'] === 'server') $msg = 'Server error. Please try again.';
                 elseif ($_GET['error'] === 'exception') $msg = 'Unexpected error. Please try again.';
+                elseif ($_GET['error'] === 'pwd_mismatch') $msg = 'Passwords do not match. Please re-enter them.';
                 if ($msg) {
                     echo '<div class="alert alert-danger">
                             <i class="fas fa-exclamation-triangle"></i>
@@ -394,6 +395,32 @@ require_once __DIR__ . '/includes/session_config.php';
                     </div>
                     <div id="strengthText" class="form-text"></div>
                 </div>
+
+                <!-- Confirm Password -->
+                <div class="input-group">
+                    <div class="form-floating flex-grow-1">
+                        <input type="password"
+                               class="form-control"
+                               id="confirm_password"
+                               name="confirm_password"
+                               placeholder="Confirm your password"
+                               autocomplete="new-password"
+                               required
+                               minlength="6"
+                               aria-required="true"
+                               aria-describedby="confirmPasswordHelp">
+                        <label for="confirm_password">
+                            <i class="fas fa-lock me-2"></i>Confirm Password <span class="required">*</span>
+                        </label>
+                    </div>
+                    <button class="btn" type="button" id="toggleConfirmPassword">
+                        <i class="fas fa-eye" id="toggleConfirmIcon"></i>
+                    </button>
+                </div>
+                <div id="confirmPasswordHelp" class="form-text">Re-enter the same password to confirm</div>
+                <div id="confirmMismatch" class="alert alert-warning d-none" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> Passwords do not match.
+                </div>
                 
                 <div class="form-check">
                     <input type="checkbox" 
@@ -447,6 +474,21 @@ require_once __DIR__ . '/includes/session_config.php';
                 toggleIcon.classList.add('fa-eye');
             }
         });
+
+        // Confirm password toggle
+        document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+            const confirmField = document.getElementById('confirm_password');
+            const toggleIcon = document.getElementById('toggleConfirmIcon');
+            if (confirmField.type === 'password') {
+                confirmField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                confirmField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
         
         // Password strength checker
         document.getElementById('password').addEventListener('input', function() {
@@ -494,6 +536,7 @@ require_once __DIR__ . '/includes/session_config.php';
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
             const terms = document.getElementById('terms').checked;
             
             if (!name || !email || !password) {
@@ -512,6 +555,15 @@ require_once __DIR__ . '/includes/session_config.php';
                 e.preventDefault();
                 alert('Password must be at least 6 characters long.');
                 return;
+            }
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                document.getElementById('confirmMismatch').classList.remove('d-none');
+                alert('Passwords do not match.');
+                return;
+            } else {
+                document.getElementById('confirmMismatch').classList.add('d-none');
             }
             
             if (!terms) {
@@ -554,6 +606,25 @@ require_once __DIR__ . '/includes/session_config.php';
             if (password && password.length < 6) {
                 this.classList.add('is-invalid');
             } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Real-time confirm password check
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const pwd = document.getElementById('password').value;
+            const confirmPwd = this.value;
+            const mismatch = document.getElementById('confirmMismatch');
+            if (confirmPwd.length === 0) {
+                mismatch.classList.add('d-none');
+                this.classList.remove('is-invalid');
+                return;
+            }
+            if (pwd !== confirmPwd) {
+                mismatch.classList.remove('d-none');
+                this.classList.add('is-invalid');
+            } else {
+                mismatch.classList.add('d-none');
                 this.classList.remove('is-invalid');
             }
         });
