@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$email]);
             $user = $stmt->fetch();
             if (!$user) {
-                $error = 'If that email is registered, a reset link will be sent.';
+                $error = 'The entered email is not registered.';
             } else {
                 // Generate token and expiry
                 $token = bin2hex(random_bytes(32));
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     "<p><a href='$resetLink'>$resetLink</a></p>" .
                     "<p>If you did not request this, you can ignore this email.</p>";
                 send_confirmation_email($user['email'], $subject, $message, $user['name']);
-                $success = 'If that email is registered, a reset link will be sent.';
+                $success = 'A reset link has been sent to your email.';
             }
         } catch (Exception $e) {
             error_log('Forgot password (PWA) error: ' . $e->getMessage());
