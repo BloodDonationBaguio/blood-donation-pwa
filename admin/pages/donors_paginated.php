@@ -49,6 +49,9 @@ $params = [];
 if (!empty($status)) {
     $whereConditions[] = 'd.status = ?';
     $params[] = $status;
+} else {
+    // Exclude pending donors by default when no status filter is selected
+    $whereConditions[] = "d.status <> 'pending'";
 }
 
 if (!empty($bloodType)) {

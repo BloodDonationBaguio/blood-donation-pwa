@@ -1054,8 +1054,16 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
         <?php endif; ?>
         
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>All Donors</h2>
+            <div>
+                <h2 class="mb-1">All Donors</h2>
+                <div class="small text-muted">
+                    Pending donors are excluded by default. Use the Pending tab or set Status to Pending.
+                </div>
+            </div>
             <div class="d-flex gap-2">
+                <a href="?tab=pending-donors" class="btn btn-outline-warning">
+                    <i class="fas fa-user-clock me-1"></i> View Pending
+                </a>
             <!-- Enhanced Search and Filter Form -->
             <form class="d-flex flex-wrap gap-2" method="GET" action="">
                 <input type="hidden" name="tab" value="donor-list">
@@ -1146,7 +1154,7 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                                 <a href="?tab=donor-details&id=<?= $donor['id'] ?>" class="btn btn-sm btn-info" title="View Complete Donor Information">
                                     <i class="fas fa-info-circle"></i> View
                                 </a>
-                                <a href="?tab=edit-donor&id=<?= $donor['id'] ?>" class="btn btn-sm btn-warning" title="Edit Donor Information">
+                                <a href="?tab=edit-donor&id=<?= $donor['id'] ?>" class="btn btn-sm btn-warning" title="Edit Donor Information" onclick="return confirm('Admin authorization required to edit donor information. Proceed?')">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
                                 <?php if ($donor['status'] === 'approved'): ?>

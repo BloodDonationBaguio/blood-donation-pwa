@@ -51,32 +51,43 @@ try {
         exit();
     }
 
-    // Fetch user donation history with PostgreSQL compatible query
-    // Use LOWER for case-insensitive email comparison in PostgreSQL
-    // Check if donors_new exists, otherwise use donors table
-    $donorsTable = 'donors'; // Default to 'donors' table which likely exists
-
+    // Fetch user donation history by email with robust donors_new fallback
+    // Prefer donors_new when available; otherwise fall back to donors
+    $donorsTable = 'donors_new';
     try {
-        // For PostgreSQL - check if table exists before querying
-        $checkTable = $pdo->prepare("SELECT to_regclass('public.donors_new') AS exists");
-        $checkTable->execute();
-        $tableResult = $checkTable->fetch(PDO::FETCH_ASSOC);
-
-        if (!empty($tableResult['exists'])) {
-            $donorsTable = 'donors_new';
-        }
+        // Attempt a lightweight query to confirm donors_new exists
+        $pdo->query("SELECT 1 FROM donors_new LIMIT 1");
     } catch (Exception $e) {
-        // If error checking table, stick with default 'donors'
-        error_log("Table check error: " . $e->getMessage());
+        $donorsTable = 'donors';
     }
 
     $donations = $pdo->prepare("
-        SELECT * FROM $donorsTable 
+        SELECT id, blood_type, status, created_at, updated_at
+        FROM $donorsTable 
         WHERE LOWER(email) = LOWER(?) 
-        ORDER BY id DESC
+        ORDER BY COALESCE(updated_at, created_at) DESC, id DESC
     ");
     $donations->execute([$user['email']]);
     $donation_history = $donations->fetchAll();
+
+    // Compute next eligibility based on the last completed donation (90 days rule)
+    $lastCompletedDate = null;
+    foreach ($donation_history as $row) {
+        $st = strtolower($row['status'] ?? '');
+        if ($st === 'completed') {
+            $lastCompletedDate = $row['updated_at'] ?? $row['created_at'] ?? null;
+            break; // Already ordered by latest first
+        }
+    }
+    $daysRemaining = null;
+    $nextEligibleDate = null;
+    if ($lastCompletedDate) {
+        $baseTs = strtotime($lastCompletedDate);
+        $nextEligibleDate = date('Y-m-d', strtotime('+90 days', $baseTs));
+        $today = date('Y-m-d');
+        $diffDays = floor((strtotime($today) - $baseTs) / (60 * 60 * 24));
+        $daysRemaining = max(0, 90 - $diffDays);
+    }
 
 } catch (Exception $e) {
     // Log the error but don't redirect to prevent loops
@@ -227,7 +238,22 @@ try {
                         <i class="bi bi-droplet-fill fs-2 text-info"></i>
                     </span>
                 </div>
-                <h5 class="fw-semibold mb-3 text-center">Donation History</h5>
+                <h5 class="fw-semibold mb-2 text-center">Donation History</h5>
+                <?php if ($lastCompletedDate): ?>
+                    <?php if ($daysRemaining > 0): ?>
+                        <div class="alert alert-warning text-center mb-3">
+                            You can donate again after <strong><?= $daysRemaining ?></strong> days. Next eligible on <strong><?= date('M d, Y', strtotime($nextEligibleDate)) ?></strong>.
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-success text-center mb-3">
+                            You’re eligible to donate again now. Thank you for your generosity!
+                        </div>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <div class="alert alert-info text-center mb-3">
+                        No completed donations yet. Once completed, you can donate again after <strong>90</strong> days.
+                    </div>
+                <?php endif; ?>
                 <?php if (isset($donation_history) && is_array($donation_history) && count($donation_history) > 0): ?>
                     <div class="table-responsive">
                         <table class="table table-borderless align-middle mb-0">
@@ -241,9 +267,30 @@ try {
                             <tbody>
                                 <?php foreach ($donation_history as $don): ?>
                                     <tr>
-                                        <td><?= date('M d, Y', strtotime($don['created_at'])) ?></td>
+                                        <td><?= date('M d, Y', strtotime($don['updated_at'] ?? $don['created_at'])) ?></td>
                                         <td><?= htmlspecialchars($don['blood_type']) ?></td>
-                                        <td><span class="badge bg-success">Registered</span></td>
+                                        <?php 
+                                            $status = strtolower($don['status'] ?? '');
+                                            $label = 'Donation Completed';
+                                            $badge = 'bg-success';
+                                            if ($status === 'completed') {
+                                                $label = 'Donation Completed';
+                                                $badge = 'bg-success';
+                                            } elseif ($status === 'approved') {
+                                                $label = 'Approved';
+                                                $badge = 'bg-info';
+                                            } elseif ($status === 'pending') {
+                                                $label = 'Pending';
+                                                $badge = 'bg-warning';
+                                            } elseif ($status === 'rejected') {
+                                                $label = 'Rejected';
+                                                $badge = 'bg-danger';
+                                            } else {
+                                                $label = 'Donation Completed'; // fallback to requested wording
+                                                $badge = 'bg-success';
+                                            }
+                                        ?>
+                                        <td><span class="badge <?= $badge ?>"><?= $label ?></span></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

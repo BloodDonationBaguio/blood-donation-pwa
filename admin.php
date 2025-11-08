@@ -510,6 +510,9 @@ try {
         if ($statusFilter) {
             $sql .= ' AND d.status = ?';
             $params[] = $statusFilter;
+        } else {
+            // Exclude pending donors by default in All Donors view
+            $sql .= " AND d.status <> 'pending'";
         }
         
         if ($bloodTypeFilter) {
