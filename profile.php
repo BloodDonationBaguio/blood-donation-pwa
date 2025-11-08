@@ -145,10 +145,17 @@ try {
         $stmt->execute([$user_id]);
         $tmp = $stmt->fetch(PDO::FETCH_ASSOC);
         if (is_array($tmp)) { $user = $tmp; }
-    } catch (Throwable $e2) {
+} catch (Throwable $e2) {
         error_log('Profile select error: ' . $e->getMessage());
         $user = [];
     }
+}
+
+// Determine which tab should be active based on query parameter
+$activeTab = 'profile';
+if (isset($_GET['tab'])) {
+    $tab = strtolower(trim($_GET['tab']));
+    if ($tab === 'settings') { $activeTab = 'settings'; }
 }
 ?>
 <!DOCTYPE html>
@@ -175,10 +182,10 @@ try {
                 <div class="card-header p-2">
                     <ul class="nav nav-tabs" id="profileTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">Profile</button>
+                            <button class="nav-link <?= $activeTab === 'profile' ? 'active' : '' ?>" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="<?= $activeTab === 'profile' ? 'true' : 'false' ?>">Profile</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Settings</button>
+                            <button class="nav-link <?= $activeTab === 'settings' ? 'active' : '' ?>" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="<?= $activeTab === 'settings' ? 'true' : 'false' ?>">Settings</button>
                         </li>
                     </ul>
                 </div>
@@ -189,7 +196,7 @@ try {
 
                     <div class="tab-content" id="profileTabsContent">
                         <!-- Profile Tab -->
-                        <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        <div class="tab-pane fade <?= $activeTab === 'profile' ? 'show active' : '' ?>" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                             <form method="POST">
                                 <div class="row g-3">
                                     <div class="col-md-6">
@@ -270,7 +277,7 @@ try {
                         </div>
 
                         <!-- Settings Tab -->
-                        <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                        <div class="tab-pane fade <?= $activeTab === 'settings' ? 'show active' : '' ?>" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                             <h5>Change Password</h5>
                             <form method="POST">
                                 <div class="mb-3">
