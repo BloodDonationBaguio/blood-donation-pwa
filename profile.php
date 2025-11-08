@@ -157,15 +157,23 @@ try {
     <meta charset="UTF-8">
     <title>Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Profile page UI refinements */
+        .profile-card .card-header { background-color: #fff; border-bottom: 0; }
+        .profile-card .nav-tabs { border-bottom: 0; gap: .25rem; }
+        .profile-card .nav-tabs .nav-link { padding: .45rem .9rem; border-top-left-radius: .4rem; border-top-right-radius: .4rem; }
+        .profile-card .nav-tabs .nav-link.active { background-color: #fff; border-color: #dee2e6 #dee2e6 #fff; }
+        .profile-card .tab-content { padding-top: 1rem; }
+    </style>
 </head>
 <body class="bg-light">
 <?php include 'navbar.php'; ?>
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header p-0">
-                    <ul class="nav nav-tabs card-header-tabs" id="profileTabs" role="tablist">
+            <div class="card shadow-sm profile-card">
+                <div class="card-header p-2">
+                    <ul class="nav nav-tabs" id="profileTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">Profile</button>
                         </li>
