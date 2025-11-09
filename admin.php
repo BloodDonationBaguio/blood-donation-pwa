@@ -409,23 +409,41 @@ try {
 
         // Fallback to donors/donors_new when donor_history is not present or empty
         if (empty($bloodInventory)) {
+            // Detect donor blood-type column name to handle schema variants (blood_type vs blood_group)
+            $btDonorsCol = 'blood_type';
+            try { $pdo->query("SELECT {$btDonorsCol} FROM donors LIMIT 1"); }
+            catch (Exception $e) {
+                foreach (['blood_group','bloodType','bloodtype'] as $alt) {
+                    try { $pdo->query("SELECT {$alt} FROM donors LIMIT 1"); $btDonorsCol = $alt; break; } catch (Exception $e2) {}
+                }
+            }
+
             $hasDonorsNew = false;
             try { $pdo->query("SELECT 1 FROM donors_new LIMIT 1"); $hasDonorsNew = true; } catch (Exception $e) { $hasDonorsNew = false; }
 
             if ($hasDonorsNew) {
-                $stmt = $pdo->query(
-                    "SELECT blood_type, COUNT(*) AS count FROM (
-                        SELECT blood_type FROM donors 
-                        WHERE status IN ('approved','served','completed') 
-                          AND blood_type IS NOT NULL AND blood_type <> ''
-                        UNION ALL
-                        SELECT blood_type FROM donors_new 
-                        WHERE status IN ('approved','served','completed') 
-                          AND blood_type IS NOT NULL AND blood_type <> ''
-                    ) AS t GROUP BY blood_type ORDER BY count DESC"
-                );
+                // Detect donors_new blood-type column similarly
+                $btDonorsNewCol = $btDonorsCol;
+                try { $pdo->query("SELECT {$btDonorsNewCol} FROM donors_new LIMIT 1"); }
+                catch (Exception $e) {
+                    foreach (['blood_group','bloodType','bloodtype'] as $alt) {
+                        try { $pdo->query("SELECT {$alt} FROM donors_new LIMIT 1"); $btDonorsNewCol = $alt; break; } catch (Exception $e2) {}
+                    }
+                }
+
+                $sql = "SELECT blood_type, COUNT(*) AS count FROM (\n"
+                     . "    SELECT {$btDonorsCol} AS blood_type FROM donors \n"
+                     . "    WHERE status IN ('approved','served','completed') \n"
+                     . "      AND {$btDonorsCol} IS NOT NULL AND {$btDonorsCol} <> ''\n"
+                     . "    UNION ALL\n"
+                     . "    SELECT {$btDonorsNewCol} AS blood_type FROM donors_new \n"
+                     . "    WHERE status IN ('approved','served','completed') \n"
+                     . "      AND {$btDonorsNewCol} IS NOT NULL AND {$btDonorsNewCol} <> ''\n"
+                     . ") AS t GROUP BY blood_type ORDER BY count DESC";
+                $stmt = $pdo->query($sql);
             } else {
-                $stmt = $pdo->query("SELECT blood_type, COUNT(*) as count FROM donors WHERE status IN ('approved', 'served', 'completed') AND blood_type IS NOT NULL AND blood_type <> '' GROUP BY blood_type ORDER BY count DESC");
+                $sql = "SELECT {$btDonorsCol} AS blood_type, COUNT(*) AS count FROM donors WHERE status IN ('approved','served','completed') AND {$btDonorsCol} IS NOT NULL AND {$btDonorsCol} <> '' GROUP BY {$btDonorsCol} ORDER BY count DESC";
+                $stmt = $pdo->query($sql);
             }
             $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
@@ -513,22 +531,19 @@ try {
         $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM donors GROUP BY status");
         $donorStatusDistribution = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Recent activity - show proper reference when available
-        $recentActivity = $pdo->query("
-                    SELECT 'donor' as type, CONCAT(d.first_name, ' ', d.last_name) as name, d.status, d.created_at,
-                           COALESCE(d.reference_code, d.reference, CAST(d.id AS CHAR)) AS reference
-        FROM donors d
-        WHERE d.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-            ORDER BY created_at DESC 
-            LIMIT 10
-        ")->fetchAll(PDO::FETCH_ASSOC);
-        // Dialect-aware override to ensure compatibility across PostgreSQL/MySQL
+        // Recent activity - dialect-aware (avoid MySQL-only syntax on PostgreSQL)
+        $recentActivity = [];
         if ($driver === 'pgsql') {
             $recentSql = "SELECT 'donor' AS type, (d.first_name || ' ' || d.last_name) AS name, d.status, d.created_at, COALESCE(d.reference_code, d.reference, CAST(d.id AS TEXT)) AS reference FROM donors d WHERE d.created_at >= (NOW() - INTERVAL '7 days') ORDER BY d.created_at DESC LIMIT 10";
         } else {
             $recentSql = "SELECT 'donor' AS type, CONCAT(d.first_name, ' ', d.last_name) AS name, d.status, d.created_at, COALESCE(d.reference_code, d.reference, CAST(d.id AS CHAR)) AS reference FROM donors d WHERE d.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) ORDER BY d.created_at DESC LIMIT 10";
         }
-        $recentActivity = $pdo->query($recentSql)->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $recentActivity = $pdo->query($recentSql)->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Keep dashboard rendering; if recent activity fails, just show "No Recent Activity"
+            $recentActivity = [];
+        }
         
     } catch (PDOException $e) {
         $bloodInventory = [];
