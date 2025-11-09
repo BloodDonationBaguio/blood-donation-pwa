@@ -5,4 +5,5 @@ services:
     autoDeploy: true
     branch: main
     plan: free
+    healthCheckPath: "/health.php"
     preDeployCommand: "php seed_production_db.php"
