@@ -1,131 +1,29 @@
-# Enable rewrite engine
-RewriteEngine On
-
-# HTTPS enforcement handled by edge (e.g., Cloudflare). Avoid origin-level scheme redirects to prevent loops.
-# If you need origin enforcement, enable it only when not behind a proxy that terminates TLS.
-
-# Canonical host: redirect apex to www
-RewriteCond %{HTTP_HOST} ^blooddonationbaguio\.com$ [NC]
-RewriteRule ^ https://www.blooddonationbaguio.com%{REQUEST_URI} [L,R=301]
-
-# Prevent MultiViews from interfering with asset resolution
 Options -MultiViews -Indexes
 
-# Set default charset
+# Charset
 AddDefaultCharset UTF-8
 
-# Ensure PHP files are processed by the PHP interpreter
-<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps)$">
-    SetHandler application/x-httpd-php
-</FilesMatch>
-
-# Explicit MIME types for JSON and JS
+# Ensure correct MIME types
 AddType application/javascript .js
 AddType application/json .json
 
-# Redirect index.html to index.php
-RewriteRule ^index\.html$ index.php [L,R=301]
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /blood-donation-pwa/
 
-# Handle front controller pattern
-# Allow direct access to debug_latest_donors.php
-RewriteCond %{REQUEST_URI} ^/debug_latest_donors\.php$
-RewriteRule ^ - [L]
-# Bypass rewrite for service worker, manifest, and common static assets
+# Allow direct access to service worker and manifest
 RewriteRule ^(sw\.js|manifest\.json)$ - [L]
+
+# Allow common static assets without rewriting
 RewriteRule ^(css/.*|assets/.*|js/.*|images/.*|fonts/.*)$ - [L]
 
-# Allow direct access to diagnostics and test endpoints
-RewriteCond %{REQUEST_URI} ^/debug_inventory_manager_versions\.php$ [NC]
-RewriteRule ^ - [L]
-RewriteCond %{REQUEST_URI} ^/flush_opcache\.php$ [NC]
-RewriteRule ^ - [L]
-RewriteCond %{REQUEST_URI} ^/run_all_tests\.php$ [NC]
-RewriteRule ^ - [L]
-RewriteCond %{REQUEST_URI} ^/blood-donation-pwa/run_all_tests\.php$ [NC]
-RewriteRule ^ - [L]
-RewriteCond %{REQUEST_URI} ^/legacy-pwa-4/blood-donation-pwa/run_all_tests\.php$ [NC]
-RewriteRule ^ - [L]
-
-# Allow direct access to all test scripts in tests directories
-RewriteCond %{REQUEST_URI} ^/tests/ [NC]
-RewriteRule ^ - [L]
-RewriteCond %{REQUEST_URI} ^/blood-donation-pwa/tests/ [NC]
-RewriteRule ^ - [L]
-RewriteCond %{REQUEST_URI} ^/legacy-pwa-4/blood-donation-pwa/tests/ [NC]
-RewriteRule ^ - [L]
-
-# Allow direct access to robust code fingerprint endpoint
-RewriteCond %{REQUEST_URI} ^/debug_fingerprint_robust\.php$ [NC]
-RewriteRule ^ - [L]
-
-# Allow direct access to diagnostics scripts under /scripts/diagnostics
-RewriteCond %{REQUEST_URI} ^/scripts/diagnostics/ [NC]
-RewriteRule ^ - [L]
-
-# Allow direct access to admin subdirectory files (login, assets, etc.)
-# Handle both possible mount paths
-RewriteCond %{REQUEST_URI} ^/legacy-pwa-4/blood-donation-pwa/admin/ [NC]
-RewriteRule ^ - [L]
-RewriteCond %{REQUEST_URI} ^/blood-donation-pwa/admin/ [NC]
-RewriteRule ^ - [L]
-
+# Front controller: send non-existing paths to index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [L,QSA]
-
-# Handle 404 errors
-ErrorDocument 404 /404.php
-
-# Security headers
-<IfModule mod_headers.c>
-    # CORS for API
-    Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
-    
-    # Security headers
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-XSS-Protection "1; mode=block"
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
-    # Enforce HSTS for 1 year across subdomains (no preload by default)
-    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+RewriteRule ^ index.php [L]
 </IfModule>
 
-# PHP settings
-<IfModule mod_php7.c>
-    php_flag display_errors on
-    php_value error_reporting E_ALL
-</IfModule>
-
-# Caching rules: long cache for static assets, no-cache for PHP
-<IfModule mod_headers.c>
-    <FilesMatch "\.(php|phtml)$">
-        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
-        Header set Pragma "no-cache"
-    </FilesMatch>
-</IfModule>
-
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresDefault "access plus 1 hour"
-    ExpiresByType text/css "access plus 7 days"
-    ExpiresByType application/javascript "access plus 7 days"
-    ExpiresByType application/x-javascript "access plus 7 days"
-    ExpiresByType text/javascript "access plus 7 days"
-    ExpiresByType image/jpeg "access plus 30 days"
-    ExpiresByType image/png "access plus 30 days"
-    ExpiresByType image/gif "access plus 30 days"
-    ExpiresByType image/webp "access plus 30 days"
-    ExpiresByType image/svg+xml "access plus 30 days"
-    ExpiresByType font/woff2 "access plus 30 days"
-    ExpiresByType font/woff "access plus 30 days"
-    ExpiresByType application/json "access plus 1 hour"
-</IfModule>
-
-# Optional compression for static text assets (Cloudflare can also handle this)
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json
-    # Exclude already compressed types
-    SetEnvIfNoCase Request_URI \.(?:gif|jpg|jpeg|png|webp)$ no-gzip
-</IfModule>
+# Fallback: make sure PHP files are handled by PHP
+<FilesMatch "\.php$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
