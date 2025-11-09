@@ -2,7 +2,7 @@
 // Include session configuration first - before any output
 require_once __DIR__ . '/includes/session_config.php';
 require_once 'includes/session_manager.php';
-require_once 'db.php';
+// Do not eagerly connect to DB; we'll load it only if needed
 
 // Check and restore session if needed
 checkRememberMeToken();
@@ -10,6 +10,9 @@ $user_id = $_SESSION['user_id'] ?? null;
 $notif_count = 0;
 $notifications = [];
 if ($user_id) {
+    // Load DB lazily only when we actually need notifications
+    ensurePDO();
+    global $pdo;
     try {
         // Check if notifications table exists
         $stmt = $pdo->prepare('SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 5');

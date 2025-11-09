@@ -17,6 +17,41 @@ if (extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
 
 session_start();
 
+// Early intercept: serve manifest and service worker directly even under front-controller rewrites
+try {
+    $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
+    $isSw = ($reqPath === '/sw.js' || $reqPath === '/blood-donation-pwa/sw.js');
+    $isManifest = ($reqPath === '/manifest.json' || $reqPath === '/blood-donation-pwa/manifest.json');
+    if ($isSw || $isManifest) {
+        $candidates = [];
+        if ($isSw) {
+            header('Content-Type: application/javascript; charset=utf-8');
+            $candidates = [
+                __DIR__ . '/sw.js',
+                dirname(__DIR__) . '/sw.js'
+            ];
+        } else {
+            header('Content-Type: application/json; charset=utf-8');
+            $candidates = [
+                __DIR__ . '/manifest.json',
+                dirname(__DIR__) . '/manifest.json'
+            ];
+        }
+        foreach ($candidates as $file) {
+            if (is_file($file)) {
+                header('Cache-Control: public, max-age=604800');
+                readfile($file);
+                exit;
+            }
+        }
+        header('HTTP/1.1 404 Not Found');
+        echo 'Not Found';
+        exit;
+    }
+} catch (Throwable $e) {
+    // Fail open: proceed with normal index rendering
+}
+
 // Allow running test suite via query param when redirected to index.php by front-controller rules
 if (isset($_GET['__run_tests'])) {
     // Require admin session to run tests from production
