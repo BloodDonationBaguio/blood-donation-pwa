@@ -53,5 +53,25 @@ class AuthorizationConfig {
         self::saveConfig($config);
         return ['success' => true];
     }
+
+    public static function isEnabled() {
+        $config = self::getConfig();
+        return !empty($config['enabled']);
+    }
+
+    public static function validatePassword($plainPassword) {
+        $config = self::getConfig();
+        if (empty($config['enabled'])) {
+            return ['success' => false, 'message' => 'Authorization is disabled'];
+        }
+        $hash = $config['password_hash'] ?? '';
+        if (empty($hash)) {
+            return ['success' => false, 'message' => 'Authorization password not configured'];
+        }
+        $ok = password_verify($plainPassword, $hash);
+        return $ok
+            ? ['success' => true]
+            : ['success' => false, 'message' => 'Invalid authorization password'];
+    }
 }
 ?>

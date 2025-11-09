@@ -2258,3 +2258,92 @@ Stack trace:
 [08-Nov-2025 18:21:24 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
 [08-Nov-2025 18:21:24 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
 [08-Nov-2025 18:21:24 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:24:18 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:24:18 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:24:18 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:24:18 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:24:18 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:24:18 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:24:18 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:24:18 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:27:19 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:27:19 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:27:19 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:27:19 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:27:19 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:27:19 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:27:19 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:27:19 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:39:09 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:39:09 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:39:09 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:39:09 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:39:09 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:39:09 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:39:09 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:39:09 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:45:55 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:45:55 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:45:55 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:45:55 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:45:55 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:45:55 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:45:55 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:45:55 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:51:15 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:51:15 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:51:15 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:51:15 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:51:15 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:51:15 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:51:15 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:51:15 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:54:01 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:54:01 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:54:01 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:54:01 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:54:01 Europe/Berlin] POST received! Username: admin
+[08-Nov-2025 19:54:01 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:54:01 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:54:01 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:54:01 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:58:01 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:58:01 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:58:01 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:58:01 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 19:58:01 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:58:01 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:58:01 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 19:58:01 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 20:01:00 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:01:00 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:01:00 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:01:00 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 20:01:00 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:01:00 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:01:00 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:01:00 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 20:04:01 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:04:01 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:04:01 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:04:01 Europe/Berlin] Database connection established successfully
+[08-Nov-2025 20:04:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:04:02 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:04:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[08-Nov-2025 20:04:02 Europe/Berlin] Database connection established successfully
+[09-Nov-2025 07:24:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:02 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:02 Europe/Berlin] Database connection established successfully
+[09-Nov-2025 07:24:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:04 Europe/Berlin] Database connection established successfully
+[09-Nov-2025 07:24:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:04 Europe/Berlin] Database connection established successfully
+[09-Nov-2025 07:24:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:04 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:04 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[09-Nov-2025 07:24:04 Europe/Berlin] Database connection established successfully

@@ -74,7 +74,7 @@ try {
     $lastCompletedDate = null;
     foreach ($donation_history as $row) {
         $st = strtolower($row['status'] ?? '');
-        if ($st === 'completed') {
+        if (in_array($st, ['completed', 'served'], true)) {
             $lastCompletedDate = $row['updated_at'] ?? $row['created_at'] ?? null;
             break; // Already ordered by latest first
         }
@@ -239,69 +239,76 @@ try {
                     </span>
                 </div>
                 <h5 class="fw-semibold mb-2 text-center">Donation History</h5>
-                <?php if ($lastCompletedDate): ?>
-                    <?php if ($daysRemaining > 0): ?>
-                        <div class="alert alert-warning text-center mb-3">
-                            You can donate again after <strong><?= $daysRemaining ?></strong> days. Next eligible on <strong><?= date('M d, Y', strtotime($nextEligibleDate)) ?></strong>.
+                <div class="container mt-5">
+                    <div class="row justify-content-center">
+                        <div class="col-md-10">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <div class="text-center mb-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="#dc3545" class="bi bi-droplet-fill" viewBox="0 0 16 16">
+                                            <path d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0 7.25 2.503 5.746 4.176 4.432 5.638 3.122 7.096 2 8.345 2 10a6 6 0 0 0 6 6zM6.646 4.646c-.376.377-1.272 1.489-2.093 2.677A4.488 4.488 0 0 1 4 10c0 .341.028.67.082.981l3.558-3.558.08-.08.08-.08-.002-.002.002.002.08-.08.08-.08 3.558-3.558A4.488 4.488 0 0 1 12 10c0-.341-.028-.67-.082-.981l-3.558 3.558-.08.08-.08.08.002.002-.002-.002-.08.08-.08.08-3.558 3.558z"/>
+                                        </svg>
+                                        <h2 class="mt-3">Donation History</h2>
+                                    </div>
+                                
+                                    <?php if ($lastCompletedDate): ?>
+                                        <div class="alert alert-info">
+                                            You can donate again after <strong><?php echo htmlspecialchars($nextEligibleDate); ?></strong> (<?php echo $daysRemaining; ?> days remaining).
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="alert alert-secondary">
+                                            No completed donations yet. Once completed, you can donate again after 90 days.
+                                        </div>
+                                    <?php endif; ?>
+                                
+                                    <div class="table-responsive">
+                                        <table class="table table-borderless align-middle mb-0">
+                                            <thead>
+                                                <tr class="text-muted small">
+                                                    <th>Date</th>
+                                                    <th>Blood Type</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($donation_history as $don): ?>
+                                                    <tr>
+                                                        <td><?= date('M d, Y', strtotime($don['updated_at'] ?? $don['created_at'])) ?></td>
+                                                        <td><?= htmlspecialchars($don['blood_type']) ?></td>
+                                                        <?php 
+                                                            $status = strtolower($don['status'] ?? '');
+                                                            $label = 'Donation Completed';
+                                                            $badge = 'bg-success';
+                                                            if ($status === 'completed' || $status === 'served') {
+                                                                $label = 'Donation Completed';
+                                                                $badge = 'bg-success';
+                                                            } elseif ($status === 'approved') {
+                                                                $label = 'Approved';
+                                                                $badge = 'bg-info';
+                                                            } elseif ($status === 'pending') {
+                                                                $label = 'Pending';
+                                                                $badge = 'bg-warning';
+                                                            } elseif ($status === 'rejected') {
+                                                                $label = 'Rejected';
+                                                                $badge = 'bg-danger';
+                                                            } else {
+                                                                $label = 'Donation Completed'; // fallback to requested wording
+                                                                $badge = 'bg-success';
+                                                            }
+                                                        ?>
+                                                        <td><span class="badge <?= $badge ?>"><?= $label ?></span></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="text-muted text-center">No donation records found.</div>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    <?php else: ?>
-                        <div class="alert alert-success text-center mb-3">
-                            You’re eligible to donate again now. Thank you for your generosity!
-                        </div>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <div class="alert alert-info text-center mb-3">
-                        No completed donations yet. Once completed, you can donate again after <strong>90</strong> days.
                     </div>
-                <?php endif; ?>
-                <?php if (isset($donation_history) && is_array($donation_history) && count($donation_history) > 0): ?>
-                    <div class="table-responsive">
-                        <table class="table table-borderless align-middle mb-0">
-                            <thead>
-                                <tr class="text-muted small">
-                                    <th>Date</th>
-                                    <th>Blood Type</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($donation_history as $don): ?>
-                                    <tr>
-                                        <td><?= date('M d, Y', strtotime($don['updated_at'] ?? $don['created_at'])) ?></td>
-                                        <td><?= htmlspecialchars($don['blood_type']) ?></td>
-                                        <?php 
-                                            $status = strtolower($don['status'] ?? '');
-                                            $label = 'Donation Completed';
-                                            $badge = 'bg-success';
-                                            if ($status === 'completed') {
-                                                $label = 'Donation Completed';
-                                                $badge = 'bg-success';
-                                            } elseif ($status === 'approved') {
-                                                $label = 'Approved';
-                                                $badge = 'bg-info';
-                                            } elseif ($status === 'pending') {
-                                                $label = 'Pending';
-                                                $badge = 'bg-warning';
-                                            } elseif ($status === 'rejected') {
-                                                $label = 'Rejected';
-                                                $badge = 'bg-danger';
-                                            } else {
-                                                $label = 'Donation Completed'; // fallback to requested wording
-                                                $badge = 'bg-success';
-                                            }
-                                        ?>
-                                        <td><span class="badge <?= $badge ?>"><?= $label ?></span></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="text-muted text-center">No donation records found.</div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
+                </div>
 
 </div>
 

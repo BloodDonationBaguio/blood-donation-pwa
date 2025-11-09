@@ -1,10 +1,18 @@
 <?php
 session_start();
 require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/authorization_config.php';
 
 // Check if admin is logged in
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header('Location: admin_login.php');
+    exit();
+}
+
+// Enforce authorization gate for edit actions
+$authValid = isset($_SESSION['authorization_verified_expires']) && $_SESSION['authorization_verified_expires'] >= time();
+if (!$authValid) {
+    header('Location: admin.php?tab=donor-list&error=Authorization required to edit donor records');
     exit();
 }
 
