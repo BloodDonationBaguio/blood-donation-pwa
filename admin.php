@@ -429,9 +429,20 @@ try {
             }
             $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
+        // Final fallback: derive distribution from blood_inventory when donor tables lack blood_type
+        if (empty($bloodInventory)) {
+            try {
+                $stmt = $pdo->query("SELECT blood_type, COUNT(*) AS count FROM blood_inventory WHERE blood_type IS NOT NULL AND blood_type <> '' GROUP BY blood_type ORDER BY count DESC");
+                $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $e) {
+                // blood_inventory table might not exist or be empty
+            }
+        }
         
         
         // Monthly trends
+        // Detect the database driver for dialect-aware queries
+        $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
         // Build last 12 months labels
         $months = [];
         $cursor = new DateTime('first day of this month');
@@ -445,8 +456,12 @@ try {
             ];
         }
 
-        // Registrations per month (donors created) - MySQL compatible
-        $stmt = $pdo->query("SELECT DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as c FROM donors WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY ym");
+        // Registrations per month (donors created) - dialect aware
+        if ($driver === 'pgsql') {
+            $stmt = $pdo->query("SELECT TO_CHAR(created_at, 'YYYY-MM') AS ym, COUNT(*) AS c FROM donors WHERE created_at >= (CURRENT_DATE - INTERVAL '12 months') GROUP BY ym ORDER BY ym");
+        } else {
+            $stmt = $pdo->query("SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym, COUNT(*) AS c FROM donors WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY ym ORDER BY ym");
+        }
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
             if (isset($months[$row['ym']])) {
                 $months[$row['ym']]['registrations'] = (int)$row['c'];
@@ -454,12 +469,18 @@ try {
         }
 
         // Donations per month: prefer donors.last_donation_date if available, fallback to blood_inventory.collection_date
+        $hasLastDonation = false;
         try {
-            $hasLastDonation = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'donors' AND column_name = 'last_donation_date'")->fetch();
+            $pdo->query("SELECT last_donation_date FROM donors LIMIT 1");
+            $hasLastDonation = true;
         } catch (Exception $e) { $hasLastDonation = false; }
 
         if ($hasLastDonation) {
-            $stmt = $pdo->query("SELECT DATE_FORMAT(last_donation_date, '%Y-%m') as ym, COUNT(*) as c FROM donors WHERE status='served' AND last_donation_date IS NOT NULL AND last_donation_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY ym");
+            if ($driver === 'pgsql') {
+                $stmt = $pdo->query("SELECT TO_CHAR(last_donation_date, 'YYYY-MM') AS ym, COUNT(*) AS c FROM donors WHERE status='served' AND last_donation_date IS NOT NULL AND last_donation_date >= (CURRENT_DATE - INTERVAL '12 months') GROUP BY ym ORDER BY ym");
+            } else {
+                $stmt = $pdo->query("SELECT DATE_FORMAT(last_donation_date, '%Y-%m') AS ym, COUNT(*) AS c FROM donors WHERE status='served' AND last_donation_date IS NOT NULL AND last_donation_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY ym ORDER BY ym");
+            }
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                 if (isset($months[$row['ym']])) {
                     $months[$row['ym']]['donations'] = (int)$row['c'];
@@ -468,7 +489,11 @@ try {
         } else {
             // Fallback: count blood units collected per month
             try {
-                $stmt = $pdo->query("SELECT DATE_FORMAT(collection_date, '%Y-%m') as ym, COUNT(*) as c FROM blood_inventory WHERE collection_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY ym");
+                if ($driver === 'pgsql') {
+                    $stmt = $pdo->query("SELECT TO_CHAR(collection_date, 'YYYY-MM') AS ym, COUNT(*) AS c FROM blood_inventory WHERE collection_date >= (CURRENT_DATE - INTERVAL '12 months') GROUP BY ym ORDER BY ym");
+                } else {
+                    $stmt = $pdo->query("SELECT DATE_FORMAT(collection_date, '%Y-%m') AS ym, COUNT(*) AS c FROM blood_inventory WHERE collection_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY ym ORDER BY ym");
+                }
                 foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                     if (isset($months[$row['ym']])) {
                         $months[$row['ym']]['donations'] = (int)$row['c'];
@@ -497,11 +522,36 @@ try {
             ORDER BY created_at DESC 
             LIMIT 10
         ")->fetchAll(PDO::FETCH_ASSOC);
+        // Dialect-aware override to ensure compatibility across PostgreSQL/MySQL
+        if ($driver === 'pgsql') {
+            $recentSql = "SELECT 'donor' AS type, (d.first_name || ' ' || d.last_name) AS name, d.status, d.created_at, COALESCE(d.reference_code, d.reference, CAST(d.id AS TEXT)) AS reference FROM donors d WHERE d.created_at >= (NOW() - INTERVAL '7 days') ORDER BY d.created_at DESC LIMIT 10";
+        } else {
+            $recentSql = "SELECT 'donor' AS type, CONCAT(d.first_name, ' ', d.last_name) AS name, d.status, d.created_at, COALESCE(d.reference_code, d.reference, CAST(d.id AS CHAR)) AS reference FROM donors d WHERE d.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) ORDER BY d.created_at DESC LIMIT 10";
+        }
+        $recentActivity = $pdo->query($recentSql)->fetchAll(PDO::FETCH_ASSOC);
         
     } catch (PDOException $e) {
         $bloodInventory = [];
         $bloodRequests = [];
-        $monthlyDonors = [];
+        // Build safe zero-filled monthly arrays to keep charts working
+        $months = [];
+        $cursor = new DateTime('first day of this month');
+        for ($i = 11; $i >= 0; $i--) {
+            $m = (clone $cursor)->modify("-{$i} months");
+            $months[$m->format('Y-m')] = [
+                'label' => $m->format('M Y'),
+                'registrations' => 0,
+                'donations' => 0
+            ];
+        }
+        $monthlyLabels = array_column($months, 'label');
+        $monthlyRegistrations = array_column($months, 'registrations');
+        $monthlyDonations = array_column($months, 'donations');
+        $monthlyDonors = [
+            'labels' => $monthlyLabels,
+            'registrations' => $monthlyRegistrations,
+            'donations' => $monthlyDonations
+        ];
         $monthlyRequests = [];
         $donorStatusDistribution = [];
         $requestStatusDistribution = [];
@@ -534,12 +584,17 @@ try {
         $params = [];
         
         if ($search) {
+            // Dialect-aware expressions
+            $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
+            $nameExpr = $driver === 'pgsql'
+                ? "(d.first_name || ' ' || d.last_name)"
+                : "CONCAT(d.first_name, ' ', d.last_name)";
+            $idCastExpr = $driver === 'pgsql' ? 'CAST(d.id AS TEXT)' : 'CAST(d.id AS CHAR)';
             // Detect reference columns safely
             $hasRefCode = false; $hasRef = false;
             try { $pdo->query("SELECT reference_code FROM donors LIMIT 1"); $hasRefCode = true; } catch (Exception $e) {}
             try { $pdo->query("SELECT reference FROM donors LIMIT 1"); $hasRef = true; } catch (Exception $e) {}
-
-            $sql .= " AND (CONCAT(d.first_name, ' ', d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?";
+            $sql .= " AND (" . $nameExpr . " LIKE ? OR d.email LIKE ? OR d.phone LIKE ?";
             $params = array_merge($params, array_fill(0, 3, "%$search%"));
             if ($hasRefCode) {
                 $sql .= ' OR d.reference_code LIKE ?';
@@ -549,7 +604,7 @@ try {
                 $params[] = "%$search%";
             }
             // Always allow searching by numeric/text ID as a fallback
-            $sql .= ' OR CAST(d.id AS TEXT) LIKE ?)';
+            $sql .= ' OR ' . $idCastExpr . ' LIKE ?)';
             $params[] = "%$search%";
         }
         
@@ -592,11 +647,17 @@ try {
         $params = [];
         
         if ($search) {
+            // Dialect-aware expressions
+            $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
+            $nameExpr = $driver === 'pgsql'
+                ? "(d.first_name || ' ' || d.last_name)"
+                : "CONCAT(d.first_name, ' ', d.last_name)";
+            $idCastExpr = $driver === 'pgsql' ? 'CAST(d.id AS TEXT)' : 'CAST(d.id AS CHAR)';
             // Detect reference columns safely
             $hasRefCode = false; $hasRef = false;
             try { $pdo->query("SELECT reference_code FROM donors LIMIT 1"); $hasRefCode = true; } catch (Exception $e) {}
             try { $pdo->query("SELECT reference FROM donors LIMIT 1"); $hasRef = true; } catch (Exception $e) {}
-            $sql .= " AND ((d.first_name || ' ' || d.last_name) LIKE ? OR d.email LIKE ? OR d.phone LIKE ?";
+            $sql .= " AND (" . $nameExpr . " LIKE ? OR d.email LIKE ? OR d.phone LIKE ?";
             $params = array_fill(0, 3, "%$search%");
             if ($hasRefCode) {
                 $sql .= ' OR d.reference_code LIKE ?';
@@ -605,7 +666,7 @@ try {
                 $sql .= ' OR d.reference LIKE ?';
                 $params[] = "%$search%";
             }
-            $sql .= ' OR CAST(d.id AS TEXT) LIKE ?)';
+            $sql .= ' OR ' . $idCastExpr . ' LIKE ?)';
             $params[] = "%$search%";
         }
         

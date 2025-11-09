@@ -1,6 +1,16 @@
 # Enable rewrite engine
 RewriteEngine On
 
+# Enforce HTTPS even behind proxies/CDNs
+# Handles direct HTTP as well as X-Forwarded-Proto from Cloudflare/Render
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Canonical host: redirect apex to www
+RewriteCond %{HTTP_HOST} ^blooddonationbaguio\.com$ [NC]
+RewriteRule ^ https://www.blooddonationbaguio.com%{REQUEST_URI} [L,R=301]
+
 # Prevent MultiViews from interfering with asset resolution
 Options -MultiViews -Indexes
 
@@ -81,6 +91,8 @@ ErrorDocument 404 /404.php
     Header set X-XSS-Protection "1; mode=block"
     Header set X-Frame-Options "SAMEORIGIN"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
+    # Enforce HSTS for 1 year across subdomains (no preload by default)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 </IfModule>
 
 # PHP settings
