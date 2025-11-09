@@ -4,6 +4,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 $base = dirname(__DIR__);
+function firstExisting(array $paths): ?string {
+    foreach ($paths as $p) { if (file_exists($p)) return $p; }
+    return null;
+}
 // Pick donor id from query, fallback to latest that has screening
 function pickDonorId(PDO $pdo): int {
     $donorId = isset($_GET['donor_id']) ? (int)$_GET['donor_id'] : 0;
@@ -16,11 +20,31 @@ function pickDonorId(PDO $pdo): int {
     return 0;
 }
 
-require_once $base . '/blood-donation-pwa/db.php';
+// Prefer root db.php, then submodule fallbacks
+$dbCandidates = [
+    $base . '/db.php',
+    $base . '/blood-donation-pwa/db.php',
+    $base . '/legacy-pwa-4/blood-donation-pwa/db.php',
+    $base . '/__zip_restore/blood-donation-pwa/db.php',
+];
+$dbFile = firstExisting($dbCandidates);
+if (!$dbFile) {
+    die('<div class="alert alert-danger">Unable to locate db.php. Checked: <code>' . htmlspecialchars(implode('</code>, <code>', array_map(fn($p)=>str_replace($base.'/', '', $p), $dbCandidates))) . '</code></div>');
+}
+require_once $dbFile;
 $donorId = pickDonorId($pdo);
 
 // Prepare GET for the endpoint and include from its directory to preserve relative requires
-chdir($base . '/blood-donation-pwa');
+$endpointDirs = [
+    $base . '/blood-donation-pwa',
+    $base . '/legacy-pwa-4/blood-donation-pwa',
+    $base . '/__zip_restore/blood-donation-pwa',
+];
+$endpointDir = firstExisting(array_map(fn($d)=> $d . '/simple_ajax_donor_details.php', $endpointDirs));
+if (!$endpointDir) {
+    die('<div class="alert alert-danger">Unable to locate <code>simple_ajax_donor_details.php</code> under expected directories.</div>');
+}
+chdir(dirname($endpointDir));
 $_GET['action'] = 'get_donor_details';
 $_GET['donor_id'] = $donorId;
 
@@ -45,6 +69,7 @@ $html = ob_get_clean();
       <?= $html ?>
     </div>
   </div>
+  <p class="mt-2 text-muted">DB: <code><?= htmlspecialchars(str_replace($base.'/', '', $dbFile)) ?></code></p>
   <p class="mt-3 text-muted">Use <code>?donor_id=24</code> to choose a donor.</p>
 </body>
 </html>

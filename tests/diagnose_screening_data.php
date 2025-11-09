@@ -4,7 +4,24 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 $base = dirname(__DIR__);
-require_once $base . '/blood-donation-pwa/db.php';
+
+function firstExisting(array $paths): ?string {
+    foreach ($paths as $p) { if (file_exists($p)) return $p; }
+    return null;
+}
+
+// Prefer root db.php, then submodule fallbacks
+$dbCandidates = [
+    $base . '/db.php',
+    $base . '/blood-donation-pwa/db.php',
+    $base . '/legacy-pwa-4/blood-donation-pwa/db.php',
+    $base . '/__zip_restore/blood-donation-pwa/db.php',
+];
+$dbFile = firstExisting($dbCandidates);
+if (!$dbFile) {
+    die('<div class="alert alert-danger">Unable to locate db.php. Checked: <code>' . htmlspecialchars(implode('</code>, <code>', array_map(fn($p)=>str_replace($base.'/', '', $p), $dbCandidates))) . '</code></div>');
+}
+require_once $dbFile;
 
 function pickDonorId(PDO $pdo): int {
     $donorId = isset($_GET['donor_id']) ? (int)$_GET['donor_id'] : 0;
@@ -19,14 +36,21 @@ function pickDonorId(PDO $pdo): int {
 
 $donorId = pickDonorId($pdo);
 
-// Load medical questions (sections and keys) from submodule
-$primaryQuestions = $base . '/blood-donation-pwa/includes/medical_questions.php';
-$fallbackQuestions = $base . '/blood-donation-pwa/includes/medical_questions_new.php';
-$medicalQuestions = file_exists($primaryQuestions) ? include $primaryQuestions : [];
+// Load medical questions (sections and keys) preferring root includes
+$questionCandidates = [
+    $base . '/includes/medical_questions.php',
+    $base . '/blood-donation-pwa/includes/medical_questions.php',
+    $base . '/blood-donation-pwa/includes/medical_questions_new.php',
+    $base . '/legacy-pwa-4/blood-donation-pwa/includes/medical_questions.php',
+    $base . '/__zip_restore/blood-donation-pwa/includes/medical_questions.php',
+];
+$pickedQuestions = firstExisting($questionCandidates);
+$medicalQuestions = $pickedQuestions ? include $pickedQuestions : [];
 if (!is_array($medicalQuestions) || empty($medicalQuestions['sections'])) {
-    $medicalQuestions = file_exists($fallbackQuestions) ? include $fallbackQuestions : [];
+    $alt = firstExisting([$base . '/includes/medical_screening_questions.php']);
+    $medicalQuestions = $alt ? include $alt : $medicalQuestions;
 }
-$sections = is_array($medicalQuestions) ? ($medicalQuestions['sections'] ?? []) : [];
+$sections = is_array($medicalQuestions) ? ($medicalQuestions['sections'] ?? $medicalQuestions) : [];
 
 // Pick donor table
 $donor = null;
@@ -128,7 +152,7 @@ foreach ($sections as $sectionKey => $section) {
     <div class="card-header">Summary (from JSON)</div>
     <div class="card-body">
       <p><strong>Safe (no):</strong> <?= $noAnswers ?> | <strong>Risk (yes):</strong> <?= $yesAnswers ?> | <strong>Not Answered:</strong> <?= $notAnswered ?></p>
-      <p class="text-muted">Sections loaded: <?= count($sections) ?></p>
+      <p class="text-muted">Sections loaded: <?= count($sections) ?> | DB: <code><?= htmlspecialchars(str_replace($base.'/', '', $dbFile)) ?></code></p>
     </div>
   </div>
 

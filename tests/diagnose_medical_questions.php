@@ -1,33 +1,35 @@
 <?php
-// Root-level wrapper: verify medical questions include files from submodule
+// Root-level wrapper: verify medical questions include files, preferring root-level includes
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 $base = dirname(__DIR__);
-$primaryPath = $base . '/blood-donation-pwa/includes/medical_questions.php';
-$fallbackPath = $base . '/blood-donation-pwa/includes/medical_questions_new.php';
 
-$source = null;
-$questions = null;
-try {
-    if (file_exists($primaryPath)) {
-        $questions = include $primaryPath;
-        $source = 'blood-donation-pwa/includes/medical_questions.php';
-    }
-    if (!is_array($questions) || empty($questions['sections'])) {
-        if (file_exists($fallbackPath)) {
-            $questions = include $fallbackPath;
-            $source = 'blood-donation-pwa/includes/medical_questions_new.php (fallback)';
-        }
-    }
-} catch (Exception $e) {
-    if (file_exists($fallbackPath)) {
-        $questions = include $fallbackPath;
-        $source = 'blood-donation-pwa/includes/medical_questions_new.php (fallback due to exception)';
-    }
+function firstExisting(array $paths): ?string {
+    foreach ($paths as $p) { if (file_exists($p)) return $p; }
+    return null;
 }
 
-$sections = is_array($questions) ? ($questions['sections'] ?? []) : [];
+// Prefer the app's root includes first, then submodule fallbacks
+$candidates = [
+    $base . '/includes/medical_questions.php',
+    $base . '/blood-donation-pwa/includes/medical_questions.php',
+    $base . '/blood-donation-pwa/includes/medical_questions_new.php',
+    $base . '/legacy-pwa-4/blood-donation-pwa/includes/medical_questions.php',
+    $base . '/__zip_restore/blood-donation-pwa/includes/medical_questions.php',
+];
+
+$picked = firstExisting($candidates);
+$source = $picked ? str_replace($base . '/', '', $picked) : null;
+$questions = $picked ? (include $picked) : null;
+
+// Fallback: try the alternative root mapping if sections key is missing
+if (!is_array($questions) || empty($questions['sections'])) {
+    $alt = firstExisting([$base . '/includes/medical_screening_questions.php']);
+    if ($alt) { $questions = include $alt; $source = str_replace($base . '/', '', $alt) . ' (fallback)'; }
+}
+
+$sections = is_array($questions) ? ($questions['sections'] ?? $questions) : [];
 
 ?><!doctype html>
 <html>
@@ -42,7 +44,13 @@ $sections = is_array($questions) ? ($questions['sections'] ?? []) : [];
 
   <?php if (empty($sections)): ?>
     <div class="alert alert-danger">Failed to load medical questions sections.</div>
-    <p class="text-muted">Checked: <code><?= htmlspecialchars($primaryPath) ?></code> and fallback <code><?= htmlspecialchars($fallbackPath) ?></code></p>
+    <p class="text-muted">Checked candidates:</p>
+    <ul class="small">
+      <?php foreach ($candidates as $c): ?>
+        <li><code><?= htmlspecialchars(str_replace($base . '/', '', $c)) ?></code></li>
+      <?php endforeach; ?>
+      <li><code>includes/medical_screening_questions.php</code> (fallback)</li>
+    </ul>
   <?php else: ?>
     <div class="alert alert-success">Loaded <?= count($sections) ?> sections.</div>
     <?php foreach ($sections as $sectionKey => $section): ?>
