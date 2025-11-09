@@ -1,12 +1,10 @@
 <?php
-// Root-level test page to verify inline donor details rendering via PWA endpoint.
-// This page fetches donor details from blood-donation-pwa/simple_ajax_donor_details.php
-// and displays the inline status banner + Q&A accordion.
+// PWA test page to verify inline donor details rendering.
+// Fetches donor details from /blood-donation-pwa/simple_ajax_donor_details.php
 
-// Try to pre-select the latest donor with simple screening, if DB is accessible.
 $prefillDonorId = '';
 try {
-    $dbConnectPath = __DIR__ . '/../blood-donation-pwa/includes/db_connect.php';
+    $dbConnectPath = __DIR__ . '/../includes/db_connect.php';
     if (file_exists($dbConnectPath)) {
         require_once $dbConnectPath;
         if (function_exists('getDBConnection')) {
@@ -24,7 +22,6 @@ try {
     // Suppress DB errors on test page; manual entry will still work.
 }
 
-// Accept manual donor_id override via query string
 if (isset($_GET['donor_id']) && preg_match('/^\d+$/', $_GET['donor_id'])) {
     $prefillDonorId = $_GET['donor_id'];
 }
@@ -34,7 +31,7 @@ if (isset($_GET['donor_id']) && preg_match('/^\d+$/', $_GET['donor_id'])) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Test Donor Modal Inline Rendering</title>
+  <title>PWA Test Donor Modal Inline Rendering</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -44,14 +41,12 @@ if (isset($_GET['donor_id']) && preg_match('/^\d+$/', $_GET['donor_id'])) {
     .result-card { min-height: 200px; }
     code.small { font-size: .875rem; }
   </style>
-</head>
+  </head>
 <body>
   <div class="page-wrap">
     <div class="header d-flex align-items-center justify-content-between">
-      <h1 class="h4 mb-0"><i class="fa-solid fa-vial me-2"></i>Inline Donor Details Rendering (Root Test)</h1>
-      <a class="btn btn-outline-secondary btn-sm" href="/blood-donation-pwa/tests/test_donor_modal.php" target="_blank">
-        Open PWA test page
-      </a>
+      <h1 class="h4 mb-0"><i class="fa-solid fa-vial me-2"></i>Inline Donor Details Rendering (PWA Test)</h1>
+      <a class="btn btn-outline-secondary btn-sm" href="/tests/test_donor_modal.php" target="_blank">Open root test page</a>
     </div>
 
     <div class="card mb-3">
@@ -64,9 +59,7 @@ if (isset($_GET['donor_id']) && preg_match('/^\d+$/', $_GET['donor_id'])) {
             <input type="text" id="donorId" name="donorId" class="form-control" placeholder="e.g. 123" value="<?php echo htmlspecialchars($prefillDonorId); ?>">
           </div>
           <div class="col-auto">
-            <button type="submit" class="btn btn-primary">
-              <i class="fa-solid fa-magnifying-glass me-1"></i>Load Donor Details
-            </button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass me-1"></i>Load Donor Details</button>
           </div>
           <div class="col-12">
             <p class="text-muted mb-0">This test fetches from <code class="small">/blood-donation-pwa/simple_ajax_donor_details.php</code> and should render the inline status banner, summary badges, and the full medical Q&amp;A accordion.</p>
@@ -108,7 +101,6 @@ if (isset($_GET['donor_id']) && preg_match('/^\d+$/', $_GET['donor_id'])) {
     fetchDetails(id);
   });
 
-  // Auto-load if a prefill donor id is present
   (function() {
     const v = donorInput.value.trim();
     if (v) { fetchDetails(v); }
