@@ -2,8 +2,9 @@
 RewriteEngine On
 
 # Enforce HTTPS even behind proxies/CDNs
-# Handles direct HTTP as well as X-Forwarded-Proto from Cloudflare/Render
-RewriteCond %{HTTPS} !=on [OR]
+# Require BOTH: origin not using HTTPS AND proxy header not https
+# This prevents loops on providers that set X-Forwarded-Proto=https while connecting via HTTP (e.g., Cloudflare Flexible)
+RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
