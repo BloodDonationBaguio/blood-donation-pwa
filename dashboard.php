@@ -239,13 +239,9 @@ try {
                         <div class="col-md-10">
                             <div class="card shadow-sm">
                                 <div class="card-body">
-                                    <div class="mb-4">
-                                        <h2 class="fw-semibold d-flex align-items-center justify-content-center gap-2 mb-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#dc3545" class="bi bi-droplet-fill" viewBox="0 0 16 16" aria-hidden="true">
-                                                <path d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0 7.25 2.503 5.746 4.176 4.432 5.638 3.122 7.096 2 8.345 2 10a6 6 0 0 0 6 6zM6.646 4.646c-.376.377-1.272 1.489-2.093 2.677A4.488 4.488 0 0 1 4 10c0 .341.028.67.082.981l3.558-3.558.08-.08.08-.08-.002-.002.002.002.08-.08.08-.08 3.558-3.558A4.488 4.488 0 0 1 12 10c0-.341-.028-.67-.082-.981l-3.558 3.558-.08.08-.08.08.002.002-.002-.002-.08.08-.08.08-3.558 3.558z"/>
-                                            </svg>
-                                            <span>Donation History</span>
-                                        </h2>
+                                    <div class="text-center mb-4">
+                                        <i class="bi bi-droplet-fill fs-1 text-danger" aria-hidden="true"></i>
+                                        <h2 class="mt-2">Donation History</h2>
                                     </div>
                                 
                                     <?php if ($lastCompletedDate): ?>
