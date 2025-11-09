@@ -1,12 +1,8 @@
 # Enable rewrite engine
 RewriteEngine On
 
-# Enforce HTTPS even behind proxies/CDNs
-# Require BOTH: origin not using HTTPS AND proxy header not https
-# This prevents loops on providers that set X-Forwarded-Proto=https while connecting via HTTP (e.g., Cloudflare Flexible)
-RewriteCond %{HTTPS} !=on
-RewriteCond %{HTTP:X-Forwarded-Proto} !https
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# HTTPS enforcement handled by edge (e.g., Cloudflare). Avoid origin-level scheme redirects to prevent loops.
+# If you need origin enforcement, enable it only when not behind a proxy that terminates TLS.
 
 # Canonical host: redirect apex to www
 RewriteCond %{HTTP_HOST} ^blooddonationbaguio\.com$ [NC]
