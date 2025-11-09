@@ -261,6 +261,7 @@ try {
                                         </div>
                                     <?php endif; ?>
                                 
+                                    <?php if (!empty($donation_history)): ?>
                                     <div class="table-responsive">
                                         <table class="table table-borderless align-middle mb-0">
                                             <thead>
