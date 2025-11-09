@@ -42,14 +42,65 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
             echo "</table>";
             echo "</div>";
             echo "</div>";
-            
+
             // Medical Information Section
             echo "<div class='row mt-3'>";
             echo "<div class='col-md-6'>";
             echo "<h4><i class='fas fa-heartbeat me-2'></i>Medical Information</h4>";
             echo "<table class='table table-sm'>";
-            echo "<tr><td><strong>Medical Conditions:</strong></td><td>" . (!empty($donor['medical_conditions']) ? htmlspecialchars($donor['medical_conditions']) : 'None reported') . "</td></tr>";
-            echo "<tr><td><strong>Current Medications:</strong></td><td>" . (!empty($donor['medications']) ? htmlspecialchars($donor['medications']) : 'None reported') . "</td></tr>";
+            // Derive conditions/medications from screening JSON when donor columns are empty
+            $derivedConditions = '';
+            $derivedMedications = '';
+            try {
+                $screeningRow = null;
+                $st = $pdo->prepare("SELECT screening_data FROM donor_medical_screening_simple WHERE donor_id = ?");
+                $st->execute([$donorId]);
+                $screeningRow = $st->fetch(PDO::FETCH_ASSOC);
+                $screeningData = [];
+                if ($screeningRow && !empty($screeningRow['screening_data'])) {
+                    $screeningData = json_decode($screeningRow['screening_data'], true);
+                    if (!is_array($screeningData)) { $screeningData = []; }
+                }
+                if (empty($screeningData) && !empty($donor['screening_data'])) {
+                    $fallback = json_decode($donor['screening_data'], true);
+                    $screeningData = is_array($fallback) ? $fallback : [];
+                }
+
+                // Load question texts to label chronic illness flags
+                $medicalQuestions = include __DIR__ . '/includes/medical_questions.php';
+                if (!is_array($medicalQuestions) || empty($medicalQuestions['sections'])) {
+                    $medicalQuestions = include __DIR__ . '/includes/medical_questions_new.php';
+                }
+                $sections = is_array($medicalQuestions) ? ($medicalQuestions['sections'] ?? []) : [];
+
+                // Build conditions summary from chronic_illnesses answered 'yes'
+                if (!empty($sections['chronic_illnesses']['questions'])) {
+                    $conditionTexts = [];
+                    foreach ($sections['chronic_illnesses']['questions'] as $qKey => $qText) {
+                        $ans = $screeningData[$qKey] ?? 'not_answered';
+                        if ($ans === 'yes') { $conditionTexts[] = $qText; }
+                    }
+                    if (!empty($conditionTexts)) {
+                        $derivedConditions = implode('; ', $conditionTexts);
+                    }
+                }
+
+                // Build medications summary from relevant answers
+                $medFlags = [];
+                if (($screeningData['q22'] ?? '') === 'yes') { $medFlags[] = 'Medication affecting bleeding/clotting'; }
+                if (($screeningData['q7'] ?? '') === 'yes') { $medFlags[] = 'Recent medication/vaccine (last 4 weeks)'; }
+                if (($screeningData['q6'] ?? '') === 'yes') { $medFlags[] = 'Aspirin in last 3 days'; }
+                if (!empty($medFlags)) { $derivedMedications = implode('; ', $medFlags); }
+            } catch (Exception $e) {
+                // Non-fatal: keep derived strings empty
+                error_log('Medical derive error: ' . $e->getMessage());
+            }
+
+            $medicalConditionsDisplay = !empty($donor['medical_conditions']) ? $donor['medical_conditions'] : ($derivedConditions ?: 'None reported');
+            $medicationsDisplay = !empty($donor['medications']) ? $donor['medications'] : ($derivedMedications ?: 'None reported');
+
+            echo "<tr><td><strong>Medical Conditions:</strong></td><td>" . htmlspecialchars($medicalConditionsDisplay) . "</td></tr>";
+            echo "<tr><td><strong>Current Medications:</strong></td><td>" . htmlspecialchars($medicationsDisplay) . "</td></tr>";
             echo "</table>";
             echo "</div>";
 
