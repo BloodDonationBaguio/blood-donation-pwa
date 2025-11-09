@@ -9,13 +9,17 @@ AddType application/json .json
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteBase /blood-donation-pwa/
+RewriteBase /
 
-# Allow direct access to service worker and manifest
+# Allow direct access to service worker and manifest (root)
 RewriteRule ^(sw\.js|manifest\.json)$ - [L]
 
-# Allow common static assets without rewriting
+# Allow direct access to service worker and manifest (subfolder)
+RewriteRule ^blood-donation-pwa/(sw\.js|manifest\.json)$ - [L]
+
+# Allow common static assets without rewriting (root and subfolder)
 RewriteRule ^(css/.*|assets/.*|js/.*|images/.*|fonts/.*)$ - [L]
+RewriteRule ^blood-donation-pwa/(css/.*|assets/.*|js/.*|images/.*|fonts/.*)$ - [L]
 
 # Front controller: send non-existing paths to index.php
 RewriteCond %{REQUEST_FILENAME} !-f
