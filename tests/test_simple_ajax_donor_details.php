@@ -20,31 +20,23 @@ function pickDonorId(PDO $pdo): int {
     return 0;
 }
 
-// Prefer root db.php, then submodule fallbacks
-$dbCandidates = [
-    $base . '/db.php',
-    $base . '/blood-donation-pwa/db.php',
-    $base . '/legacy-pwa-4/blood-donation-pwa/db.php',
-    $base . '/__zip_restore/blood-donation-pwa/db.php',
+// Locate the endpoint file first (prefer root, then submodules)
+$endpointCandidates = [
+    $base . '/simple_ajax_donor_details.php',
+    $base . '/blood-donation-pwa/simple_ajax_donor_details.php',
+    $base . '/legacy-pwa-4/blood-donation-pwa/simple_ajax_donor_details.php',
+    $base . '/__zip_restore/blood-donation-pwa/simple_ajax_donor_details.php',
 ];
-$dbFile = firstExisting($dbCandidates);
-if (!$dbFile) {
-    die('<div class="alert alert-danger">Unable to locate db.php. Checked: <code>' . htmlspecialchars(implode('</code>, <code>', array_map(fn($p)=>str_replace($base.'/', '', $p), $dbCandidates))) . '</code></div>');
+$endpointFile = firstExisting($endpointCandidates);
+if (!$endpointFile) {
+    die('<div class="alert alert-danger">Unable to locate <code>simple_ajax_donor_details.php</code>. Checked: <code>' . htmlspecialchars(implode('</code>, <code>', array_map(fn($p)=>str_replace($base.'/', '', $p), $endpointCandidates))) . '</code></div>');
 }
-require_once $dbFile;
-$donorId = pickDonorId($pdo);
+$endpointDir = dirname($endpointFile);
+chdir($endpointDir);
 
-// Prepare GET for the endpoint and include from its directory to preserve relative requires
-$endpointDirs = [
-    $base . '/blood-donation-pwa',
-    $base . '/legacy-pwa-4/blood-donation-pwa',
-    $base . '/__zip_restore/blood-donation-pwa',
-];
-$endpointDir = firstExisting(array_map(fn($d)=> $d . '/simple_ajax_donor_details.php', $endpointDirs));
-if (!$endpointDir) {
-    die('<div class="alert alert-danger">Unable to locate <code>simple_ajax_donor_details.php</code> under expected directories.</div>');
-}
-chdir(dirname($endpointDir));
+// Load the DB from the endpoint directory to avoid duplicate includes
+require_once 'db.php';
+$donorId = pickDonorId($pdo);
 $_GET['action'] = 'get_donor_details';
 $_GET['donor_id'] = $donorId;
 
@@ -69,7 +61,8 @@ $html = ob_get_clean();
       <?= $html ?>
     </div>
   </div>
-  <p class="mt-2 text-muted">DB: <code><?= htmlspecialchars(str_replace($base.'/', '', $dbFile)) ?></code></p>
+  <p class="mt-2 text-muted">Endpoint: <code><?= htmlspecialchars(str_replace($base.'/', '', $endpointFile)) ?></code></p>
+  <p class="mt-2 text-muted">DB: <code><?= htmlspecialchars(str_replace($base.'/', '', $endpointDir . '/db.php')) ?></code></p>
   <p class="mt-3 text-muted">Use <code>?donor_id=24</code> to choose a donor.</p>
 </body>
 </html>
