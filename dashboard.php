@@ -233,12 +233,7 @@ try {
         <!-- Donation History Card -->
         <div class="col-lg-8 col-md-12">
             <div class="card border-0 shadow-sm rounded-4 p-4">
-                <div class="d-flex justify-content-center align-items-center mb-3">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="background:#f5f6fa;width:56px;height:56px;">
-                        <i class="bi bi-droplet-fill fs-2 text-info"></i>
-                    </span>
-                </div>
-                <h5 class="fw-semibold mb-2 text-center">Donation History</h5>
+                
                 <div class="container mt-5">
                     <div class="row justify-content-center">
                         <div class="col-md-10">
