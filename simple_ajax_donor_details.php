@@ -118,7 +118,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
             
             // Check simple screening first
             if ($medicalScreeningSimple) {
-                $screeningData = json_decode($medicalScreeningSimple['screening_data'], true);
+                // Decode screening data with robust fallbacks
+                $screeningData = null;
+                if (!empty($medicalScreeningSimple['screening_data'])) {
+                    $screeningData = json_decode($medicalScreeningSimple['screening_data'], true);
+                }
+                if (!is_array($screeningData) || empty($screeningData)) {
+                    // Fallback to joined donor.details screening_data if available
+                    $screeningData = !empty($donor['screening_data']) ? json_decode($donor['screening_data'], true) : [];
+                    if (!is_array($screeningData)) { $screeningData = []; }
+                }
                 $allQuestionsAnswered = $medicalScreeningSimple['all_questions_answered'];
                 $screeningStatus = $allQuestionsAnswered ? 'Completed' : 'Partially Completed';
                 
@@ -132,7 +141,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                 
                 // Build summary and inline details using includes/medical_questions.php
                 $medicalQuestions = include __DIR__ . '/includes/medical_questions.php';
-                $sections = $medicalQuestions['sections'] ?? [];
+                if (!is_array($medicalQuestions) || empty($medicalQuestions['sections'])) {
+                    // Fallback to alternative questions file if primary is unavailable
+                    $medicalQuestions = include __DIR__ . '/includes/medical_questions_new.php';
+                }
+                $sections = is_array($medicalQuestions) ? ($medicalQuestions['sections'] ?? []) : [];
 
                 $yesAnswers = 0;
                 $noAnswers = 0;
