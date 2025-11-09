@@ -1,8 +1,4 @@
 <?php
-// Redirect to canonical legacy admin login
-header('Location: /legacy-pwa-4/blood-donation-pwa/admin_login.php', true, 302);
-exit;
-
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -22,7 +18,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
         $admin = $stmt->fetch();
         
         if ($admin) {
-            header('Location: /admin.php');
+            header('Location: admin.php');
             exit();
         } else {
             // Invalid session, clear it
@@ -75,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         error_log("Last login update failed: " . $e->getMessage());
                     }
                     
-                    // Redirect to legacy admin dashboard
-                    header('Location: /admin.php');
+                    // Redirect to admin dashboard
+                    header('Location: admin.php');
                     exit();
                 } else {
                     $error = 'Invalid password';
@@ -259,21 +255,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     </div>
   </div>
-  <script>
-    // Show a loading indicator on submit to indicate processing
-    document.addEventListener('DOMContentLoaded', function () {
-      const form = document.querySelector('.login-form');
-      if (!form) return;
-      form.addEventListener('submit', function () {
-        const btn = form.querySelector('button[type="submit"]');
-        if (!btn) return;
-        // Prevent double clicks
-        btn.disabled = true;
-        btn.setAttribute('aria-busy', 'true');
-        // Replace content with a spinner + status text
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Signing In...';
-      });
-    });
-  </script>
 </body>
 </html>
