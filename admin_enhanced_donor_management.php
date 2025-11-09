@@ -236,21 +236,30 @@ $bloodTypeFilter = $_GET['blood_type'] ?? '';
 $searchTerm = $_GET['search'] ?? '';
 
 // Get donors list with filters
-$donors = getDonorsList($pdo, $statusFilter);
+// If a specific donor_id is provided, show only that donor
+if ($donorId > 0 && $donor) {
+    // Compute medical screening status for the single donor entry
+    $donor['medical_screening_status'] = getMedicalScreeningStatus(
+        $donor['screening_data'] ?? null,
+        $donor['all_questions_answered'] ?? null
+    );
+    $donors = [$donor];
+} else {
+    $donors = getDonorsList($pdo, $statusFilter);
+    // Apply additional filters only when browsing the full list
+    if ($bloodTypeFilter) {
+        $donors = array_filter($donors, fn($d) => $d['blood_type'] === $bloodTypeFilter);
+    }
+    if ($searchTerm) {
+        $donors = array_filter($donors, fn($d) => 
+            stripos($d['first_name'] . ' ' . $d['last_name'], $searchTerm) !== false ||
+            stripos($d['email'], $searchTerm) !== false ||
+            stripos($d['reference_code'], $searchTerm) !== false
+        );
+    }
+}
 $stats = getDonorStatistics($pdo);
 $unservedReasons = getUnservedReasons();
-
-// Apply additional filters
-if ($bloodTypeFilter) {
-    $donors = array_filter($donors, fn($d) => $d['blood_type'] === $bloodTypeFilter);
-}
-if ($searchTerm) {
-    $donors = array_filter($donors, fn($d) => 
-        stripos($d['first_name'] . ' ' . $d['last_name'], $searchTerm) !== false ||
-        stripos($d['email'], $searchTerm) !== false ||
-        stripos($d['reference_code'], $searchTerm) !== false
-    );
-}
 ?>
 
 <!DOCTYPE html>
