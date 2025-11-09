@@ -1180,7 +1180,7 @@ function buildPaginationUrl($page) {
                                                     tooltip: {
                                                         callbacks: {
                                                             label: function(context) {
-                                                                return context.label + ': ' + context.parsed + ' donors';
+                                                                return context.label + ': ' + context.parsed + ' blood units';
                                                             }
                                                         }
                                                     }
