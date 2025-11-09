@@ -726,6 +726,9 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                                         <?php endif; ?>
                                     </td>
                                     <td>
+                                        <a href="?tab=donor-details&id=<?= $donor['id'] ?>" class="btn btn-sm btn-primary" title="View Donor Details">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
                                         <a href="?tab=donor-details&id=<?= $donor['id'] ?>" class="btn btn-sm btn-info" title="View Complete Donor Information">
                                             <i class="fas fa-info-circle"></i> View More Information
                                         </a>
