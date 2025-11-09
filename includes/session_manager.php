@@ -4,11 +4,17 @@
 // Include session configuration first
 require_once __DIR__ . '/session_config.php';
 
-// Load the main db.php from project root
-require_once __DIR__ . '/../db.php';
+// Lazily load the DB only when needed to prevent slow initial page loads
+function ensurePDO() {
+    global $pdo;
+    if (!isset($pdo) || $pdo === null) {
+        require_once __DIR__ . '/../db.php';
+    }
+}
 
 function getDbDriver() {
     try {
+        ensurePDO();
         global $pdo;
         return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
     } catch (Exception $e) {
@@ -31,6 +37,7 @@ function getCurrentUser() {
         return null;
     }
     
+    ensurePDO();
     global $pdo;
     try {
         $stmt = $pdo->prepare("SELECT * FROM users_new WHERE id = ?");
@@ -45,6 +52,7 @@ function getCurrentUser() {
  * Login user with optional remember me
  */
 function loginUser($user, $rememberMe = false) {
+    ensurePDO();
     global $pdo;
     
     // Set session variables
@@ -61,6 +69,8 @@ function loginUser($user, $rememberMe = false) {
         $expires = date('Y-m-d H:i:s', strtotime('+30 days'));
         
         try {
+            // Ensure table exists before storing token
+            createRememberTokensTable();
             // Store remember token in database (MySQL and PostgreSQL compatible upsert)
             $driver = getDbDriver();
             if ($driver === 'pgsql') {
@@ -93,6 +103,7 @@ function loginUser($user, $rememberMe = false) {
     
     // Update last login time
     try {
+        ensurePDO();
 $stmt = $pdo->prepare("UPDATE users_new SET updated_at = CURRENT_TIMESTAMP WHERE id = ?");
         $stmt->execute([$user['id']]);
     } catch (Exception $e) {
@@ -112,6 +123,8 @@ function checkRememberMeToken() {
         return false; // No remember token
     }
     
+    ensurePDO();
+    createRememberTokensTable();
     global $pdo;
     try {
         // Check if remember token is valid
@@ -151,6 +164,7 @@ WHERE rt.token = ? AND rt.expires_at > CURRENT_TIMESTAMP
  * Logout user and clean up tokens
  */
 function logoutUser() {
+    ensurePDO();
     global $pdo;
     
     $userId = $_SESSION['user_id'] ?? null;
@@ -241,6 +255,7 @@ function requireUserLogin($redirectTo = 'login.php') {
  * Create remember tokens table if it doesn't exist
  */
 function createRememberTokensTable() {
+    ensurePDO();
     global $pdo;
     try {
         // Ensure users_new table exists (minimal schema) for FK to work
@@ -258,7 +273,7 @@ function createRememberTokensTable() {
             );");
         } else {
             $pdo->exec("CREATE TABLE IF NOT EXISTS users_new (
-id SERIAL PRIMARY KEY,
+                id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
@@ -284,7 +299,7 @@ id SERIAL PRIMARY KEY,
         } else {
             $sql = "
                 CREATE TABLE IF NOT EXISTS user_remember_tokens (
-id SERIAL PRIMARY KEY,
+                    id INT AUTO_INCREMENT PRIMARY KEY,
                     user_id INT NOT NULL,
                     token VARCHAR(64) NOT NULL UNIQUE,
                     expires_at DATETIME NOT NULL,
@@ -304,9 +319,8 @@ id SERIAL PRIMARY KEY,
     }
 }
 
-// Initialize remember tokens table
-createRememberTokensTable();
-
-// Auto-check remember me token on every page load
-checkRememberMeToken();
+// Only attempt to restore a session if we have a remember token
+if (!isUserLoggedIn() && isset($_COOKIE['remember_token'])) {
+    checkRememberMeToken();
+}
 ?>

@@ -17,24 +17,35 @@ if (extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
 
 session_start();
 
-// Early intercept: serve manifest and service worker directly even under front-controller rewrites
+// Early intercept: serve manifest and service worker directly even under front-controller rewrites.
+// This guarantees correct content types and avoids routing to index.php HTML
 try {
     $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
-    $isSw = ($reqPath === '/sw.js' || $reqPath === '/blood-donation-pwa/sw.js');
-    $isManifest = ($reqPath === '/manifest.json' || $reqPath === '/blood-donation-pwa/manifest.json');
+    $isSw = (
+        $reqPath === '/sw.js' ||
+        $reqPath === '/blood-donation-pwa/sw.js' ||
+        $reqPath === '/legacy-pwa-4/blood-donation-pwa/sw.js'
+    );
+    $isManifest = (
+        $reqPath === '/manifest.json' ||
+        $reqPath === '/blood-donation-pwa/manifest.json' ||
+        $reqPath === '/legacy-pwa-4/blood-donation-pwa/manifest.json'
+    );
     if ($isSw || $isManifest) {
         $candidates = [];
         if ($isSw) {
             header('Content-Type: application/javascript; charset=utf-8');
             $candidates = [
                 __DIR__ . '/sw.js',
-                dirname(__DIR__) . '/sw.js'
+                __DIR__ . '/blood-donation-pwa/sw.js',
+                __DIR__ . '/legacy-pwa-4/blood-donation-pwa/sw.js'
             ];
         } else {
             header('Content-Type: application/json; charset=utf-8');
             $candidates = [
                 __DIR__ . '/manifest.json',
-                dirname(__DIR__) . '/manifest.json'
+                __DIR__ . '/blood-donation-pwa/manifest.json',
+                __DIR__ . '/legacy-pwa-4/blood-donation-pwa/manifest.json'
             ];
         }
         foreach ($candidates as $file) {
@@ -134,10 +145,16 @@ try {
     }
     ?>
     <?php
+      // Prefer local manifest; fall back to subfolder or root if absent
       $localManifest = __DIR__ . '/manifest.json';
-      $manifestHref = file_exists($localManifest)
-        ? 'manifest.json?v=2.0.1'
-        : '/manifest.json?v=2.0.1';
+      $subfolderManifest = __DIR__ . '/blood-donation-pwa/manifest.json';
+      if (file_exists($localManifest)) {
+          $manifestHref = 'manifest.json?v=2.0.1';
+      } elseif (file_exists($subfolderManifest)) {
+          $manifestHref = '/blood-donation-pwa/manifest.json?v=2.0.1';
+      } else {
+          $manifestHref = '/manifest.json?v=2.0.1';
+      }
     ?>
     <link rel="manifest" href="<?php echo $manifestHref; ?>">
     <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
@@ -164,11 +181,14 @@ try {
           }
         };
 
-        // Prefer local sw.js; fallback to root sw.js if local missing/misconfigured
+        // Try local root sw.js, then explicit root, then subfolder fallback
         (async () => {
           const localOk = await tryRegister('sw.js?v=11');
           if (!localOk) {
-            await tryRegister('/sw.js?v=11');
+            const rootOk = await tryRegister('/sw.js?v=11');
+            if (!rootOk) {
+              await tryRegister('/blood-donation-pwa/sw.js?v=11');
+            }
           }
         })();
       }
