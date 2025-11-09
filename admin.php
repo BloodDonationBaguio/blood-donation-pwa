@@ -1663,6 +1663,9 @@ function buildPaginationUrl($page) {
                                                 <td><span class="badge bg-danger"><?= htmlspecialchars($donor['blood_type']) ?></span></td>
                                                 <td><?= date('M d, Y', strtotime($donor['created_at'])) ?></td>
                                                 <td>
+                                                    <a href="admin_enhanced_donor_management.php?donor_id=<?= $donor['id'] ?>" class="btn btn-sm btn-primary" title="View Donor Details">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
                                                     <a href="?tab=pending-donors&approve_donor=<?= $donor['id'] ?>" class="btn btn-sm btn-success" onclick="if(!confirm('Approve this donor?')) return false; showLoading(this, 'Approving...'); showGlobalLoader('Approving donor...');">
                                                         <i class="fas fa-check"></i> Approve
                                                     </a>
