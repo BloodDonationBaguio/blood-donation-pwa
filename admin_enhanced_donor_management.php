@@ -929,7 +929,7 @@ $unservedReasons = getUnservedReasons();
             new bootstrap.Modal(document.getElementById('donorModal')).show();
             
             // Fetch donor details
-            fetch(`simple_ajax_donor_details.php?action=get_donor_details&donor_id=${donorId}`)
+            fetch(`/simple_ajax_donor_details.php?action=get_donor_details&donor_id=${donorId}`)
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('donorModalBody').innerHTML = html;
