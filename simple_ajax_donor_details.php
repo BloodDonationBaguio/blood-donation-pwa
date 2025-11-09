@@ -130,22 +130,144 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                 echo "</span>";
                 echo "</div>";
                 
-                if ($allQuestionsAnswered) {
-                    echo "<div class='alert alert-success'>";
-                    echo "<i class='fas fa-check-circle me-2'></i>";
-                    echo "<strong>Screening Complete:</strong> All medical questions have been answered.";
-                    echo "<div class='mt-2'>";
-                    echo "<button class='btn btn-sm btn-primary' onclick='viewMedicalScreening(" . $donorId . ")'>";
-                    echo "<i class='fas fa-eye me-1'></i>View Screening Details";
-                    echo "</button>";
-                    echo "</div>";
+                // Build summary and inline details using includes/medical_questions.php
+                $medicalQuestions = include __DIR__ . '/includes/medical_questions.php';
+                $sections = $medicalQuestions['sections'] ?? [];
+
+                $yesAnswers = 0;
+                $noAnswers = 0;
+                $notAnswered = 0;
+                $donorGender = $donor['gender'] ?? '';
+
+                // Count summary from screening data
+                foreach ($sections as $sectionKey => $section) {
+                    // Skip female-only section for male donors
+                    if ($sectionKey === 'female_only' && strtolower($donorGender) !== 'female') {
+                        continue;
+                    }
+                    foreach ($section['questions'] as $questionKey => $questionText) {
+                        $answer = $screeningData[$questionKey] ?? 'not_answered';
+                        // Special handling for date-type female questions
+                        if ($questionKey === 'q34') {
+                            $q34Type = $screeningData['q34'] ?? null; // 'none' or 'date'
+                            $q34Date = $screeningData['q34_date'] ?? null;
+                            if ($q34Type === 'none') {
+                                $answer = 'None';
+                            } elseif ($q34Type === 'date' && !empty($q34Date)) {
+                                $answer = $q34Date;
+                            } else {
+                                $answer = 'not_answered';
+                            }
+                        } elseif ($questionKey === 'q37') {
+                            $q37Date = $screeningData['q37_date'] ?? null;
+                            $answer = !empty($q37Date) ? $q37Date : 'not_answered';
+                        }
+
+                        if ($answer === 'yes') $yesAnswers++;
+                        elseif ($answer === 'no') $noAnswers++;
+                        else $notAnswered++;
+                    }
+                }
+
+                // Status summary alert
+                echo "<div class='alert alert-" . ($yesAnswers > 0 ? 'warning' : 'success') . "'>";
+                echo "<i class='fas fa-info-circle me-2'></i>";
+                echo "<strong>Screening Summary:</strong> ";
+                echo "<span class='badge bg-" . ($yesAnswers > 0 ? 'warning' : 'success') . "'>";
+                echo ($yesAnswers > 0 ? 'Review Required' : 'Passed');
+                echo "</span>";
+                echo "<span class='ms-3'><small>Safe: {$noAnswers} | Risk: {$yesAnswers} | Not Answered: {$notAnswered}</small></span>";
+                echo "</div>";
+
+                // Inline detailed Q&A accordion
+                echo "<div class='mt-4'>";
+                echo "<h5><i class='fas fa-clipboard-list me-2'></i>Medical Screening Questions & Answers</h5>";
+                echo "<div class='alert alert-info mb-3'>";
+                echo "<i class='fas fa-info-circle me-2'></i>";
+                echo "<strong>Note:</strong> Click on each section to view the detailed questions and answers.";
+                echo "</div>";
+
+                if (!empty($sections)) {
+                    echo "<div class='accordion' id='medicalScreeningAccordion'>";
+                    $questionCounter = 0;
+
+                    foreach ($sections as $sectionKey => $section) {
+                        $sectionTitle = $section['title'];
+                        $questions = $section['questions'];
+                        $sectionId = 'section-' . str_replace(' ', '-', strtolower($sectionTitle));
+
+                        // Skip female-only section for male donors
+                        if ($sectionKey === 'female_only') {
+                            if (strtolower($donorGender) !== 'female') {
+                                continue; // Skip this section for non-female donors
+                            }
+                        }
+
+                        echo "<div class='accordion-item'>";
+                        echo "<h2 class='accordion-header' id='heading-{$sectionId}'>";
+                        echo "<button class='accordion-button " . ($questionCounter === 0 ? '' : 'collapsed') . "' type='button' data-bs-toggle='collapse' data-bs-target='#collapse-{$sectionId}' aria-expanded='" . ($questionCounter === 0 ? 'true' : 'false') . "' aria-controls='collapse-{$sectionId}'>";
+                        echo "<i class='fas fa-heartbeat me-2'></i>{$sectionTitle}";
+                        echo "</button>";
+                        echo "</h2>";
+
+                        echo "<div id='collapse-{$sectionId}' class='accordion-collapse collapse " . ($questionCounter === 0 ? 'show' : '') . "' aria-labelledby='heading-{$sectionId}' data-bs-parent='#medicalScreeningAccordion'>";
+                        echo "<div class='accordion-body'>";
+
+                        foreach ($questions as $questionKey => $questionText) {
+                            $answer = $screeningData[$questionKey] ?? 'not_answered';
+                            if ($questionKey === 'q34') {
+                                $q34Type = $screeningData['q34'] ?? null; // 'none' or 'date'
+                                $q34Date = $screeningData['q34_date'] ?? null;
+                                if ($q34Type === 'none') {
+                                    $answer = 'None';
+                                } elseif ($q34Type === 'date' && !empty($q34Date)) {
+                                    $answer = $q34Date;
+                                } else {
+                                    $answer = 'not_answered';
+                                }
+                            } elseif ($questionKey === 'q37') {
+                                $q37Date = $screeningData['q37_date'] ?? null;
+                                $answer = !empty($q37Date) ? $q37Date : 'not_answered';
+                            }
+
+                            $answerClass = '';
+                            $answerIcon = '';
+                            if ($answer === 'yes') {
+                                $answerClass = 'text-danger';
+                                $answerIcon = '<i class="fas fa-times-circle text-danger me-1"></i>';
+                            } elseif ($answer === 'no') {
+                                $answerClass = 'text-success';
+                                $answerIcon = '<i class="fas fa-check-circle text-success me-1"></i>';
+                            } elseif ($answer === 'not_answered') {
+                                $answerClass = 'text-muted';
+                                $answerIcon = '<i class="fas fa-question-circle text-muted me-1"></i>';
+                            } else {
+                                // For date/None values, show neutral styling
+                                $answerClass = 'text-body';
+                                $answerIcon = '<i class="fas fa-info-circle text-muted me-1"></i>';
+                            }
+
+                            echo "<div class='mb-3 p-3 border rounded " . ($answer === 'yes' ? 'border-danger bg-light' : ($answer === 'no' ? 'border-success bg-light' : 'border-secondary')) . "'>";
+                            echo "<div class='fw-bold mb-2'>{$questionText}</div>";
+                            echo "<div class='{$answerClass}'>{$answerIcon}<strong>Answer:</strong> " . (in_array($answer, ['yes','no','not_answered']) ? ucfirst($answer) : htmlspecialchars($answer)) . "</div>";
+                            echo "</div>";
+                        }
+
+                        echo "</div>";
+                        echo "</div>";
+                        echo "</div>";
+
+                        $questionCounter++;
+                    }
+
                     echo "</div>";
                 } else {
-                    echo "<div class='alert alert-warning'>";
-                    echo "<i class='fas fa-exclamation-triangle me-2'></i>";
-                    echo "<strong>Screening Incomplete:</strong> Medical questionnaire is partially completed.";
+                    echo "<div class='alert alert-info'>";
+                    echo "<i class='fas fa-info-circle me-2'></i>";
+                    echo "Medical screening questions not available.";
                     echo "</div>";
                 }
+                echo "</div>";
                 
                 // Show screening date
                 if (!empty($medicalScreeningSimple['created_at'])) {
@@ -314,4 +436,4 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
 // If not an AJAX request, show error
 echo '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i><strong>Invalid request.</strong></div>';
 exit;
-?> 
+?>

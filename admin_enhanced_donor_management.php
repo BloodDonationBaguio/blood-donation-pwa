@@ -453,13 +453,7 @@ $unservedReasons = getUnservedReasons();
                                             <span class="badge bg-<?= $screeningClass ?> status-badge">
                                                 <?= $screeningStatus ?>
                                             </span>
-                                            <?php if ($screeningStatus === 'Completed'): ?>
-                                                <br><small>
-                                                    <button class="btn btn-sm btn-outline-primary mt-1" onclick="viewMedicalScreening(<?= $donor['id'] ?>)">
-                                                        <i class="fas fa-eye"></i> View
-                                                    </button>
-                                                </small>
-                                            <?php endif; ?>
+                                            <!-- Screening details are now shown inside 'View More Information' modal. -->
                                         </td>
                                         <td><?= date('M d, Y', strtotime($donor['created_at'])) ?></td>
                                         <td>
