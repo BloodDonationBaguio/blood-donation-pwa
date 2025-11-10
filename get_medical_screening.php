@@ -69,13 +69,20 @@ try {
     
     // Get medical screening data from multiple possible sources
     $screeningData = null; $screeningDate = null; $completed = false;
-    // 1) donor_medical_screening_simple
-    $stmt = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_simple WHERE donor_id = ?");
-    $stmt->execute([$donorId]);
-    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        if (!empty($row['screening_data'])) {
-            $data = json_decode($row['screening_data'], true);
-            if (is_array($data)) { $screeningData = $data; $screeningDate = $row['created_at'] ?? $donor['created_at'] ?? null; $completed = !empty($row['all_questions_answered']); }
+    // 1) donor_medical_screening_simple (guarded by table existence to avoid 500s)
+    if (function_exists('tableExists') ? tableExists($pdo, 'donor_medical_screening_simple') : true) {
+        try {
+            $stmt = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_simple WHERE donor_id = ?");
+            $stmt->execute([$donorId]);
+            if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                if (!empty($row['screening_data'])) {
+                    $data = json_decode($row['screening_data'], true);
+                    if (is_array($data)) { $screeningData = $data; $screeningDate = $row['created_at'] ?? $donor['created_at'] ?? null; $completed = !empty($row['all_questions_answered']); }
+                }
+            }
+        } catch (Throwable $e) {
+            // Silently continue to next source if table/query fails
+            error_log('get_medical_screening: simple source failed: ' . $e->getMessage());
         }
     }
     // 2) donor_medical_screening_fixed (fallback)
