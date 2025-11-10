@@ -7,7 +7,11 @@
 // Start session for authentication
 session_start();
 
-require_once __DIR__ . '/db_production.php';
+// Robust DB include: prefer production if present, else local
+$__dbIncluded = false;
+foreach ([__DIR__ . '/db_production.php', __DIR__ . '/db.php', __DIR__ . '/blood-donation-pwa/db.php'] as $__candidate) {
+    if (file_exists($__candidate)) { require_once $__candidate; $__dbIncluded = true; break; }
+}
 // Note: admin_auth.php and enhanced_donor_management.php may not be needed for this endpoint
 
 // Check database connection
@@ -40,7 +44,7 @@ try {
     // Resolve donors table dynamically (prefer donors_new when available)
     $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
     // Get donor basic information
-    $donorStmt = $pdo->prepare("SELECT first_name, last_name, reference_code, gender FROM {$donorsTable} WHERE id = ?");
+    $donorStmt = $pdo->prepare("SELECT first_name, last_name, reference_code, gender, created_at, screening_data FROM {$donorsTable} WHERE id = ?");
     $donorStmt->execute([$donorId]);
     $donor = $donorStmt->fetch(PDO::FETCH_ASSOC);
     
@@ -50,27 +54,64 @@ try {
         exit;
     }
     
-    // Get medical screening data
-    $screeningStmt = $pdo->prepare("SELECT * FROM donor_medical_screening_simple WHERE donor_id = ?");
-    $screeningStmt->execute([$donorId]);
-    $screening = $screeningStmt->fetch(PDO::FETCH_ASSOC);
-    
-    if (!$screening) {
+    // Get medical screening data from multiple possible sources
+    $screening = null;
+    $screeningData = null;
+    $screeningDate = null;
+    $completed = false;
+
+    // 1) donor_medical_screening_simple
+    $stmt = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_simple WHERE donor_id = ?");
+    $stmt->execute([$donorId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row && !empty($row['screening_data'])) {
+        $data = json_decode($row['screening_data'], true);
+        if (is_array($data)) {
+            $screeningData = $data;
+            $screeningDate = $row['created_at'] ?? $donor['created_at'] ?? null;
+            $completed = !empty($row['all_questions_answered']);
+        }
+    }
+
+    // 2) donor_medical_screening_fixed (fallback)
+    if (!$screeningData && function_exists('tableExists') && tableExists($pdo, 'donor_medical_screening_fixed')) {
+        $st2 = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_fixed WHERE donor_id = ?");
+        $st2->execute([$donorId]);
+        $row2 = $st2->fetch(PDO::FETCH_ASSOC);
+        if ($row2 && !empty($row2['screening_data'])) {
+            $data2 = json_decode($row2['screening_data'], true);
+            if (is_array($data2)) {
+                $screeningData = $data2;
+                $screeningDate = $row2['created_at'] ?? $donor['created_at'] ?? null;
+                $completed = !empty($row2['all_questions_answered']);
+            }
+        }
+    }
+
+    // 3) donors.screening_data (legacy)
+    if (!$screeningData && !empty($donor['screening_data'])) {
+        $data3 = json_decode($donor['screening_data'], true);
+        if (is_array($data3)) {
+            $screeningData = $data3;
+            $screeningDate = $donor['created_at'] ?? null;
+            // infer completion: count non-empty answers against required
+            $required = (strtolower($donor['gender']) === 'female') ? 37 : 32;
+            $answered = 0; foreach ($data3 as $k=>$v){ if($v!=='' && $v!==null){ $answered++; } }
+            $completed = ($answered >= $required);
+        }
+    }
+
+    if (!$screeningData) {
         http_response_code(404);
         echo json_encode(['error' => 'Medical screening not found']);
         exit;
     }
     
-    // Parse screening data
-    $screeningData = json_decode($screening['screening_data'], true);
-    if (!$screeningData) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid screening data']);
-        exit;
+    // Load medical questions with robust path resolution
+    $medicalQuestions = null;
+    foreach ([__DIR__ . '/includes/medical_questions.php', __DIR__ . '/../includes/medical_questions.php'] as $__qFile) {
+        if (file_exists($__qFile)) { $medicalQuestions = include $__qFile; break; }
     }
-    
-    // Load medical questions
-    $medicalQuestions = include 'includes/medical_questions.php';
     $sections = $medicalQuestions['sections'] ?? [];
     
     // Build response
@@ -81,8 +122,8 @@ try {
             'gender' => $donor['gender']
         ],
         'screening' => [
-            'completed' => (bool)$screening['all_questions_answered'],
-            'date' => $screening['created_at'],
+            'completed' => (bool)$completed,
+            'date' => $screeningDate,
             'data' => $screeningData
         ],
         'questions' => [],
