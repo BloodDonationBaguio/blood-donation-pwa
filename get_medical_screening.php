@@ -9,7 +9,7 @@ session_start();
 
 // Robust DB include: prefer production if present, else local
 $__dbIncluded = false;
-foreach ([__DIR__ . '/db_production.php', __DIR__ . '/db.php', __DIR__ . '/blood-donation-pwa/db.php'] as $__candidate) {
+foreach ([__DIR__ . '/db_production.php', __DIR__ . '/db.php', __DIR__ . '/../db.php'] as $__candidate) {
     if (file_exists($__candidate)) { require_once $__candidate; $__dbIncluded = true; break; }
 }
 
@@ -68,52 +68,35 @@ try {
     }
     
     // Get medical screening data from multiple possible sources
-    $screening = null;
-    $screeningData = null;
-    $screeningDate = null;
-    $completed = false;
-
+    $screeningData = null; $screeningDate = null; $completed = false;
     // 1) donor_medical_screening_simple
     $stmt = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_simple WHERE donor_id = ?");
     $stmt->execute([$donorId]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($row && !empty($row['screening_data'])) {
-        $data = json_decode($row['screening_data'], true);
-        if (is_array($data)) {
-            $screeningData = $data;
-            $screeningDate = $row['created_at'] ?? $donor['created_at'] ?? null;
-            $completed = !empty($row['all_questions_answered']);
+    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        if (!empty($row['screening_data'])) {
+            $data = json_decode($row['screening_data'], true);
+            if (is_array($data)) { $screeningData = $data; $screeningDate = $row['created_at'] ?? $donor['created_at'] ?? null; $completed = !empty($row['all_questions_answered']); }
         }
     }
-
     // 2) donor_medical_screening_fixed (fallback)
     if (!$screeningData && function_exists('tableExists') && tableExists($pdo, 'donor_medical_screening_fixed')) {
         $st2 = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_fixed WHERE donor_id = ?");
         $st2->execute([$donorId]);
-        $row2 = $st2->fetch(PDO::FETCH_ASSOC);
-        if ($row2 && !empty($row2['screening_data'])) {
-            $data2 = json_decode($row2['screening_data'], true);
-            if (is_array($data2)) {
-                $screeningData = $data2;
-                $screeningDate = $row2['created_at'] ?? $donor['created_at'] ?? null;
-                $completed = !empty($row2['all_questions_answered']);
+        if ($row2 = $st2->fetch(PDO::FETCH_ASSOC)) {
+            if (!empty($row2['screening_data'])) {
+                $data2 = json_decode($row2['screening_data'], true);
+                if (is_array($data2)) { $screeningData = $data2; $screeningDate = $row2['created_at'] ?? $donor['created_at'] ?? null; $completed = !empty($row2['all_questions_answered']); }
             }
         }
     }
-
     // 3) donors.screening_data (legacy)
     if (!$screeningData && !empty($donor['screening_data'])) {
         $data3 = json_decode($donor['screening_data'], true);
         if (is_array($data3)) {
-            $screeningData = $data3;
-            $screeningDate = $donor['created_at'] ?? null;
-            // infer completion: count non-empty answers against required
-            $required = (strtolower($donor['gender']) === 'female') ? 37 : 32;
-            $answered = 0; foreach ($data3 as $k=>$v){ if($v!=='' && $v!==null){ $answered++; } }
-            $completed = ($answered >= $required);
+            $screeningData = $data3; $screeningDate = $donor['created_at'] ?? null;
+            $required = (strtolower($donor['gender']) === 'female') ? 37 : 32; $ans = 0; foreach ($data3 as $k=>$v){ if($v!=='' && $v!==null){ $ans++; } } $completed = ($ans >= $required);
         }
     }
-
     if (!$screeningData) {
         http_response_code(404);
         echo json_encode(['error' => 'Medical screening not found']);
