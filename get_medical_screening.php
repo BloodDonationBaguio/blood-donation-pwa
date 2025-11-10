@@ -12,6 +12,19 @@ $__dbIncluded = false;
 foreach ([__DIR__ . '/db_production.php', __DIR__ . '/db.php', __DIR__ . '/blood-donation-pwa/db.php'] as $__candidate) {
     if (file_exists($__candidate)) { require_once $__candidate; $__dbIncluded = true; break; }
 }
+
+// Ensure tableExists helper is available for dynamic table resolution
+if (!function_exists('tableExists')) {
+    function tableExists(PDO $pdo, string $table): bool {
+        try {
+            $stmt = $pdo->prepare('SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?');
+            $stmt->execute([$table]);
+            return (bool)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            try { $pdo->query("SELECT 1 FROM `{$table}` LIMIT 1"); return true; } catch (Throwable $e2) { return false; }
+        }
+    }
+}
 // Note: admin_auth.php and enhanced_donor_management.php may not be needed for this endpoint
 
 // Check database connection
@@ -42,7 +55,7 @@ $donorId = (int)$_GET['donor_id'];
 
 try {
     // Resolve donors table dynamically (prefer donors_new when available)
-    $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+    $donorsTable = tableExists($pdo, 'donors_new') ? 'donors_new' : 'donors';
     // Get donor basic information
     $donorStmt = $pdo->prepare("SELECT first_name, last_name, reference_code, gender, created_at, screening_data FROM {$donorsTable} WHERE id = ?");
     $donorStmt->execute([$donorId]);
