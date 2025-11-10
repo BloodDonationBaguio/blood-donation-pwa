@@ -461,9 +461,6 @@ $unservedReasons = getUnservedReasons();
                                                 <button class="btn btn-sm btn-primary" onclick="viewDonor(<?= $donor['id'] ?>)">
                                                     <i class="fas fa-info-circle"></i> View More Information
                                                 </button>
-                                                <button class="btn btn-sm btn-outline-secondary" onclick="viewMedicalScreening(<?= $donor['id'] ?>)">
-                                                    <i class="fas fa-stethoscope"></i> Medical Screening
-                                                </button>
                                                 <button class="btn btn-sm btn-warning" onclick="updateDonorStatus(<?= $donor['id'] ?>, '<?= $donor['status'] ?>')">
                                                     <i class="fas fa-edit"></i> Update Status
                                                 </button>
