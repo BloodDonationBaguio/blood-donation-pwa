@@ -98,21 +98,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!$hasAvailable) {
                 try {
-                    require_once __DIR__ . '/blood-donation-pwa/includes/BloodInventoryManagerComplete.php';
-                    $inventoryManager = new BloodInventoryManagerComplete($pdo);
-
-                    $unitData = [
-                        'donor_id' => $donorId,
-                        'collection_date' => date('Y-m-d'),
-                        'collection_site' => 'Main Center',
-                        'storage_location' => 'Storage A'
+                    // Robust include to avoid fatal errors on production when paths differ
+                    $managerIncluded = false;
+                    $candidatePaths = [
+                        __DIR__ . '/includes/BloodInventoryManagerComplete.php',
+                        __DIR__ . '/blood-donation-pwa/includes/BloodInventoryManagerComplete.php'
                     ];
+                    foreach ($candidatePaths as $path) {
+                        if (file_exists($path)) { require_once $path; $managerIncluded = true; break; }
+                    }
 
-                    $createResult = $inventoryManager->addBloodUnit($unitData);
-                    if (!empty($createResult['success'])) {
-                        $success .= ($success ? ' ' : '') . 'Blood unit auto-created.';
+                    if ($managerIncluded && class_exists('BloodInventoryManagerComplete')) {
+                        $inventoryManager = new BloodInventoryManagerComplete($pdo);
+
+                        $unitData = [
+                            'donor_id' => $donorId,
+                            'collection_date' => date('Y-m-d'),
+                            'collection_site' => 'Main Center',
+                            'storage_location' => 'Storage A'
+                        ];
+
+                        $createResult = $inventoryManager->addBloodUnit($unitData);
+                        if (!empty($createResult['success'])) {
+                            $success .= ($success ? ' ' : '') . 'Blood unit auto-created.';
+                        } else {
+                            error_log('admin_edit_donor: auto-create blood unit failed - ' . ($createResult['message'] ?? 'unknown error'));
+                        }
                     } else {
-                        error_log('admin_edit_donor: auto-create blood unit failed - ' . ($createResult['message'] ?? 'unknown error'));
+                        // Prevent HTTP 500 by skipping when file/class is missing
+                        error_log('admin_edit_donor: BloodInventoryManagerComplete not available; skipped auto-create.');
                     }
                 } catch (Exception $e) {
                     error_log('admin_edit_donor: error auto-creating blood unit - ' . $e->getMessage());
@@ -182,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
                         <?php endif; ?>
                         
-                        <form method="POST">
+                        <form method="POST" id="editDonorForm">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">First Name</label>
@@ -285,8 +299,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <a href="admin.php?tab=donor-list" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left"></i> Back to List
                                 </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Save Changes
+                                <button type="submit" class="btn btn-primary" id="saveChangesBtn">
+                                    <i class="fas fa-save"></i> <span class="save-text">Save Changes</span>
                                 </button>
                             </div>
                         </form>
@@ -297,5 +311,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Add loading state to Save Changes button on submit
+    (function() {
+        const form = document.getElementById('editDonorForm');
+        const saveBtn = document.getElementById('saveChangesBtn');
+        if (form && saveBtn) {
+            form.addEventListener('submit', function() {
+                if (saveBtn.disabled) return; // prevent double-click
+                saveBtn.disabled = true;
+                // Preserve original content to allow potential reuse if needed
+                const originalHTML = saveBtn.innerHTML;
+                saveBtn.setAttribute('data-original', originalHTML);
+                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+            });
+        }
+    })();
+    </script>
 </body>
 </html>
