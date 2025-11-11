@@ -262,53 +262,26 @@ try {
     if (isset($_GET['mark_served'])) {
         $id = (int)$_GET['mark_served'];
         try {
-            // Check if served_date column exists, if not use a different approach
-            $stmt = $pdo->prepare("UPDATE donors SET status = 'served' WHERE id = ?");
-            $result = $stmt->execute([$id]);
-            
-            if ($result) {
-                // Try to update served_date if column exists
-                try {
-                    $dateStmt = $pdo->prepare('UPDATE donors SET served_date = NOW() WHERE id = ?');
-                    $dateStmt->execute([$id]);
-                } catch (PDOException $e) {
-                    // Column might not exist, that's okay
-                    error_log("served_date column might not exist: " . $e->getMessage());
+            // Use unified PostgreSQL-compatible serving logic
+            require_once __DIR__ . '/includes/enhanced_donor_management.php';
+
+            $rv = markDonorServed($pdo, $id);
+            if (is_array($rv) && !empty($rv['success'])) {
+                $unitId = $rv['unit_id'] ?? 'unknown';
+                $msg = 'Donor marked as served successfully. Unit ' . $unitId . ' created';
+                if (isset($rv['inserted']) && !$rv['inserted']) {
+                    $msg = 'Donor served. Unit ' . $unitId . ' already existed';
                 }
-                
-                // AUTOMATICALLY CREATE BLOOD UNIT when donor is marked as served
-                try {
-                    require_once __DIR__ . '/includes/BloodInventoryManagerComplete.php';
-                    $inventoryManager = new BloodInventoryManagerComplete($pdo);
-                    
-                    $bloodUnitData = [
-                        'donor_id' => $id,
-                        'collection_date' => date('Y-m-d'),
-                        'collection_site' => 'Main Center',
-                        'storage_location' => 'Storage A'
-                    ];
-                    
-                    $result = $inventoryManager->addBloodUnit($bloodUnitData);
-                    
-                    if (!$result['success']) {
-                        error_log("Failed to auto-create blood unit for donor $id: " . $result['message']);
-                    }
-                } catch (Exception $e) {
-                    error_log("Error auto-creating blood unit for donor $id: " . $e->getMessage());
-                }
-                
-                // Log the action
-                logAdminAction($pdo, 'donor_marked_served', 'donors', $id, "Donor marked as served");
-                
-                header('Location: ?tab=donor-list&success=Donor was marked as served successfully.');
+                header('Location: ?tab=donor-list&success=' . urlencode($msg));
                 exit();
             } else {
-                header('Location: ?tab=donor-list&error=Failed to update donor status.');
+                $err = is_array($rv) ? ($rv['error'] ?? 'Unknown error') : 'Operation failed';
+                header('Location: ?tab=donor-list&error=' . urlencode('Failed to mark served: ' . $err));
                 exit();
             }
-        } catch (PDOException $e) {
-            error_log("Error marking donor as served: " . $e->getMessage());
-            header('Location: ?tab=donor-list&error=Database error occurred.');
+        } catch (Throwable $e) {
+            error_log("Error marking donor as served (unified): " . $e->getMessage());
+            header('Location: ?tab=donor-list&error=' . urlencode('Database error occurred: ' . $e->getMessage()));
             exit();
         }
     }
