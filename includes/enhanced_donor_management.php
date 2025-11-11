@@ -414,7 +414,10 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
     try {
         // Self-heal critical tables including blood_inventory
         try {
-            require_once __DIR__ . '/../database_self_heal.php';
+            // Skip self-heal during automated tests to avoid redirects/HTML output
+            if (!defined('TEST_MODE') || TEST_MODE !== true) {
+                require_once __DIR__ . '/../database_self_heal.php';
+            }
         } catch (Throwable $e) {
             error_log('database_self_heal include failed: ' . $e->getMessage());
         }
@@ -477,6 +480,25 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
             $inventoryStmt = $pdo->prepare($sql);
             $inventoryStmt->execute([$unitId, $donorId, substr($bloodType, 0, 10), $servedDate, $expiryDate]);
             $insertedUnitId = $unitId; // If ignored, treat as existing
+            // Resilience: ensure row exists; if not, attempt direct upsert-style insert
+            try {
+                $checkStmt = $pdo->prepare('SELECT COUNT(*) FROM blood_inventory WHERE unit_id = ?');
+                $checkStmt->execute([$unitId]);
+                $exists = (int)$checkStmt->fetchColumn() > 0;
+                if (!$exists) {
+                    // Fallback insert without IGNORE (handles edge cases where IGNORE suppresses insertion)
+                    $sql2 = "INSERT INTO blood_inventory (
+                                unit_id, donor_id, blood_type, collection_date, expiry_date, status, volume_ml
+                            ) VALUES (
+                                ?, ?, ?, ?, ?, 'available', 450
+                            ) ON DUPLICATE KEY UPDATE unit_id = unit_id";
+                    $stmt2 = $pdo->prepare($sql2);
+                    $stmt2->execute([$unitId, $donorId, substr($bloodType, 0, 10), $servedDate, $expiryDate]);
+                }
+            } catch (Throwable $ensureE) {
+                // Non-fatal: log and proceed; transaction will still commit for served state
+                error_log('blood_inventory ensure insert fallback failed: ' . $ensureE->getMessage());
+            }
         }
 
         // Send served email if available

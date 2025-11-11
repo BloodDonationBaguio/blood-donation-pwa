@@ -21,6 +21,10 @@ require_once __DIR__ . '/utils.php';
 
 // Preferred order for core tests; any remaining files will be auto-included
 $preferred = [
+  // Ensure served-flow tests run first so their results are visible even if later tests fail
+  'test_mark_donor_served.php',
+  'test_mark_multiple_donors_served.php',
+  // Core consistency and backfill tests
   'inventory_manager_consistency.php',
   'dashboard_summary_consistency.php',
   'admin_modern_page_consistency.php',
@@ -38,19 +42,29 @@ $preferred = [
 
 foreach ($preferred as $file) {
   $path = __DIR__ . '/' . $file;
-  if (file_exists($path)) { require_once $path; }
+  if (file_exists($path)) {
+    // Trace which test is running to diagnose early exits
+    echo "\n>>> Running: $file\n";
+    require_once $path;
+  }
+  // Echo progress after each test to surface early results even if a later test exits
+  if (isset($t_output)) { echo $t_output; }
 }
 
-// Auto-include any other tests in this directory, excluding self and utils
+// Auto-include any other test_* files (skip diagnostic/utility pages that may exit)
 $excluded = ['run_all_tests.php', 'utils.php'];
 $already = array_flip($preferred);
 foreach (glob(__DIR__ . '/*.php') as $path) {
   $name = basename($path);
   if (in_array($name, $excluded)) { continue; }
   if (isset($already[$name])) { continue; }
+  if (!preg_match('/^test_.*\.php$/', $name)) { continue; }
+  echo "\n>>> Running: $name\n";
   require_once $path;
+  if (isset($t_output)) { echo $t_output; }
 }
 
-echo $t_output;
+// Final summary (may already be partially printed above)
+if (isset($t_output)) { echo $t_output; }
 
 ?>

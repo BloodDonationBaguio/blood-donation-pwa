@@ -15,7 +15,9 @@ if (!isset($pdo) || !$pdo instanceof PDO) {
     $_SESSION['admin_id'] = $_SESSION['admin_id'] ?? 1;
 }
 
-function dbDriver(PDO $pdo) { try { return strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)); } catch (Throwable $e) { return 'mysql'; } }
+if (!function_exists('dbDriver')) {
+    function dbDriver(PDO $pdo) { try { return strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)); } catch (Throwable $e) { return 'mysql'; } }
+}
 if (!function_exists('tableExists')) {
     function tableExists(PDO $pdo, $table) {
         $driver = dbDriver($pdo);
@@ -37,6 +39,7 @@ if (!function_exists('tableExists')) {
     }
 }
 
+if (!function_exists('ensureMinimalTables')) {
 function ensureMinimalTables(PDO $pdo) {
     $driver = dbDriver($pdo);
     if (!tableExists($pdo, 'donations_new')) {
@@ -130,7 +133,10 @@ function ensureMinimalTables(PDO $pdo) {
         else { $pdo->exec("ALTER TABLE donors ADD COLUMN served_date DATETIME NULL"); }
     } catch (Throwable $e) {}
 }
+}
 
+// Counters
+$passed = 0; $failed = 0; $skipped = 0;
 t_section('Bulk Served — markMultipleDonorsServed creates units for multiple donors');
 
 if (!isset($pdo) || !$pdo instanceof PDO) {
@@ -149,8 +155,9 @@ $date = '2025-01-03';
 $types = ['O-', 'B+', 'AB-'];
 $donorIds = [];
 foreach ($types as $i => $bt) {
+    $uniqueEmail = 'bulk_donor_' . ($i+1) . '_' . bin2hex(random_bytes(4)) . '@example.com';
     $stmt = $pdo->prepare("INSERT INTO donors (first_name, last_name, email, blood_type, status, created_at) VALUES (?, ?, ?, ?, 'approved', CURRENT_TIMESTAMP)");
-    $stmt->execute(['Bulk', 'Donor' . ($i+1), 'bulk_donor_' . ($i+1) . '@example.com', $bt]);
+    $stmt->execute(['Bulk', 'Donor' . ($i+1), $uniqueEmail, $bt]);
     $donorIds[] = (int)$pdo->lastInsertId();
 }
 
@@ -166,10 +173,10 @@ foreach ($donorIds as $idx => $id) {
     $q = $pdo->prepare('SELECT COUNT(*) FROM blood_inventory WHERE unit_id = ?');
     $q->execute([$unit]);
     $cnt = (int)$q->fetchColumn();
-    t_assert($cnt === 1, 'bulk: blood_inventory contains unit ' . $unit);
+if (t_assert($cnt === 1, 'bulk: blood_inventory contains unit ' . $unit)) { $passed += 1; } else { $failed += 1; }
     $expectUnits += $cnt;
 }
-t_assert($expectUnits === count($donorIds), 'bulk: created one unit per donor');
+if (t_assert($expectUnits === count($donorIds), 'bulk: created one unit per donor')) { $passed += 1; } else { $failed += 1; }
 
 // Re-run bulk served to verify idempotency (no duplicate units)
 ob_start();
@@ -183,9 +190,23 @@ foreach ($donorIds as $idx => $id) {
     $q->execute([$unit]);
     $actualUnits += (int)$q->fetchColumn();
 }
-t_assert($actualUnits === $expectUnits, 'bulk: idempotent, no duplicate units on second call');
+if (t_assert($actualUnits === $expectUnits, 'bulk: idempotent, no duplicate units on second call')) { $passed += 1; } else { $failed += 1; }
 
 // Summarize
-t_result();
+t_result($passed, $failed, $skipped);
+
+// Cleanup inserted test data to avoid impacting other tests
+try {
+    if (!empty($donorIds)) {
+        // Remove inventory units and donation rows for these donors
+        $placeholders = implode(',', array_fill(0, count($donorIds), '?'));
+        $delInv = $pdo->prepare('DELETE FROM blood_inventory WHERE donor_id IN (' . $placeholders . ')');
+        $delInv->execute($donorIds);
+        $delDon = $pdo->prepare('DELETE FROM donations_new WHERE donor_id IN (' . $placeholders . ')');
+        $delDon->execute($donorIds);
+        $delDonors = $pdo->prepare('DELETE FROM donors WHERE id IN (' . $placeholders . ')');
+        $delDonors->execute($donorIds);
+    }
+} catch (Throwable $e) {}
 
 ?>

@@ -37,17 +37,19 @@ function getPdo(): PDO {
     throw new RuntimeException('No PDO instance available.');
 }
 
-function tableExists(PDO $pdo, string $table): bool {
-    try {
-        $stmt = $pdo->prepare('SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?');
-        $stmt->execute([$table]);
-        return (bool)$stmt->fetchColumn();
-    } catch (Throwable $e) {
+if (!function_exists('tableExists')) {
+    function tableExists(PDO $pdo, string $table): bool {
         try {
-            $pdo->query("SELECT 1 FROM `{$table}` LIMIT 1");
-            return true;
-        } catch (Throwable $e2) {
-            return false;
+            $stmt = $pdo->prepare('SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?');
+            $stmt->execute([$table]);
+            return (bool)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            try {
+                $pdo->query("SELECT 1 FROM `{$table}` LIMIT 1");
+                return true;
+            } catch (Throwable $e2) {
+                return false;
+            }
         }
     }
 }

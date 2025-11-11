@@ -489,10 +489,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
     } else {
         echo '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i><strong>Invalid donor ID.</strong></div>';
     }
-    exit;
+    // In tests, do not terminate the entire suite
+    if (!defined('TEST_MODE') || !TEST_MODE) exit;
 }
 
 // If not an AJAX request, show error
 echo '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i><strong>Invalid request.</strong></div>';
-exit;
+// In tests, do not terminate the entire suite
+if (!defined('TEST_MODE') || !TEST_MODE) exit;
 ?>
