@@ -12,6 +12,9 @@ require_once 'includes/admin_actions.php';
 // Create necessary tables
 createDonorManagementTables($pdo);
 
+// Backfill missing served_date for already-served donors
+backfillServedDates($pdo);
+
 // Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');

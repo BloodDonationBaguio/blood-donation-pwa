@@ -682,4 +682,25 @@ function getDonorDisplayStatus($status) {
     
     return $displayStatuses[$status] ?? ucfirst($status);
 }
+
+// Backfill served_date for already-served donors using latest completed donation
+function backfillServedDates($pdo) {
+    try {
+        // Set served_date to the latest completed donation_date if missing
+        $sql = "UPDATE donors d
+                JOIN (
+                  SELECT donor_id, MAX(donation_date) AS latest_date
+                  FROM donations_new
+                  WHERE status = 'completed'
+                  GROUP BY donor_id
+                ) dn ON dn.donor_id = d.id
+                SET d.served_date = dn.latest_date
+                WHERE d.status = 'served' AND d.served_date IS NULL";
+        $pdo->exec($sql);
+        return true;
+    } catch (Exception $e) {
+        error_log('Error backfilling served_date: ' . $e->getMessage());
+        return false;
+    }
+}
 ?>
