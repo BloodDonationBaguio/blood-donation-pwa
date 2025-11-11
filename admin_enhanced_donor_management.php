@@ -534,17 +534,6 @@ $unservedReasons = getUnservedReasons();
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Verification Checklist:</strong>
-                    </div>
-                    <ul>
-                        <li>✅ Personal information is complete and accurate</li>
-                        <li>✅ Contact details are valid</li>
-                        <li>✅ Medical questionnaire has been reviewed</li>
-                        <li>✅ No disqualifying medical conditions</li>
-                        <li>✅ Blood type is confirmed</li>
-                    </ul>
                     <p><strong>This action will:</strong></p>
                     <ul>
                         <li>Change status to "Approved"</li>
