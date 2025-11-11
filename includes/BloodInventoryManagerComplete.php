@@ -391,25 +391,39 @@ class BloodInventoryManagerComplete {
                 $transactionStarted = true;
             }
 
-            // Validate donor (support both donors and donors_new)
-            $donorTable = 'donors';
+            // Ensure blood_inventory table exists to avoid runtime failures on insert
+            $this->ensureBloodInventoryTable();
+
+            // Validate donor (robust across donors and donors_new)
+            $donor = null;
+            $donorTableUsed = 'donors';
+            $donorsNewExists = false;
             try {
                 if (function_exists('tableExists') && tableExists($this->pdo, 'donors_new')) {
-                    $donorTable = 'donors_new';
+                    $donorsNewExists = true;
                 }
             } catch (Exception $e) {
-                // If table detection fails, default to original 'donors'
+                // Default to legacy donors if detection fails
                 error_log('Table detection failed in addBloodUnit, defaulting to donors: ' . $e->getMessage());
             }
 
-            // Accept donors with 'served' (both tables) and 'completed' (donors_new)
-            $eligibility = ($donorTable === 'donors_new')
-                ? "(status = 'served' OR status = 'completed')"
-                : "status = 'served'";
-            $sql = "SELECT id, first_name, last_name, blood_type, status FROM {$donorTable} WHERE id = ? AND {$eligibility}";
-            $donorStmt = $this->pdo->prepare($sql);
-            $donorStmt->execute([$data['donor_id']]);
-            $donor = $donorStmt->fetch(PDO::FETCH_ASSOC);
+            if ($donorsNewExists) {
+                // Try donors_new first (served/completed eligible)
+                $sqlNew = "SELECT id, first_name, last_name, blood_type, status FROM donors_new WHERE id = ? AND (status = 'served' OR status = 'completed')";
+                $stNew = $this->pdo->prepare($sqlNew);
+                $stNew->execute([$data['donor_id']]);
+                $donor = $stNew->fetch(PDO::FETCH_ASSOC);
+                if ($donor) { $donorTableUsed = 'donors_new'; }
+            }
+
+            if (!$donor) {
+                // Fallback to legacy donors table (served eligible)
+                $sqlOld = "SELECT id, first_name, last_name, blood_type, status FROM donors WHERE id = ? AND status = 'served'";
+                $stOld = $this->pdo->prepare($sqlOld);
+                $stOld->execute([$data['donor_id']]);
+                $donor = $stOld->fetch(PDO::FETCH_ASSOC);
+                if ($donor) { $donorTableUsed = 'donors'; }
+            }
 
             if (!$donor) {
                 throw new Exception('Donor not found or not eligible for blood donation');
@@ -474,6 +488,98 @@ class BloodInventoryManagerComplete {
             }
             error_log("Error adding blood unit: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Ensure blood_inventory table exists across supported drivers.
+     * Creates the table if missing with minimal required columns.
+     */
+    private function ensureBloodInventoryTable() {
+        try {
+            $driver = 'mysql';
+            try { $driver = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME)); } catch (Throwable $e) { /* default mysql */ }
+
+            // Quick existence check
+            $exists = false;
+            try {
+                if ($driver === 'pgsql') {
+                    $chk = $this->pdo->prepare("SELECT 1 FROM information_schema.tables WHERE table_name = 'blood_inventory' LIMIT 1");
+                    $chk->execute();
+                    $exists = (bool)$chk->fetchColumn();
+                } elseif ($driver === 'sqlite') {
+                    $chk = $this->pdo->prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='blood_inventory' LIMIT 1");
+                    $chk->execute();
+                    $exists = (bool)$chk->fetchColumn();
+                } else {
+                    $chk = $this->pdo->prepare("SHOW TABLES LIKE 'blood_inventory'");
+                    $chk->execute();
+                    $exists = (bool)$chk->fetchColumn();
+                }
+            } catch (Throwable $e) {
+                // If detection fails, try creating defensively
+                $exists = false;
+            }
+
+            if ($exists) { return; }
+
+            if ($driver === 'pgsql') {
+                $sql = "CREATE TABLE IF NOT EXISTS blood_inventory (
+                    id SERIAL PRIMARY KEY,
+                    unit_id VARCHAR(64) UNIQUE NOT NULL,
+                    donor_id INTEGER,
+                    blood_type VARCHAR(10) NOT NULL,
+                    collection_date DATE NOT NULL,
+                    expiry_date DATE NOT NULL,
+                    status VARCHAR(20) NOT NULL DEFAULT 'available',
+                    collection_site VARCHAR(100),
+                    storage_location VARCHAR(100),
+                    notes TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP NULL,
+                    deleted_at TIMESTAMP NULL
+                )";
+                $this->pdo->exec($sql);
+                $this->pdo->exec("CREATE INDEX IF NOT EXISTS idx_blood_inventory_status ON blood_inventory(status)");
+                $this->pdo->exec("CREATE INDEX IF NOT EXISTS idx_blood_inventory_expiry ON blood_inventory(expiry_date)");
+            } elseif ($driver === 'sqlite') {
+                $sql = "CREATE TABLE IF NOT EXISTS blood_inventory (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    unit_id TEXT UNIQUE NOT NULL,
+                    donor_id INTEGER,
+                    blood_type TEXT NOT NULL,
+                    collection_date TEXT NOT NULL,
+                    expiry_date TEXT NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'available',
+                    collection_site TEXT,
+                    storage_location TEXT,
+                    notes TEXT,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NULL,
+                    deleted_at TEXT NULL
+                )";
+                $this->pdo->exec($sql);
+            } else { // mysql/mariadb
+                $sql = "CREATE TABLE IF NOT EXISTS blood_inventory (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    unit_id VARCHAR(64) UNIQUE NOT NULL,
+                    donor_id INT,
+                    blood_type VARCHAR(10) NOT NULL,
+                    collection_date DATE NOT NULL,
+                    expiry_date DATE NOT NULL,
+                    status VARCHAR(20) NOT NULL DEFAULT 'available',
+                    collection_site VARCHAR(100),
+                    storage_location VARCHAR(100),
+                    notes TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP NULL,
+                    deleted_at TIMESTAMP NULL
+                ) ENGINE=InnoDB";
+                $this->pdo->exec($sql);
+            }
+        } catch (Throwable $e) {
+            // Log but do not fail addBloodUnit; subsequent insert will report error if still missing
+            error_log('ensureBloodInventoryTable failed: ' . $e->getMessage());
         }
     }
 
