@@ -694,10 +694,12 @@ try {
 }
 
 // Helper function for pagination URLs
-function buildPaginationUrl($page) {
-    $params = $_GET;
-    $params['page'] = $page;
-    return '?' . http_build_query($params);
+if (!function_exists('buildPaginationUrl')) {
+    function buildPaginationUrl($page) {
+        $params = $_GET;
+        $params['page'] = $page;
+        return '?' . http_build_query($params);
+    }
 }
 ?>
 <!DOCTYPE html>
