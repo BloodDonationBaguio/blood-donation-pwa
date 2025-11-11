@@ -136,9 +136,14 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
             throw new Exception("Donor not found");
         }
         
-        // Update donor status
-        $stmt = $pdo->prepare("UPDATE donors SET status = ? WHERE id = ?");
-        $result = $stmt->execute([$newStatus, $donorId]);
+        // Update donor status; when served, also set served_date
+        if ($newStatus === 'served') {
+            $stmt = $pdo->prepare("UPDATE donors SET status = 'served', served_date = CURRENT_TIMESTAMP WHERE id = ?");
+            $result = $stmt->execute([$donorId]);
+        } else {
+            $stmt = $pdo->prepare("UPDATE donors SET status = ? WHERE id = ?");
+            $result = $stmt->execute([$newStatus, $donorId]);
+        }
         
         // Add status change note and email donor with the note
         if (!empty($notes)) {
@@ -434,9 +439,12 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
         // Log the update (schema already ensured before transaction)
         $logMessage .= "Updating donor $donorId status to 'served'\n";
         
-        // Update donor status to 'served'
-        $stmt = $pdo->prepare("UPDATE $tableName SET status = 'served' WHERE id = ?");
-        $result = $stmt->execute([$donorId]);
+        // Determine donation date to persist in served_date
+        $donationDate = $donationDate ?: date('Y-m-d');
+        
+        // Update donor status to 'served' and set served_date
+        $stmt = $pdo->prepare("UPDATE $tableName SET status = 'served', served_date = ? WHERE id = ?");
+        $result = $stmt->execute([$donationDate, $donorId]);
         $logMessage .= "Update result: " . ($result ? "success" : "failed") . "\n";
         
         if (!$result) {
