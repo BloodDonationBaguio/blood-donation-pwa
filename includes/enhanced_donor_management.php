@@ -703,4 +703,92 @@ function backfillServedDates($pdo) {
         return false;
     }
 }
+
+// Backfill donation dates for legacy served donors using safe fallbacks
+// - If a served donor lacks served_date but has last_donation_date, use it
+// - If dates are missing, derive from blood_inventory.collection_date
+// - Ensure last_donation_date is also populated when served_date exists
+function backfillDonationDatesFallbacks($pdo) {
+    try {
+        $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
+
+        // 1) served_date <- last_donation_date when served_date is missing
+        try {
+            $pdo->exec("UPDATE donors SET served_date = last_donation_date WHERE status = 'served' AND served_date IS NULL AND last_donation_date IS NOT NULL");
+        } catch (Exception $e) {
+            // Non-blocking
+            error_log('Fallback A failed: ' . $e->getMessage());
+        }
+
+        // 2) served_date <- latest blood_inventory.collection_date when still missing
+        try {
+            if ($driver === 'pgsql') {
+                $sql = "UPDATE donors d
+                        SET served_date = bi.latest_date
+                        FROM (
+                          SELECT donor_id, MAX(collection_date) AS latest_date
+                          FROM blood_inventory
+                          WHERE donor_id IS NOT NULL
+                          GROUP BY donor_id
+                        ) bi
+                        WHERE bi.donor_id = d.id AND d.status = 'served' AND d.served_date IS NULL";
+                $pdo->exec($sql);
+            } else {
+                $sql = "UPDATE donors d
+                        JOIN (
+                          SELECT donor_id, MAX(collection_date) AS latest_date
+                          FROM blood_inventory
+                          WHERE donor_id IS NOT NULL
+                          GROUP BY donor_id
+                        ) bi ON bi.donor_id = d.id
+                        SET d.served_date = bi.latest_date
+                        WHERE d.status = 'served' AND d.served_date IS NULL";
+                $pdo->exec($sql);
+            }
+        } catch (Exception $e) {
+            error_log('Fallback B failed: ' . $e->getMessage());
+        }
+
+        // 3) last_donation_date <- served_date when missing
+        try {
+            $pdo->exec("UPDATE donors SET last_donation_date = served_date WHERE last_donation_date IS NULL AND served_date IS NOT NULL");
+        } catch (Exception $e) {
+            error_log('Fallback C failed: ' . $e->getMessage());
+        }
+
+        // 4) last_donation_date <- latest blood_inventory.collection_date when still missing
+        try {
+            if ($driver === 'pgsql') {
+                $sql = "UPDATE donors d
+                        SET last_donation_date = bi.latest_date
+                        FROM (
+                          SELECT donor_id, MAX(collection_date) AS latest_date
+                          FROM blood_inventory
+                          WHERE donor_id IS NOT NULL
+                          GROUP BY donor_id
+                        ) bi
+                        WHERE bi.donor_id = d.id AND d.last_donation_date IS NULL";
+                $pdo->exec($sql);
+            } else {
+                $sql = "UPDATE donors d
+                        JOIN (
+                          SELECT donor_id, MAX(collection_date) AS latest_date
+                          FROM blood_inventory
+                          WHERE donor_id IS NOT NULL
+                          GROUP BY donor_id
+                        ) bi ON bi.donor_id = d.id
+                        SET d.last_donation_date = bi.latest_date
+                        WHERE d.last_donation_date IS NULL";
+                $pdo->exec($sql);
+            }
+        } catch (Exception $e) {
+            error_log('Fallback D failed: ' . $e->getMessage());
+        }
+
+        return true;
+    } catch (Exception $e) {
+        error_log('Error in backfillDonationDatesFallbacks: ' . $e->getMessage());
+        return false;
+    }
+}
 ?>

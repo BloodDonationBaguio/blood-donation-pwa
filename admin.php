@@ -130,7 +130,7 @@ try {
     require_once(__DIR__ . "/db.php");
     require_once(__DIR__ . "/includes/enhanced_donor_management.php");
     
-    // Ensure donors.served_date exists (MySQL) and backfill missing values once
+    // Ensure donors.served_date and last_donation_date exist (MySQL) and backfill missing values once
     try {
         $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
         if ($driver !== 'pgsql') {
@@ -139,9 +139,16 @@ try {
             if (!$hasServedDate) {
                 $pdo->exec("ALTER TABLE donors ADD COLUMN served_date TIMESTAMP NULL");
             }
+            $check2 = $pdo->query("SHOW COLUMNS FROM donors LIKE 'last_donation_date'");
+            $hasLastDonation = $check2 && $check2->fetch(PDO::FETCH_ASSOC);
+            if (!$hasLastDonation) {
+                $pdo->exec("ALTER TABLE donors ADD COLUMN last_donation_date TIMESTAMP NULL");
+            }
         }
         // Idempotent: fills served_date for already served donors with completed donations
         if (function_exists('backfillServedDates')) { backfillServedDates($pdo); }
+        // Additional fallbacks to cover older donors and inventory-derived dates
+        if (function_exists('backfillDonationDatesFallbacks')) { backfillDonationDatesFallbacks($pdo); }
     } catch (Exception $e) {
         // Non-blocking; log and continue
         error_log('Admin init ensure/backfill served_date failed: ' . $e->getMessage());
