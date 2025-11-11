@@ -423,6 +423,7 @@ $unservedReasons = getUnservedReasons();
                                         <th>Phone</th>
                                         <th>Blood Type</th>
                                         <th>Status</th>
+                                        <th>Donation Date</th>
                                         <th>Medical Screening</th>
                                         <th>Registration Date</th>
                                         <th>Admin Actions</th>
@@ -444,6 +445,17 @@ $unservedReasons = getUnservedReasons();
                                             <span class="badge bg-<?= getDonorStatusColor($donor['status']) ?> status-badge">
                                                 <?= getDonorDisplayStatus($donor['status']) ?>
                                             </span>
+                                        </td>
+                                        <td>
+                                            <?php
+                                                $donationDate = null;
+                                                if (($donor['status'] ?? '') === 'served' && !empty($donor['served_date'])) {
+                                                    $donationDate = $donor['served_date'];
+                                                } elseif (!empty($donor['last_donation_date'])) {
+                                                    $donationDate = $donor['last_donation_date'];
+                                                }
+                                            ?>
+                                            <?= $donationDate ? date('M d, Y', strtotime($donationDate)) : '-' ?>
                                         </td>
                                         <td>
                                             <?php 

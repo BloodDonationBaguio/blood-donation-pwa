@@ -1130,6 +1130,7 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                         <th>Phone</th>
                         <th>Blood Type</th>
                         <th>Status</th>
+                        <th>Donation Date</th>
                         <th>Submitted</th>
                         <th>Actions</th>
                     </tr>
@@ -1148,10 +1149,18 @@ if (isset($_POST['bulk_action']) && isset($_POST['selected_donors'])) {
                                 </span>
                             </td>
                             <td>
+                                <?php
+                                    $donationDate = null;
+                                    if (($donor['status'] ?? '') === 'served' && !empty($donor['served_date'])) {
+                                        $donationDate = $donor['served_date'];
+                                    } elseif (!empty($donor['last_donation_date'])) {
+                                        $donationDate = $donor['last_donation_date'];
+                                    }
+                                ?>
+                                <?= $donationDate ? date('M d, Y', strtotime($donationDate)) : '-' ?>
+                            </td>
+                            <td>
                                 <?= date('M d, Y', strtotime($donor['created_at'])) ?>
-                                <?php if ($donor['status'] === 'served' && !empty($donor['served_date'])): ?>
-                                    <br><small class="text-info">Served: <?= date('M d, Y', strtotime($donor['served_date'])) ?></small>
-                                <?php endif; ?>
                             </td>
                             <td>
                                 <a href="?tab=donor-details&id=<?= $donor['id'] ?>" class="btn btn-sm btn-info" title="View Complete Donor Information">
