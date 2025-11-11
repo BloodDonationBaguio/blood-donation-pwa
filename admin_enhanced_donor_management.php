@@ -545,7 +545,7 @@ $unservedReasons = getUnservedReasons();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-success" onclick="confirmApprove()">
+                    <button type="button" id="approveConfirmBtn" class="btn btn-success" onclick="confirmApprove()">
                         <i class="fas fa-check me-2"></i>Approve Donor
                     </button>
                 </div>
@@ -951,10 +951,22 @@ $unservedReasons = getUnservedReasons();
         // Approve donor
         function approveDonor(donorId) {
             document.getElementById('approveDonorId').value = donorId;
+            // Reset approve button state on modal open
+            const btn = document.getElementById('approveConfirmBtn');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Approve Donor';
+            }
             new bootstrap.Modal(document.getElementById('approveModal')).show();
         }
         
         function confirmApprove() {
+            const approveBtn = document.getElementById('approveConfirmBtn');
+            const originalHtml = approveBtn ? approveBtn.innerHTML : null;
+            if (approveBtn) {
+                approveBtn.disabled = true;
+                approveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Approving...';
+            }
             const donorId = document.getElementById('approveDonorId').value;
             const formData = new FormData();
             formData.append('action', 'approve_donor');
@@ -968,6 +980,17 @@ $unservedReasons = getUnservedReasons();
                     location.reload();
                 } else {
                     alert('Failed to approve donor: ' + data.message);
+                    if (approveBtn) {
+                        approveBtn.disabled = false;
+                        approveBtn.innerHTML = originalHtml || '<i class="fas fa-check me-2"></i>Approve Donor';
+                    }
+                }
+            })
+            .catch(error => {
+                alert('Failed to approve donor: ' + error);
+                if (approveBtn) {
+                    approveBtn.disabled = false;
+                    approveBtn.innerHTML = originalHtml || '<i class="fas fa-check me-2"></i>Approve Donor';
                 }
             });
         }
