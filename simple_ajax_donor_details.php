@@ -40,72 +40,21 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
             echo "<tr><td><strong>Address:</strong></td><td>" . htmlspecialchars($donor['address'] ?? 'Not specified') . "</td></tr>";
             echo "<tr><td><strong>City:</strong></td><td>" . htmlspecialchars($donor['city'] ?? 'Not specified') . "</td></tr>";
             echo "<tr><td><strong>Province:</strong></td><td>" . htmlspecialchars($donor['province'] ?? 'Not specified') . "</td></tr>";
-            echo "<tr><td><strong>Emergency Contact:</strong></td><td>" . htmlspecialchars($donor['emergency_contact'] ?? 'Not specified') . "</td></tr>";
-            echo "<tr><td><strong>Emergency Phone:</strong></td><td>" . htmlspecialchars($donor['emergency_phone'] ?? 'Not specified') . "</td></tr>";
-            echo "</table>";
-            echo "</div>";
-            echo "</div>";
-
-            // Medical Information Section
-            echo "<div class='row mt-3'>";
-            echo "<div class='col-md-6'>";
-            echo "<h4><i class='fas fa-heartbeat me-2'></i>Medical Information</h4>";
-            echo "<table class='table table-sm'>";
-            // Derive conditions/medications from screening JSON when donor columns are empty
-            $derivedConditions = '';
-            $derivedMedications = '';
-            try {
-                $screeningRow = null;
-                $st = $pdo->prepare("SELECT screening_data FROM donor_medical_screening_simple WHERE donor_id = ?");
-                $st->execute([$donorId]);
-                $screeningRow = $st->fetch(PDO::FETCH_ASSOC);
-                $screeningData = [];
-                if ($screeningRow && !empty($screeningRow['screening_data'])) {
-                    $screeningData = json_decode($screeningRow['screening_data'], true);
-                    if (!is_array($screeningData)) { $screeningData = []; }
-                }
-                if (empty($screeningData) && !empty($donor['screening_data'])) {
-                    $fallback = json_decode($donor['screening_data'], true);
-                    $screeningData = is_array($fallback) ? $fallback : [];
-                }
-
-                // Load question texts to label chronic illness flags
-                $medicalQuestions = include __DIR__ . '/includes/medical_questions.php';
-                if (!is_array($medicalQuestions) || empty($medicalQuestions['sections'])) {
-                    $medicalQuestions = include __DIR__ . '/includes/medical_questions_new.php';
-                }
-                $sections = is_array($medicalQuestions) ? ($medicalQuestions['sections'] ?? []) : [];
-
-                // Build conditions summary from chronic_illnesses answered 'yes'
-                if (!empty($sections['chronic_illnesses']['questions'])) {
-                    $conditionTexts = [];
-                    foreach ($sections['chronic_illnesses']['questions'] as $qKey => $qText) {
-                        $ans = $screeningData[$qKey] ?? 'not_answered';
-                        if ($ans === 'yes') { $conditionTexts[] = $qText; }
-                    }
-                    if (!empty($conditionTexts)) {
-                        $derivedConditions = implode('; ', $conditionTexts);
-                    }
-                }
-
-                // Build medications summary from relevant answers
-                $medFlags = [];
-                if (($screeningData['q22'] ?? '') === 'yes') { $medFlags[] = 'Medication affecting bleeding/clotting'; }
-                if (($screeningData['q7'] ?? '') === 'yes') { $medFlags[] = 'Recent medication/vaccine (last 4 weeks)'; }
-                if (($screeningData['q6'] ?? '') === 'yes') { $medFlags[] = 'Aspirin in last 3 days'; }
-                if (!empty($medFlags)) { $derivedMedications = implode('; ', $medFlags); }
-            } catch (Exception $e) {
-                // Non-fatal: keep derived strings empty
-                error_log('Medical derive error: ' . $e->getMessage());
+            // Only show emergency rows when values exist
+            $emContact = trim($donor['emergency_contact'] ?? '');
+            if ($emContact !== '') {
+                echo "<tr><td><strong>Emergency Contact:</strong></td><td>" . htmlspecialchars($emContact) . "</td></tr>";
             }
-
-            $medicalConditionsDisplay = !empty($donor['medical_conditions']) ? $donor['medical_conditions'] : ($derivedConditions ?: 'None reported');
-            $medicationsDisplay = !empty($donor['medications']) ? $donor['medications'] : ($derivedMedications ?: 'None reported');
-
-            echo "<tr><td><strong>Medical Conditions:</strong></td><td>" . htmlspecialchars($medicalConditionsDisplay) . "</td></tr>";
-            echo "<tr><td><strong>Current Medications:</strong></td><td>" . htmlspecialchars($medicationsDisplay) . "</td></tr>";
+            $emPhone = trim($donor['emergency_phone'] ?? '');
+            if ($emPhone !== '') {
+                echo "<tr><td><strong>Emergency Phone:</strong></td><td>" . htmlspecialchars($emPhone) . "</td></tr>";
+            }
             echo "</table>";
             echo "</div>";
+            echo "</div>";
+
+            // Medical Information section removed per request
+            echo "<div class='row mt-3'>";
 
             // Admin Notes section
             $notes = getDonorNotes($pdo, $donorId);
@@ -260,10 +209,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                 foreach ($questions as $key => $question) {
                     if (isset($answers[$key])) {
                         $val = $answers[$key];
-                        $class = (is_string($val) && strtolower($val) === 'yes') ? 'text-danger' : 'text-success';
                         echo "<div class='question-item'>";
                         echo "<strong>" . htmlspecialchars($question) . "</strong>";
-                        echo "<p class='answer " . $class . "'>" . htmlspecialchars($val) . "</p>";
+                        echo "<p class='answer'>" . htmlspecialchars($val) . "</p>";
                         if (isset($answers[$key . '_details']) && !empty($answers[$key . '_details'])) {
                             echo "<p class='details'><em>Details: " . htmlspecialchars($answers[$key . '_details']) . "</em></p>";
                         }
@@ -272,21 +220,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                 }
                 echo "</div>"; // .screening-answers
 
-                // Inline CSS for styling
-                echo "<style> .question-item { padding: 10px; margin: 5px 0; border-left: 3px solid #ddd; background: #f8f9fa; } .question-item .answer { font-weight: bold; margin: 5px 0; } .question-item .details { font-size: 0.9em; color: #666; } </style>";
+                // Inline CSS simplified (no icons or colored borders)
+                echo "<style>.question-item{padding:8px;margin:6px 0}.question-item .answer{margin:4px 0}.question-item .details{font-size:.9em;color:#666}</style>";
             } elseif (!empty($donor['screening_data'])) {
                 // Fallback: use joined donor.screening_data when standalone row not found
                 $screeningData = json_decode($donor['screening_data'], true);
                 if (!is_array($screeningData)) { $screeningData = []; }
                 $allQuestionsAnswered = (int)($donor['all_questions_answered'] ?? 0) === 1;
 
-                echo "<div class='alert alert-" . ($allQuestionsAnswered ? 'success' : 'warning') . "'>";
-                echo "<i class='fas fa-info-circle me-2'></i>";
-                echo "<strong>Medical Screening Status:</strong> ";
-                echo "<span class='badge bg-" . ($allQuestionsAnswered ? 'success' : 'warning') . "'>";
-                echo ($allQuestionsAnswered ? 'Completed' : 'Partially Completed');
-                echo "</span>";
-                echo "</div>";
+                // Status line simplified, no summary
+                echo "<div class='screening-status'><strong>Status:</strong> " . ($allQuestionsAnswered ? '<span class=\'badge bg-success\'>Completed</span>' : '<span class=\'badge bg-warning\'>Partially Completed</span>') . "</div>";
 
                 // Build summary and inline details using includes/medical_questions.php
                 $medicalQuestions = include __DIR__ . '/includes/medical_questions.php';
@@ -327,14 +270,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                     }
                 }
 
-                echo "<div class='alert alert-" . ($yesAnswers > 0 ? 'warning' : 'success') . "'>";
-                echo "<i class='fas fa-info-circle me-2'></i>";
-                echo "<strong>Screening Summary:</strong> ";
-                echo "<span class='badge bg-" . ($yesAnswers > 0 ? 'warning' : 'success') . "'>";
-                echo ($yesAnswers > 0 ? 'Review Required' : 'Passed');
-                echo "</span>";
-                echo "<span class='ms-3'><small>Safe: {$noAnswers} | Risk: {$yesAnswers} | Not Answered: {$notAnswered}</small></span>";
-                echo "</div>";
+                // Screening Summary removed per request
 
                 // Inline detailed Q&A accordion
                 echo "<div class='mt-4'>";
@@ -384,25 +320,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                                 $answer = !empty($q37Date) ? $q37Date : 'not_answered';
                             }
 
-                            $answerClass = '';
-                            $answerIcon = '';
-                            if ($answer === 'yes') {
-                                $answerClass = 'text-danger';
-                                $answerIcon = '<i class="fas fa-times-circle text-danger me-1"></i>';
-                            } elseif ($answer === 'no') {
-                                $answerClass = 'text-success';
-                                $answerIcon = '<i class="fas fa-check-circle text-success me-1"></i>';
-                            } elseif ($answer === 'not_answered') {
-                                $answerClass = 'text-muted';
-                                $answerIcon = '<i class="fas fa-question-circle text-muted me-1"></i>';
-                            } else {
-                                $answerClass = 'text-body';
-                                $answerIcon = '<i class="fas fa-info-circle text-muted me-1"></i>';
-                            }
-
-                            echo "<div class='mb-3 p-3 border rounded " . ($answer === 'yes' ? 'border-danger bg-light' : ($answer === 'no' ? 'border-success bg-light' : 'border-secondary')) . "'>";
-                            echo "<div class='fw-bold mb-2'>{$questionText}</div>";
-                            echo "<div class='{$answerClass}'>{$answerIcon}<strong>Answer:</strong> " . (in_array($answer, ['yes','no','not_answered']) ? ucfirst($answer) : htmlspecialchars($answer)) . "</div>";
+                            echo "<div class='mb-3'>";
+                            echo "<div class='fw-bold mb-2'>" . htmlspecialchars($questionText) . "</div>";
+                            echo "<div><strong>Answer:</strong> " . (in_array($answer, ['yes','no','not_answered']) ? ucfirst($answer) : htmlspecialchars($answer)) . "</div>";
                             echo "</div>";
                         }
 
@@ -516,23 +436,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                          
                          foreach ($questions as $questionKey => $questionText) {
                              $answer = $medicalScreening[$questionKey] ?? 'Not answered';
-                             $answerClass = '';
-                             $answerIcon = '';
-                             
-                             if ($answer === 'yes') {
-                                 $answerClass = 'text-danger';
-                                 $answerIcon = '<i class="fas fa-times-circle text-danger me-1"></i>';
-                             } elseif ($answer === 'no') {
-                                 $answerClass = 'text-success';
-                                 $answerIcon = '<i class="fas fa-check-circle text-success me-1"></i>';
-                             } else {
-                                 $answerClass = 'text-muted';
-                                 $answerIcon = '<i class="fas fa-question-circle text-muted me-1"></i>';
-                             }
-                             
-                             echo "<div class='mb-3 p-3 border rounded " . ($answer === 'yes' ? 'border-danger bg-light' : ($answer === 'no' ? 'border-success bg-light' : 'border-secondary')) . "'>";
-                             echo "<div class='fw-bold mb-2'>{$questionText}</div>";
-                             echo "<div class='{$answerClass}'>{$answerIcon}<strong>Answer:</strong> " . ucfirst($answer) . "</div>";
+                             echo "<div class='mb-3'>";
+                             echo "<div class='fw-bold mb-2'>" . htmlspecialchars($questionText) . "</div>";
+                             echo "<div><strong>Answer:</strong> " . htmlspecialchars(ucfirst($answer)) . "</div>";
                              echo "</div>";
                          }
                          
