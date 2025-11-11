@@ -76,15 +76,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if (is_array($decoded)) { $donorIds = $decoded; }
             }
             $donationDate = $_POST['donation_date'] ?? date('Y-m-d');
-            $successCount = 0;
-            
-            foreach ($donorIds as $donorId) {
-                if (markDonorServed($pdo, (int)$donorId, $donationDate)) {
-                    $successCount++;
+            // Use new bulk helper to capture details
+            try {
+                $results = markMultipleDonorsServed($pdo, $donorIds, $donationDate);
+                $successCount = count($results['success']);
+                $failedCount = count($results['failed']);
+                $unitIds = array_map(function($r){ return $r['unit_id'] ?? null; }, $results['success']);
+                $unitIds = array_values(array_filter($unitIds));
+                $message = "Marked $successCount donors as served";
+                if (!empty($unitIds)) {
+                    $message .= ". Units: " . implode(', ', $unitIds);
                 }
+                echo json_encode([
+                    'success' => true,
+                    'message' => $message,
+                    'details' => $results,
+                ]);
+            } catch (Throwable $e) {
+                error_log('bulk_served error: ' . $e->getMessage());
+                echo json_encode(['success' => false, 'message' => 'Failed to mark donors as served', 'error' => $e->getMessage()]);
             }
-            
-            echo json_encode(['success' => true, 'message' => "Marked $successCount donors as served"]);
             exit;
             
         case 'bulk_communication':
@@ -150,11 +161,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $donorId = (int)$_POST['donor_id'];
             $donationDate = $_POST['donation_date'] ?? date('Y-m-d');
             try {
-                if (markDonorServed($pdo, $donorId, $donationDate)) {
-                    echo json_encode(['success' => true, 'message' => 'Donor marked as served']);
+                $result = markDonorServed($pdo, $donorId, $donationDate);
+                if (is_array($result) && !empty($result['success'])) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Donor marked as served. Blood unit created: ' . ($result['unit_id'] ?? 'N/A'),
+                        'unit_id' => $result['unit_id'] ?? null,
+                        'donor_id' => $result['donor_id'] ?? $donorId,
+                        'blood_type' => $result['blood_type'] ?? null,
+                    ]);
                 } else {
-                    $ei = $pdo->errorInfo();
-                    $err = isset($ei[2]) ? $ei[2] : 'Unknown database error';
+                    $err = is_array($result) ? ($result['error'] ?? 'Unknown error') : 'Operation failed';
                     echo json_encode(['success' => false, 'message' => 'Failed to mark donor as served', 'error' => $err]);
                 }
             } catch (Throwable $e) {
@@ -1048,7 +1065,7 @@ $unservedReasons = getUnservedReasons();
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Donor marked as served!');
+                    alert(data.message || 'Donor marked as served!');
                     location.reload();
                 } else {
                     alert('Failed to mark donor as served: ' + (data.message || '') + (data.error ? '\nDetails: ' + data.error : ''));

@@ -403,108 +403,85 @@ function markDonorUnserved($pdo, $donorId, $reason, $customNote = '', $adminId =
     }
 }
 
-// Mark donor as served (admin controlled)
+// Mark donor as served (PostgreSQL-compatible: inserts into blood_inventory directly)
 function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) {
-    // Log to a file for debugging
     if (!file_exists(__DIR__ . '/../logs')) {
-        mkdir(__DIR__ . '/../logs', 0755, true);
+        @mkdir(__DIR__ . '/../logs', 0755, true);
     }
     $logFile = __DIR__ . '/../logs/donor_served.log';
-    $logMessage = "[" . date('Y-m-d H:i:s') . "] markDonorServed called with donorId: $donorId\n";
-    
+    $logPrefix = "[" . date('Y-m-d H:i:s') . "] markDonorServed donorId=$donorId ";
+
     try {
+        // Self-heal critical tables including blood_inventory
+        try {
+            require_once __DIR__ . '/../database_self_heal.php';
+        } catch (Throwable $e) {
+            error_log('database_self_heal include failed: ' . $e->getMessage());
+        }
+
         // Ensure audit log table exists BEFORE starting transaction
         ensureAuditLogTableExists($pdo);
-        
-        // Ensure status column includes 'served' BEFORE starting transaction (DDL auto-commits)
-        try {
-            // PostgreSQL doesn't need ENUM modification - VARCHAR handles all these values
-            // $pdo->exec("ALTER TABLE donors ALTER COLUMN status SET DEFAULT 'pending'");
-            $logMessage .= "Updated status column to include 'served'\n";
-        } catch (Exception $e) {
-            // Column might already be updated or doesn't need changes
-            $logMessage .= "Status column check: " . $e->getMessage() . "\n";
-        }
-        
+
         $pdo->beginTransaction();
-        
-        // Log current tables
-        $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
-        $logMessage .= "Available tables: " . implode(", ", $tables) . "\n";
-        
-        // Always use donors table
-        $tableName = 'donors';
-        $logMessage .= "Using table: $tableName\n";
-        
-        // Log the update (schema already ensured before transaction)
-        $logMessage .= "Updating donor $donorId status to 'served'\n";
-        
-        // Determine donation date to persist in served_date
-        $donationDate = $donationDate ?: date('Y-m-d');
-        
-        // Update donor status to 'served' and set served_date
-        $stmt = $pdo->prepare("UPDATE $tableName SET status = 'served', served_date = ? WHERE id = ?");
-        $result = $stmt->execute([$donationDate, $donorId]);
-        $logMessage .= "Update result: " . ($result ? "success" : "failed") . "\n";
-        
-        if (!$result) {
-            throw new Exception("Failed to update donor status");
-        }
-        
-        // Get donor details for email
+
+        // Fetch donor
         $donor = getDonorDetails($pdo, $donorId);
-        
         if (!$donor) {
-            throw new Exception("Donor not found");
+            throw new Exception("Donor not found: $donorId");
         }
-        
-        // Log the update
-        file_put_contents($logFile, $logMessage, FILE_APPEND);
-        
-        // Add donation record
-        $donationDate = $donationDate ?: date('Y-m-d');
-        // Ensure blood_type is valid and not too long (max 10 chars for safety)
-        $bloodType = $donor['blood_type'];
-        if (strlen($bloodType) > 10) {
-            // Truncate or use a safe default
-            $bloodType = substr($bloodType, 0, 10);
-            error_log("WARNING: Blood type too long for donor $donorId: " . $donor['blood_type']);
+
+        // Update donor status and served date
+        $servedDate = $donationDate ?: date('Y-m-d');
+        $update = $pdo->prepare("UPDATE donors SET status = 'served', served_date = ? WHERE id = ?");
+        $update->execute([$servedDate, $donorId]);
+
+        // Generate unique unit ID
+        $bloodType = strtoupper(trim((string)$donor['blood_type']));
+        if ($bloodType === '') {
+            // Fallback to unknown blood type to avoid empty unit id
+            $bloodType = 'UNK';
         }
-        // Use the correct column name 'status' as defined in the table schema
-        $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, status, created_at) VALUES (?, ?, ?, 'completed', CURRENT_TIMESTAMP)");
-        $stmt->execute([$donorId, $donationDate, $bloodType]);
-        
-        // AUTOMATICALLY CREATE BLOOD UNIT when donor is marked as served
+        $unitId = 'UNIT-' . $bloodType . '-' . date('Ymd', strtotime($servedDate)) . '-' . str_pad((string)$donorId, 5, '0', STR_PAD_LEFT);
+
+        // Calculate expiry date (35 days from collection)
+        $expiryDate = date('Y-m-d', strtotime($servedDate . ' +35 days'));
+
+        // Insert donation record (completed)
         try {
-            require_once __DIR__ . '/BloodInventoryManagerComplete.php';
-            $inventoryManager = new BloodInventoryManagerComplete($pdo);
-            
-            $bloodUnitData = [
-                'donor_id' => $donorId,
-                'collection_date' => $donationDate,
-                'collection_site' => 'Main Center',
-                'storage_location' => 'Storage A'
-            ];
-            
-            $result = $inventoryManager->addBloodUnit($bloodUnitData);
-            
-            if ($result['success']) {
-                $logMessage .= "Blood unit created automatically: {$result['unit_id']}\n";
-                file_put_contents($logFile, $logMessage, FILE_APPEND);
-            } else {
-                $logMessage .= "Failed to create blood unit: {$result['message']}\n";
-                file_put_contents($logFile, $logMessage, FILE_APPEND);
-            }
-        } catch (Exception $e) {
-            $logMessage .= "Error creating blood unit: " . $e->getMessage() . "\n";
-            file_put_contents($logFile, $logMessage, FILE_APPEND);
-            error_log("Error auto-creating blood unit for donor $donorId: " . $e->getMessage());
+            $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, status, created_at) VALUES (?, ?, ?, 'completed', CURRENT_TIMESTAMP)");
+            $stmt->execute([$donorId, $servedDate, substr($bloodType, 0, 10)]);
+        } catch (Throwable $e) {
+            // Continue even if donations_new insert fails; log for follow-up
+            error_log('donations_new insert failed: ' . $e->getMessage());
         }
-        
-        if ($donor && !empty($donor['email'])) {
-            // Send served confirmation email
+
+        // Insert into blood_inventory (PostgreSQL ON CONFLICT safe)
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $insertedUnitId = null;
+        if ($driver === 'pgsql') {
+            $sql = "INSERT INTO blood_inventory (
+                        unit_id, donor_id, blood_type, collection_date, expiry_date, status, volume_ml, created_at
+                    ) VALUES (
+                        ?, ?, ?, ?, ?, 'Available', 450, CURRENT_TIMESTAMP
+                    ) ON CONFLICT (unit_id) DO NOTHING RETURNING unit_id";
+            $inventoryStmt = $pdo->prepare($sql);
+            $inventoryStmt->execute([$unitId, $donorId, substr($bloodType, 0, 10), $servedDate, $expiryDate]);
+            $insertedUnitId = $inventoryStmt->fetchColumn();
+        } else {
+            // MySQL/MariaDB fallback
+            $sql = "INSERT IGNORE INTO blood_inventory (
+                        unit_id, donor_id, blood_type, collection_date, expiry_date, status, volume_ml
+                    ) VALUES (
+                        ?, ?, ?, ?, ?, 'Available', 450
+                    )";
+            $inventoryStmt = $pdo->prepare($sql);
+            $inventoryStmt->execute([$unitId, $donorId, substr($bloodType, 0, 10), $servedDate, $expiryDate]);
+            $insertedUnitId = $unitId; // If ignored, treat as existing
+        }
+
+        // Send served email if available
+        if (!empty($donor['email'])) {
             require_once __DIR__ . '/mail_helper.php';
-            
             $subject = "Thank You for Donating Blood – Philippine Red Cross Baguio Chapter";
             $message = "<p>Dear {$donor['first_name']} {$donor['last_name']},</p>"
                 . "<p>On behalf of the Philippine Red Cross – Baguio Chapter, we sincerely thank you for your blood donation. Your generosity helps save lives and supports patients in our community who are in urgent need.</p>"
@@ -516,23 +493,50 @@ function markDonorServed($pdo, $donorId, $donationDate = null, $adminId = null) 
                 . "</ul>"
                 . "<p>You may donate blood again after 90 days (3 months). We will be happy to welcome you back when you are eligible.</p>"
                 . "<p>With gratitude,<br>Philippine Red Cross – Baguio Chapter</p>";
-            
             send_confirmation_email($donor['email'], $subject, $message);
         }
-        
+
         // Log admin action
-        logAdminAction($pdo, 'donor_served', 'donors', $donorId, "Donor marked as served after donation");
-        
+        logAdminAction($pdo, 'donor_served', 'donors', $donorId, "Donor marked as served; unit $unitId");
+
         $pdo->commit();
-        return true;
-        
-    } catch (Exception $e) {
+
+        @file_put_contents($logFile, $logPrefix . "SUCCESS unit=$unitId\n", FILE_APPEND);
+
+        return [
+            'success' => true,
+            'unit_id' => $unitId,
+            'donor_id' => $donorId,
+            'blood_type' => $bloodType,
+            'inserted' => (bool)$insertedUnitId
+        ];
+
+    } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
-        error_log("Error marking donor as served: " . $e->getMessage());
-        return false;
+        @file_put_contents($logFile, $logPrefix . 'ERROR ' . $e->getMessage() . "\n", FILE_APPEND);
+        error_log("ERROR marking donor served: " . $e->getMessage());
+        error_log($e->getTraceAsString());
+        return [
+            'success' => false,
+            'error' => $e->getMessage()
+        ];
     }
+}
+
+// Bulk: mark multiple donors served (helper)
+function markMultipleDonorsServed($pdo, $donorIds, $donationDate = null) {
+    $results = [ 'success' => [], 'failed' => [] ];
+    foreach ((array)$donorIds as $id) {
+        $r = markDonorServed($pdo, (int)$id, $donationDate);
+        if (is_array($r) && !empty($r['success'])) {
+            $results['success'][] = $r;
+        } else {
+            $results['failed'][] = [ 'donor_id' => (int)$id, 'error' => is_array($r) ? ($r['error'] ?? 'Unknown error') : 'Operation failed' ];
+        }
+    }
+    return $results;
 }
 
 // Get donor notes
