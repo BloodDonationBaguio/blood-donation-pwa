@@ -59,7 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $province = trim($_POST['province']);
     $weight = floatval($_POST['weight']);
     $height = floatval($_POST['height']);
-    $status = $_POST['status'];
+    // Status is no longer editable from this page; keep existing value
+    $status = $donor['status'];
     
     try {
         // Store original data for audit log
@@ -273,25 +274,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             
                             <div class="row">
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label class="form-label">Weight (kg)</label>
                                     <input type="number" name="weight" class="form-control" step="0.1"
                                            value="<?= htmlspecialchars($donor['weight']) ?>">
                                 </div>
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label class="form-label">Height (cm)</label>
                                     <input type="number" name="height" class="form-control" step="0.1"
                                            value="<?= htmlspecialchars($donor['height']) ?>">
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label">Status</label>
-                                    <select name="status" class="form-select" required>
-                                        <option value="pending" <?= $donor['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
-                                        <option value="approved" <?= $donor['status'] == 'approved' ? 'selected' : '' ?>>Approved</option>
-                                        <option value="served" <?= $donor['status'] == 'served' ? 'selected' : '' ?>>Served</option>
-                                        <option value="rejected" <?= $donor['status'] == 'rejected' ? 'selected' : '' ?>>Deferred</option>
-                                        <option value="suspended" <?= $donor['status'] == 'suspended' ? 'selected' : '' ?>>Suspended</option>
-                                    </select>
                                 </div>
                             </div>
                             
