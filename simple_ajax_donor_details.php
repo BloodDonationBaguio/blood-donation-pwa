@@ -9,6 +9,9 @@ require_once 'includes/enhanced_donor_management.php';
 // Only handle AJAX requests
 if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
     $donorId = isset($_GET['donor_id']) ? (int)$_GET['donor_id'] : 0;
+    // Debugging: request and donor id
+    error_log("=== DONOR DETAILS REQUEST ===");
+    error_log("Donor ID: " . ($_GET['donor_id'] ?? ''));
     
     if ($donorId > 0) {
         $donor = getDonorDetails($pdo, $donorId);
@@ -125,15 +128,62 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
             }
             echo "</div>";
             
-            // Check for medical screening data including weight/height
-            $medicalScreeningStmt = $pdo->prepare("SELECT * FROM donor_medical_screening_simple WHERE donor_id = ?");
-            $medicalScreeningStmt->execute([$donorId]);
-            $medicalScreeningSimple = $medicalScreeningStmt->fetch();
-            
+            // Fetch medical screening (simple) using PostgreSQL syntax when applicable
+            $medicalScreeningSimple = null;
+            try {
+                $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+                if ($driver === 'pgsql') {
+                    $tableCheck = $pdo->query("SELECT EXISTS ( SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'donor_medical_screening_simple' )")->fetchColumn();
+                    error_log("Table exists: " . ($tableCheck ? 'YES' : 'NO'));
+                    if ($tableCheck) {
+                        $screeningQuery = "SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_simple WHERE donor_id = $1";
+                        $screeningStmt = $pdo->prepare($screeningQuery);
+                        $screeningStmt->execute([$donorId]);
+                        error_log("Screening query executed");
+                        $medicalScreeningSimple = $screeningStmt->fetch(PDO::FETCH_ASSOC);
+                        error_log("Screening data found: " . ($medicalScreeningSimple ? 'YES' : 'NO'));
+                        if ($medicalScreeningSimple && !empty($medicalScreeningSimple['screening_data'])) {
+                            $decoded = json_decode($medicalScreeningSimple['screening_data'], true);
+                            error_log("Decoded answers: " . print_r($decoded, true));
+                        }
+                    }
+                } else {
+                    // MySQL fallback for local development
+                    $tableCheckMy = false;
+                    try {
+                        $tableCheckMy = $pdo->query("SHOW TABLES LIKE 'donor_medical_screening_simple'")->rowCount() > 0;
+                    } catch (Exception $inner) {
+                        error_log("MySQL table check error: " . $inner->getMessage());
+                    }
+                    error_log("Table exists (MySQL): " . ($tableCheckMy ? 'YES' : 'NO'));
+                    if ($tableCheckMy) {
+                        $screeningStmt = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_simple WHERE donor_id = ?");
+                        $screeningStmt->execute([$donorId]);
+                        error_log("Screening query executed (MySQL)");
+                        $medicalScreeningSimple = $screeningStmt->fetch(PDO::FETCH_ASSOC);
+                        error_log("Screening data found: " . ($medicalScreeningSimple ? 'YES' : 'NO'));
+                        if ($medicalScreeningSimple && !empty($medicalScreeningSimple['screening_data'])) {
+                            $decoded = json_decode($medicalScreeningSimple['screening_data'], true);
+                            error_log("Decoded answers: " . print_r($decoded, true));
+                        }
+                    }
+                }
+            } catch (PDOException $e) {
+                error_log("Screening query error: " . $e->getMessage());
+                $medicalScreeningSimple = null;
+            }
+
             // Also check for detailed medical screening (if exists)
-            $medicalScreeningStmt = $pdo->prepare("SELECT * FROM donor_medical_screening_fixed WHERE donor_id = ?");
-            $medicalScreeningStmt->execute([$donorId]);
-            $medicalScreening = $medicalScreeningStmt->fetch();
+            $medicalScreening = null;
+            try {
+                if (tableExists($pdo, 'donor_medical_screening_fixed')) {
+                    $medicalScreeningStmt = $pdo->prepare("SELECT * FROM donor_medical_screening_fixed WHERE donor_id = ?");
+                    $medicalScreeningStmt->execute([$donorId]);
+                    $medicalScreening = $medicalScreeningStmt->fetch();
+                }
+            } catch (Exception $e) {
+                error_log('screening_fixed query error: ' . $e->getMessage());
+            }
             
             echo "<div class='col-md-6'>";
             echo "<h4><i class='fas fa-ruler me-2'></i>Physical Measurements</h4>";
@@ -168,175 +218,62 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
             echo "<h4><i class='fas fa-stethoscope me-2'></i>Medical Screening Information</h4>";
             
             // Check simple screening first
-            if ($medicalScreeningSimple) {
-                // Decode screening data with robust fallbacks
-                $screeningData = null;
-                if (!empty($medicalScreeningSimple['screening_data'])) {
-                    $screeningData = json_decode($medicalScreeningSimple['screening_data'], true);
-                }
-                if (!is_array($screeningData) || empty($screeningData)) {
-                    // Fallback to joined donor.details screening_data if available
-                    $screeningData = !empty($donor['screening_data']) ? json_decode($donor['screening_data'], true) : [];
-                    if (!is_array($screeningData)) { $screeningData = []; }
-                }
-                $allQuestionsAnswered = $medicalScreeningSimple['all_questions_answered'];
-                $screeningStatus = $allQuestionsAnswered ? 'Completed' : 'Partially Completed';
+            if (!empty($medicalScreeningSimple) && !empty($medicalScreeningSimple['screening_data'])) {
+                $answers = json_decode($medicalScreeningSimple['screening_data'], true);
+                $allQuestionsAnswered = !empty($medicalScreeningSimple['all_questions_answered']);
                 
-                echo "<div class='alert alert-" . ($allQuestionsAnswered ? 'success' : 'warning') . "'>";
-                echo "<i class='fas fa-info-circle me-2'></i>";
-                echo "<strong>Medical Screening Status:</strong> ";
-                echo "<span class='badge bg-" . ($allQuestionsAnswered ? 'success' : 'warning') . "'>";
-                echo $screeningStatus;
-                echo "</span>";
-                echo "</div>";
-                
-                // Build summary and inline details using includes/medical_questions.php
-                $medicalQuestions = include __DIR__ . '/includes/medical_questions.php';
-                if (!is_array($medicalQuestions) || empty($medicalQuestions['sections'])) {
-                    // Fallback to alternative questions file if primary is unavailable
-                    $medicalQuestions = include __DIR__ . '/includes/medical_questions_new.php';
-                }
-                $sections = is_array($medicalQuestions) ? ($medicalQuestions['sections'] ?? []) : [];
-
-                $yesAnswers = 0;
-                $noAnswers = 0;
-                $notAnswered = 0;
-                $donorGender = $donor['gender'] ?? '';
-
-                // Count summary from screening data
-                foreach ($sections as $sectionKey => $section) {
-                    // Skip female-only section for male donors
-                    if ($sectionKey === 'female_only' && strtolower($donorGender) !== 'female') {
-                        continue;
-                    }
-                    foreach ($section['questions'] as $questionKey => $questionText) {
-                        $answer = $screeningData[$questionKey] ?? 'not_answered';
-                        // Special handling for date-type female questions
-                        if ($questionKey === 'q34') {
-                            $q34Type = $screeningData['q34'] ?? null; // 'none' or 'date'
-                            $q34Date = $screeningData['q34_date'] ?? null;
-                            if ($q34Type === 'none') {
-                                $answer = 'None';
-                            } elseif ($q34Type === 'date' && !empty($q34Date)) {
-                                $answer = $q34Date;
-                            } else {
-                                $answer = 'not_answered';
-                            }
-                        } elseif ($questionKey === 'q37') {
-                            $q37Date = $screeningData['q37_date'] ?? null;
-                            $answer = !empty($q37Date) ? $q37Date : 'not_answered';
-                        }
-
-                        if ($answer === 'yes') $yesAnswers++;
-                        elseif ($answer === 'no') $noAnswers++;
-                        else $notAnswered++;
-                    }
-                }
-
-                // Status summary alert
-                echo "<div class='alert alert-" . ($yesAnswers > 0 ? 'warning' : 'success') . "'>";
-                echo "<i class='fas fa-info-circle me-2'></i>";
-                echo "<strong>Screening Summary:</strong> ";
-                echo "<span class='badge bg-" . ($yesAnswers > 0 ? 'warning' : 'success') . "'>";
-                echo ($yesAnswers > 0 ? 'Review Required' : 'Passed');
-                echo "</span>";
-                echo "<span class='ms-3'><small>Safe: {$noAnswers} | Risk: {$yesAnswers} | Not Answered: {$notAnswered}</small></span>";
-                echo "</div>";
-
-                // Inline detailed Q&A accordion
-                echo "<div class='mt-4'>";
-                echo "<h5><i class='fas fa-clipboard-list me-2'></i>Medical Screening Questions & Answers</h5>";
-                echo "<div class='alert alert-info mb-3'>";
-                echo "<i class='fas fa-info-circle me-2'></i>";
-                echo "<strong>Note:</strong> Click on each section to view the detailed questions and answers.";
-                echo "</div>";
-
-                if (!empty($sections)) {
-                    echo "<div class='accordion' id='medicalScreeningAccordion'>";
-                    $questionCounter = 0;
-
-                    foreach ($sections as $sectionKey => $section) {
-                        $sectionTitle = $section['title'];
-                        $questions = $section['questions'];
-                        $sectionId = 'section-' . str_replace(' ', '-', strtolower($sectionTitle));
-
-                        // Skip female-only section for male donors
-                        if ($sectionKey === 'female_only') {
-                            if (strtolower($donorGender) !== 'female') {
-                                continue; // Skip this section for non-female donors
-                            }
-                        }
-
-                        echo "<div class='accordion-item'>";
-                        echo "<h2 class='accordion-header' id='heading-{$sectionId}'>";
-                        echo "<button class='accordion-button " . ($questionCounter === 0 ? '' : 'collapsed') . "' type='button' data-bs-toggle='collapse' data-bs-target='#collapse-{$sectionId}' aria-expanded='" . ($questionCounter === 0 ? 'true' : 'false') . "' aria-controls='collapse-{$sectionId}'>";
-                        echo "<i class='fas fa-heartbeat me-2'></i>{$sectionTitle}";
-                        echo "</button>";
-                        echo "</h2>";
-
-                        echo "<div id='collapse-{$sectionId}' class='accordion-collapse collapse " . ($questionCounter === 0 ? 'show' : '') . "' aria-labelledby='heading-{$sectionId}' data-bs-parent='#medicalScreeningAccordion'>";
-                        echo "<div class='accordion-body'>";
-
-                        foreach ($questions as $questionKey => $questionText) {
-                            $answer = $screeningData[$questionKey] ?? 'not_answered';
-                            if ($questionKey === 'q34') {
-                                $q34Type = $screeningData['q34'] ?? null; // 'none' or 'date'
-                                $q34Date = $screeningData['q34_date'] ?? null;
-                                if ($q34Type === 'none') {
-                                    $answer = 'None';
-                                } elseif ($q34Type === 'date' && !empty($q34Date)) {
-                                    $answer = $q34Date;
-                                } else {
-                                    $answer = 'not_answered';
-                                }
-                            } elseif ($questionKey === 'q37') {
-                                $q37Date = $screeningData['q37_date'] ?? null;
-                                $answer = !empty($q37Date) ? $q37Date : 'not_answered';
-                            }
-
-                            $answerClass = '';
-                            $answerIcon = '';
-                            if ($answer === 'yes') {
-                                $answerClass = 'text-danger';
-                                $answerIcon = '<i class="fas fa-times-circle text-danger me-1"></i>';
-                            } elseif ($answer === 'no') {
-                                $answerClass = 'text-success';
-                                $answerIcon = '<i class="fas fa-check-circle text-success me-1"></i>';
-                            } elseif ($answer === 'not_answered') {
-                                $answerClass = 'text-muted';
-                                $answerIcon = '<i class="fas fa-question-circle text-muted me-1"></i>';
-                            } else {
-                                // For date/None values, show neutral styling
-                                $answerClass = 'text-body';
-                                $answerIcon = '<i class="fas fa-info-circle text-muted me-1"></i>';
-                            }
-
-                            echo "<div class='mb-3 p-3 border rounded " . ($answer === 'yes' ? 'border-danger bg-light' : ($answer === 'no' ? 'border-success bg-light' : 'border-secondary')) . "'>";
-                            echo "<div class='fw-bold mb-2'>{$questionText}</div>";
-                            echo "<div class='{$answerClass}'>{$answerIcon}<strong>Answer:</strong> " . (in_array($answer, ['yes','no','not_answered']) ? ucfirst($answer) : htmlspecialchars($answer)) . "</div>";
-                            echo "</div>";
-                        }
-
-                        echo "</div>";
-                        echo "</div>";
-                        echo "</div>";
-
-                        $questionCounter++;
-                    }
-
-                    echo "</div>";
+                // Status badge
+                echo "<div class='screening-status'>";
+                echo "<strong>Status:</strong> ";
+                if ($allQuestionsAnswered) {
+                    echo "<span class='badge bg-success'>Completed</span>";
                 } else {
-                    echo "<div class='alert alert-info'>";
-                    echo "<i class='fas fa-info-circle me-2'></i>";
-                    echo "Medical screening questions not available.";
-                    echo "</div>";
+                    echo "<span class='badge bg-warning'>Partially Completed</span>";
                 }
                 echo "</div>";
                 
-                // Show screening date
+                // Screening date
                 if (!empty($medicalScreeningSimple['created_at'])) {
-                    echo "<p><small class='text-muted'><i class='fas fa-calendar me-1'></i>Screening started on: " . date('M d, Y H:i', strtotime($medicalScreeningSimple['created_at'])) . "</small></p>";
+                    echo "<div class='screening-date'>";
+                    echo "<strong>Screening Date:</strong> " . date('M d, Y', strtotime($medicalScreeningSimple['created_at']));
+                    echo "</div>";
                 }
+
+                // Questions block
+                echo "<div class='screening-answers mt-3'>";
+                echo "<h5>Screening Questions & Answers:</h5>";
+                
+                // Define questions (expects these keys in screening_data)
+                $questions = [
+                    'chronic_conditions' => 'Do you have any chronic medical conditions?',
+                    'medications' => 'Are you currently taking any medications?',
+                    'recent_illness' => 'Have you been ill in the past 2 weeks?',
+                    'recent_travel' => 'Have you traveled internationally in the past 6 months?',
+                    'tattoos_piercings' => 'Have you gotten any tattoos or piercings in the past 12 months?',
+                    'pregnancy' => 'Are you currently pregnant or breastfeeding?',
+                    'blood_disorders' => 'Do you have any blood disorders?',
+                    'infectious_diseases' => 'Have you been diagnosed with hepatitis, HIV, or other infectious diseases?',
+                    'recent_vaccines' => 'Have you received any vaccines in the past 4 weeks?',
+                    'weight_requirement' => 'Do you weigh at least 110 pounds (50 kg)?'
+                ];
+
+                foreach ($questions as $key => $question) {
+                    if (isset($answers[$key])) {
+                        $val = $answers[$key];
+                        $class = (is_string($val) && strtolower($val) === 'yes') ? 'text-danger' : 'text-success';
+                        echo "<div class='question-item'>";
+                        echo "<strong>" . htmlspecialchars($question) . "</strong>";
+                        echo "<p class='answer " . $class . "'>" . htmlspecialchars($val) . "</p>";
+                        if (isset($answers[$key . '_details']) && !empty($answers[$key . '_details'])) {
+                            echo "<p class='details'><em>Details: " . htmlspecialchars($answers[$key . '_details']) . "</em></p>";
+                        }
+                        echo "</div>";
+                    }
+                }
+                echo "</div>"; // .screening-answers
+
+                // Inline CSS for styling
+                echo "<style> .question-item { padding: 10px; margin: 5px 0; border-left: 3px solid #ddd; background: #f8f9fa; } .question-item .answer { font-weight: bold; margin: 5px 0; } .question-item .details { font-size: 0.9em; color: #666; } </style>";
             } elseif (!empty($donor['screening_data'])) {
                 // Fallback: use joined donor.screening_data when standalone row not found
                 $screeningData = json_decode($donor['screening_data'], true);
