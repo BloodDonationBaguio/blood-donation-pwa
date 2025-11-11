@@ -130,6 +130,23 @@ try {
     require_once(__DIR__ . "/db.php");
     require_once(__DIR__ . "/includes/enhanced_donor_management.php");
     
+    // Ensure donors.served_date exists (MySQL) and backfill missing values once
+    try {
+        $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
+        if ($driver !== 'pgsql') {
+            $check = $pdo->query("SHOW COLUMNS FROM donors LIKE 'served_date'");
+            $hasServedDate = $check && $check->fetch(PDO::FETCH_ASSOC);
+            if (!$hasServedDate) {
+                $pdo->exec("ALTER TABLE donors ADD COLUMN served_date TIMESTAMP NULL");
+            }
+        }
+        // Idempotent: fills served_date for already served donors with completed donations
+        if (function_exists('backfillServedDates')) { backfillServedDates($pdo); }
+    } catch (Exception $e) {
+        // Non-blocking; log and continue
+        error_log('Admin init ensure/backfill served_date failed: ' . $e->getMessage());
+    }
+    
     // Define constant to allow access to includes
     define('INCLUDES_PATH', true);
     
