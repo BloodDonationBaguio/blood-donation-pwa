@@ -31,8 +31,11 @@ $prefill = [];
 if (function_exists('getCurrentUser')) {
     $currentUser = getCurrentUser();
     if ($currentUser) {
+        $namePref = $currentUser['name'] ?? '';
+        $nameParts = preg_split('/\s+/', trim($namePref), 2);
         $prefill = [
-            'full_name'   => $currentUser['name'] ?? '',
+            'first_name'  => $nameParts[0] ?? '',
+            'last_name'   => $nameParts[1] ?? '',
             'gender'      => $currentUser['gender'] ?? '',
             'birth_date'  => $currentUser['date_of_birth'] ?? '',
             'weight'      => $currentUser['weight'] ?? '',
@@ -71,7 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     error_log('Content type: ' . ($_SERVER['CONTENT_TYPE'] ?? 'not set'));
     error_log('Content length: ' . ($_SERVER['CONTENT_LENGTH'] ?? 'not set'));
     // 1. Validate essential donor information
-    $fullName   = trim($_POST['full_name'] ?? '');
+    $firstName  = trim($_POST['first_name'] ?? '');
+    $lastName   = trim($_POST['last_name'] ?? '');
+    $fullName   = trim($firstName . ' ' . $lastName);
     $gender     = $_POST['gender'] ?? '';
     $dob        = $_POST['birth_date'] ?? '';
     $weight     = floatval($_POST['weight'] ?? 0);
@@ -92,7 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Required fields validation
-    if (empty($fullName)) $errors[] = "Full name is required";
+    if (empty($firstName)) $errors[] = "First name is required";
+    if (empty($lastName)) $errors[] = "Last name is required";
     if (empty($gender)) $errors[] = "Gender is required";
     if ($weight < 50) $errors[] = "Minimum weight requirement is 50kg";
     if ($height < 100) $errors[] = "Please enter a valid height (minimum 100cm)";
@@ -258,11 +264,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             gender, address, city, province, weight, height, reference_code, status, created_at
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
                     ");
-                    
-                    // Split full name into first and last name
-                    $nameParts = explode(' ', trim($fullName), 2);
-                    $firstName = $nameParts[0] ?? '';
-                    $lastName = $nameParts[1] ?? '';
                     
                     error_log("Executing insert with data: " . json_encode([
                         'first_name' => $firstName,
@@ -817,12 +818,22 @@ ob_clean();
                     <div class="row">
                         <!-- Left Column -->
                         <div class="col-md-6">
-                            <!-- Full Name -->
+                            <!-- First & Last Name -->
                             <div class="mb-3">
-                                <label for="full_name" class="form-label required">Full Name</label>
-                                <input type="text" class="form-control" id="full_name" name="full_name" 
-                                       value="<?php echo htmlspecialchars($_POST['full_name'] ?? ($prefill['full_name'] ?? '')); ?>" required>
-                                <div class="invalid-feedback">Please enter your full name.</div>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label for="first_name" class="form-label required">First Name</label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name"
+                                               value="<?php echo htmlspecialchars($_POST['first_name'] ?? ($prefill['first_name'] ?? '')); ?>" required>
+                                        <div class="invalid-feedback">Please enter your first name.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="last_name" class="form-label required">Last Name</label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name"
+                                               value="<?php echo htmlspecialchars($_POST['last_name'] ?? ($prefill['last_name'] ?? '')); ?>" required>
+                                        <div class="invalid-feedback">Please enter your last name.</div>
+                                    </div>
+                                </div>
                             </div>
                             
                             <!-- Gender -->

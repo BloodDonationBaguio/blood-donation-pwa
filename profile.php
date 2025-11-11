@@ -60,7 +60,9 @@ ensureUserProfileColumns($pdo);
 
 // Handle profile update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
-    $name        = trim($_POST['name'] ?? '');
+    $firstName   = trim($_POST['first_name'] ?? '');
+    $lastName    = trim($_POST['last_name'] ?? '');
+    $name        = trim($firstName . ' ' . $lastName);
     $email       = trim($_POST['email'] ?? '');
     $gender      = trim($_POST['gender'] ?? '');
     $birth_date  = trim($_POST['birth_date'] ?? '');
@@ -73,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $height      = trim($_POST['height'] ?? '');
     $blood_type  = trim($_POST['blood_type'] ?? '');
 
-    if ($name && $email) {
+    if ($firstName && $lastName && $email) {
         try {
             $stmt = $pdo->prepare('UPDATE users_new SET name=?, email=?, gender=?, date_of_birth=?, phone=?, address=?, city=?, province=?, postal_code=?, weight=?, height=?, blood_type=? WHERE id=?');
             $ok = $stmt->execute([
@@ -103,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             error_log('Profile update error: ' . $e->getMessage());
         }
     } else {
-        $error = 'Name and email are required.';
+        $error = 'First name, last name, and email are required.';
     }
 }
 
@@ -157,6 +159,14 @@ if (isset($_GET['tab'])) {
     $tab = strtolower(trim($_GET['tab']));
     if ($tab === 'settings') { $activeTab = 'settings'; }
 }
+// Derive first/last name from stored single name for UI
+$firstPref = '';
+$lastPref = '';
+if (!empty($user['name'])) {
+    $parts = preg_split('/\s+/', trim($user['name']), 2);
+    $firstPref = $parts[0] ?? '';
+    $lastPref = $parts[1] ?? '';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -200,8 +210,12 @@ if (isset($_GET['tab'])) {
                             <form method="POST">
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label">Full Name</label>
-                                        <input type="text" class="form-control" name="name" value="<?= htmlspecialchars($user['name'] ?? '') ?>" required>
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" class="form-control" name="first_name" value="<?= htmlspecialchars($_POST['first_name'] ?? $firstPref) ?>" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" name="last_name" value="<?= htmlspecialchars($_POST['last_name'] ?? $lastPref) ?>" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Email</label>
