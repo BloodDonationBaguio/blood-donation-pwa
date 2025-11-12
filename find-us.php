@@ -370,16 +370,6 @@ $contact_info = isset($settings['contact']) ? $settings['contact'] : [];
                     </p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="contact-item">
-                    <i class="fas fa-heart contact-icon"></i>
-                    <h3 class="contact-title">Emergency</h3>
-                    <p class="contact-text">
-                        For urgent blood needs, call our emergency hotline: <br>
-                        <a href="tel:+63-74-442-9999" class="contact-link">+63-74-442-9999</a>
-                    </p>
-                </div>
-            </div>
         </div>
     </div>
 
