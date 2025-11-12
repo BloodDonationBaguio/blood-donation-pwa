@@ -1297,17 +1297,13 @@ if (!function_exists('buildPaginationUrl')) {
                                     </div>
                                     <div class="card-body">
                                         <?php
-                                        // Robust fetch with sane defaults so the UI doesn't render empty
+                                        // Show only Username and Email (email mirrors admin forgot-password lookup)
                                         $adminInfo = [
-                                            'username'   => $_SESSION['admin_username'] ?? 'admin',
-                                            'email'      => '',
-                                            'full_name'  => '',
-                                            'role'       => $_SESSION['admin_role'] ?? 'super_admin',
-                                            'last_login' => null,
-                                            'created_at' => null,
+                                            'username' => $_SESSION['admin_username'] ?? 'admin',
+                                            'email'    => '',
                                         ];
                                         try {
-                                            $adminStmt = $pdo->prepare("SELECT username, email, full_name, role, last_login, created_at FROM admin_users WHERE username = ?");
+                                            $adminStmt = $pdo->prepare("SELECT username, email FROM admin_users WHERE username = ?");
                                             $adminStmt->execute([$_SESSION['admin_username'] ?? $adminInfo['username']]);
                                             $row = $adminStmt->fetch();
                                             if ($row && is_array($row)) {
@@ -1331,26 +1327,6 @@ if (!function_exists('buildPaginationUrl')) {
                                             <div class="col-md-6">
                                                 <label class="form-label">Email</label>
                                                 <input type="email" class="form-control" value="<?= htmlspecialchars($adminInfo['email'] ?: 'Not set') ?>" readonly>
-                                            </div>
-                                            
-                                            <div class="col-md-6">
-                                                <label class="form-label">Full Name</label>
-                                                <input type="text" class="form-control" value="<?= htmlspecialchars($adminInfo['full_name'] ?: 'Not set') ?>" readonly>
-                                            </div>
-                                            
-                                            <div class="col-md-6">
-                                                <label class="form-label">Role</label>
-                                                <input type="text" class="form-control" value="<?= htmlspecialchars(ucfirst(str_replace('_', ' ', $adminInfo['role']))) ?>" readonly>
-                                            </div>
-                                            
-                                            <div class="col-md-6">
-                                                <label class="form-label">Last Login</label>
-                                                <input type="text" class="form-control" value="<?= $adminInfo['last_login'] ? date('Y-m-d H:i:s', strtotime($adminInfo['last_login'])) : 'Never' ?>" readonly>
-                                            </div>
-                                            
-                                            <div class="col-md-6">
-                                                <label class="form-label">Account Created</label>
-                                                <input type="text" class="form-control" value="<?= $adminInfo['created_at'] ? date('Y-m-d H:i:s', strtotime($adminInfo['created_at'])) : 'Unknown' ?>" readonly>
                                             </div>
                                         </div>
                                     </div>
