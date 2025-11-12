@@ -125,7 +125,7 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
         // (CREATE TABLE auto-commits and would break our transaction)
         ensureAuditLogTableExists($pdo);
         
-        $pdo->beginTransaction();
+        
         
         // Get current donor details
         $stmt = $pdo->prepare("SELECT * FROM donors WHERE id = ?");
@@ -169,18 +169,23 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
             }
         }
         
-        // If served via generic status update, also create donation record
         if ($newStatus === 'served') {
             $donationDate = date('Y-m-d');
-            // Ensure blood_type is valid and not too long (max 10 chars for safety)
             $bloodType = $donor['blood_type'];
             if (strlen($bloodType) > 10) {
-                // Truncate or use a safe default
                 $bloodType = substr($bloodType, 0, 10);
                 error_log("WARNING: Blood type too long for donor $donorId: " . $donor['blood_type']);
             }
             $stmt = $pdo->prepare("INSERT INTO donations_new (donor_id, donation_date, blood_type, status, created_at) VALUES (?, ?, ?, 'completed', CURRENT_TIMESTAMP)");
             $stmt->execute([$donorId, $donationDate, $bloodType]);
+            require_once __DIR__ . '/BloodInventoryManagerComplete.php';
+            $inventoryManager = new BloodInventoryManagerComplete($pdo);
+            $inventoryManager->addBloodUnit([
+                'donor_id' => $donorId,
+                'collection_date' => $donationDate,
+                'collection_site' => 'Main Center',
+                'storage_location' => 'Storage A'
+            ]);
         }
 
         // Log admin action
@@ -240,13 +245,22 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
             }
         }
 
-        $pdo->commit();
+        
+        if ($newStatus === 'served') {
+            $donationDate = date('Y-m-d');
+            require_once __DIR__ . '/BloodInventoryManagerComplete.php';
+            $inventoryManager = new BloodInventoryManagerComplete($pdo);
+            $inventoryManager->addBloodUnit([
+                'donor_id' => $donorId,
+                'collection_date' => $donationDate,
+                'collection_site' => 'Main Center',
+                'storage_location' => 'Storage A'
+            ]);
+        }
         return true;
         
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
+        
         error_log("Error updating donor status: " . $e->getMessage());
         error_log("Stack trace: " . $e->getTraceAsString());
         // Store the error message so it can be retrieved by the caller
