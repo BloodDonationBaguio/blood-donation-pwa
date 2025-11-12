@@ -355,9 +355,7 @@ $contact_info = isset($settings['contact']) ? $settings['contact'] : [];
                     <i class="fas fa-clock contact-icon"></i>
                     <h3 class="contact-title">Operating Hours</h3>
                     <p class="contact-text">
-                        <strong>Monday - Friday: 8:00 AM - 5:00 PM</strong><br>
-                        <strong>Saturday - Sunday: 8:00 AM - 5:00 PM</strong><br>
-                        Emergency services available by appointment
+                        <strong>Everyday: 8:00 AM - 5:00 PM</strong>
                     </p>
                 </div>
             </div>
