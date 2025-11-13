@@ -185,16 +185,21 @@ try {
     $donationsThisYear = 0;
 }
 ?>
-      // Prefer local manifest; fall back to subfolder or root if absent
+<?php
       $localManifest = __DIR__ . '/manifest.json';
-      $subfolderManifest = __DIR__ . '/blood-donation-pwa/manifest.json';
-      if (file_exists($localManifest)) {
-          $manifestHref = 'manifest.json?v=2.0.1';
-      } elseif (file_exists($subfolderManifest)) {
-          $manifestHref = '/blood-donation-pwa/manifest.json?v=2.0.1';
+      $subManifest = __DIR__ . '/blood-donation-pwa/manifest.json';
+      $manifestFile = null;
+      if (is_file($localManifest)) {
+          $manifestHref = 'manifest.json';
+          $manifestFile = $localManifest;
+      } elseif (is_file($subManifest)) {
+          $manifestHref = '/blood-donation-pwa/manifest.json';
+          $manifestFile = $subManifest;
       } else {
-          $manifestHref = '/manifest.json?v=2.0.1';
+          $manifestHref = '/manifest.json';
       }
+      $version = $manifestFile ? (string)filemtime($manifestFile) : (string)time();
+      $manifestHref .= '?v=' . rawurlencode($version);
     ?>
     <link rel="manifest" href="<?php echo $manifestHref; ?>">
     <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
@@ -305,12 +310,31 @@ try {
             position: relative;
         }
 
-        .donation-year-counter {
+        .donation-counter-section {
+            background: linear-gradient(135deg, #001f3f 0%, #003366 100%);
             color: #fff;
-            font-size: 18px;
-            font-weight: 500;
-            margin: 0 auto 1.5rem;
+            padding: 60px 0;
+            margin-top: 0;
+        }
+        .counter-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
             text-align: center;
+        }
+        .counter-value {
+            font-size: 56px;
+            font-weight: 800;
+            color: #32cd32;
+            text-align: center;
+            line-height: 1;
+        }
+        .counter-subtitle {
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            opacity: 0.9;
+            margin-top: 8px;
         }
         
         .section-card {
@@ -852,9 +876,6 @@ try {
         </div>
         <h1 class="hero-title fade-in">Blood Donation System</h1>
         <p class="hero-subtitle fade-in">Donate blood, save lives. Register as a donor and make a difference.</p>
-        <div class="donation-year-counter">
-            ❤️ <span id="donationCount" data-count="<?= number_format($donationsThisYear) ?>">0</span> donations made this year — join the movement!
-        </div>
         <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
             <a href="donor-registration.php" class="btn btn-light btn-custom d-flex align-items-center gap-2">
                 <i class="bi bi-droplet-fill"></i> Donor Registration
@@ -862,6 +883,15 @@ try {
         </div>
     </div>
 </section>
+
+<!-- Donations This Year Counter Section -->
+<section class="donation-counter-section">
+    <div class="container">
+        <h3 class="counter-title">Donations This Year</h3>
+        <div class="counter-value"><span id="donationCount" data-count="<?= number_format($donationsThisYear) ?>">0</span></div>
+        <div class="counter-subtitle">Together, we save lives!</div>
+    </div>
+    </section>
 
 <div class="container" style="margin-top: 80px;">
   <?php if (isset($_GET['logout']) && $_GET['logout'] === 'success'): ?>
@@ -1136,21 +1166,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Count-up animation for donation count
     const dc = document.getElementById('donationCount');
-    if (dc) {
-        const parseTarget = (v) => {
-            try { return parseInt((v||'').toString().replace(/[^0-9]/g, ''), 10) || 0; } catch { return 0; }
-        };
-        const target = parseTarget(dc.dataset.count);
-        const duration = 1000;
+    const parseTarget = (v) => { try { return parseInt((v||'').toString().replace(/[^0-9]/g, ''), 10) || 0; } catch { return 0; } };
+    const animateTo = (target, duration = 1200) => {
+        const startVal = parseTarget(dc.textContent);
         const start = performance.now();
-        function step(ts){
+        const tick = (ts) => {
             const p = Math.min((ts - start) / duration, 1);
-            const val = Math.floor(target * p);
+            const val = Math.floor(startVal + (target - startVal) * p);
             dc.textContent = val.toLocaleString();
-            if (p < 1) requestAnimationFrame(step);
-        }
-        requestAnimationFrame(step);
-    }
+            if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+    };
+    const runInitial = () => { if (dc) { animateTo(parseTarget(dc.dataset.count)); } };
+    const io = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if (e.isIntersecting) { runInitial(); io.disconnect(); } }); });
+    if (dc) io.observe(dc);
+
+    const fetchCount = async () => {
+        try {
+            const res = await fetch('donation_count.php', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const data = await res.json();
+            const val = parseTarget(data.count);
+            animateTo(val);
+        } catch {}
+    };
+    setInterval(fetchCount, 300000);
+    fetchCount();
 });
 </script>
 <?php if (AccessibilityHelper::getConfig()['enabled']): ?>
