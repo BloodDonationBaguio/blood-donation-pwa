@@ -528,18 +528,38 @@ try {
         $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM donors GROUP BY status");
         $donorStatusDistribution = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Recent activity - dialect-aware (avoid MySQL-only syntax on PostgreSQL)
+        // Recent activity - resilient across donors_new/donors and dialect-aware
         $recentActivity = [];
-        if ($driver === 'pgsql') {
-            $recentSql = "SELECT 'donor' AS type, (d.first_name || ' ' || d.last_name) AS name, d.status, d.created_at, COALESCE(d.reference_code, d.reference, CAST(d.id AS TEXT)) AS reference FROM donors d WHERE d.created_at >= (NOW() - INTERVAL '7 days') ORDER BY d.created_at DESC LIMIT 10";
-        } else {
-            $recentSql = "SELECT 'donor' AS type, CONCAT(d.first_name, ' ', d.last_name) AS name, d.status, d.created_at, COALESCE(d.reference_code, d.reference, CAST(d.id AS CHAR)) AS reference FROM donors d WHERE d.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) ORDER BY d.created_at DESC LIMIT 10";
-        }
+        $donorTable = 'donors';
+        try {
+            if (function_exists('tableExists') && tableExists($pdo, 'donors_new')) {
+                $donorTable = 'donors_new';
+            }
+        } catch (Throwable $e) { /* default to donors */ }
+
+        $nameExpr = ($driver === 'pgsql') ? "(d.first_name || ' ' || d.last_name)" : "CONCAT(d.first_name, ' ', d.last_name)";
+        $idCast   = ($driver === 'pgsql') ? 'CAST(d.id AS TEXT)' : 'CAST(d.id AS CHAR)';
+        $nowMinus = ($driver === 'pgsql') ? "(NOW() - INTERVAL '7 days')" : "DATE_SUB(NOW(), INTERVAL 7 DAY)";
+        $dateCol  = "COALESCE(d.updated_at, d.created_at)";
+        $recentSql = "SELECT 'donor' AS type, $nameExpr AS name, d.status, $dateCol AS created_at, COALESCE(d.reference_code, d.reference, $idCast) AS reference FROM {$donorTable} d WHERE $dateCol >= $nowMinus ORDER BY $dateCol DESC LIMIT 10";
         try {
             $recentActivity = $pdo->query($recentSql)->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            // Keep dashboard rendering; if recent activity fails, just show "No Recent Activity"
-            $recentActivity = [];
+            // Fallback: attempt audit log
+            try {
+                require_once __DIR__ . '/includes/admin_actions.php';
+                $recentActivity = array_map(function($row){
+                    return [
+                        'type' => 'audit',
+                        'name' => $row['record_name'] ?? ($row['table_name'] ?? 'Record'),
+                        'status' => $row['action_type'] ?? 'action',
+                        'created_at' => $row['created_at'] ?? date('Y-m-d'),
+                        'reference' => $row['record_id'] ?? ''
+                    ];
+                }, getAdminActionLog($pdo, ['limit' => 10]));
+            } catch (Throwable $e2) {
+                $recentActivity = [];
+            }
         }
         
     } catch (PDOException $e) {
