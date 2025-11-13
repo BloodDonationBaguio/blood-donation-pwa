@@ -218,10 +218,8 @@ try {
         const tryRegister = async (scriptUrl) => {
           try {
             const reg = await navigator.serviceWorker.register(scriptUrl);
-            console.log('Service Worker registered:', reg.scope);
             return true;
           } catch (err) {
-            console.warn('SW registration failed for', scriptUrl, err);
             return false;
           }
         };

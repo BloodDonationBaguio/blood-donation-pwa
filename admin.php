@@ -1162,8 +1162,7 @@ if (!function_exists('buildPaginationUrl')) {
                             });
                             
                             // Debug: Check if data is available
-                            console.log('Blood Inventory Data:', <?= json_encode($bloodInventory) ?>);
-                            console.log('Monthly Donors Data:', <?= json_encode($monthlyDonors) ?>);
+                            
                             
                             // Wait for DOM to be fully loaded
                             document.addEventListener('DOMContentLoaded', function() {
@@ -1210,7 +1209,7 @@ if (!function_exists('buildPaginationUrl')) {
                                         console.error('Error initializing Blood Inventory Chart:', error);
                                     }
                                 } else {
-                                    console.log('Blood Inventory Chart not available or no data');
+                                    
                                 }
 
                                 // Monthly Trends Chart
@@ -1259,7 +1258,7 @@ if (!function_exists('buildPaginationUrl')) {
                                         console.error('Error initializing Monthly Trends Chart:', error);
                                     }
                                 } else {
-                                    console.log('Monthly Trends Chart not available or no data');
+                                    
                                 }
                             });
                         </script>
@@ -2939,9 +2938,7 @@ if (!function_exists('buildPaginationUrl')) {
         };
         
         // Ensure functions are available immediately
-        console.log('Audit log functions initialized globally');
-        console.log('clearAuditLogFilters available:', typeof window.clearAuditLogFilters === 'function');
-        console.log('exportAuditLog available:', typeof window.exportAuditLog === 'function');
+        
 
         // Initialize tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

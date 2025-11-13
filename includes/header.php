@@ -23,7 +23,7 @@ if (session_status() === PHP_SESSION_NONE) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
             for(let registration of registrations) {
                 registration.unregister();
-                console.log('ServiceWorker unregistered');
+                
             }
         });
     }
