@@ -142,9 +142,49 @@ try {
     if (AccessibilityHelper::getConfig()['enabled']) {
         echo AccessibilityHelper::generateSkipLinks();
         echo '<style>' . AccessibilityHelper::generateCSS() . '</style>';
+}
+?>
+<?php
+// Database connection and donations-this-year counter
+try {
+    require_once __DIR__ . '/db.php';
+    $donationsThisYear = 0;
+    $driver = 'mysql';
+    try { $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)); } catch (Throwable $e) { /* default mysql */ }
+
+    $yearExpr = function($col) use ($driver) {
+        if ($driver === 'pgsql') {
+            return "EXTRACT(YEAR FROM $col) = EXTRACT(YEAR FROM CURRENT_DATE)";
+        }
+        return "YEAR($col) = YEAR(CURRENT_DATE)"; // mysql/mariadb
+    };
+
+    $table = null;
+    if (function_exists('tableExists')) {
+        try {
+            if (tableExists($pdo, 'donors_new')) { $table = 'donors_new'; }
+            elseif (tableExists($pdo, 'donors')) { $table = 'donors'; }
+        } catch (Throwable $e) { /* ignore */ }
     }
-    ?>
-    <?php
+
+    if ($table) {
+        $dateCol = ($table === 'donors_new') ? 'COALESCE(served_date, created_at)' : 'COALESCE(served_date, created_at)';
+        $sql = "SELECT COUNT(*) AS cnt FROM $table WHERE status = 'served' AND " . $yearExpr($dateCol);
+        $stmt = $pdo->query($sql);
+        $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
+    } else {
+        // Fallback: donations_new completed this year
+        $col = 'donation_date';
+        $sql = "SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND " . $yearExpr($col);
+        try {
+            $stmt = $pdo->query($sql);
+            $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
+        } catch (Throwable $e) { $donationsThisYear = 0; }
+    }
+} catch (Throwable $e) {
+    $donationsThisYear = 0;
+}
+?>
       // Prefer local manifest; fall back to subfolder or root if absent
       $localManifest = __DIR__ . '/manifest.json';
       $subfolderManifest = __DIR__ . '/blood-donation-pwa/manifest.json';
@@ -263,6 +303,14 @@ try {
             visibility: visible !important;
             z-index: 10;
             position: relative;
+        }
+
+        .donation-year-counter {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0 auto 1.5rem;
+            text-align: center;
         }
         
         .section-card {
@@ -804,6 +852,9 @@ try {
         </div>
         <h1 class="hero-title fade-in">Blood Donation System</h1>
         <p class="hero-subtitle fade-in">Donate blood, save lives. Register as a donor and make a difference.</p>
+        <div class="donation-year-counter">
+            ❤️ <span id="donationCount" data-count="<?= number_format($donationsThisYear) ?>">0</span> donations made this year — join the movement!
+        </div>
         <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
             <a href="donor-registration.php" class="btn btn-light btn-custom d-flex align-items-center gap-2">
                 <i class="bi bi-droplet-fill"></i> Donor Registration
@@ -1082,6 +1133,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Count-up animation for donation count
+    const dc = document.getElementById('donationCount');
+    if (dc) {
+        const parseTarget = (v) => {
+            try { return parseInt((v||'').toString().replace(/[^0-9]/g, ''), 10) || 0; } catch { return 0; }
+        };
+        const target = parseTarget(dc.dataset.count);
+        const duration = 1000;
+        const start = performance.now();
+        function step(ts){
+            const p = Math.min((ts - start) / duration, 1);
+            const val = Math.floor(target * p);
+            dc.textContent = val.toLocaleString();
+            if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
 });
 </script>
 <?php if (AccessibilityHelper::getConfig()['enabled']): ?>
