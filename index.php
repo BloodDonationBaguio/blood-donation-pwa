@@ -235,6 +235,26 @@ try {
           }
         })();
       }
+
+      (function(){
+        const link = document.querySelector('link[rel="manifest"]');
+        if (!link) return;
+        const primary = link.href;
+        const fallbacks = [
+          location.origin + '/blood-donation-pwa/manifest.json',
+          location.origin + '/manifest.json'
+        ];
+        const tryHead = async (url) => {
+          try { const r = await fetch(url, { method: 'HEAD', cache: 'no-store' }); return r.ok; } catch { return false; }
+        };
+        (async () => {
+          const ok = await tryHead(primary);
+          if (ok) return;
+          for (const u of fallbacks) {
+            if (await tryHead(u)) { link.setAttribute('href', u); break; }
+          }
+        })();
+      })();
     </script>
     <style>
         * {
