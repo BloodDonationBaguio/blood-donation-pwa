@@ -311,8 +311,8 @@ try {
         }
 
         .donation-counter-section {
-            background: linear-gradient(135deg, #001f3f 0%, #003366 100%);
-            color: #fff;
+            background: #fff;
+            color: #dc3545;
             padding: 60px 0;
             margin-top: 0;
         }
@@ -321,6 +321,7 @@ try {
             font-weight: 700;
             margin-bottom: 8px;
             text-align: center;
+            color: #dc3545;
         }
         .counter-value {
             font-size: 56px;
@@ -335,6 +336,7 @@ try {
             text-align: center;
             opacity: 0.9;
             margin-top: 8px;
+            color: #dc3545;
         }
         
         .section-card {
