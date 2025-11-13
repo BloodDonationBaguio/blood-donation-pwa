@@ -313,8 +313,10 @@ try {
         .donation-counter-section {
             background: #fff;
             color: #dc3545;
-            padding: 60px 0;
+            padding: 40px 0 60px;
             margin-top: 0;
+            border-top: 1px solid #f0f0f0;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.03);
         }
         .counter-title {
             font-size: 28px;
@@ -337,6 +339,27 @@ try {
             opacity: 0.9;
             margin-top: 8px;
             color: #dc3545;
+        }
+        .donation-counter-card {
+            max-width: 680px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            padding: 28px 28px 26px;
+            border: 1px solid #f1f1f1;
+            position: relative;
+        }
+        .donation-counter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #dc3545, #ff6b6b, #dc3545);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
         }
         
         .section-card {
@@ -889,11 +912,13 @@ try {
 <!-- Donations This Year Counter Section -->
 <section class="donation-counter-section">
     <div class="container">
-        <h3 class="counter-title">Donations This Year</h3>
-        <div class="counter-value"><span id="donationCount" data-count="<?= number_format($donationsThisYear) ?>">0</span></div>
-        <div class="counter-subtitle">Together, we save lives!</div>
+        <div class="donation-counter-card">
+            <h3 class="counter-title">Donations This Year</h3>
+            <div class="counter-value"><span id="donationCount" data-count="<?= number_format($donationsThisYear) ?>">0</span></div>
+            <div class="counter-subtitle">Together, we save lives!</div>
+        </div>
     </div>
-    </section>
+</section>
 
 <div class="container" style="margin-top: 80px;">
   <?php if (isset($_GET['logout']) && $_GET['logout'] === 'success'): ?>
