@@ -969,33 +969,6 @@ if (!function_exists('buildPaginationUrl')) {
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 p-4 main-content">
                 <div class="dashboard-container">
-                    <!-- Admin Role Display -->
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <div class="alert alert-info d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-user-shield me-2"></i>
-                                    <strong>Logged in as:</strong> 
-                                    <span class="badge bg-primary ms-2">
-                                        <?php
-                                        // Get role from session or database
-                                        $adminRole = $_SESSION['admin_role'] ?? 'super_admin';
-                                        if ($adminRole === 'admin') {
-                                            $adminRole = 'super_admin'; // Convert old 'admin' to 'super_admin'
-                                        }
-                                        echo ucfirst(str_replace('_', ' ', $adminRole)) . ' Admin';
-                                        ?>
-                                    </span>
-                                </div>
-                                <div>
-                                    <small class="text-muted">
-                                        <i class="fas fa-user me-1"></i>
-                                        <?= htmlspecialchars($_SESSION['admin_username'] ?? 'admin') ?>
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     
                     <?php if ($error): ?>
                         <div class="alert alert-danger alert-dismissible fade show">
