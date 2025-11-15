@@ -943,7 +943,7 @@ if (!function_exists('buildPaginationUrl')) {
 
                     <li class="nav-item">
                         <a class="nav-link <?= $activeTab === 'manual-register' ? 'active' : '' ?>" href="?tab=manual-register">
-                            <i class="fas fa-user-plus"></i> Manual Registration
+                            <i class="fas fa-user-plus"></i> Add Donor
                         </a>
                     </li>
 
