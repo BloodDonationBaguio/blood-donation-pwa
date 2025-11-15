@@ -23,7 +23,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label required">Gender</label>
-          <select class="form-select" name="gender" required>
+          <select class="form-select" name="gender" id="gender" required>
             <option value="">Select Gender</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
@@ -76,7 +76,7 @@
   </div></div>
   <div class="card mt-3"><div class="card-body">
     <h4 class="section-title">Medical Screening</h4>
-    <?php include dirname(__DIR__, 2) . '/includes/medical_section.php'; ?>
+    <?php include dirname(__DIR__, 2) . '/medical_section.php'; ?>
   </div></div>
   <div class="mt-3">
     <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus me-1"></i> Register Donor</button>
