@@ -1663,9 +1663,10 @@ if (!function_exists('buildPaginationUrl')) {
 
                     <?php if ($activeTab === 'manual-register'): ?>
                         <h2 class="mb-3">Manual Donor Registration</h2>
-                        <?php if ($success): ?>
+                        <div class="alert alert-secondary py-1 mb-3">Build: <?= date('Ymd-His') ?></div>
+                        <?php if (!empty($_GET['success'])): ?>
                             <div class="alert alert-success alert-dismissible fade show">
-                                <?= htmlspecialchars($success) ?>
+                                Donor registered successfully. Reference: <?= htmlspecialchars($_GET['ref'] ?? '') ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         <?php endif; ?>
@@ -1681,6 +1682,11 @@ if (!function_exists('buildPaginationUrl')) {
                                     $chunk = $m[0];
                                 }
                                 if ($chunk) {
+                                    // Remove eligibility section
+                                    $chunk = preg_replace('/<div\s+class="card mb-4"\s+id="eligibilityCheck"[\s\S]*?<\/div>\s*/i', '', $chunk);
+                                    // Remove CAPTCHA section
+                                    $chunk = preg_replace('/<div\s+class="form-section"[\s\S]*?g-recaptcha[\s\S]*?<\/div>/i', '', $chunk);
+                                    // Point action to admin processor
                                     $chunk = preg_replace('/action="[^"]*"/i', 'action="process_manual_donor.php"', $chunk);
                                     echo $chunk;
                                 } else {
