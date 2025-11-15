@@ -138,6 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </style>
 <?php
 try {
+    if (!defined('ADMIN_MODE')) { define('ADMIN_MODE', true); }
     $formPath = dirname(__DIR__, 2) . '/donor-registration.php';
     if (file_exists($formPath)) {
         ob_start();

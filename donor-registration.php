@@ -23,6 +23,7 @@ function isEligibleAge($birthDate) {
 }
 
 // Initialize variables
+$ADMIN_MODE = defined('ADMIN_MODE') && ADMIN_MODE === true;
 $errors = [];
 $success = false;
 $refNumber = '';
@@ -754,6 +755,7 @@ ob_clean();
         <?php else: ?>
 
         <!-- Pre-screening Eligibility Check -->
+        <?php if (!$ADMIN_MODE): ?>
         <div class="card mb-4" id="eligibilityCheck" style="<?= !empty($errors) ? 'display: none;' : 'display: block;' ?>">
             <div class="card-header bg-warning text-dark">
                 <h5 class="mb-0"><i class="bi bi-question-circle-fill me-2"></i>Quick Eligibility Check</h5>
@@ -801,10 +803,11 @@ ob_clean();
                 </button>
             </div>
         </div>
+        <?php endif; ?>
 
-            <form method="POST" action="" id="donorForm" novalidate style="<?= !empty($errors) ? 'display: block;' : 'display: none;' ?>">
+            <form method="POST" action="<?= $ADMIN_MODE ? 'process_manual_donor.php' : '' ?>" id="donorForm" novalidate style="<?= $ADMIN_MODE ? 'display: block;' : (!empty($errors) ? 'display: block;' : 'display: none;') ?>">
                 <!-- Back to Eligibility Check Button (only show if no errors) -->
-                <?php if (empty($errors)): ?>
+                <?php if (empty($errors) && !$ADMIN_MODE): ?>
                 <div class="mb-3">
                     <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showEligibilityCheck()">
                         <i class="bi bi-arrow-left me-2"></i>Back to Eligibility Check
@@ -958,6 +961,7 @@ ob_clean();
                 <?php include __DIR__ . '/includes/medical_section.php'; ?>
                 
                 <!-- CAPTCHA Section -->
+                <?php if (!$ADMIN_MODE): ?>
                 <div class="form-section">
                     <h4 class="section-title">Security Verification</h4>
                     <div class="mb-3">
@@ -965,6 +969,7 @@ ob_clean();
                         <div class="form-text">Please complete the CAPTCHA to verify you're not a robot.</div>
                     </div>
                 </div>
+                <?php endif; ?>
                 
                 <button type="submit" class="btn btn-donate">Register as a Donor</button>
             </form>

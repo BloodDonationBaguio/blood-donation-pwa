@@ -1682,6 +1682,7 @@ if (!function_exists('buildPaginationUrl')) {
                         <?php endif; ?>
                         <?php
                         try {
+                            define('ADMIN_MODE', true);
                             $formPath = __DIR__ . '/donor-registration.php';
                             if (!file_exists($formPath)) {
                                 echo '<div class="alert alert-danger">Donor registration form not found.</div>';
