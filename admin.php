@@ -1666,48 +1666,7 @@ if (!function_exists('buildPaginationUrl')) {
                     <?php endif; ?>
 
                     <?php if ($activeTab === 'manual-register'): ?>
-                        <h2 class="mb-3">Manual Donor Registration</h2>
-                        <div class="alert alert-info d-flex justify-content-between align-items-center py-2 mb-3">
-                            <div>
-                                <strong>Version:</strong> <?= date('Y-m-d H:i:s') ?>
-                                <span class="ms-3"><strong>Build:</strong> <?= filemtime(__FILE__) ?></span>
-                            </div>
-                            <a href="admin_flush_cache.php" class="btn btn-sm btn-warning">Flush Cache</a>
-                        </div>
-                        <?php if (!empty($_GET['success'])): ?>
-                            <div class="alert alert-success alert-dismissible fade show">
-                                Donor registered successfully. Reference: <?= htmlspecialchars($_GET['ref'] ?? '') ?>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        <?php endif; ?>
-                        <?php
-                        try {
-                            define('ADMIN_MODE', true);
-                            $formPath = __DIR__ . '/donor-registration.php';
-                            if (!file_exists($formPath)) {
-                                echo '<div class="alert alert-danger">Donor registration form not found.</div>';
-                            } else {
-                                ob_start();
-                                include $formPath;
-                                $rendered = ob_get_clean();
-                                $formOnly = '';
-                                if (preg_match('/<form[^>]*id="donorForm"[^>]*>[\s\S]*?<\/form>/i', $rendered, $m)) {
-                                    $formOnly = $m[0];
-                                } else {
-                                    $formOnly = $rendered;
-                                }
-                                $formOnly = preg_replace('/<div[^>]*class="form-section"[^>]*>[\s\S]*?g-recaptcha[\s\S]*?<\/div>/i', '', $formOnly);
-                                $formOnly = preg_replace('/action="[^"]*"/i', 'action="process_manual_donor.php"', $formOnly);
-                                // Force form visible: strip any inline style that hides it and hidden attribute
-                                $formOnly = preg_replace('/(<form[^>]*?)\sstyle="[^"]*"/i', '$1', $formOnly);
-                                $formOnly = preg_replace('/style="[^"]*display\s*:\s*none[^"]*"/i', '', $formOnly);
-                                $formOnly = preg_replace('/\shidden(=\"hidden\")?/i', '', $formOnly);
-                                echo $formOnly;
-                            }
-                        } catch (Throwable $e) {
-                            echo '<div class="alert alert-danger">Error loading form.</div>';
-                        }
-                        ?>
+                        <?php include __DIR__ . '/includes/admin/tabs/manual-register.php'; ?>
                     <?php endif; ?>
 
                         <?php elseif ($activeTab === 'pending-donors'): ?>
