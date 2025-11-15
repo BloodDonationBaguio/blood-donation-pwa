@@ -24,6 +24,10 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: strict-origin-when-cross-origin');
+// No-cache headers to avoid serving stale admin pages
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 // Detect test mode (set by tests runner) to relax auth checks during automated tests
 $IS_TEST_MODE = (defined('TEST_MODE') && TEST_MODE === true);
@@ -1663,7 +1667,13 @@ if (!function_exists('buildPaginationUrl')) {
 
                     <?php if ($activeTab === 'manual-register'): ?>
                         <h2 class="mb-3">Manual Donor Registration</h2>
-                        <div class="alert alert-secondary py-1 mb-3">Build: <?= date('Ymd-His') ?></div>
+                        <div class="alert alert-info d-flex justify-content-between align-items-center py-2 mb-3">
+                            <div>
+                                <strong>Version:</strong> <?= date('Y-m-d H:i:s') ?>
+                                <span class="ms-3"><strong>Build:</strong> <?= filemtime(__FILE__) ?></span>
+                            </div>
+                            <a href="admin_flush_cache.php" class="btn btn-sm btn-warning">Flush Cache</a>
+                        </div>
                         <?php if (!empty($_GET['success'])): ?>
                             <div class="alert alert-success alert-dismissible fade show">
                                 Donor registered successfully. Reference: <?= htmlspecialchars($_GET['ref'] ?? '') ?>
