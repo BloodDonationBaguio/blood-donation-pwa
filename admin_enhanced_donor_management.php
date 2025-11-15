@@ -393,11 +393,7 @@ $unservedReasons = getUnservedReasons();
                     </form>
                 </div>
 
-                <div class="mb-3 d-flex justify-content-end">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manualRegistrationModal">
-                        <i class="fas fa-user-plus me-2"></i>Manual Donor Registration
-                    </button>
-                </div>
+                
                 
                 <!-- Bulk Actions -->
                 <div class="bulk-actions" id="bulkActions" style="display: none;">
@@ -528,44 +524,7 @@ $unservedReasons = getUnservedReasons();
         </div>
     </div>
 
-    <!-- Manual Donor Registration Modal (reuses donor-registration.php form) -->
-    <div class="modal fade" id="manualRegistrationModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Manual Donor Registration</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <?php
-                    try {
-                        $formPath = __DIR__ . '/donor-registration.php';
-                        $html = file_exists($formPath) ? file_get_contents($formPath) : '';
-                        $chunk = '';
-                        if ($html) {
-                            if (preg_match('/<div\s+class="card mb-4"\s+id="eligibilityCheck"[\s\S]*?<form[\s\S]*?id="donorForm"[\s\S]*?<\/form>/i', $html, $m)) {
-                                $chunk = $m[0];
-                            } elseif (preg_match('/<form[\s\S]*?id="donorForm"[\s\S]*?<\/form>/i', $html, $m)) {
-                                $chunk = $m[0];
-                            }
-                            if ($chunk) {
-                                // Point action to admin processor
-                                $chunk = preg_replace('/action="[^"]*"/i', 'action="process_manual_donor.php"', $chunk);
-                                echo $chunk;
-                            } else {
-                                echo '<div class="alert alert-danger">Unable to load donor form. Please try again later.</div>';
-                            }
-                        } else {
-                            echo '<div class="alert alert-danger">Donor registration form not found.</div>';
-                        }
-                    } catch (Throwable $e) {
-                        echo '<div class="alert alert-danger">Error loading form: ' . htmlspecialchars($e->getMessage()) . '</div>';
-                    }
-                    ?>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Donor Details Modal -->
     <div class="modal fade" id="donorModal" tabindex="-1">

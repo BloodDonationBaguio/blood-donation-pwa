@@ -1662,184 +1662,37 @@ if (!function_exists('buildPaginationUrl')) {
                     <?php endif; ?>
 
                     <?php if ($activeTab === 'manual-register'): ?>
-                        <?php 
-                        $mr_success = '';
-                        $mr_error = '';
-                        // Prefer donors_new if present
-                        $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
-                        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'manual_register') {
-                            try {
-                                if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
-                                    throw new Exception('Invalid CSRF token');
+                        <h2 class="mb-3">Manual Donor Registration</h2>
+                        <?php if ($success): ?>
+                            <div class="alert alert-success alert-dismissible fade show">
+                                <?= htmlspecialchars($success) ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+                        <?php
+                        try {
+                            $formPath = __DIR__ . '/donor-registration.php';
+                            $html = file_exists($formPath) ? file_get_contents($formPath) : '';
+                            $chunk = '';
+                            if ($html) {
+                                if (preg_match('/<div\s+class="card mb-4"\s+id="eligibilityCheck"[\s\S]*?<form[\s\S]*?id="donorForm"[\s\S]*?<\/form>/i', $html, $m)) {
+                                    $chunk = $m[0];
+                                } elseif (preg_match('/<form[\s\S]*?id="donorForm"[\s\S]*?<\/form>/i', $html, $m)) {
+                                    $chunk = $m[0];
                                 }
-                                $recentDonation = trim((string)($_POST['recent_donation'] ?? ''));
-                                if ($recentDonation === 'yes') {
-                                    throw new Exception('Donor is not eligible: must wait 90 days since last donation');
+                                if ($chunk) {
+                                    $chunk = preg_replace('/action="[^"]*"/i', 'action="process_manual_donor.php"', $chunk);
+                                    echo $chunk;
+                                } else {
+                                    echo '<div class="alert alert-danger">Unable to load donor form.</div>';
                                 }
-                                $required = ['full_name','blood_type','date_of_birth','gender','weight'];
-                                $data = [];
-                                foreach ($required as $f) {
-                                    $val = trim((string)($_POST[$f] ?? ''));
-                                    if ($val === '') throw new Exception('Please fill in all required fields');
-                                    $data[$f] = $val;
-                                }
-                                $dob = new DateTime($data['date_of_birth']);
-                                $age = (new DateTime())->diff($dob)->y;
-                                if ($age < 16) throw new Exception('Donor must be at least 16 years old');
-                                if ((float)$data['weight'] < 50) throw new Exception('Donor must weigh at least 50 kg');
-                                $email = trim((string)($_POST['email'] ?? ''));
-                                if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Please enter a valid email address');
-                                // Donation interval check using email if provided
-                                if ($email !== '') {
-                                    try {
-                                        $checkTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
-                                        $stmt = $pdo->prepare("SELECT created_at FROM {$checkTable} WHERE email = ? ORDER BY created_at DESC LIMIT 1");
-                                        $stmt->execute([$email]);
-                                        $prev = $stmt->fetch(PDO::FETCH_ASSOC);
-                                        if ($prev && isset($prev['created_at'])) {
-                                            $last = new DateTime($prev['created_at']);
-                                            $days = (new DateTime())->diff($last)->days;
-                                            if ($days < 90) throw new Exception('Donor previously registered less than 90 days ago');
-                                        }
-                                    } catch (Throwable $e) { /* non-blocking */ }
-                                }
-                                $referenceCode = 'DON' . strtoupper(substr(md5(uniqid('', true)), 0, 8));
-                                $columns = 'full_name, email, phone, blood_type, date_of_birth, gender, weight, last_donation_date, address, city, state, postal_code, country, reference_code, status, created_at';
-                                $placeholders = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,' . (($donorsTable === 'donors_new') ? "'active'" : "'active'") . ', CURRENT_TIMESTAMP';
-                                $sql = "INSERT INTO {$donorsTable} ($columns) VALUES ($placeholders)";
-                                $stmt = $pdo->prepare($sql);
-                                $stmt->execute([
-                                    $data['full_name'],
-                                    $email ?: null,
-                                    trim((string)($_POST['phone'] ?? '')),
-                                    $data['blood_type'],
-                                    $data['date_of_birth'],
-                                    $data['gender'],
-                                    (float)$data['weight'],
-                                    ($_POST['last_donation_date'] ?? null) ?: null,
-                                    trim((string)($_POST['address'] ?? '')),
-                                    trim((string)($_POST['city'] ?? '')),
-                                    trim((string)($_POST['state'] ?? '')),
-                                    trim((string)($_POST['postal_code'] ?? '')),
-                                    trim((string)($_POST['country'] ?? 'Philippines')),
-                                    $referenceCode
-                                ]);
-                                $donorId = (int)$pdo->lastInsertId();
-                                // Save medical screening
-                                $medical = [];
-                                for ($qi=1; $qi<=37; $qi++) { $medical['q'.$qi] = $_POST['q'.$qi] ?? ''; }
-                                if (($data['gender'] ?? '') === 'female') {
-                                    $medical['q34'] = $_POST['q34'] ?? '';
-                                    if (!empty($_POST['q34_date'])) $medical['q34_date'] = $_POST['q34_date'];
-                                    if (!empty($_POST['q37_date'])) $medical['q37_date'] = $_POST['q37_date'];
-                                }
-                                $requiredQuestions = (strtolower($data['gender']) === 'female') ? 37 : 32;
-                                $actualAnswered = 0; foreach ($medical as $ans) { if (!empty($ans)) $actualAnswered++; }
-                                $allAnswered = $actualAnswered >= $requiredQuestions ? 1 : 0;
-                                try {
-                                    $msStmt = $pdo->prepare("INSERT INTO donor_medical_screening_simple (donor_id, reference_code, screening_data, all_questions_answered) VALUES (?, ?, ?, ?)");
-                                    $msStmt->execute([$donorId, $referenceCode, json_encode($medical), $allAnswered]);
-                                } catch (Throwable $e) { /* ignore on failure */ }
-                                if (function_exists('ensureAuditLogTableExists')) { ensureAuditLogTableExists($pdo); }
-                                if (function_exists('logAdminAction')) { logAdminAction($pdo, 'donor_created', $donorsTable, (int)$pdo->lastInsertId(), $referenceCode, $_SESSION['admin_username'] ?? 'admin'); }
-                                $mr_success = 'Donor added successfully! Reference Code: ' . $referenceCode;
-                            } catch (Exception $e) {
-                                $mr_error = $e->getMessage();
+                            } else {
+                                echo '<div class="alert alert-danger">Donor registration form not found.</div>';
                             }
+                        } catch (Throwable $e) {
+                            echo '<div class="alert alert-danger">Error loading form: ' . htmlspecialchars($e->getMessage()) . '</div>';
                         }
                         ?>
-                        <h2 class="mb-3">Manual Donor Registration</h2>
-                        <p class="text-muted mb-2">For walk-in donors and those who cannot use the online system.</p>
-                        <!-- Eligibility Check (same behavior as public registration) -->
-                        <div class="card mb-3" id="eligibilityCheckAdmin" style="display: block;">
-                            <div class="card-header bg-warning text-dark">
-                                <h5 class="mb-0"><i class="bi bi-question-circle-fill me-2"></i>Quick Eligibility Check</h5>
-                            </div>
-                            <div class="card-body">
-                                <p class="mb-3">Before proceeding, answer this quick question:</p>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="recent_donation_admin" id="donated_recently_yes_admin" value="yes">
-                                    <label class="form-check-label fw-bold text-danger" for="donated_recently_yes_admin">Yes, donor has donated in the last 3 months (90 days)</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="recent_donation_admin" id="donated_recently_no_admin" value="no">
-                                    <label class="form-check-label fw-bold text-success" for="donated_recently_no_admin">No, donor has NOT donated in the last 3 months</label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="recent_donation_admin" id="not_sure_admin" value="not_sure">
-                                    <label class="form-check-label" for="not_sure_admin">Not sure when donor last donated</label>
-                                </div>
-                                <div class="alert alert-warning" id="recentDonorWarningAdmin" style="display:none;">
-                                    <h6 class="mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i>Not Eligible Yet</h6>
-                                    <p class="mb-0">Must wait at least <strong>90 days</strong> between donations.</p>
-                                </div>
-                                <div class="alert alert-info" id="unsureDonorInfoAdmin" style="display:none;">
-                                    <h6 class="mb-1"><i class="bi bi-info-circle-fill me-2"></i>Not sure?</h6>
-                                    <p class="mb-0">Proceed; the system will check history if email is provided.</p>
-                                </div>
-                                <button type="button" class="btn btn-primary" id="proceedBtnAdmin" style="display:none;">Proceed to Registration</button>
-                            </div>
-                        </div>
-                        <?php if ($mr_success): ?><div class="alert alert-success"><?= htmlspecialchars($mr_success) ?></div><?php endif; ?>
-                        <?php if ($mr_error): ?><div class="alert alert-danger"><?= htmlspecialchars($mr_error) ?></div><?php endif; ?>
-                        <div class="card" id="manualRegCard" style="display:none;"><div class="card-body">
-                        <form method="post" class="row g-3">
-                            <input type="hidden" name="action" value="manual_register">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-                            <input type="hidden" name="recent_donation" id="recent_donation_post" value="">
-                            <div class="col-md-6">
-                                <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" name="full_name" class="form-control" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control" placeholder="optional">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Phone</label>
-                                <input type="tel" name="phone" class="form-control" placeholder="optional">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Blood Type <span class="text-danger">*</span></label>
-                                <select name="blood_type" class="form-select" required>
-                                    <option value="">Select Blood Type</option>
-                                    <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-                                    <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
-                                <input type="date" name="date_of_birth" class="form-control" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Gender <span class="text-danger">*</span></label>
-                                <select name="gender" class="form-select" required>
-                                    <option value="">Select Gender</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Weight (kg) <span class="text-danger">*</span></label>
-                                <input type="number" name="weight" class="form-control" min="50" step="0.1" required>
-                                <small class="text-muted">Minimum 50 kg</small>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Last Donation Date</label>
-                                <input type="date" name="last_donation_date" class="form-control">
-                            </div>
-                            <div class="col-12"><h5 class="mt-3 mb-2">Address</h5></div>
-                            <div class="col-md-6"><label class="form-label">Address</label><input type="text" name="address" class="form-control"></div>
-                            <div class="col-md-6"><label class="form-label">City</label><input type="text" name="city" class="form-control"></div>
-                            <div class="col-md-4"><label class="form-label">State/Province</label><input type="text" name="state" class="form-control"></div>
-                            <div class="col-md-4"><label class="form-label">Postal Code</label><input type="text" name="postal_code" class="form-control"></div>
-                            <div class="col-md-4"><label class="form-label">Country</label><input type="text" name="country" class="form-control" value="Philippines"></div>
-                            <div class="col-12 mt-2">
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor</button>
-                            </div>
-                        </form>
-                        </div></div>
                     <?php endif; ?>
 
                         <?php elseif ($activeTab === 'pending-donors'): ?>
