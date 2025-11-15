@@ -12,9 +12,6 @@ $medicalQuestions = $medicalQuestions['sections'] ?? [];
 <!-- Medical Screening Section -->
 <div class="form-section">
     <h2 class="section-title">Section 2: Medical Screening Questions</h2>
-    <div class="alert alert-info mb-4">
-        <strong>Important:</strong> Please answer all questions truthfully. Your responses will be kept confidential.
-    </div>
 
     <?php foreach ($medicalQuestions as $sectionKey => $section): ?>
         <div class="card mb-4 <?php echo ($sectionKey === 'female_only') ? 'female-only-section' : ''; ?>">
