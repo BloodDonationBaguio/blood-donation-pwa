@@ -1673,30 +1673,24 @@ if (!function_exists('buildPaginationUrl')) {
                         <?php
                         try {
                             $formPath = __DIR__ . '/donor-registration.php';
-                            $html = file_exists($formPath) ? file_get_contents($formPath) : '';
-                            $chunk = '';
-                            if ($html) {
-                                if (preg_match('/<div\s+class="card mb-4"\s+id="eligibilityCheck"[\s\S]*?<form[\s\S]*?id="donorForm"[\s\S]*?<\/form>/i', $html, $m)) {
-                                    $chunk = $m[0];
-                                } elseif (preg_match('/<form[\s\S]*?id="donorForm"[\s\S]*?<\/form>/i', $html, $m)) {
-                                    $chunk = $m[0];
-                                }
-                                if ($chunk) {
-                                    // Remove eligibility section
-                                    $chunk = preg_replace('/<div\s+class="card mb-4"\s+id="eligibilityCheck"[\s\S]*?<\/div>\s*/i', '', $chunk);
-                                    // Remove CAPTCHA section
-                                    $chunk = preg_replace('/<div\s+class="form-section"[\s\S]*?g-recaptcha[\s\S]*?<\/div>/i', '', $chunk);
-                                    // Point action to admin processor
-                                    $chunk = preg_replace('/action="[^"]*"/i', 'action="process_manual_donor.php"', $chunk);
-                                    echo $chunk;
-                                } else {
-                                    echo '<div class="alert alert-danger">Unable to load donor form.</div>';
-                                }
-                            } else {
+                            if (!file_exists($formPath)) {
                                 echo '<div class="alert alert-danger">Donor registration form not found.</div>';
+                            } else {
+                                ob_start();
+                                include $formPath;
+                                $rendered = ob_get_clean();
+                                $formOnly = '';
+                                if (preg_match('/<form[^>]*id="donorForm"[^>]*>[\s\S]*?<\/form>/i', $rendered, $m)) {
+                                    $formOnly = $m[0];
+                                } else {
+                                    $formOnly = $rendered;
+                                }
+                                $formOnly = preg_replace('/<div[^>]*class="form-section"[^>]*>[\s\S]*?g-recaptcha[\s\S]*?<\/div>/i', '', $formOnly);
+                                $formOnly = preg_replace('/action="[^"]*"/i', 'action="process_manual_donor.php"', $formOnly);
+                                echo $formOnly;
                             }
                         } catch (Throwable $e) {
-                            echo '<div class="alert alert-danger">Error loading form: ' . htmlspecialchars($e->getMessage()) . '</div>';
+                            echo '<div class="alert alert-danger">Error loading form.</div>';
                         }
                         ?>
                     <?php endif; ?>
