@@ -45,7 +45,7 @@ try {
     if (empty($gender)) $errors[] = "Gender is required";
     if ($weight < 50) $errors[] = "Minimum weight requirement is 50kg";
     if ($height < 100) $errors[] = "Please enter a valid height (minimum 100cm)";
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Valid email is required";
+    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Valid email is required";
     $validBloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown', 'UNK'];
     if (empty($bloodType)) { $errors[] = "Blood type is required"; }
     elseif (!in_array($bloodType, $validBloodTypes)) { $errors[] = "Invalid blood type selected. Please select a valid blood type."; }
@@ -56,7 +56,7 @@ try {
     if (empty($postalCode)) $errors[] = "Postal code is required";
 
     // Duplicate recent registration check (5 minutes window)
-    if (empty($errors)) {
+    if (empty($errors) && $email !== '') {
         try {
             $checkTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
             $duplicateCheck = $pdo->prepare("SELECT id, created_at FROM {$checkTable} WHERE email = ? AND created_at > CURRENT_TIMESTAMP - INTERVAL '5 minutes' ORDER BY created_at DESC LIMIT 1");
@@ -99,8 +99,9 @@ try {
     $dbBloodType = $isUnknownSelected ? null : $bloodType;
 
     // Insert donor
+    $dbEmail = ($email !== '') ? $email : null;
     $stmt = $pdo->prepare("INSERT INTO {$donorsTable} (first_name, last_name, email, phone, blood_type, date_of_birth, gender, address, city, province, weight, height, reference_code, status, created_by_admin, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP)");
-    $stmt->execute([$firstName, $lastName, $email, $phone, $dbBloodType, $dob, $gender, $address, $city, $province, $weight, $height, $refNumber, 1]);
+    $stmt->execute([$firstName, $lastName, $dbEmail, $phone, $dbBloodType, $dob, $gender, $address, $city, $province, $weight, $height, $refNumber, 1]);
     $donorId = (int)$pdo->lastInsertId();
 
     // Save medical screening
@@ -116,7 +117,7 @@ try {
     try {
         $subject = "Blood Donation Registration Reference";
         $message = "<h2>Thank you, {$fullName}, for registering as a blood donor.</h2><p>Your reference number is: <strong>{$refNumber}</strong></p>";
-        if (function_exists('send_confirmation_email')) { @send_confirmation_email($email, $subject, $message, $fullName); }
+        if ($email !== '' && function_exists('send_confirmation_email')) { @send_confirmation_email($email, $subject, $message, $fullName); }
     } catch (Throwable $e) { /* ignore */ }
 
     header('Location: admin.php?tab=manual-register&success=1&ref=' . urlencode($refNumber));

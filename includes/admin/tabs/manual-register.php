@@ -63,8 +63,8 @@
       </div>
       <div class="col-md-6">
         <div class="mb-3">
-          <label class="form-label required">Email</label>
-          <input type="email" class="form-control" name="email" required>
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" name="email" placeholder="optional">
           <div class="invalid-feedback">Enter a valid email</div>
         </div>
         <div class="mb-3">
