@@ -1839,6 +1839,7 @@ function buildPaginationUrl($page) {
                 })
                 .join('\n');
 
+            const origin = location.origin;
             const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Blood Inventory - Print</title>
 <style>
@@ -1846,18 +1847,16 @@ function buildPaginationUrl($page) {
   .action-btn, .btn, .pagination { display: none !important; }
 }
 body { font-family: Inter, Arial, sans-serif; }
-.print-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.print-header { display:flex; align-items:center; justify-content:flex-end; margin-bottom:12px; }
 .print-brand { display:flex; align-items:center; gap:10px; }
 .print-brand img { height:28px; }
-.generated { font-size:12px; color:#555; }
 ${styles}
 </style>
 </head><body>
 <div class="print-header">
-  <div class="generated">Generated at <?= date('m/d/y, g:i A') ?></div>
   <div class="print-brand">
-    <img src="/assets/icons/favicon-32.png" alt="System Logo">
-    <img src="https://benguetredcross.com/wp-content/uploads/2023/03/Logo_Philippine_Red_Cross-1536x1536.png" alt="Red Cross Baguio">
+    <img src="${origin}/assets/icons/favicon-32.png" alt="System Logo" onerror="this.style.display='none'">
+    <img src="https://benguetredcross.com/wp-content/uploads/2023/03/Logo_Philippine_Red_Cross-1536x1536.png" alt="Red Cross Baguio" onerror="this.style.display='none'">
   </div>
 </div>
 <h3>Blood Inventory (Page <?= $filters['page'] ?> of <?= $totalPages ?>)</h3>
