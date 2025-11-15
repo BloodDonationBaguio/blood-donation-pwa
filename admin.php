@@ -1697,6 +1697,10 @@ if (!function_exists('buildPaginationUrl')) {
                                 }
                                 $formOnly = preg_replace('/<div[^>]*class="form-section"[^>]*>[\s\S]*?g-recaptcha[\s\S]*?<\/div>/i', '', $formOnly);
                                 $formOnly = preg_replace('/action="[^"]*"/i', 'action="process_manual_donor.php"', $formOnly);
+                                // Force form visible: strip any inline style that hides it and hidden attribute
+                                $formOnly = preg_replace('/(<form[^>]*?)\sstyle="[^"]*"/i', '$1', $formOnly);
+                                $formOnly = preg_replace('/style="[^"]*display\s*:\s*none[^"]*"/i', '', $formOnly);
+                                $formOnly = preg_replace('/\shidden(=\"hidden\")?/i', '', $formOnly);
                                 echo $formOnly;
                             }
                         } catch (Throwable $e) {
