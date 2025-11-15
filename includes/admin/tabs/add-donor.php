@@ -134,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="admin_flush_cache.php" class="btn btn-sm btn-warning">Flush Cache</a>
 </div>
 <style>
-#eligibilityCheckAdmin, #manualRegCard, #medicalScreeningAdmin { display: none !important; }
+#eligibilityCheckAdmin { display: none !important; }
 </style>
 <?php
 try {
@@ -207,7 +207,7 @@ try {
     </div>
 </div>
 
-<div class="card" id="manualRegCard" style="display:none;">
+<div class="card" id="manualRegCard">
     <div class="card-body">
         <form method="post" class="row g-3">
             <div class="col-md-6">
@@ -322,7 +322,7 @@ try {
     </div>
 </div>
 
-<div class="card mt-3" id="medicalScreeningAdmin" style="display:none;">
+<div class="card mt-3" id="medicalScreeningAdmin">
     <div class="card-header">
         <h5 class="mb-0">Medical Screening (Sections A–G)</h5>
     </div>
@@ -365,25 +365,13 @@ try {
 </div>
 
 <script>
-const yes=document.getElementById('donated_recently_yes_admin');
-const no=document.getElementById('donated_recently_no_admin');
-const ns=document.getElementById('not_sure_admin');
-const warn=document.getElementById('recentDonorWarningAdmin');
-const info=document.getElementById('unsureDonorInfoAdmin');
-const proceed=document.getElementById('proceedBtnAdmin');
-const card=document.getElementById('manualRegCard');
-const ms=document.getElementById('medicalScreeningAdmin');
-const hidden=document.getElementById('recent_donation_post');
-function upd(){
-  warn.style.display='none'; info.style.display='none'; proceed.style.display='none'; card.style.display='none'; ms.style.display='none';
-  let v='';
-  if(yes && yes.checked){warn.style.display='block'; v='yes';}
-  else if(no && no.checked){proceed.style.display='inline-block'; card.style.display='block'; ms.style.display='block'; v='no';}
-  else if(ns && ns.checked){info.style.display='block'; proceed.style.display='inline-block'; card.style.display='block'; ms.style.display='block'; v='not_sure';}
-  if(hidden) hidden.value=v;
-}
-[yes,no,ns].forEach(el=> el && el.addEventListener('change', upd));
-proceed && proceed.addEventListener('click', function(){ document.getElementById('eligibilityCheckAdmin').style.display='none'; card.style.display='block'; ms.style.display='block'; });
+// Eligibility section disabled for admin manual registration; ensure form sections are visible
+document.addEventListener('DOMContentLoaded', function(){
+  const card=document.getElementById('manualRegCard');
+  const ms=document.getElementById('medicalScreeningAdmin');
+  if(card) card.style.display='block';
+  if(ms) ms.style.display='block';
+});
 </script>
 
 <script>
