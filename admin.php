@@ -1672,6 +1672,10 @@ if (!function_exists('buildPaginationUrl')) {
                                 if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
                                     throw new Exception('Invalid CSRF token');
                                 }
+                                $recentDonation = trim((string)($_POST['recent_donation'] ?? ''));
+                                if ($recentDonation === 'yes') {
+                                    throw new Exception('Donor is not eligible: must wait 90 days since last donation');
+                                }
                                 $required = ['full_name','blood_type','date_of_birth','gender','weight'];
                                 $data = [];
                                 foreach ($required as $f) {
@@ -1685,6 +1689,20 @@ if (!function_exists('buildPaginationUrl')) {
                                 if ((float)$data['weight'] < 50) throw new Exception('Donor must weigh at least 50 kg');
                                 $email = trim((string)($_POST['email'] ?? ''));
                                 if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Please enter a valid email address');
+                                // Donation interval check using email if provided
+                                if ($email !== '') {
+                                    try {
+                                        $checkTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+                                        $stmt = $pdo->prepare("SELECT created_at FROM {$checkTable} WHERE email = ? ORDER BY created_at DESC LIMIT 1");
+                                        $stmt->execute([$email]);
+                                        $prev = $stmt->fetch(PDO::FETCH_ASSOC);
+                                        if ($prev && isset($prev['created_at'])) {
+                                            $last = new DateTime($prev['created_at']);
+                                            $days = (new DateTime())->diff($last)->days;
+                                            if ($days < 90) throw new Exception('Donor previously registered less than 90 days ago');
+                                        }
+                                    } catch (Throwable $e) { /* non-blocking */ }
+                                }
                                 $referenceCode = 'DON' . strtoupper(substr(md5(uniqid('', true)), 0, 8));
                                 $columns = 'full_name, email, phone, blood_type, date_of_birth, gender, weight, last_donation_date, address, city, state, postal_code, country, reference_code, status, created_at';
                                 $placeholders = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,' . (($donorsTable === 'donors_new') ? "'active'" : "'active'") . ', CURRENT_TIMESTAMP';
@@ -1715,13 +1733,44 @@ if (!function_exists('buildPaginationUrl')) {
                         }
                         ?>
                         <h2 class="mb-3">Manual Donor Registration</h2>
-                        <p class="text-muted mb-4">For walk-in donors and those who cannot use the online system.</p>
+                        <p class="text-muted mb-2">For walk-in donors and those who cannot use the online system.</p>
+                        <!-- Eligibility Check (same behavior as public registration) -->
+                        <div class="card mb-3" id="eligibilityCheckAdmin" style="display: block;">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="bi bi-question-circle-fill me-2"></i>Quick Eligibility Check</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-3">Before proceeding, answer this quick question:</p>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="recent_donation_admin" id="donated_recently_yes_admin" value="yes">
+                                    <label class="form-check-label fw-bold text-danger" for="donated_recently_yes_admin">Yes, donor has donated in the last 3 months (90 days)</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="recent_donation_admin" id="donated_recently_no_admin" value="no">
+                                    <label class="form-check-label fw-bold text-success" for="donated_recently_no_admin">No, donor has NOT donated in the last 3 months</label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="recent_donation_admin" id="not_sure_admin" value="not_sure">
+                                    <label class="form-check-label" for="not_sure_admin">Not sure when donor last donated</label>
+                                </div>
+                                <div class="alert alert-warning" id="recentDonorWarningAdmin" style="display:none;">
+                                    <h6 class="mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i>Not Eligible Yet</h6>
+                                    <p class="mb-0">Must wait at least <strong>90 days</strong> between donations.</p>
+                                </div>
+                                <div class="alert alert-info" id="unsureDonorInfoAdmin" style="display:none;">
+                                    <h6 class="mb-1"><i class="bi bi-info-circle-fill me-2"></i>Not sure?</h6>
+                                    <p class="mb-0">Proceed; the system will check history if email is provided.</p>
+                                </div>
+                                <button type="button" class="btn btn-primary" id="proceedBtnAdmin" style="display:none;">Proceed to Registration</button>
+                            </div>
+                        </div>
                         <?php if ($mr_success): ?><div class="alert alert-success"><?= htmlspecialchars($mr_success) ?></div><?php endif; ?>
                         <?php if ($mr_error): ?><div class="alert alert-danger"><?= htmlspecialchars($mr_error) ?></div><?php endif; ?>
-                        <div class="card"><div class="card-body">
+                        <div class="card" id="manualRegCard" style="display:none;"><div class="card-body">
                         <form method="post" class="row g-3">
                             <input type="hidden" name="action" value="manual_register">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+                            <input type="hidden" name="recent_donation" id="recent_donation_post" value="">
                             <div class="col-md-6">
                                 <label class="form-label">Full Name <span class="text-danger">*</span></label>
                                 <input type="text" name="full_name" class="form-control" required>
@@ -2865,6 +2914,28 @@ if (!function_exists('buildPaginationUrl')) {
                                 <div class="col-12 mt-2"><button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor</button></div>
                             </form>
                             </div></div>
+                        <script>
+                        (function(){
+                          const yes=document.getElementById('donated_recently_yes_admin');
+                          const no=document.getElementById('donated_recently_no_admin');
+                          const ns=document.getElementById('not_sure_admin');
+                          const warn=document.getElementById('recentDonorWarningAdmin');
+                          const info=document.getElementById('unsureDonorInfoAdmin');
+                          const proceed=document.getElementById('proceedBtnAdmin');
+                          const card=document.getElementById('manualRegCard');
+                          const hidden=document.getElementById('recent_donation_post');
+                          function update(){
+                            warn.style.display='none'; info.style.display='none'; proceed.style.display='none'; card.style.display='none';
+                            let v='';
+                            if(yes && yes.checked){warn.style.display='block'; v='yes';}
+                            else if(no && no.checked){proceed.style.display='inline-block'; card.style.display='block'; v='no';}
+                            else if(ns && ns.checked){info.style.display='block'; proceed.style.display='inline-block'; card.style.display='block'; v='not_sure';}
+                            if(hidden) hidden.value=v;
+                          }
+                          [yes,no,ns].forEach(el=> el && el.addEventListener('change', update));
+                          proceed && proceed.addEventListener('click', function(){ document.getElementById('eligibilityCheckAdmin').style.display='none'; card.style.display='block'; });
+                        })();
+                        </script>
                         <?php else: ?>
                             <div class="alert alert-warning">
                                 <h4>Tab Content</h4>
