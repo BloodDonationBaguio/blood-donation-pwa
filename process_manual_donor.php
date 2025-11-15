@@ -43,6 +43,8 @@ try {
     if (empty($firstName)) $errors[] = "First name is required";
     if (empty($lastName)) $errors[] = "Last name is required";
     if (empty($gender)) $errors[] = "Gender is required";
+    if ($weight < 50) $errors[] = "Minimum weight requirement is 50kg";
+    if ($height < 100) $errors[] = "Please enter a valid height (minimum 100cm)";
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Valid email is required";
     $validBloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown', 'UNK'];
     if (empty($bloodType)) { $errors[] = "Blood type is required"; }
@@ -51,7 +53,7 @@ try {
     if (empty($address)) $errors[] = "Address is required";
     if (empty($city)) $errors[] = "City is required";
     if (empty($province)) $errors[] = "Province is required";
-    
+    if (empty($postalCode)) $errors[] = "Postal code is required";
 
     // Duplicate recent registration check (5 minutes window)
     if (empty($errors)) {

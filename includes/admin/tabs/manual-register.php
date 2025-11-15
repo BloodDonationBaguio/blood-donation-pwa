@@ -16,10 +16,17 @@
   <div class="card mb-3"><div class="card-body">
     <div class="row">
       <div class="col-md-6">
-        <div class="mb-3">
-          <label class="form-label required">Full Name</label>
-          <input type="text" class="form-control" name="full_name" required>
-          <div class="invalid-feedback">Required</div>
+        <div class="row g-2 mb-3">
+          <div class="col-md-6">
+            <label class="form-label required">First Name</label>
+            <input type="text" class="form-control" name="first_name" required>
+            <div class="invalid-feedback">Required</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label required">Last Name</label>
+            <input type="text" class="form-control" name="last_name" required>
+            <div class="invalid-feedback">Required</div>
+          </div>
         </div>
         <div class="mb-3">
           <label class="form-label required">Gender</label>
@@ -37,6 +44,20 @@
         </div>
         
         <div class="mb-3">
+          <label class="form-label required">Weight (kg)</label>
+          <div class="input-group">
+            <input type="number" class="form-control" name="weight" min="50" step="0.1" required>
+            <span class="input-group-text">kg (minimum 50 kg)</span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label required">Height (cm)</label>
+          <div class="input-group">
+            <input type="number" class="form-control" name="height" min="100" max="250" step="0.1" required>
+            <span class="input-group-text">cm</span>
+          </div>
+        </div>
+        <div class="mb-3">
           <label class="form-label required">Blood Type</label>
           <select name="blood_type" class="form-select" required>
             <option value="">Select Blood Type</option>
@@ -47,6 +68,16 @@
         </div>
       </div>
       <div class="col-md-6">
+        <div class="mb-3">
+          <label class="form-label required">Email</label>
+          <input type="email" class="form-control" name="email" required>
+          <div class="invalid-feedback">Enter a valid email</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label required">Phone Number</label>
+          <input type="tel" class="form-control" name="phone" required>
+          <div class="invalid-feedback">Required</div>
+        </div>
         <div class="mb-3">
           <label class="form-label required">Email</label>
           <input type="email" class="form-control" name="email" required>
@@ -70,6 +101,11 @@
           <label class="form-label">Province</label>
           <div class="form-control bg-light"><span class="text-muted">Benguet</span><input type="hidden" name="province" value="Benguet"></div>
         </div>
+        <div class="mb-3">
+          <label class="form-label required">Postal Code</label>
+          <input type="text" class="form-control" name="postal_code" required>
+          <div class="invalid-feedback">Required</div>
+        </div>
         
       </div>
     </div>
@@ -88,17 +124,6 @@ document.addEventListener('DOMContentLoaded', function(){
   if(!form) return;
   form.addEventListener('submit', function(e){
     let ok=true; form.querySelectorAll('[required]').forEach(el=>{ if(!el.value.trim()){ el.classList.add('is-invalid'); ok=false; } else { el.classList.remove('is-invalid'); } });
-    const fullNameInput=form.querySelector('input[name="full_name"]');
-    if(fullNameInput){
-      const parts=fullNameInput.value.trim().split(/\s+/);
-      const first=parts.shift()||'';
-      const last=parts.join(' ');
-      let fn=form.querySelector('input[name="first_name"]');
-      let ln=form.querySelector('input[name="last_name"]');
-      if(!fn){ fn=document.createElement('input'); fn.type='hidden'; fn.name='first_name'; form.appendChild(fn); }
-      if(!ln){ ln=document.createElement('input'); ln.type='hidden'; ln.name='last_name'; form.appendChild(ln); }
-      fn.value=first; ln.value=last;
-    }
     if(!ok){ e.preventDefault(); const first=form.querySelector('.is-invalid'); if(first) first.scrollIntoView({behavior:'smooth',block:'center'}); }
   });
 });
