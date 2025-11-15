@@ -1846,9 +1846,20 @@ function buildPaginationUrl($page) {
   .action-btn, .btn, .pagination { display: none !important; }
 }
 body { font-family: Inter, Arial, sans-serif; }
+.print-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.print-brand { display:flex; align-items:center; gap:10px; }
+.print-brand img { height:28px; }
+.generated { font-size:12px; color:#555; }
 ${styles}
 </style>
 </head><body>
+<div class="print-header">
+  <div class="generated">Generated at <?= date('m/d/y, g:i A') ?></div>
+  <div class="print-brand">
+    <img src="/assets/icons/favicon-32.png" alt="System Logo">
+    <img src="https://benguetredcross.com/wp-content/uploads/2023/03/Logo_Philippine_Red_Cross-1536x1536.png" alt="Red Cross Baguio">
+  </div>
+</div>
 <h3>Blood Inventory (Page <?= $filters['page'] ?> of <?= $totalPages ?>)</h3>
 ${clone.innerHTML}
 <script>window.onload = function(){ window.print(); setTimeout(()=>window.close(), 300); }<\/script>
