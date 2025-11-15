@@ -1724,6 +1724,22 @@ if (!function_exists('buildPaginationUrl')) {
                                     trim((string)($_POST['country'] ?? 'Philippines')),
                                     $referenceCode
                                 ]);
+                                $donorId = (int)$pdo->lastInsertId();
+                                // Save medical screening
+                                $medical = [];
+                                for ($qi=1; $qi<=37; $qi++) { $medical['q'.$qi] = $_POST['q'.$qi] ?? ''; }
+                                if (($data['gender'] ?? '') === 'female') {
+                                    $medical['q34'] = $_POST['q34'] ?? '';
+                                    if (!empty($_POST['q34_date'])) $medical['q34_date'] = $_POST['q34_date'];
+                                    if (!empty($_POST['q37_date'])) $medical['q37_date'] = $_POST['q37_date'];
+                                }
+                                $requiredQuestions = (strtolower($data['gender']) === 'female') ? 37 : 32;
+                                $actualAnswered = 0; foreach ($medical as $ans) { if (!empty($ans)) $actualAnswered++; }
+                                $allAnswered = $actualAnswered >= $requiredQuestions ? 1 : 0;
+                                try {
+                                    $msStmt = $pdo->prepare("INSERT INTO donor_medical_screening_simple (donor_id, reference_code, screening_data, all_questions_answered) VALUES (?, ?, ?, ?)");
+                                    $msStmt->execute([$donorId, $referenceCode, json_encode($medical), $allAnswered]);
+                                } catch (Throwable $e) { /* ignore on failure */ }
                                 if (function_exists('ensureAuditLogTableExists')) { ensureAuditLogTableExists($pdo); }
                                 if (function_exists('logAdminAction')) { logAdminAction($pdo, 'donor_created', $donorsTable, (int)$pdo->lastInsertId(), $referenceCode, $_SESSION['admin_username'] ?? 'admin'); }
                                 $mr_success = 'Donor added successfully! Reference Code: ' . $referenceCode;
@@ -2912,8 +2928,49 @@ if (!function_exists('buildPaginationUrl')) {
                                 <div class="col-md-4"><label class="form-label">Postal Code</label><input type="text" name="postal_code" class="form-control"></div>
                                 <div class="col-md-4"><label class="form-label">Country</label><input type="text" name="country" class="form-control" value="Philippines"></div>
                                 <div class="col-12 mt-2"><button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor</button></div>
-                            </form>
-                            </div></div>
+                        </form>
+                        </div></div>
+                        <div class="card mt-3" id="medicalScreeningAdmin" style="display:none;">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-notes-medical me-2"></i>Medical Screening (Sections A–G)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <?php for ($i=1; $i<=37; $i++): ?>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Question <?= $i ?></label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="q<?= $i ?>" value="yes" id="q<?= $i ?>_y">
+                                                <label class="form-check-label" for="q<?= $i ?>_y">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="q<?= $i ?>" value="no" id="q<?= $i ?>_n">
+                                                <label class="form-check-label" for="q<?= $i ?>_n">No</label>
+                                            </div>
+                                        </div>
+                                    <?php endfor; ?>
+                                    <div class="col-md-6">
+                                        <label class="form-label">q34 (Female only)</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="q34" value="none" id="q34_none">
+                                            <label class="form-check-label" for="q34_none">None</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="q34" value="date" id="q34_date_opt">
+                                            <label class="form-check-label" for="q34_date_opt">Date</label>
+                                        </div>
+                                        <input type="date" class="form-control mt-2" name="q34_date">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">q37 Date (Female only)</label>
+                                        <input type="date" class="form-control" name="q37_date">
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor & Screening</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <script>
                         (function(){
                           const yes=document.getElementById('donated_recently_yes_admin');
@@ -2923,13 +2980,14 @@ if (!function_exists('buildPaginationUrl')) {
                           const info=document.getElementById('unsureDonorInfoAdmin');
                           const proceed=document.getElementById('proceedBtnAdmin');
                           const card=document.getElementById('manualRegCard');
+                          const ms=document.getElementById('medicalScreeningAdmin');
                           const hidden=document.getElementById('recent_donation_post');
                           function update(){
-                            warn.style.display='none'; info.style.display='none'; proceed.style.display='none'; card.style.display='none';
+                            warn.style.display='none'; info.style.display='none'; proceed.style.display='none'; card.style.display='none'; if(ms) ms.style.display='none';
                             let v='';
                             if(yes && yes.checked){warn.style.display='block'; v='yes';}
-                            else if(no && no.checked){proceed.style.display='inline-block'; card.style.display='block'; v='no';}
-                            else if(ns && ns.checked){info.style.display='block'; proceed.style.display='inline-block'; card.style.display='block'; v='not_sure';}
+                            else if(no && no.checked){proceed.style.display='inline-block'; card.style.display='block'; if(ms) ms.style.display='block'; v='no';}
+                            else if(ns && ns.checked){info.style.display='block'; proceed.style.display='inline-block'; card.style.display='block'; if(ms) ms.style.display='block'; v='not_sure';}
                             if(hidden) hidden.value=v;
                           }
                           [yes,no,ns].forEach(el=> el && el.addEventListener('change', update));
