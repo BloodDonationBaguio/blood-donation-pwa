@@ -121,11 +121,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Add New Donor</h2>
+    <h2>Manual Donor Registration</h2>
     <a href="?tab=donor-list" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left me-1"></i> Back to List
     </a>
 </div>
+<div class="alert alert-info d-flex justify-content-between align-items-center py-2 mb-3">
+    <div>
+        <strong>Version:</strong> <?= date('Y-m-d H:i:s') ?>
+        <span class="ms-3"><strong>Build:</strong> <?= filemtime(__FILE__) ?></span>
+    </div>
+    <a href="admin_flush_cache.php" class="btn btn-sm btn-warning">Flush Cache</a>
+</div>
+<style>
+#eligibilityCheckAdmin, #manualRegCard, #medicalScreeningAdmin { display: none !important; }
+</style>
+<?php
+try {
+    $formPath = dirname(__DIR__, 2) . '/donor-registration.php';
+    if (file_exists($formPath)) {
+        ob_start();
+        include $formPath;
+        $rendered = ob_get_clean();
+        $formOnly = '';
+        if (preg_match('/<form[^>]*id="donorForm"[^>]*>[\s\S]*?<\/form>/i', $rendered, $m)) {
+            $formOnly = $m[0];
+        } else {
+            $formOnly = $rendered;
+        }
+        // Remove eligibility and CAPTCHA
+        $formOnly = preg_replace('/<div[^>]*id="eligibilityCheck"[\s\S]*?<\/div>/i', '', $formOnly);
+        $formOnly = preg_replace('/<div[^>]*class="form-section"[^>]*>[\s\S]*?g-recaptcha[\s\S]*?<\/div>/i', '', $formOnly);
+        // Force visible and point to admin processor
+        $formOnly = preg_replace('/action="[^"]*"/i', 'action="process_manual_donor.php"', $formOnly);
+        $formOnly = preg_replace('/(<form[^>]*?)\sstyle="[^"]*"/i', '$1', $formOnly);
+        $formOnly = preg_replace('/style="[^"]*display\s*:\s*none[^"]*"/i', '', $formOnly);
+        $formOnly = preg_replace('/\shidden(=\"hidden\")?/i', '', $formOnly);
+        echo $formOnly;
+    } else {
+        echo '<div class="alert alert-danger">Donor registration form not found.</div>';
+    }
+} catch (Throwable $e) {
+    echo '<div class="alert alert-danger">Error loading donor form.</div>';
+}
+?>
 
 <?php if ($success): ?>
     <div class="alert alert-success">
