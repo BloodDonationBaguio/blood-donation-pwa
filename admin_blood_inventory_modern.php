@@ -1853,9 +1853,10 @@ body { font-family: Inter, Arial, sans-serif; }
 ${styles}
 </style>
 </head><body>
-<div class="print-header">
+<div class="print-header" style="justify-content:space-between;">
+  <div class="generated">Generated at <?= date('m/d/y, g:i A') ?></div>
   <div class="print-brand">
-    <img src="${origin}/assets/icons/favicon-32.png" alt="System Logo" onerror="this.style.display='none'">
+    <img src="${origin}/assets/icons/favicon.svg" alt="System Logo" onerror="this.src='${origin}/assets/icons/favicon-32.png'">
     <img src="https://benguetredcross.com/wp-content/uploads/2023/03/Logo_Philippine_Red_Cross-1536x1536.png" alt="Red Cross Baguio" onerror="this.style.display='none'">
   </div>
 </div>
