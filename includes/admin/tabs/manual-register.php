@@ -99,7 +99,11 @@
     <?php include dirname(__DIR__, 2) . '/medical_section.php'; ?>
   </div></div>
   <div class="mt-3">
-    <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus me-1"></i> Register Donor</button>
+    <button id="registerBtn" type="submit" class="btn btn-danger btn-lg d-inline-flex align-items-center">
+      <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+      <i class="fas fa-user-plus me-2"></i>
+      <span class="btn-label">Register Donor</span>
+    </button>
   </div>
 </form>
 <script>
@@ -108,7 +112,15 @@ document.addEventListener('DOMContentLoaded', function(){
   if(!form) return;
   form.addEventListener('submit', function(e){
     let ok=true; form.querySelectorAll('[required]').forEach(el=>{ if(!el.value.trim()){ el.classList.add('is-invalid'); ok=false; } else { el.classList.remove('is-invalid'); } });
-    if(!ok){ e.preventDefault(); const first=form.querySelector('.is-invalid'); if(first) first.scrollIntoView({behavior:'smooth',block:'center'}); }
+    if(!ok){ e.preventDefault(); const first=form.querySelector('.is-invalid'); if(first) first.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+    const btn=document.getElementById('registerBtn');
+    if(btn){
+      const spin=btn.querySelector('.spinner-border');
+      const label=btn.querySelector('.btn-label');
+      if(spin) spin.classList.remove('d-none');
+      if(label) label.textContent='Registering...';
+      btn.disabled=true;
+    }
   });
 });
 </script>
