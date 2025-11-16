@@ -14,6 +14,7 @@ ini_set('log_errors', 1);
 
 function generateReferenceNumber() { return strtoupper('DNR-' . substr(md5(uniqid(mt_rand(), true)), 0, 6)); }
 function isEligibleAge($birthDate) { $age = date_diff(date_create($birthDate), date_create('today'))->y; return ($age >= 18 && $age <= 65); }
+function isEmailNullable($pdo, $table) { try { $stmt = $pdo->prepare("SELECT is_nullable FROM information_schema.columns WHERE table_name = ? AND column_name = 'email'"); $stmt->execute([$table]); $val = strtolower((string)$stmt->fetchColumn()); return $val === 'yes'; } catch (Throwable $e) { return true; } }
 
 $errors = [];
 $success = false;
@@ -100,6 +101,7 @@ try {
 
     // Insert donor
     $dbEmail = ($email !== '') ? $email : null;
+    if ($dbEmail === null && !isEmailNullable($pdo, $donorsTable)) { $dbEmail = 'no-email+' . strtolower($refNumber) . '@donor.invalid'; }
     $stmt = $pdo->prepare("INSERT INTO {$donorsTable} (first_name, last_name, email, phone, blood_type, date_of_birth, gender, address, city, province, weight, height, reference_code, status, created_by_admin, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP)");
     $stmt->execute([$firstName, $lastName, $dbEmail, $phone, $dbBloodType, $dob, $gender, $address, $city, $province, $weight, $height, $refNumber, 1]);
     $donorId = (int)$pdo->lastInsertId();
