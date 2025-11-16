@@ -2969,11 +2969,11 @@ if (!function_exists('buildPaginationUrl')) {
         // Show any success/error messages from PHP in toasts
         document.addEventListener('DOMContentLoaded', function() {
             <?php if (isset($_GET['success'])): ?>
-                showToast('<?= addslashes($_GET['success']) ?>', 'success');
+                showToast(<?= json_encode($_GET['success']) ?>, 'success');
             <?php endif; ?>
             
             <?php if (isset($_GET['error'])): ?>
-                showToast('<?= addslashes($_GET['error']) ?>', 'danger');
+                showToast(<?= json_encode($_GET['error']) ?>, 'danger');
             <?php endif; ?>
         });
 
