@@ -122,7 +122,7 @@ try {
         if ($email !== '' && function_exists('send_confirmation_email')) { @send_confirmation_email($email, $subject, $message, $fullName); }
     } catch (Throwable $e) { /* ignore */ }
 
-    header('Location: admin.php?tab=manual-register&success=1&ref=' . urlencode($refNumber));
+    header('Location: admin.php?tab=manual-register&success=' . urlencode('Donor added successfully. Reference: ' . $refNumber) . '&ref=' . urlencode($refNumber));
     exit;
 } catch (Throwable $e) {
     if ($pdo && $pdo->inTransaction()) { $pdo->rollBack(); }
