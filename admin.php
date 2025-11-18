@@ -2409,9 +2409,7 @@ if (!function_exists('buildPaginationUrl')) {
                                             </button>
                                         </li>
                                         <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="features-tab" data-bs-toggle="pill" data-bs-target="#features" type="button" role="tab">
-                                                <i class="fas fa-star me-2"></i>Features
-                                            </button>
+                                            
                                         </li>
                                     </ul>
                                     
@@ -2607,96 +2605,7 @@ if (!function_exists('buildPaginationUrl')) {
                                             </div>
                                             </div>
                                             
-                                        <!-- Features Tab -->
-                                        <div class="tab-pane fade" id="features" role="tabpanel">
-                                            <div class="card border-0 shadow-sm">
-                                                <div class="card-body">
-                                                    <h4 class="card-title text-primary mb-4">
-                                                        <i class="fas fa-star me-2"></i>System Features & Capabilities
-                                                    </h4>
-                                                    
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <h5 class="text-success mb-3">Core Features</h5>
-                                                            <div class="feature-item mb-3">
-                                                                <div class="d-flex align-items-start">
-                                                                    <div class="feature-icon me-3">
-                                                                        <i class="fas fa-server text-primary"></i>
-                                            </div>
-                                                                    <div>
-                                                                        <h6 class="mb-1">Server-Side Pagination</h6>
-                                                                        <p class="text-muted small mb-0">Efficient data loading with configurable page sizes (10, 20, 50, 100 records)</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                                            <div class="feature-item mb-3">
-                                                                <div class="d-flex align-items-start">
-                                                                    <div class="feature-icon me-3">
-                                                                        <i class="fas fa-link text-success"></i>
-                                                                    </div>
-                                                                    <div>
-                                                                        <h6 class="mb-1">Data Integrity</h6>
-                                                                        <p class="text-muted small mb-0">Perfect matching between donors and blood units with foreign key constraints</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            
-                                                            <div class="feature-item mb-3">
-                                                                <div class="d-flex align-items-start">
-                                                                    <div class="feature-icon me-3">
-                                                                        <i class="fas fa-search text-info"></i>
-                                                                    </div>
-                                                                    <div>
-                                                                        <h6 class="mb-1">Advanced Search</h6>
-                                                                        <p class="text-muted small mb-0">Multi-field search with real-time filtering and sorting capabilities</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <div class="col-md-6">
-                                                            <h5 class="text-info mb-3">Technical Features</h5>
-                                                            <div class="feature-item mb-3">
-                                                                <div class="d-flex align-items-start">
-                                                                    <div class="feature-icon me-3">
-                                                                        <i class="fas fa-mobile-alt text-primary"></i>
-                                                                    </div>
-                                                                    <div>
-                                                                        <h6 class="mb-1">Responsive Design</h6>
-                                                                        <p class="text-muted small mb-0">Works perfectly on desktop, tablet, and mobile devices</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            
-                                                            <div class="feature-item mb-3">
-                                                                <div class="d-flex align-items-start">
-                                                                    <div class="feature-icon me-3">
-                                                                        <i class="fas fa-shield-alt text-success"></i>
-                                                                    </div>
-                                                                    <div>
-                                                                        <h6 class="mb-1">Security Features</h6>
-                                                                        <p class="text-muted small mb-0">CSRF protection, input validation, and secure session management</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            
-                                                            <div class="feature-item mb-3">
-                                                                <div class="d-flex align-items-start">
-                                                                    <div class="feature-icon me-3">
-                                                                        <i class="fas fa-chart-line text-warning"></i>
-                                                                    </div>
-                                                                    <div>
-                                                                        <h6 class="mb-1">Analytics & Reporting</h6>
-                                                                        <p class="text-muted small mb-0">Real-time statistics and comprehensive reporting capabilities</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                     </div>
                                 </div>
                                 
@@ -2727,32 +2636,7 @@ if (!function_exists('buildPaginationUrl')) {
                                         </div>
                                     </div>
                                     
-                                    <!-- System Status -->
-                                    <div class="card border-0 shadow-sm mb-4">
-                                        <div class="card-header bg-success text-white">
-                                            <h5 class="mb-0">
-                                                <i class="fas fa-heartbeat me-2"></i>System Health
-                                            </h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row text-center">
-                                                <div class="col-6 mb-3">
-                                                    <div class="bg-success bg-opacity-10 p-3 rounded">
-                                                        <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-                                                        <h6 class="text-success mb-1">Online</h6>
-                                                        <small class="text-muted">System Status</small>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 mb-3">
-                                                    <div class="bg-info bg-opacity-10 p-3 rounded">
-                                                        <i class="fas fa-database text-info fa-2x mb-2"></i>
-                                                        <h6 class="text-info mb-1">Connected</h6>
-                                                        <small class="text-muted">Database</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                     
                                 </div>
                             </div>
@@ -2761,19 +2645,6 @@ if (!function_exists('buildPaginationUrl')) {
                             <style>
                             .alert-gradient {
                                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            }
-                            .feature-item {
-                                border-left: 3px solid #e9ecef;
-                                padding-left: 15px;
-                            }
-                            .feature-icon {
-                                width: 40px;
-                                height: 40px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                background: #f8f9fa;
-                                border-radius: 50%;
                             }
                             .timeline-item {
                                 padding: 5px 0;
