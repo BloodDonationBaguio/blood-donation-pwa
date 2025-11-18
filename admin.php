@@ -2868,7 +2868,7 @@ if (!function_exists('buildPaginationUrl')) {
                                 <div class="mb-3"><label class="form-label">Phone Number <span class="text-danger">*</span></label><input type="tel" name="phone" class="form-control" required></div>
                                 <div class="mb-3"><label class="form-label">Address <span class="text-danger">*</span></label><input type="text" name="address" class="form-control" required></div>
                                 <div class="mb-3"><label class="form-label">City</label><div class="form-control bg-light"><span class="text-muted">City of Baguio</span><input type="hidden" name="city" value="City of Baguio"></div></div>
-                                <div class="mb-3"><label class="form-label">Province</label><div class="form-control bg-light"><span class="text-muted">Benguet</span><input type="hidden" name="state" value="Benguet"></div></div>
+                                <div class="mb-3"><label class="form-label">Province</label><div class="form-control bg-light"><span class="text-muted">Benguet</span><input type="hidden" name="province" value="Benguet"></div></div>
                                 <div class="mb-3"><label class="form-label">Postal Code <span class="text-danger">*</span></label><input type="text" name="postal_code" class="form-control" required></div>
                             </div>
                             
