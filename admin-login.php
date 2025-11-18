@@ -336,9 +336,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <a href="admin-forgot-password.php" class="text-primary">Forgot Password?</a>
         </div>
         
-        <div class="text-center mt-2">
-          <a href="admin_logout.php" class="text-muted">Clear Session / Logout</a>
-        </div>
+        
       </div>
     </div>
   </div>
