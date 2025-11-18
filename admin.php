@@ -1013,6 +1013,32 @@ if (!function_exists('buildPaginationUrl')) {
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Pagination for Audit Log -->
+                                    <div class="d-flex justify-content-end mt-3">
+                                        <nav aria-label="Audit log pages">
+                                            <ul class="pagination pagination-sm mb-0">
+                                                <?php
+                                                $params = $_GET; $params['tab'] = 'audit-log'; $params['audit_per_page'] = $auditPerPage;
+                                                $prevPage = max(1, $auditPage - 1); $nextPage = min(max(1,$totalPages), $auditPage + 1);
+                                                $params['audit_page'] = 1; $firstUrl = '?' . http_build_query($params);
+                                                $params['audit_page'] = $prevPage; $prevUrl = '?' . http_build_query($params);
+                                                $params['audit_page'] = $nextPage; $nextUrl = '?' . http_build_query($params);
+                                                $params['audit_page'] = max(1,$totalPages); $lastUrl = '?' . http_build_query($params);
+                                                ?>
+                                                <li class="page-item <?= $auditPage<=1?'disabled':'' ?>"><a class="page-link" href="<?= $firstUrl ?>" aria-label="First">&laquo;&laquo;</a></li>
+                                                <li class="page-item <?= $auditPage<=1?'disabled':'' ?>"><a class="page-link" href="<?= $prevUrl ?>" aria-label="Previous">&laquo;</a></li>
+                                                <?php
+                                                $window = 5; $start = max(1, $auditPage - 2); $end = max(1, min(max(1,$totalPages), $start + $window - 1));
+                                                for ($i = $start; $i <= $end; $i++) {
+                                                    $params['audit_page'] = $i; $url = '?' . http_build_query($params);
+                                                    echo '<li class="page-item '.($i===$auditPage?'active':'').'"><a class="page-link" href="'.$url.'">'.$i.'</a></li>';
+                                                }
+                                                ?>
+                                                <li class="page-item <?= $auditPage>=max(1,$totalPages)?'disabled':'' ?>"><a class="page-link" href="<?= $nextUrl ?>" aria-label="Next">&raquo;</a></li>
+                                                <li class="page-item <?= $auditPage>=max(1,$totalPages)?'disabled':'' ?>"><a class="page-link" href="<?= $lastUrl ?>" aria-label="Last">&raquo;&raquo;</a></li>
+                                            </ul>
+                                        </nav>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -1591,7 +1617,6 @@ if (!function_exists('buildPaginationUrl')) {
                             </div>
                             
                             <!-- Pagination Controls -->
-                            <?php if ($totalPages > 1): ?>
                                 <div class="d-flex justify-content-between align-items-center mt-4">
                                     <!-- Records per page dropdown -->
                                     <div class="d-flex align-items-center">
@@ -1607,7 +1632,7 @@ if (!function_exists('buildPaginationUrl')) {
                                     <!-- Pagination info -->
                                     <div class="text-muted">
                                         Showing <?= $startRecord ?>-<?= $endRecord ?> of <?= $totalRecords ?> records
-                                        (Page <?= $page ?> of <?= $totalPages ?>)
+                                        (Page <?= max(1,$page) ?> of <?= max(1,$totalPages) ?>)
                                     </div>
                                     
                                     <!-- Pagination buttons -->
@@ -1664,7 +1689,7 @@ if (!function_exists('buildPaginationUrl')) {
                                     window.location.href = url.toString();
                                 }
                                 </script>
-                            <?php endif; ?>
+                            
                         
                         <?php elseif ($activeTab === 'pending-donors'): ?>
                             <h2 class="mb-4">Pending Donors</h2>
@@ -2097,31 +2122,7 @@ if (!function_exists('buildPaginationUrl')) {
                                                     </tbody>
                                                 </table>
                                     </div>
-                                    <?php if ($totalPages > 1): ?>
-                                        <nav aria-label="Audit log pages">
-                                            <ul class="pagination justify-content-end">
-                                                <?php
-                                                $params = $_GET; $params['tab'] = 'audit-log'; $params['audit_per_page'] = $auditPerPage;
-                                                $prevPage = max(1, $auditPage - 1); $nextPage = min($totalPages, $auditPage + 1);
-                                                $params['audit_page'] = $prevPage; $prevUrl = '?' . http_build_query($params);
-                                                $params['audit_page'] = $nextPage; $nextUrl = '?' . http_build_query($params);
-                                                ?>
-                                                <li class="page-item <?= $auditPage<=1?'disabled':'' ?>">
-                                                    <a class="page-link" href="<?= $prevUrl ?>" tabindex="-1">Previous</a>
-                                                </li>
-                                                <?php
-                                                $window = 5; $start = max(1, $auditPage - 2); $end = min($totalPages, $start + $window - 1);
-                                                for ($i = $start; $i <= $end; $i++) {
-                                                    $params['audit_page'] = $i; $url = '?' . http_build_query($params);
-                                                    echo '<li class="page-item '.($i===$auditPage?'active':'').'"><a class="page-link" href="'.$url.'">'.$i.'</a></li>';
-                                                }
-                                                ?>
-                                                <li class="page-item <?= $auditPage>=$totalPages?'disabled':'' ?>">
-                                                    <a class="page-link" href="<?= $nextUrl ?>">Next</a>
-                                                </li>
-                                            </ul>
-                                        </nav>
-                                    <?php endif; ?>
+                                    
                                     </div>
                                 </div>
                             </div>

@@ -1372,7 +1372,6 @@ function buildPaginationUrl($page) {
                 </div>
 
                 <!-- Pagination -->
-                <?php if ($totalPages > 1): ?>
                 <div class="row mt-4">
                     <div class="col-12">
                         <nav aria-label="Page navigation">
@@ -1415,7 +1414,7 @@ function buildPaginationUrl($page) {
                         </nav>
                     </div>
                 </div>
-                <?php endif; ?>
+                
             </div>
         </div>
     </div>
