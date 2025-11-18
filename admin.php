@@ -2855,16 +2855,17 @@ if (!function_exists('buildPaginationUrl')) {
                             <input type="hidden" name="action" value="manual_register">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                             
+                            <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="row g-2">
                                     <div class="col-md-6"><label class="form-label">First Name <span class="text-danger">*</span></label><input type="text" name="first_name" class="form-control" required></div>
                                     <div class="col-md-6"><label class="form-label">Last Name <span class="text-danger">*</span></label><input type="text" name="last_name" class="form-control" required></div>
                                 </div>
-                                <div class="mt-3"><label class="form-label">Gender <span class="text-danger">*</span></label><select name="gender" id="gender" class="form-select" required><option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
-                                <div class="mt-3"><label class="form-label">Date of Birth <span class="text-danger">*</span></label><input type="date" name="birth_date" class="form-control" required></div>
-                                <div class="mt-3"><label class="form-label">Weight (kg) <span class="text-danger">*</span></label><div class="input-group"><input type="number" name="weight" class="form-control" min="50" step="0.1" required><span class="input-group-text">kg (minimum 50 kg)</span></div></div>
-                                <div class="mt-3"><label class="form-label">Height (cm) <span class="text-danger">*</span></label><div class="input-group"><input type="number" name="height" class="form-control" min="100" max="250" step="0.1" required><span class="input-group-text">cm</span></div></div>
-                                <div class="mt-3"><label class="form-label">Blood Type <span class="text-danger">*</span></label><select name="blood_type" class="form-select" required><option value="">Select Blood Type</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option><option value="UNK">Unknown (Will be determined during screening)</option></select></div>
+                                <div class="mb-3"><label class="form-label">Gender <span class="text-danger">*</span></label><select name="gender" id="gender" class="form-select" required><option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                                <div class="mb-3"><label class="form-label">Date of Birth <span class="text-danger">*</span></label><input type="date" name="birth_date" class="form-control" required></div>
+                                <div class="mb-3"><label class="form-label">Weight (kg) <span class="text-danger">*</span></label><div class="input-group"><input type="number" name="weight" class="form-control" min="50" step="0.1" required><span class="input-group-text">kg (minimum 50 kg)</span></div></div>
+                                <div class="mb-3"><label class="form-label">Height (cm) <span class="text-danger">*</span></label><div class="input-group"><input type="number" name="height" class="form-control" min="100" max="250" step="0.1" required><span class="input-group-text">cm</span></div></div>
+                                <div class="mb-3"><label class="form-label">Blood Type <span class="text-danger">*</span></label><select name="blood_type" class="form-select" required><option value="">Select Blood Type</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option><option value="UNK">Unknown (Will be determined during screening)</option></select></div>
                             </div>
                         <div class="col-md-6">
                                 <div class="mb-3"><label class="form-label">Email <small class="text-muted">(optional)</small></label><input type="email" name="email" class="form-control" placeholder="optional"></div>
@@ -2874,7 +2875,7 @@ if (!function_exists('buildPaginationUrl')) {
                                 <div class="mb-3"><label class="form-label">Province</label><div class="form-control bg-light"><span class="text-muted">Benguet</span><input type="hidden" name="province" value="Benguet"></div></div>
                                 <div class="mb-3"><label class="form-label">Postal Code <span class="text-danger">*</span></label><input type="text" name="postal_code" class="form-control" required></div>
                             </div>
-                            
+                            </div>
                             
                             </div>
                         </div>
