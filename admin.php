@@ -2815,7 +2815,7 @@ if (!function_exists('buildPaginationUrl')) {
                         ?>
                         <h2 class="mb-3">Manual Donor Registration</h2>
                         <!-- Quick Eligibility Check -->
-                        <div class="card mb-3" id="eligibilityCheckAdmin" style="display: block;">
+                        <div class="card mb-3" id="eligibilityCheckAdmin" style="display: none;">
                             <div class="card-header bg-warning text-dark">
                                 <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Quick Eligibility Check</h5>
                             </div>
@@ -2847,10 +2847,9 @@ if (!function_exists('buildPaginationUrl')) {
                         <?php if ($mr_success): ?><div class="alert alert-success"><?= htmlspecialchars($mr_success) ?></div><?php endif; ?>
                         <?php if ($mr_error): ?><div class="alert alert-danger"><?= htmlspecialchars($mr_error) ?></div><?php endif; ?>
                         <form method="post" action="process_manual_donor.php" class="row g-3" id="donorForm">
-                        <div class="card" id="manualRegCard" style="display:none;"><div class="card-body">
+                        <div class="card" id="manualRegCard" style="display:block;"><div class="card-body">
                             <input type="hidden" name="action" value="manual_register">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-                            <input type="hidden" name="recent_donation" id="recent_donation_post" value="">
                             <div class="col-12"><h4 class="section-title">Personal Information</h4></div>
                             <div class="col-md-6">
                                 <div class="row g-2">
@@ -2874,7 +2873,7 @@ if (!function_exists('buildPaginationUrl')) {
                             
                         
                         </div></div>
-                        <div class="card mt-3" id="medicalScreeningAdmin" style="display:none;">
+                        <div class="card mt-3" id="medicalScreeningAdmin" style="display:block;">
                             <div class="card-body">
                                 <?php include __DIR__ . '/includes/medical_section.php'; ?>
                                 <div class="mt-3">
@@ -2883,51 +2882,6 @@ if (!function_exists('buildPaginationUrl')) {
                             </div>
                         </div>
                         </form>
-                        <script>
-                        (function(){
-                          const yes=document.getElementById('donated_recently_yes_admin');
-                          const no=document.getElementById('donated_recently_no_admin');
-                          const ns=document.getElementById('not_sure_admin');
-                          const warn=document.getElementById('recentDonorWarningAdmin');
-                          const info=document.getElementById('unsureDonorInfoAdmin');
-                          const proceed=null;
-                          const card=document.getElementById('manualRegCard');
-                          const ms=document.getElementById('medicalScreeningAdmin');
-                          const hidden=document.getElementById('recent_donation_post');
-                          function update(){
-                            warn.style.display='none'; info.style.display='none'; card.style.display='none'; if(ms) ms.style.display='none';
-                            let v='';
-                            if(yes && yes.checked){warn.style.display='block'; v='yes';}
-                            else if(no && no.checked){card.style.display='block'; if(ms) ms.style.display='block'; v='no';}
-                            else if(ns && ns.checked){info.style.display='block'; card.style.display='block'; if(ms) ms.style.display='block'; v='not_sure';}
-                            if(hidden) hidden.value=v;
-                          }
-                          [yes,no,ns].forEach(el=> el && el.addEventListener('change', update));
-                          
-                        })();
-                        </script>
-                        <script>
-                        (function(){
-                          const yes=document.getElementById('donated_recently_yes_admin');
-                          const no=document.getElementById('donated_recently_no_admin');
-                          const ns=document.getElementById('not_sure_admin');
-                          const warn=document.getElementById('recentDonorWarningAdmin');
-                          const info=document.getElementById('unsureDonorInfoAdmin');
-                          const proceed=null;
-                          const card=document.getElementById('manualRegCard');
-                          const hidden=document.getElementById('recent_donation_post');
-                          function update(){
-                            warn.style.display='none'; info.style.display='none'; card.style.display='none';
-                            let v='';
-                            if(yes && yes.checked){warn.style.display='block'; v='yes';}
-                            else if(no && no.checked){card.style.display='block'; v='no';}
-                            else if(ns && ns.checked){info.style.display='block'; card.style.display='block'; v='not_sure';}
-                            if(hidden) hidden.value=v;
-                          }
-                          [yes,no,ns].forEach(el=> el && el.addEventListener('change', update));
-                          
-                        })();
-                        </script>
                     <?php else: ?>
                         <div class="alert alert-warning">
                             <h4>Tab Content</h4>
