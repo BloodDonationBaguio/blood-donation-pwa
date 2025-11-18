@@ -904,6 +904,17 @@ try {
             opacity: 1;
             transform: translateX(0);
         }
+        .disclaimer-banner {
+            background: #b00020;
+            color: #fff;
+            font-size: 0.95rem;
+            padding: 8px 12px;
+            text-align: center;
+            letter-spacing: 0.2px;
+        }
+        @media (max-width: 768px) {
+            .disclaimer-banner { font-size: 0.9rem; padding: 10px; }
+        }
     </style>
 </head>
 <body class="bg-light">
