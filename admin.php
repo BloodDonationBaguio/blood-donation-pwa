@@ -943,7 +943,7 @@ if (!function_exists('buildPaginationUrl')) {
 
                     <li class="nav-item">
                         <a class="nav-link <?= $activeTab === 'manual-register' ? 'active' : '' ?>" href="?tab=manual-register">
-                            <i class="fas fa-user-plus"></i> Manual Registration
+                            <i class="fas fa-user-plus"></i> Add Donor
                         </a>
                     </li>
 
@@ -2804,7 +2804,7 @@ if (!function_exists('buildPaginationUrl')) {
                             <div class="col-md-6"><label class="form-label">Phone</label><input type="tel" name="phone" class="form-control" placeholder="optional"></div>
                             <div class="col-md-6"><label class="form-label">Blood Type <span class="text-danger">*</span></label><select name="blood_type" class="form-select" required><option value="">Select Blood Type</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
                             <div class="col-md-6"><label class="form-label">Date of Birth <span class="text-danger">*</span></label><input type="date" name="date_of_birth" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">Gender <span class="text-danger">*</span></label><select name="gender" class="form-select" required><option value="">Select Gender</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
+                            <div class="col-md-6"><label class="form-label">Gender <span class="text-danger">*</span></label><select name="gender" id="gender" class="form-select" required><option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
                             <div class="col-md-6"><label class="form-label">Weight (kg) <span class="text-danger">*</span></label><input type="number" name="weight" class="form-control" min="50" step="0.1" required><small class="text-muted">Minimum 50 kg</small></div>
                             <div class="col-md-6"><label class="form-label">Last Donation Date</label><input type="date" name="last_donation_date" class="form-control"></div>
                             <div class="col-12"><h5 class="mt-3 mb-2">Address</h5></div>
@@ -2821,39 +2821,9 @@ if (!function_exists('buildPaginationUrl')) {
                                 <h5 class="mb-0"><i class="fas fa-notes-medical me-2"></i>Medical Screening (Sections A–G)</h5>
                             </div>
                             <div class="card-body">
-                                <div class="row g-3">
-                                    <?php for ($i=1; $i<=37; $i++): ?>
-                                        <div class="col-md-4">
-                                            <label class="form-label">Question <?= $i ?></label>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="q<?= $i ?>" value="yes" id="q<?= $i ?>_y">
-                                                <label class="form-check-label" for="q<?= $i ?>_y">Yes</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="q<?= $i ?>" value="no" id="q<?= $i ?>_n">
-                                                <label class="form-check-label" for="q<?= $i ?>_n">No</label>
-                                            </div>
-                                        </div>
-                                    <?php endfor; ?>
-                                    <div class="col-md-6">
-                                        <label class="form-label">q34 (Female only)</label>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="q34" value="none" id="q34_none">
-                                            <label class="form-check-label" for="q34_none">None</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="q34" value="date" id="q34_date_opt">
-                                            <label class="form-check-label" for="q34_date_opt">Date</label>
-                                        </div>
-                                        <input type="date" class="form-control mt-2" name="q34_date">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">q37 Date (Female only)</label>
-                                        <input type="date" class="form-control" name="q37_date">
-                                    </div>
-                                    <div class="col-12">
-                                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor & Screening</button>
-                                    </div>
+                                <?php include dirname(__DIR__) . '/includes/medical_section.php'; ?>
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor & Screening</button>
                                 </div>
                             </div>
                         </div>

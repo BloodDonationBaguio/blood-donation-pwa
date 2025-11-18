@@ -435,7 +435,7 @@ body {
 }
 
 /* Small mobile (max-width: 480px) */
-@media (max-width: 480px) {
+  @media (max-width: 480px) {
   .nav-container {
     padding: 0 15px;
   }
