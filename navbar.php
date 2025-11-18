@@ -94,6 +94,16 @@ if ($user_id) {
   </div>
 </nav>
 
+<?php if ($is_home): ?>
+  <div class="nav-disclaimer" role="alert">
+    ⚠️ Disclaimer: This website is a student capstone project and is currently under development. It is NOT an official Philippine Red Cross platform.
+  </div>
+  <style>
+    body { padding-top: 104px; }
+    @media (max-width: 480px) { body { padding-top: 89px; } }
+  </style>
+<?php endif; ?>
+
 <style>
 /* ========================================
    RESPONSIVE NAVBAR STYLES
@@ -109,7 +119,7 @@ if ($user_id) {
   right: 0;
   z-index: 1000;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  padding: 15px 0;
+  padding: 15px 0 0 0;
 }
 
 .nav-container {
@@ -319,7 +329,23 @@ if ($user_id) {
 
 /* Body padding for fixed navbar */
 body {
-  padding-top: 80px !important;
+  padding-top: 80px;
+}
+/* Disclaimer banner inside fixed navbar */
+.nav-disclaimer {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  background: #b00020;
+  color: #fff;
+  text-align: center;
+  font-size: 0.95rem;
+  padding: 8px 12px;
+  z-index: 1000;
+}
+@media (max-width: 768px) {
+  .nav-disclaimer { top: 50px; font-size: 0.9rem; padding: 10px; }
 }
 
 /* ========================================
@@ -432,7 +458,7 @@ body {
   }
   
   body {
-    padding-top: 65px !important;
+    padding-top: 65px;
   }
 }
 

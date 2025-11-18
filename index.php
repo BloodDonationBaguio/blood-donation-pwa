@@ -903,31 +903,11 @@ try {
             opacity: 1;
             transform: translateX(0);
         }
-        .disclaimer-banner {
-            background: #b00020;
-            color: #fff;
-            font-size: 0.95rem;
-            padding: 8px 12px;
-            text-align: center;
-            letter-spacing: 0.2px;
-        }
-        @media (max-width: 768px) {
-            .disclaimer-banner { font-size: 0.9rem; padding: 10px; }
-        }
     </style>
 </head>
 <body class="bg-light">
 
 <?php include 'navbar.php'; ?>
-
-<div class="disclaimer-banner" role="alert">
-    ⚠️ Disclaimer: This website is a student capstone project and is currently under development. It is NOT an official Philippine Red Cross platform.
- </div>
-<style>
-  body { padding-top: 0 !important; }
-  .hero-section { margin-top: 80px; }
-  @media (max-width: 768px) { .hero-section { margin-top: 65px; } }
-</style>
 
 <?php if (isset($_GET['logout']) && $_GET['logout'] === 'success'): ?>
 <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
