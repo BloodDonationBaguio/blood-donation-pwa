@@ -13,6 +13,7 @@ $medicalQuestions = $medicalQuestions['sections'] ?? [];
 <div class="form-section">
     <h2 class="section-title">Section 2: Medical Screening Questions</h2>
 
+    <?php if (!empty($medicalQuestions)): ?>
     <?php foreach ($medicalQuestions as $sectionKey => $section): ?>
         <div class="card mb-4 <?php echo ($sectionKey === 'female_only') ? 'female-only-section' : ''; ?>">
             <div class="card-header bg-light">
@@ -73,6 +74,28 @@ $medicalQuestions = $medicalQuestions['sections'] ?? [];
             </div>
         </div>
     <?php endforeach; ?>
+    <?php else: ?>
+        <div class="card mb-4">
+            <div class="card-header bg-light"><h5 class="mb-0">Screening Questions</h5></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <?php for ($i = 1; $i <= 37; $i++): ?>
+                        <div class="col-md-4">
+                            <label class="form-label">Question <?php echo $i; ?></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="q<?php echo $i; ?>" value="yes" id="q<?php echo $i; ?>_yes">
+                                <label class="form-check-label" for="q<?php echo $i; ?>_yes">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="q<?php echo $i; ?>" value="no" id="q<?php echo $i; ?>_no">
+                                <label class="form-check-label" for="q<?php echo $i; ?>_no">No</label>
+                            </div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
     
     <!-- Declaration -->
     <div class="card mb-4">
