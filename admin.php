@@ -3281,7 +3281,25 @@ if (!function_exists('buildPaginationUrl')) {
                 });
             }
         }
-</script>
+        
+        // Suppress noisy external requests injected by extensions
+        (function(){
+            var blockedHosts = { 'getmerlin.in': true, 'www.getmerlin.in': true };
+            var originalFetch = window.fetch;
+            if (typeof originalFetch === 'function') {
+                window.fetch = function(resource, init){
+                    try {
+                        var url = (typeof resource === 'string') ? resource : (resource && resource.url) || '';
+                        var host = new URL(url, window.location.href).hostname;
+                        if (blockedHosts[host]) {
+                            return Promise.resolve(new Response('', { status: 204, statusText: 'No Content' }));
+                        }
+                    } catch (e) {}
+                    return originalFetch.apply(this, arguments);
+                };
+            }
+        })();
+    </script>
 
     <div id="globalLoader" style="position:fixed;inset:0;background:rgba(255,255,255,0.7);display:none;align-items:center;justify-content:center;z-index:2000;">
         <div class="text-center">
