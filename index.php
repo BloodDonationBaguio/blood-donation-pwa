@@ -262,7 +262,6 @@ try {
         }
         
         body {
-            padding-top: 76px !important;
             font-family: 'Inter', sans-serif;
             line-height: 1.6;
             color: #333;
@@ -924,6 +923,11 @@ try {
 <div class="disclaimer-banner" role="alert">
     ⚠️ Disclaimer: This website is a student capstone project and is currently under development. It is NOT an official Philippine Red Cross platform.
  </div>
+<style>
+  body { padding-top: 0 !important; }
+  .hero-section { margin-top: 80px; }
+  @media (max-width: 768px) { .hero-section { margin-top: 65px; } }
+</style>
 
 <?php if (isset($_GET['logout']) && $_GET['logout'] === 'success'): ?>
 <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
