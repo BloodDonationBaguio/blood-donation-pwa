@@ -453,6 +453,10 @@ try {
                 // blood_inventory table might not exist or be empty
             }
         }
+        $bloodInventory = array_values(array_filter($bloodInventory, function($row) {
+            $bt = isset($row['blood_type']) ? trim((string)$row['blood_type']) : '';
+            return $bt !== '' && strcasecmp($bt, 'unknown') !== 0;
+        }));
         
         
         // Monthly trends
