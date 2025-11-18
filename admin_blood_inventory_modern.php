@@ -1847,19 +1847,20 @@ function buildPaginationUrl($page) {
 }
 @page { margin: 0; }
 body { font-family: Inter, Arial, sans-serif; }
-.print-header { display:flex; align-items:center; justify-content:flex-end; margin-bottom:12px; }
+.print-header { display:flex; flex-direction:column; align-items:center; margin-bottom:12px; }
 .print-brand { display:flex; align-items:center; gap:10px; }
 .print-brand img { height:28px; }
 .system-logo { border-radius:50%; border:2px solid #0b3d91; background:#fff; padding:2px; height:28px; width:28px; object-fit:contain; }
+.generated { align-self:flex-start; }
 ${styles}
 </style>
 </head><body>
-<div class="print-header" style="justify-content:space-between;">
-  <div class="generated">Generated at <?= date('m/d/y, g:i A') ?></div>
+<div class="print-header">
   <div class="print-brand">
     <img class="system-logo" src="${origin}/assets/icons/favicon.svg" alt="System Logo" onerror="this.src='${origin}/assets/icons/favicon-32.png'">
     <img src="https://benguetredcross.com/wp-content/uploads/2023/03/Logo_Philippine_Red_Cross-1536x1536.png" alt="Red Cross Baguio" onerror="this.style.display='none'">
   </div>
+  <div class="generated">Generated at <?= date('m/d/y, g:i A') ?></div>
 </div>
 <h3>Blood Inventory (Page <?= $filters['page'] ?> of <?= $totalPages ?>)</h3>
 ${clone.innerHTML}
