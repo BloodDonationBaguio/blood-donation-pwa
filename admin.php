@@ -1911,7 +1911,7 @@ if (!function_exists('buildPaginationUrl')) {
                                     <h1>🩸 Blood Donation System - Audit Log</h1>
                                     <div class="header-info">
                                         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-                                        <p><strong>Total Entries:</strong> <?= count($auditLogs) ?></p>
+                                        <p><strong>Total Entries:</strong> <?= $totalAudit ?></p>
                                     </div>
                                     ${printContent.innerHTML}
                                     <script>
@@ -2847,7 +2847,7 @@ if (!function_exists('buildPaginationUrl')) {
                             if(hidden) hidden.value=v;
                           }
                           [yes,no,ns].forEach(el=> el && el.addEventListener('change', update));
-                          proceed && proceed.addEventListener('click', function(){ document.getElementById('eligibilityCheckAdmin').style.display='none'; card.style.display='block'; });
+                          proceed && proceed.addEventListener('click', function(){ document.getElementById('eligibilityCheckAdmin').style.display='none'; card.style.display='block'; if(ms) ms.style.display='block'; });
                         })();
                         </script>
                         <script>
@@ -2869,7 +2869,7 @@ if (!function_exists('buildPaginationUrl')) {
                             if(hidden) hidden.value=v;
                           }
                           [yes,no,ns].forEach(el=> el && el.addEventListener('change', update));
-                          proceed && proceed.addEventListener('click', function(){ document.getElementById('eligibilityCheckAdmin').style.display='none'; card.style.display='block'; });
+                          proceed && proceed.addEventListener('click', function(){ document.getElementById('eligibilityCheckAdmin').style.display='none'; card.style.display='block'; var ms=document.getElementById('medicalScreeningAdmin'); if(ms) ms.style.display='block'; });
                         })();
                         </script>
                     <?php else: ?>
