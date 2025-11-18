@@ -1893,7 +1893,26 @@ if (!function_exists('buildPaginationUrl')) {
                                         <div class="text-muted">Page <?= $auditPage ?> of <?= max(1, ($auditPerPage > 0 ? (int)ceil($totalAudit / $auditPerPage) : 1)) ?></div>
                                         <nav aria-label="Audit Log Pagination">
                                             <ul class="pagination pagination-sm mb-0">
-                                                
+                                                <?php
+                                                $params = $_GET; $params['tab'] = 'audit-log'; $params['audit_per_page'] = $auditPerPage;
+                                                $first = 1; $last = max(1,$auditTotalPages);
+                                                $prev = max(1, $auditPage - 1); $next = min($last, $auditPage + 1);
+                                                $params['audit_page'] = $first; $firstUrl = '?' . http_build_query($params);
+                                                $params['audit_page'] = $prev; $prevUrl = '?' . http_build_query($params);
+                                                $params['audit_page'] = $next; $nextUrl = '?' . http_build_query($params);
+                                                $params['audit_page'] = $last; $lastUrl = '?' . http_build_query($params);
+                                                ?>
+                                                <li class="page-item <?= $auditPage<=1?'disabled':'' "><a class="page-link" href="<?= $firstUrl ?>" aria-label="First">&laquo;&laquo;</a></li>
+                                                <li class="page-item <?= $auditPage<=1?'disabled':'' "><a class="page-link" href="<?= $prevUrl ?>" aria-label="Previous">&laquo;</a></li>
+                                                <?php
+                                                $window = 5; $start = max(1, $auditPage - 2); $end = min($last, $start + $window - 1);
+                                                for ($i = $start; $i <= $end; $i++) {
+                                                    $params['audit_page'] = $i; $url = '?' . http_build_query($params);
+                                                    echo '<li class="page-item '.($i===$auditPage?'active':'').'"><a class="page-link" href="'.$url.'">'.$i.'</a></li>';
+                                                }
+                                                ?>
+                                                <li class="page-item <?= $auditPage>=$last?'disabled':'' "><a class="page-link" href="<?= $nextUrl ?>" aria-label="Next">&raquo;</a></li>
+                                                <li class="page-item <?= $auditPage>=$last?'disabled':'' "><a class="page-link" href="<?= $lastUrl ?>" aria-label="Last">&raquo;&raquo;</a></li>
                                             </ul>
                                         </nav>
                                     </div>
@@ -2190,36 +2209,7 @@ if (!function_exists('buildPaginationUrl')) {
                                                     <small>0-2 units available</small>
                                     </div>
                                 </div>
-                                <!-- Pagination Controls for Audit Log -->
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <div class="text-muted">
-                                        Page <?= $auditPage ?> of <?= max(1,$auditTotalPages) ?>
-                                    </div>
-                                    <nav aria-label="Audit Log Pagination">
-                                        <ul class="pagination pagination-sm mb-0">
-                                            <?php
-                                            $params = $_GET; $params['tab'] = 'audit-log'; $params['audit_per_page'] = $auditPerPage;
-                                            $first = 1; $last = max(1,$auditTotalPages);
-                                            $prev = max(1, $auditPage - 1); $next = min($last, $auditPage + 1);
-                                            $params['audit_page'] = $first; $firstUrl = '?' . http_build_query($params);
-                                            $params['audit_page'] = $prev; $prevUrl = '?' . http_build_query($params);
-                                            $params['audit_page'] = $next; $nextUrl = '?' . http_build_query($params);
-                                            $params['audit_page'] = $last; $lastUrl = '?' . http_build_query($params);
-                                            ?>
-                                            <li class="page-item <?= $auditPage<=1?'disabled':'' ?>"><a class="page-link" href="<?= $firstUrl ?>" aria-label="First">&laquo;&laquo;</a></li>
-                                            <li class="page-item <?= $auditPage<=1?'disabled':'' ?>"><a class="page-link" href="<?= $prevUrl ?>" aria-label="Previous">&laquo;</a></li>
-                                            <?php
-                                            $window = 5; $start = max(1, $auditPage - 2); $end = min($last, $start + $window - 1);
-                                            for ($i = $start; $i <= $end; $i++) {
-                                                $params['audit_page'] = $i; $url = '?' . http_build_query($params);
-                                                echo '<li class="page-item '.($i===$auditPage?'active':'').'"><a class="page-link" href="'.$url.'">'.$i.'</a></li>';
-                                            }
-                                            ?>
-                                            <li class="page-item <?= $auditPage>=$last?'disabled':'' ?>"><a class="page-link" href="<?= $nextUrl ?>" aria-label="Next">&raquo;</a></li>
-                                            <li class="page-item <?= $auditPage>=$last?'disabled':'' ?>"><a class="page-link" href="<?= $lastUrl ?>" aria-label="Last">&raquo;&raquo;</a></li>
-                                        </ul>
-                                    </nav>
-                                </div>
+                                
                             </div>
                         </div>
                                 </div>
