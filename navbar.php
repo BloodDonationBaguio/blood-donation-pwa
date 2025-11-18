@@ -268,6 +268,7 @@ if ($user_id) {
   min-width: 160px;
   display: none; /* default hidden */
   margin-top: 8px;
+  z-index: 2001;
 }
 
 .dropdown-menu.show {
@@ -343,6 +344,7 @@ body {
   font-size: 0.95rem;
   padding: 8px 12px;
   z-index: 1000;
+  pointer-events: none;
 }
 @media (max-width: 768px) {
   .nav-disclaimer { top: 50px; font-size: 0.9rem; padding: 10px; }
