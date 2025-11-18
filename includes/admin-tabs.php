@@ -594,18 +594,18 @@ if ($activeTab === 'add-donor'): ?>
     <script>
     // Audit Log specific JavaScript
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Audit Log page loaded');
+        
         
         // Initialize form elements
         const filterForm = document.getElementById('auditLogFilterForm');
         const clearBtn = document.getElementById('auditLogClearBtn');
         
         if (filterForm) {
-            console.log('Filter form found');
+            
         }
         
         if (clearBtn) {
-            console.log('Clear button found');
+            
         }
     });
     </script>
