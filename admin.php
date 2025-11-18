@@ -2847,10 +2847,14 @@ if (!function_exists('buildPaginationUrl')) {
                         <?php if ($mr_success): ?><div class="alert alert-success"><?= htmlspecialchars($mr_success) ?></div><?php endif; ?>
                         <?php if ($mr_error): ?><div class="alert alert-danger"><?= htmlspecialchars($mr_error) ?></div><?php endif; ?>
                         <form method="post" action="process_manual_donor.php" class="row g-3" id="donorForm">
-                        <div class="card" id="manualRegCard" style="display:block;"><div class="card-body">
+                        <div class="card" id="manualRegCard" style="display:block;">
+                            <div class="card-header">
+                                <h5 class="mb-0">Personal Information</h5>
+                            </div>
+                            <div class="card-body">
                             <input type="hidden" name="action" value="manual_register">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-                            <div class="col-12"><h4 class="section-title">Personal Information</h4></div>
+                            
                             <div class="col-md-6">
                                 <div class="row g-2">
                                     <div class="col-md-6"><label class="form-label">First Name <span class="text-danger">*</span></label><input type="text" name="first_name" class="form-control" required></div>
@@ -2863,7 +2867,7 @@ if (!function_exists('buildPaginationUrl')) {
                                 <div class="mt-3"><label class="form-label">Blood Type <span class="text-danger">*</span></label><select name="blood_type" class="form-select" required><option value="">Select Blood Type</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option><option value="UNK">Unknown (Will be determined during screening)</option></select></div>
                             </div>
                         <div class="col-md-6">
-                                <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" placeholder="optional"></div>
+                                <div class="mb-3"><label class="form-label">Email <small class="text-muted">(optional)</small></label><input type="email" name="email" class="form-control" placeholder="optional"></div>
                                 <div class="mb-3"><label class="form-label">Phone Number <span class="text-danger">*</span></label><input type="tel" name="phone" class="form-control" required></div>
                                 <div class="mb-3"><label class="form-label">Address <span class="text-danger">*</span></label><input type="text" name="address" class="form-control" required></div>
                                 <div class="mb-3"><label class="form-label">City</label><div class="form-control bg-light"><span class="text-muted">City of Baguio</span><input type="hidden" name="city" value="City of Baguio"></div></div>
@@ -2871,8 +2875,9 @@ if (!function_exists('buildPaginationUrl')) {
                                 <div class="mb-3"><label class="form-label">Postal Code <span class="text-danger">*</span></label><input type="text" name="postal_code" class="form-control" required></div>
                             </div>
                             
-                        
-                        </div></div>
+                            
+                            </div>
+                        </div>
                         <div class="card mt-3" id="medicalScreeningAdmin" style="display:block;">
                             <div class="card-body">
                                 <?php include __DIR__ . '/includes/medical_section.php'; ?>
