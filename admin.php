@@ -1005,47 +1005,6 @@ if (!function_exists('buildPaginationUrl')) {
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div>
-                                                <div class="stat-number"><?= number_format($donorCount) ?></div>
-                                                <div class="stat-label">Total Donors</div>
-                                            </div>
-                                            <div class="bg-danger bg-opacity-10 p-3 rounded-circle">
-                                                <i class="fas fa-users text-danger" style="font-size: 1.5rem;"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Pagination for Audit Log -->
-                                    <div class="d-flex justify-content-end mt-3">
-                                        <nav aria-label="Audit log pages">
-                                            <ul class="pagination pagination-sm mb-0">
-                                                <?php
-                                                $params = $_GET; $params['tab'] = 'audit-log'; $params['audit_per_page'] = $auditPerPage;
-                                                $prevPage = max(1, $auditPage - 1); $nextPage = min(max(1,$totalPages), $auditPage + 1);
-                                                $params['audit_page'] = 1; $firstUrl = '?' . http_build_query($params);
-                                                $params['audit_page'] = $prevPage; $prevUrl = '?' . http_build_query($params);
-                                                $params['audit_page'] = $nextPage; $nextUrl = '?' . http_build_query($params);
-                                                $params['audit_page'] = max(1,$totalPages); $lastUrl = '?' . http_build_query($params);
-                                                ?>
-                                                <li class="page-item <?= $auditPage<=1?'disabled':'' ?>"><a class="page-link" href="<?= $firstUrl ?>" aria-label="First">&laquo;&laquo;</a></li>
-                                                <li class="page-item <?= $auditPage<=1?'disabled':'' ?>"><a class="page-link" href="<?= $prevUrl ?>" aria-label="Previous">&laquo;</a></li>
-                                                <?php
-                                                $window = 5; $start = max(1, $auditPage - 2); $end = max(1, min(max(1,$totalPages), $start + $window - 1));
-                                                for ($i = $start; $i <= $end; $i++) {
-                                                    $params['audit_page'] = $i; $url = '?' . http_build_query($params);
-                                                    echo '<li class="page-item '.($i===$auditPage?'active':'').'"><a class="page-link" href="'.$url.'">'.$i.'</a></li>';
-                                                }
-                                                ?>
-                                                <li class="page-item <?= $auditPage>=max(1,$totalPages)?'disabled':'' ?>"><a class="page-link" href="<?= $nextUrl ?>" aria-label="Next">&raquo;</a></li>
-                                                <li class="page-item <?= $auditPage>=max(1,$totalPages)?'disabled':'' ?>"><a class="page-link" href="<?= $lastUrl ?>" aria-label="Last">&raquo;&raquo;</a></li>
-                                            </ul>
-                                        </nav>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card stat-card h-100">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
                                                 <div class="stat-number"><?= number_format($pendingDonorCount) ?></div>
                                                 <div class="stat-label">Pending Donors</div>
                                             </div>
@@ -1808,7 +1767,7 @@ if (!function_exists('buildPaginationUrl')) {
                                     }
                                     $startRecord = $totalAudit > 0 ? ($auditOffset + 1) : 0;
                                     $endRecord = min($auditOffset + $auditPerPage, $totalAudit);
-                                    $totalPages = $auditPerPage > 0 ? (int)ceil($totalAudit / $auditPerPage) : 1;
+                                    $auditTotalPages = $auditPerPage > 0 ? (int)ceil($totalAudit / $auditPerPage) : 1;
                                     ?>
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div class="alert alert-info mb-0">
@@ -2177,10 +2136,40 @@ if (!function_exists('buildPaginationUrl')) {
                                                 <div class="d-flex align-items-center">
                                                     <span class="badge bg-danger me-2">Critical</span>
                                                     <small>0-2 units available</small>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
+                                </div>
+                                <!-- Pagination Controls for Audit Log -->
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div class="text-muted">
+                                        Page <?= $auditPage ?> of <?= max(1,$auditTotalPages) ?>
+                                    </div>
+                                    <nav aria-label="Audit Log Pagination">
+                                        <ul class="pagination pagination-sm mb-0">
+                                            <?php
+                                            $params = $_GET; $params['tab'] = 'audit-log'; $params['audit_per_page'] = $auditPerPage;
+                                            $first = 1; $last = max(1,$auditTotalPages);
+                                            $prev = max(1, $auditPage - 1); $next = min($last, $auditPage + 1);
+                                            $params['audit_page'] = $first; $firstUrl = '?' . http_build_query($params);
+                                            $params['audit_page'] = $prev; $prevUrl = '?' . http_build_query($params);
+                                            $params['audit_page'] = $next; $nextUrl = '?' . http_build_query($params);
+                                            $params['audit_page'] = $last; $lastUrl = '?' . http_build_query($params);
+                                            ?>
+                                            <li class="page-item <?= $auditPage<=1?'disabled':'' ?>"><a class="page-link" href="<?= $firstUrl ?>" aria-label="First">&laquo;&laquo;</a></li>
+                                            <li class="page-item <?= $auditPage<=1?'disabled':'' ?>"><a class="page-link" href="<?= $prevUrl ?>" aria-label="Previous">&laquo;</a></li>
+                                            <?php
+                                            $window = 5; $start = max(1, $auditPage - 2); $end = min($last, $start + $window - 1);
+                                            for ($i = $start; $i <= $end; $i++) {
+                                                $params['audit_page'] = $i; $url = '?' . http_build_query($params);
+                                                echo '<li class="page-item '.($i===$auditPage?'active':'').'"><a class="page-link" href="'.$url.'">'.$i.'</a></li>';
+                                            }
+                                            ?>
+                                            <li class="page-item <?= $auditPage>=$last?'disabled':'' ?>"><a class="page-link" href="<?= $nextUrl ?>" aria-label="Next">&raquo;</a></li>
+                                            <li class="page-item <?= $auditPage>=$last?'disabled':'' ?>"><a class="page-link" href="<?= $lastUrl ?>" aria-label="Last">&raquo;&raquo;</a></li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
                                 </div>
                             </div>
                             
