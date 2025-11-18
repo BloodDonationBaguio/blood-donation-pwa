@@ -964,6 +964,39 @@ function buildPaginationUrl($page) {
                 flex: none;
             }
         }
+        /* Modern Pagination */
+        .pagination-modern {
+            display: inline-flex;
+            gap: 6px;
+            background: #ffffff;
+            padding: 6px 8px;
+            border-radius: 999px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid #e9ecef;
+        }
+        .pagination-modern .page-link {
+            border: none;
+            background: transparent;
+            color: var(--primary-color);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 500;
+        }
+        .pagination-modern .page-link:hover {
+            background: rgba(220,53,69,.08);
+            color: var(--primary-color);
+        }
+        .pagination-modern .page-item.active .page-link {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(220,53,69,.3);
+        }
+        .pagination-modern .page-item.disabled .page-link {
+            color: #adb5bd;
+            opacity: .6;
+            cursor: not-allowed;
+        }
+        .pagination-modern .page-link:focus { box-shadow: none; }
     </style>
 </head>
 <body>
@@ -1375,7 +1408,7 @@ function buildPaginationUrl($page) {
                 <div class="row mt-4">
                     <div class="col-12">
                         <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center">
+                            <ul class="pagination pagination-modern justify-content-center">
                                 <!-- Previous Page -->
                                 <li class="page-item <?= $filters['page'] <= 1 ? 'disabled' : '' ?>">
                                     <a class="page-link" href="<?= buildPaginationUrl(1) ?>" aria-label="First">

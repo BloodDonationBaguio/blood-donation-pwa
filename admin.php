@@ -911,6 +911,41 @@ if (!function_exists('buildPaginationUrl')) {
         canvas {
             max-height: 300px !important;
         }
+        /* Modern Pagination */
+        .pagination-modern {
+            display: inline-flex;
+            gap: 6px;
+            background: #ffffff;
+            padding: 6px 8px;
+            border-radius: 999px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            border: 1px solid #e9ecef;
+        }
+        .pagination-modern .page-link {
+            border: none;
+            background: transparent;
+            color: var(--primary-color);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 500;
+        }
+        .pagination-modern .page-link:hover {
+            background: rgba(220,53,69,.08);
+            color: var(--primary-color);
+        }
+        .pagination-modern .page-item.active .page-link {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(220,53,69,.3);
+        }
+        .pagination-modern .page-item.disabled .page-link {
+            color: #adb5bd;
+            opacity: .6;
+            cursor: not-allowed;
+        }
+        .pagination-modern .page-link:focus {
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -1032,7 +1067,7 @@ if (!function_exists('buildPaginationUrl')) {
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <div class="text-muted">Page <?= $auditPage ?> of <?= max(1, ($auditPerPage > 0 ? (int)ceil($totalAudit / $auditPerPage) : 1)) ?></div>
                                     <nav aria-label="Audit Log Pagination">
-                                        <ul class="pagination pagination-sm mb-0">
+                                        <ul class="pagination pagination-modern mb-0">
                                             <?php
                                             $params = $_GET; $params['tab'] = 'audit-log'; $params['audit_per_page'] = $auditPerPage;
                                             $auditTotalPages = $auditPerPage > 0 ? (int)ceil($totalAudit / $auditPerPage) : 1;
@@ -1639,7 +1674,7 @@ if (!function_exists('buildPaginationUrl')) {
                                     
                                     <!-- Pagination buttons -->
                                     <nav aria-label="Donor list pagination">
-                                        <ul class="pagination pagination-sm mb-0">
+                                        <ul class="pagination pagination-modern mb-0">
                                             <!-- First page -->
                                             <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
                                                 <a class="page-link" href="<?= buildPaginationUrl(1) ?>" aria-label="First">
@@ -1892,7 +1927,7 @@ if (!function_exists('buildPaginationUrl')) {
                                     <div class="d-flex justify-content-between align-items-center mt-3">
                                         <div class="text-muted">Page <?= $auditPage ?> of <?= max(1, ($auditPerPage > 0 ? (int)ceil($totalAudit / $auditPerPage) : 1)) ?></div>
                                         <nav aria-label="Audit Log Pagination">
-                                            <ul class="pagination pagination-sm mb-0">
+                                        <ul class="pagination pagination-modern mb-0">
                                                 <?php
                                                 $params = $_GET; $params['tab'] = 'audit-log'; $params['audit_per_page'] = $auditPerPage;
                                                 $first = 1; $last = max(1,$auditTotalPages);
