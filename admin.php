@@ -1763,16 +1763,41 @@ if (!function_exists('buildPaginationUrl')) {
                             <div class="card">
                                 <div class="card-body">
                                     <?php
+                                    $auditPage = max(1, (int)($_GET['audit_page'] ?? 1));
+                                    $auditPerPage = (int)($_GET['audit_per_page'] ?? 20);
+                                    $allowedAuditPerPage = [20, 50, 100];
+                                    if (!in_array($auditPerPage, $allowedAuditPerPage)) { $auditPerPage = 20; }
+                                    $auditOffset = ($auditPage - 1) * $auditPerPage;
+                                    $totalAudit = 0;
                                     try {
-                                        $auditLogs = $pdo->query("SELECT * FROM admin_audit_log ORDER BY created_at DESC LIMIT 200")->fetchAll();
+                                        $totalAudit = (int)$pdo->query("SELECT COUNT(*) FROM admin_audit_log")->fetchColumn();
+                                        $stmt = $pdo->prepare("SELECT * FROM admin_audit_log ORDER BY created_at DESC LIMIT ? OFFSET ?");
+                                        $stmt->bindValue(1, $auditPerPage, PDO::PARAM_INT);
+                                        $stmt->bindValue(2, $auditOffset, PDO::PARAM_INT);
+                                        $stmt->execute();
+                                        $auditLogs = $stmt->fetchAll();
                                     } catch (Exception $e) {
                                         $auditLogs = [];
                                         error_log("Audit log query error: " . $e->getMessage());
                                     }
+                                    $startRecord = $totalAudit > 0 ? ($auditOffset + 1) : 0;
+                                    $endRecord = min($auditOffset + $auditPerPage, $totalAudit);
+                                    $totalPages = $auditPerPage > 0 ? (int)ceil($totalAudit / $auditPerPage) : 1;
                                     ?>
-                                    <div class="alert alert-info">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        Showing last <?= count($auditLogs) ?> audit log entries
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="alert alert-info mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Showing <?= $startRecord ?>–<?= $endRecord ?> of <?= $totalAudit ?> audit log entries
+                                        </div>
+                                        <form method="GET" class="d-flex align-items-center">
+                                            <input type="hidden" name="tab" value="audit-log">
+                                            <label class="me-2">Per page</label>
+                                            <select name="audit_per_page" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                <option value="20" <?= $auditPerPage===20?'selected':'' ?>>20</option>
+                                                <option value="50" <?= $auditPerPage===50?'selected':'' ?>>50</option>
+                                                <option value="100" <?= $auditPerPage===100?'selected':'' ?>>100</option>
+                                            </select>
+                                        </form>
                                     </div>
                                     <div class="table-responsive" id="auditLogTable">
                                         <table class="table table-striped table-hover">
@@ -2070,10 +2095,35 @@ if (!function_exists('buildPaginationUrl')) {
                                                         <?php endforeach; ?>
                                                     </tbody>
                                                 </table>
-                                            </div>
-                                        </div>
+                                    </div>
+                                    <?php if ($totalPages > 1): ?>
+                                        <nav aria-label="Audit log pages">
+                                            <ul class="pagination justify-content-end">
+                                                <?php
+                                                $params = $_GET; $params['tab'] = 'audit-log'; $params['audit_per_page'] = $auditPerPage;
+                                                $prevPage = max(1, $auditPage - 1); $nextPage = min($totalPages, $auditPage + 1);
+                                                $params['audit_page'] = $prevPage; $prevUrl = '?' . http_build_query($params);
+                                                $params['audit_page'] = $nextPage; $nextUrl = '?' . http_build_query($params);
+                                                ?>
+                                                <li class="page-item <?= $auditPage<=1?'disabled':'' ?>">
+                                                    <a class="page-link" href="<?= $prevUrl ?>" tabindex="-1">Previous</a>
+                                                </li>
+                                                <?php
+                                                $window = 5; $start = max(1, $auditPage - 2); $end = min($totalPages, $start + $window - 1);
+                                                for ($i = $start; $i <= $end; $i++) {
+                                                    $params['audit_page'] = $i; $url = '?' . http_build_query($params);
+                                                    echo '<li class="page-item '.($i===$auditPage?'active':'').'"><a class="page-link" href="'.$url.'">'.$i.'</a></li>';
+                                                }
+                                                ?>
+                                                <li class="page-item <?= $auditPage>=$totalPages?'disabled':'' ?>">
+                                                    <a class="page-link" href="<?= $nextUrl ?>">Next</a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    <?php endif; ?>
                                     </div>
                                 </div>
+                            </div>
                                 <div class="col-md-4">
                                     <div class="card">
                                         <div class="card-header"><h5>Inventory Summary</h5></div>
@@ -2794,8 +2844,8 @@ if (!function_exists('buildPaginationUrl')) {
                         </div>
                         <?php if ($mr_success): ?><div class="alert alert-success"><?= htmlspecialchars($mr_success) ?></div><?php endif; ?>
                         <?php if ($mr_error): ?><div class="alert alert-danger"><?= htmlspecialchars($mr_error) ?></div><?php endif; ?>
+                        <form method="post" class="row g-3" id="donorForm">
                         <div class="card" id="manualRegCard" style="display:none;"><div class="card-body">
-                        <form method="post" class="row g-3">
                             <input type="hidden" name="action" value="manual_register">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                             <input type="hidden" name="recent_donation" id="recent_donation_post" value="">
@@ -2814,19 +2864,20 @@ if (!function_exists('buildPaginationUrl')) {
                             <div class="col-md-4"><label class="form-label">Postal Code</label><input type="text" name="postal_code" class="form-control"></div>
                             <div class="col-md-4"><label class="form-label">Country</label><input type="text" name="country" class="form-control" value="Philippines"></div>
                             <div class="col-12 mt-2"><button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor</button></div>
-                        </form>
+                        
                         </div></div>
                         <div class="card mt-3" id="medicalScreeningAdmin" style="display:none;">
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-notes-medical me-2"></i>Medical Screening (Sections A–G)</h5>
                             </div>
                             <div class="card-body">
-                                <?php include dirname(__DIR__) . '/includes/medical_section.php'; ?>
+                                <?php include __DIR__ . '/includes/medical_section.php'; ?>
                                 <div class="mt-3">
                                     <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor & Screening</button>
                                 </div>
                             </div>
                         </div>
+                        </form>
                         <script>
                         (function(){
                           const yes=document.getElementById('donated_recently_yes_admin');
