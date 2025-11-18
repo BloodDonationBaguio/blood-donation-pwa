@@ -2750,13 +2750,15 @@ if (!function_exists('buildPaginationUrl')) {
                                 }
                                 $recentDonation = trim((string)($_POST['recent_donation'] ?? ''));
                                 if ($recentDonation === 'yes') { throw new Exception('Donor is not eligible: must wait 90 days since last donation'); }
-                                $required = ['full_name','blood_type','date_of_birth','gender','weight'];
+                                $required = ['first_name','last_name','blood_type','birth_date','gender','weight','height','email','phone','address','postal_code'];
                                 $data = [];
                                 foreach ($required as $f) { $v = trim((string)($_POST[$f] ?? '')); if ($v==='') throw new Exception('Please fill in all required fields'); $data[$f]=$v; }
+                                $data['full_name'] = $data['first_name'].' '.$data['last_name'];
+                                $data['date_of_birth'] = $data['birth_date'];
                                 $dob = new DateTime($data['date_of_birth']); $age=(new DateTime())->diff($dob)->y; if($age<16) throw new Exception('Donor must be at least 16 years old');
                                 if ((float)$data['weight'] < 50) throw new Exception('Donor must weigh at least 50 kg');
                                 $email = trim((string)($_POST['email'] ?? ''));
-                                if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Please enter a valid email address');
+                                if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Please enter a valid email address');
                                 if ($email !== '') {
                                     try {
                                         $checkTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
@@ -2812,7 +2814,6 @@ if (!function_exists('buildPaginationUrl')) {
                         }
                         ?>
                         <h2 class="mb-3">Manual Donor Registration</h2>
-                        <p class="text-muted mb-2">Use the same pre‑screening and fields as the public donor registration.</p>
                         <!-- Quick Eligibility Check -->
                         <div class="card mb-3" id="eligibilityCheckAdmin" style="display: block;">
                             <div class="card-header bg-warning text-dark">
@@ -2840,7 +2841,7 @@ if (!function_exists('buildPaginationUrl')) {
                                     <h6 class="mb-1"><i class="fas fa-info-circle me-2"></i>Not sure?</h6>
                                     <p class="mb-0">Proceed; the system will check history if email is provided.</p>
                                 </div>
-                                <button type="button" class="btn btn-primary" id="proceedBtnAdmin" style="display:none;">Proceed to Registration</button>
+                                
                             </div>
                         </div>
                         <?php if ($mr_success): ?><div class="alert alert-success"><?= htmlspecialchars($mr_success) ?></div><?php endif; ?>
@@ -2850,27 +2851,30 @@ if (!function_exists('buildPaginationUrl')) {
                             <input type="hidden" name="action" value="manual_register">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                             <input type="hidden" name="recent_donation" id="recent_donation_post" value="">
-                            <div class="col-md-6"><label class="form-label">Full Name <span class="text-danger">*</span></label><input type="text" name="full_name" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">Email</label><input type="email" name="email" class="form-control" placeholder="optional"></div>
-                            <div class="col-md-6"><label class="form-label">Phone</label><input type="tel" name="phone" class="form-control" placeholder="optional"></div>
-                            <div class="col-md-6"><label class="form-label">Blood Type <span class="text-danger">*</span></label><select name="blood_type" class="form-select" required><option value="">Select Blood Type</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
-                            <div class="col-md-6"><label class="form-label">Date of Birth <span class="text-danger">*</span></label><input type="date" name="date_of_birth" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">Gender <span class="text-danger">*</span></label><select name="gender" id="gender" class="form-select" required><option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
-                            <div class="col-md-6"><label class="form-label">Weight (kg) <span class="text-danger">*</span></label><input type="number" name="weight" class="form-control" min="50" step="0.1" required><small class="text-muted">Minimum 50 kg</small></div>
-                            <div class="col-md-6"><label class="form-label">Last Donation Date</label><input type="date" name="last_donation_date" class="form-control"></div>
-                            <div class="col-12"><h5 class="mt-3 mb-2">Address</h5></div>
-                            <div class="col-md-6"><label class="form-label">Address</label><input type="text" name="address" class="form-control"></div>
-                            <div class="col-md-6"><label class="form-label">City</label><input type="text" name="city" class="form-control"></div>
-                            <div class="col-md-4"><label class="form-label">State/Province</label><input type="text" name="state" class="form-control"></div>
-                            <div class="col-md-4"><label class="form-label">Postal Code</label><input type="text" name="postal_code" class="form-control"></div>
-                            <div class="col-md-4"><label class="form-label">Country</label><input type="text" name="country" class="form-control" value="Philippines"></div>
+                            <div class="col-12"><h4 class="section-title">Personal Information</h4></div>
+                            <div class="col-md-6">
+                                <div class="row g-2">
+                                    <div class="col-md-6"><label class="form-label">First Name <span class="text-danger">*</span></label><input type="text" name="first_name" class="form-control" required></div>
+                                    <div class="col-md-6"><label class="form-label">Last Name <span class="text-danger">*</span></label><input type="text" name="last_name" class="form-control" required></div>
+                                </div>
+                                <div class="mt-3"><label class="form-label">Gender <span class="text-danger">*</span></label><select name="gender" id="gender" class="form-select" required><option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                                <div class="mt-3"><label class="form-label">Date of Birth <span class="text-danger">*</span></label><input type="date" name="birth_date" class="form-control" required></div>
+                                <div class="mt-3"><label class="form-label">Weight (kg) <span class="text-danger">*</span></label><div class="input-group"><input type="number" name="weight" class="form-control" min="50" step="0.1" required><span class="input-group-text">kg (minimum 50 kg)</span></div></div>
+                                <div class="mt-3"><label class="form-label">Height (cm) <span class="text-danger">*</span></label><div class="input-group"><input type="number" name="height" class="form-control" min="100" max="250" step="0.1" required><span class="input-group-text">cm</span></div></div>
+                                <div class="mt-3"><label class="form-label">Blood Type <span class="text-danger">*</span></label><select name="blood_type" class="form-select" required><option value="">Select Blood Type</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option><option value="UNK">Unknown (Will be determined during screening)</option></select></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" name="email" class="form-control" required></div>
+                                <div class="mb-3"><label class="form-label">Phone Number <span class="text-danger">*</span></label><input type="tel" name="phone" class="form-control" required></div>
+                                <div class="mb-3"><label class="form-label">Address <span class="text-danger">*</span></label><input type="text" name="address" class="form-control" required></div>
+                                <div class="mb-3"><label class="form-label">City</label><div class="form-control bg-light"><span class="text-muted">City of Baguio</span><input type="hidden" name="city" value="City of Baguio"></div></div>
+                                <div class="mb-3"><label class="form-label">Province</label><div class="form-control bg-light"><span class="text-muted">Benguet</span><input type="hidden" name="state" value="Benguet"></div></div>
+                                <div class="mb-3"><label class="form-label">Postal Code <span class="text-danger">*</span></label><input type="text" name="postal_code" class="form-control" required></div>
+                            </div>
                             <div class="col-12 mt-2"><button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor</button></div>
                         
                         </div></div>
                         <div class="card mt-3" id="medicalScreeningAdmin" style="display:none;">
-                            <div class="card-header">
-                                <h5 class="mb-0"><i class="fas fa-notes-medical me-2"></i>Medical Screening (Sections A–G)</h5>
-                            </div>
                             <div class="card-body">
                                 <?php include __DIR__ . '/includes/medical_section.php'; ?>
                                 <div class="mt-3">
@@ -2886,20 +2890,20 @@ if (!function_exists('buildPaginationUrl')) {
                           const ns=document.getElementById('not_sure_admin');
                           const warn=document.getElementById('recentDonorWarningAdmin');
                           const info=document.getElementById('unsureDonorInfoAdmin');
-                          const proceed=document.getElementById('proceedBtnAdmin');
+                          const proceed=null;
                           const card=document.getElementById('manualRegCard');
                           const ms=document.getElementById('medicalScreeningAdmin');
                           const hidden=document.getElementById('recent_donation_post');
                           function update(){
-                            warn.style.display='none'; info.style.display='none'; proceed.style.display='none'; card.style.display='none'; if(ms) ms.style.display='none';
+                            warn.style.display='none'; info.style.display='none'; card.style.display='none'; if(ms) ms.style.display='none';
                             let v='';
                             if(yes && yes.checked){warn.style.display='block'; v='yes';}
-                            else if(no && no.checked){proceed.style.display='inline-block'; card.style.display='block'; if(ms) ms.style.display='block'; v='no';}
-                            else if(ns && ns.checked){info.style.display='block'; proceed.style.display='inline-block'; card.style.display='block'; if(ms) ms.style.display='block'; v='not_sure';}
+                            else if(no && no.checked){card.style.display='block'; if(ms) ms.style.display='block'; v='no';}
+                            else if(ns && ns.checked){info.style.display='block'; card.style.display='block'; if(ms) ms.style.display='block'; v='not_sure';}
                             if(hidden) hidden.value=v;
                           }
                           [yes,no,ns].forEach(el=> el && el.addEventListener('change', update));
-                          proceed && proceed.addEventListener('click', function(){ document.getElementById('eligibilityCheckAdmin').style.display='none'; card.style.display='block'; if(ms) ms.style.display='block'; });
+                          
                         })();
                         </script>
                         <script>
@@ -2909,19 +2913,19 @@ if (!function_exists('buildPaginationUrl')) {
                           const ns=document.getElementById('not_sure_admin');
                           const warn=document.getElementById('recentDonorWarningAdmin');
                           const info=document.getElementById('unsureDonorInfoAdmin');
-                          const proceed=document.getElementById('proceedBtnAdmin');
+                          const proceed=null;
                           const card=document.getElementById('manualRegCard');
                           const hidden=document.getElementById('recent_donation_post');
                           function update(){
-                            warn.style.display='none'; info.style.display='none'; proceed.style.display='none'; card.style.display='none';
+                            warn.style.display='none'; info.style.display='none'; card.style.display='none';
                             let v='';
                             if(yes && yes.checked){warn.style.display='block'; v='yes';}
-                            else if(no && no.checked){proceed.style.display='inline-block'; card.style.display='block'; v='no';}
-                            else if(ns && ns.checked){info.style.display='block'; proceed.style.display='inline-block'; card.style.display='block'; v='not_sure';}
+                            else if(no && no.checked){card.style.display='block'; v='no';}
+                            else if(ns && ns.checked){info.style.display='block'; card.style.display='block'; v='not_sure';}
                             if(hidden) hidden.value=v;
                           }
                           [yes,no,ns].forEach(el=> el && el.addEventListener('change', update));
-                          proceed && proceed.addEventListener('click', function(){ document.getElementById('eligibilityCheckAdmin').style.display='none'; card.style.display='block'; var ms=document.getElementById('medicalScreeningAdmin'); if(ms) ms.style.display='block'; });
+                          
                         })();
                         </script>
                     <?php else: ?>
