@@ -2846,7 +2846,7 @@ if (!function_exists('buildPaginationUrl')) {
                         </div>
                         <?php if ($mr_success): ?><div class="alert alert-success"><?= htmlspecialchars($mr_success) ?></div><?php endif; ?>
                         <?php if ($mr_error): ?><div class="alert alert-danger"><?= htmlspecialchars($mr_error) ?></div><?php endif; ?>
-                        <form method="post" class="row g-3" id="donorForm">
+                        <form method="post" action="process_manual_donor.php" class="row g-3" id="donorForm">
                         <div class="card" id="manualRegCard" style="display:none;"><div class="card-body">
                             <input type="hidden" name="action" value="manual_register">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
