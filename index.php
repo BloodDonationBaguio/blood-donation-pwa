@@ -285,6 +285,17 @@ try {
             position: relative;
             overflow: hidden;
         }
+        .disclaimer-banner {
+            background: #b00020;
+            color: #fff;
+            font-size: 0.95rem;
+            padding: 8px 12px;
+            text-align: center;
+            letter-spacing: 0.2px;
+        }
+        @media (max-width: 768px) {
+            .disclaimer-banner { font-size: 0.9rem; padding: 10px; }
+        }
         
         .hero-section::before {
             content: '';
@@ -898,6 +909,10 @@ try {
 <body class="bg-light">
 
 <?php include 'navbar.php'; ?>
+
+<div class="disclaimer-banner" role="alert">
+    ⚠️ Disclaimer: This website is a student capstone project and is currently under development. It is NOT an official Philippine Red Cross platform.
+ </div>
 
 <?php if (isset($_GET['logout']) && $_GET['logout'] === 'success'): ?>
 <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
