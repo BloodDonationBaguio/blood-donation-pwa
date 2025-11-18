@@ -2750,7 +2750,7 @@ if (!function_exists('buildPaginationUrl')) {
                                 }
                                 $recentDonation = trim((string)($_POST['recent_donation'] ?? ''));
                                 if ($recentDonation === 'yes') { throw new Exception('Donor is not eligible: must wait 90 days since last donation'); }
-                                $required = ['first_name','last_name','blood_type','birth_date','gender','weight','height','email','phone','address','postal_code'];
+                                $required = ['first_name','last_name','blood_type','birth_date','gender','weight','height','phone','address','postal_code'];
                                 $data = [];
                                 foreach ($required as $f) { $v = trim((string)($_POST[$f] ?? '')); if ($v==='') throw new Exception('Please fill in all required fields'); $data[$f]=$v; }
                                 $data['full_name'] = $data['first_name'].' '.$data['last_name'];
@@ -2758,7 +2758,7 @@ if (!function_exists('buildPaginationUrl')) {
                                 $dob = new DateTime($data['date_of_birth']); $age=(new DateTime())->diff($dob)->y; if($age<16) throw new Exception('Donor must be at least 16 years old');
                                 if ((float)$data['weight'] < 50) throw new Exception('Donor must weigh at least 50 kg');
                                 $email = trim((string)($_POST['email'] ?? ''));
-                                if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Please enter a valid email address');
+                                if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Please enter a valid email address');
                                 if ($email !== '') {
                                     try {
                                         $checkTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
@@ -2863,22 +2863,22 @@ if (!function_exists('buildPaginationUrl')) {
                                 <div class="mt-3"><label class="form-label">Height (cm) <span class="text-danger">*</span></label><div class="input-group"><input type="number" name="height" class="form-control" min="100" max="250" step="0.1" required><span class="input-group-text">cm</span></div></div>
                                 <div class="mt-3"><label class="form-label">Blood Type <span class="text-danger">*</span></label><select name="blood_type" class="form-select" required><option value="">Select Blood Type</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option><option value="UNK">Unknown (Will be determined during screening)</option></select></div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" name="email" class="form-control" required></div>
+                        <div class="col-md-6">
+                                <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" placeholder="optional"></div>
                                 <div class="mb-3"><label class="form-label">Phone Number <span class="text-danger">*</span></label><input type="tel" name="phone" class="form-control" required></div>
                                 <div class="mb-3"><label class="form-label">Address <span class="text-danger">*</span></label><input type="text" name="address" class="form-control" required></div>
                                 <div class="mb-3"><label class="form-label">City</label><div class="form-control bg-light"><span class="text-muted">City of Baguio</span><input type="hidden" name="city" value="City of Baguio"></div></div>
                                 <div class="mb-3"><label class="form-label">Province</label><div class="form-control bg-light"><span class="text-muted">Benguet</span><input type="hidden" name="state" value="Benguet"></div></div>
                                 <div class="mb-3"><label class="form-label">Postal Code <span class="text-danger">*</span></label><input type="text" name="postal_code" class="form-control" required></div>
                             </div>
-                            <div class="col-12 mt-2"><button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor</button></div>
+                            
                         
                         </div></div>
                         <div class="card mt-3" id="medicalScreeningAdmin" style="display:none;">
                             <div class="card-body">
                                 <?php include __DIR__ . '/includes/medical_section.php'; ?>
                                 <div class="mt-3">
-                                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Donor & Screening</button>
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus me-1"></i> Add Donor</button>
                                 </div>
                             </div>
                         </div>
