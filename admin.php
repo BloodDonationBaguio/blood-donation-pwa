@@ -2408,9 +2408,6 @@ if (!function_exists('buildPaginationUrl')) {
                                                 <i class="fas fa-tint me-2"></i>Blood Inventory
                                             </button>
                                         </li>
-                                        <li class="nav-item" role="presentation">
-                                            
-                                        </li>
                                     </ul>
                                     
                                     <!-- Tab Content -->

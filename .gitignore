@@ -12,6 +12,12 @@ backup_*/
 config/email_config.json
 config/backup_config.json
 
+# Environment files (keep examples only)
+.env
+.env.*
+!.env.example
+!.env.supabase.example
+
 # System files
 .DS_Store
 Thumbs.db

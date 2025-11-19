@@ -1,9 +1,17 @@
 <?php
-// Environment-aware DB config: PostgreSQL on Render (DATABASE_URL), MySQL locally
+// Environment-aware DB config: Prefer Supabase Postgres, then Render (DATABASE_URL), otherwise MySQL locally
+// Prefer Supabase when explicit Supabase envs are present
+if (getenv('SUPABASE_DB_PASSWORD') || getenv('SUPABASE_URL') || getenv('SUPABASE_DB_HOST') || getenv('NEXT_PUBLIC_SUPABASE_URL')) {
+    require_once __DIR__ . '/supabase_db.php';
+    return;
+}
+
+// Fallback to Render/Generic Postgres using DATABASE_URL
 if (getenv('DATABASE_URL')) {
     require_once __DIR__ . '/db_production.php';
     return;
 }
+
 // Local/dev fallback: MySQL
 
 // Check if this file is being included directly

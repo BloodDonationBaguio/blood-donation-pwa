@@ -21,8 +21,14 @@ if ($database_url) {
     define('DB_PORT', isset($db['port']) ? $db['port'] : 5432);
     
     try {
+        $isSupabase = (strpos(DB_HOST, '.supabase.co') !== false) || (strpos(DB_HOST, '.supabase.com') !== false);
+        $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME;
+        if ($isSupabase) {
+            $dsn .= ";sslmode=require"; // Supabase requires SSL
+        }
+
         $pdo = new PDO(
-            "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME,
+            $dsn,
             DB_USER,
             DB_PASS,
             [
@@ -30,7 +36,11 @@ if ($database_url) {
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
             ]
         );
-        error_log("PostgreSQL connection established successfully");
+
+        // Align timezone with application
+        try { $pdo->exec("SET timezone = 'Asia/Manila'"); } catch (Throwable $tz) { /* ignore */ }
+
+        error_log("PostgreSQL connection established successfully (" . ($isSupabase ? 'Supabase' : 'Generic') . ")");
     } catch (PDOException $e) {
         error_log("Database connection failed: " . $e->getMessage());
         die("Database connection error. Please check logs.");
