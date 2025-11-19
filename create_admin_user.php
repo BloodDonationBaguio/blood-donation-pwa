@@ -9,28 +9,54 @@ echo "<h2>👤 Create Admin User</h2>";
 try {
     require_once 'db.php';
     echo "<p style='color: green;'>✅ Database connected</p>";
-    
-    // Check if admin_users table exists
-    $stmt = $pdo->query("PRAGMA table_info('admin_users')");
-    if ($stmt->rowCount() === 0) {
+
+    $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+
+    // Check if admin_users table exists (driver-aware)
+    $exists = false;
+    if ($driver === 'pgsql') {
+        $stmt = $pdo->query("SELECT to_regclass('public.admin_users')");
+        $exists = $stmt && $stmt->fetchColumn() !== null;
+    } else {
+        $stmt = $pdo->query("PRAGMA table_info('admin_users')");
+        $exists = $stmt && $stmt->rowCount() > 0;
+    }
+
+    if (!$exists) {
         echo "<p style='color: red;'>❌ admin_users table not found. Creating it...</p>";
-        
-        // Create admin_users table
-        $createTable = "
-            CREATE TABLE admin_users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username VARCHAR(50) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                role TEXT CHECK(role IN ('super_admin', 'inventory_manager', 'medical_staff', 'viewer')) DEFAULT 'super_admin',
-                email VARCHAR(100),
-                full_name VARCHAR(100),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP NULL,
-                is_active BOOLEAN DEFAULT TRUE
-            )
-        ";
-        
+
+        if ($driver === 'pgsql') {
+            $createTable = "
+                CREATE TABLE IF NOT EXISTS admin_users (
+                    id BIGSERIAL PRIMARY KEY,
+                    username VARCHAR(50) UNIQUE NOT NULL,
+                    password VARCHAR(255) NOT NULL,
+                    role VARCHAR(30) DEFAULT 'super_admin',
+                    email VARCHAR(100),
+                    full_name VARCHAR(100),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_login TIMESTAMP NULL,
+                    is_active BOOLEAN DEFAULT TRUE
+                )
+            ";
+        } else {
+            $createTable = "
+                CREATE TABLE admin_users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username VARCHAR(50) UNIQUE NOT NULL,
+                    password VARCHAR(255) NOT NULL,
+                    role TEXT DEFAULT 'super_admin',
+                    email VARCHAR(100),
+                    full_name VARCHAR(100),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_login TIMESTAMP NULL,
+                    is_active BOOLEAN DEFAULT TRUE
+                )
+            ";
+        }
+
         $pdo->exec($createTable);
         echo "<p style='color: green;'>✅ admin_users table created</p>";
     } else {
@@ -45,8 +71,15 @@ try {
     // Check if admin user already exists
     $stmt = $pdo->prepare("SELECT id FROM admin_users WHERE username = ?");
     $stmt->execute([$username]);
-    
-    if ($stmt->rowCount() > 0) {
+
+    $existsUser = false;
+    if (method_exists($stmt, 'rowCount')) {
+        $existsUser = $stmt->rowCount() > 0;
+    } else {
+        $existsUser = (bool)$stmt->fetchColumn();
+    }
+
+    if ($existsUser) {
         echo "<p style='color: orange;'>⚠️ Admin user already exists. Updating password...</p>";
         
         // Update existing user
@@ -66,7 +99,7 @@ try {
     }
     
     // Verify the user was created
-    $stmt = $pdo->prepare("SELECT username, role, is_active FROM admin_users WHERE username = ?");
+        $stmt = $pdo->prepare("SELECT username, role, is_active FROM admin_users WHERE username = ?");
     $stmt->execute([$username]);
     $user = $stmt->fetch();
     
