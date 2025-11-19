@@ -333,19 +333,8 @@ $contact_info = isset($settings['contact']) ? $settings['contact'] : [];
                     <i class="fas fa-phone contact-icon"></i>
                     <h3 class="contact-title">Phone</h3>
                     <p class="contact-text">
-                        <a href="tel:<?= isset($contact_info['phone']) ? htmlspecialchars($contact_info['phone']) : '+63-74-442-1234' ?>" class="contact-link">
-                            <?= isset($contact_info['phone']) ? htmlspecialchars($contact_info['phone']) : '+63-74-442-1234' ?>
-                        </a>
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="contact-item">
-                    <i class="fas fa-envelope contact-icon"></i>
-                    <h3 class="contact-title">Email</h3>
-                    <p class="contact-text">
-                        <a href="mailto:<?= isset($contact_info['email']) ? htmlspecialchars($contact_info['email']) : 'baguio@redcross.org.ph' ?>" class="contact-link">
-                            <?= isset($contact_info['email']) ? htmlspecialchars($contact_info['email']) : 'baguio@redcross.org.ph' ?>
+                        <a href="tel:0744247953" class="contact-link">
+                            0744247953
                         </a>
                     </p>
                 </div>
