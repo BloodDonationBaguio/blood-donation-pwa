@@ -1,28 +1,13 @@
 <?php
-<<<<<<< HEAD
-// Environment-aware DB config: Prefer Supabase Postgres, then Render (DATABASE_URL), otherwise MySQL locally
-// Prefer Supabase when explicit Supabase envs are present
+// Environment-aware DB config: Prefer Supabase Postgres first, then Render (DATABASE_URL), else local MySQL
 if (
-    getenv('SUPABASE_DB_PASSWORD') || getenv('SUPABASE_URL') || getenv('SUPABASE_DB_HOST') || getenv('NEXT_PUBLIC_SUPABASE_URL') ||
+    getenv('SUPABASE_DB_PASSWORD') || getenv('SUPABASE_CONNECTION_STRING') || getenv('SUPABASE_URL') || getenv('SUPABASE_DB_HOST') || getenv('NEXT_PUBLIC_SUPABASE_URL') ||
     (!empty($_ENV['SUPABASE_URL']) || !empty($_SERVER['SUPABASE_URL'])) ||
     (!empty($_ENV['SUPABASE_DB_PASSWORD']) || !empty($_SERVER['SUPABASE_DB_PASSWORD']))
 ) {
     require_once __DIR__ . '/supabase_db.php';
     return;
 }
-
-// Fallback to Render/Generic Postgres using DATABASE_URL
-=======
-// Environment-aware DB config: Prefer Supabase Postgres via explicit envs; fallback to Render; else MySQL
-if (
-    getenv('SUPABASE_DB_PASSWORD') || getenv('SUPABASE_CONNECTION_STRING') || getenv('SUPABASE_URL') || getenv('SUPABASE_DB_HOST') || getenv('NEXT_PUBLIC_SUPABASE_URL') ||
-    (!empty($_ENV['SUPABASE_URL']) || !empty($_SERVER['SUPABASE_URL'])) ||
-    (!empty($_ENV['SUPABASE_DB_PASSWORD']) || !empty($_SERVER['SUPABASE_DB_PASSWORD']))
-) {
-    require_once __DIR__ . '/../supabase_db.php';
-    return;
-}
->>>>>>> 518cf1e (Stop overwriting db.php in Docker; prefer Supabase in db.php; make admin seeder work on PostgreSQL)
 if (getenv('DATABASE_URL')) {
     require_once __DIR__ . '/db_production.php';
     return;
