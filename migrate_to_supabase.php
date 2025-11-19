@@ -45,28 +45,34 @@ try {
 }
 
 try {
-    // Connect to Supabase PostgreSQL (target)
+    // Connect to Supabase PostgreSQL (target) using DB password and SSL
     $supabase_url = getenv('SUPABASE_URL') ?: getenv('NEXT_PUBLIC_SUPABASE_URL');
-    $supabase_service_key = getenv('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!$supabase_url || !$supabase_service_key) {
-        die("❌ Supabase credentials not found. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.\n");
+    $supabase_db_host = getenv('SUPABASE_DB_HOST');
+    $supabase_db_name = getenv('SUPABASE_DB_NAME') ?: 'postgres';
+    $supabase_db_user = getenv('SUPABASE_DB_USER') ?: 'postgres';
+    $supabase_db_password = getenv('SUPABASE_DB_PASSWORD');
+    $supabase_db_port = getenv('SUPABASE_DB_PORT') ?: '5432';
+
+    if (!$supabase_url || !$supabase_db_password) {
+        die("❌ Supabase credentials not found. Please set SUPABASE_URL and SUPABASE_DB_PASSWORD.\n");
     }
-    
+
     $project_id = str_replace(['https://', '.supabase.co'], '', $supabase_url);
-    $supabase_host = $project_id . '.supabase.co';
-    
+    $supabase_host = $supabase_db_host ?: ('db.' . $project_id . '.supabase.co');
+
+    $supabase_dsn = "pgsql:host={$supabase_host};port={$supabase_db_port};dbname={$supabase_db_name};sslmode=require";
     $supabase_pdo = new PDO(
-        "pgsql:host={$supabase_host};port=5432;dbname=postgres",
-        'postgres',
-        $supabase_service_key,
+        $supabase_dsn,
+        $supabase_db_user,
+        $supabase_db_password,
         [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
         ]
     );
     $supabase_connected = true;
-    echo "✓ Connected to Supabase PostgreSQL\n";
+    echo "✓ Connected to Supabase PostgreSQL (SSL)\n";
 } catch (PDOException $e) {
     die("❌ Failed to connect to Supabase: " . $e->getMessage() . "\n");
 }
@@ -135,28 +141,81 @@ function migrateTable($render_pdo, $supabase_pdo, $table_name, $batch_size = 100
 }
 
 // List of tables to migrate (in order of dependencies)
-$tables_to_migrate = [
-    'admin_users',
-    'donors', 
-    'blood_units',
-    'notifications'
-];
+// Discover all public tables on Render and migrate them
+try {
+    $tblStmt = $render_pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'");
+    $tables = $tblStmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    // Prioritize key tables first
+    $priority = ['admin_users','donors_new','donors','blood_units','blood_inventory','notifications','blood_requests','users','users_new'];
+    $tables = array_unique(array_merge($priority, $tables));
 
-// Check if tables exist and migrate
-foreach ($tables_to_migrate as $table) {
-    try {
-        // Check if table exists in Render
-        $check_stmt = $render_pdo->query("SELECT to_regclass('public.{$table}')");
-        $exists = $check_stmt->fetchColumn() !== null;
-        
-        if ($exists) {
-            migrateTable($render_pdo, $supabase_pdo, $table);
-        } else {
-            echo "Table {$table} does not exist in Render, skipping...\n\n";
+    foreach ($tables as $table) {
+        // Skip system tables if any slipped through
+        if (strpos($table, 'pg_') === 0 || strpos($table, 'sql_') === 0) { continue; }
+
+        // Ensure table exists on Supabase; create if missing
+        $existsSup = $supabase_pdo->query("SELECT to_regclass('public." . str_replace("'","''", $table) . "')")->fetchColumn() !== null;
+        if (!$existsSup) {
+            echo "Creating table {$table} on Supabase...\n";
+            // Build CREATE TABLE from source columns
+            $cols = $render_pdo->query("SELECT column_name, data_type, is_nullable, character_maximum_length, numeric_precision, numeric_scale, column_default FROM information_schema.columns WHERE table_schema='public' AND table_name='" . str_replace("'","''", $table) . "' ORDER BY ordinal_position")->fetchAll(PDO::FETCH_ASSOC);
+            $colDefs = [];
+            foreach ($cols as $col) {
+                $name = $col['column_name'];
+                $type = $col['data_type'];
+                // Map common types as-is; add length/precision where defined
+                if (in_array($type, ['character varying','varchar','text'])) {
+                    if (!empty($col['character_maximum_length'])) {
+                        $typeDef = "varchar(" . (int)$col['character_maximum_length'] . ")";
+                    } else {
+                        $typeDef = ($type === 'text') ? 'text' : 'varchar';
+                    }
+                } elseif (in_array($type, ['integer','bigint','smallint'])) {
+                    $typeDef = $type;
+                } elseif (in_array($type, ['numeric','decimal'])) {
+                    if (!empty($col['numeric_precision'])) {
+                        $typeDef = "numeric(" . (int)$col['numeric_precision'] . (isset($col['numeric_scale']) ? "," . (int)$col['numeric_scale'] : "") . ")";
+                    } else { $typeDef = 'numeric'; }
+                } elseif (in_array($type, ['timestamp without time zone','timestamp with time zone'])) {
+                    $typeDef = 'timestamp';
+                } elseif ($type === 'date') { $typeDef = 'date'; }
+                elseif ($type === 'boolean') { $typeDef = 'boolean'; }
+                else { $typeDef = $type; }
+
+                $nullable = ($col['is_nullable'] === 'YES') ? '' : ' NOT NULL';
+                // Avoid copying defaults blindly if they reference sequences; sequences handled later
+                $default = '';
+                if (!empty($col['column_default']) && stripos($col['column_default'], 'nextval(') === false) {
+                    $default = " DEFAULT " . $col['column_default'];
+                }
+                $colDefs[] = '"' . $name . '" ' . $typeDef . $default . $nullable;
+            }
+            $createSql = 'CREATE TABLE "' . $table . '" (' . implode(', ', $colDefs) . ')';
+            try {
+                $supabase_pdo->exec($createSql);
+                echo "  ✓ Created {$table}\n";
+            } catch (PDOException $e) {
+                echo "  ⚠️ Could not create {$table}: " . $e->getMessage() . "\n";
+            }
         }
-    } catch (PDOException $e) {
-        echo "Error checking table {$table}: " . $e->getMessage() . "\n\n";
+
+        // Migrate data for this table
+        migrateTable($render_pdo, $supabase_pdo, $table);
+
+        // Reset sequences for serial columns if present
+        try {
+            $seqStmt = $render_pdo->query("SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='" . str_replace("'","''", $table) . "' AND column_default LIKE 'nextval(%'");
+            $serialCols = $seqStmt->fetchAll(PDO::FETCH_COLUMN);
+            foreach ($serialCols as $colName) {
+                $supabase_pdo->exec("SELECT setval(pg_get_serial_sequence(''public." . str_replace("'","''", $table) . "'', '" . str_replace("'","''", $colName) . "'), COALESCE(MAX(" . $colName . "), 1)) FROM \"" . $table . "\";");
+            }
+        } catch (Exception $e) {
+            // ignore
+        }
     }
+} catch (PDOException $e) {
+    die("❌ Failed to enumerate tables: " . $e->getMessage() . "\n");
 }
 
 echo "=== Migration Complete ===\n";
