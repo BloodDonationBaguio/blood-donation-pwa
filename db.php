@@ -1,7 +1,11 @@
 <?php
 // Environment-aware DB config: Prefer Supabase Postgres, then Render (DATABASE_URL), otherwise MySQL locally
 // Prefer Supabase when explicit Supabase envs are present
-if (getenv('SUPABASE_DB_PASSWORD') || getenv('SUPABASE_URL') || getenv('SUPABASE_DB_HOST') || getenv('NEXT_PUBLIC_SUPABASE_URL')) {
+if (
+    getenv('SUPABASE_DB_PASSWORD') || getenv('SUPABASE_URL') || getenv('SUPABASE_DB_HOST') || getenv('NEXT_PUBLIC_SUPABASE_URL') ||
+    (!empty($_ENV['SUPABASE_URL']) || !empty($_SERVER['SUPABASE_URL'])) ||
+    (!empty($_ENV['SUPABASE_DB_PASSWORD']) || !empty($_SERVER['SUPABASE_DB_PASSWORD']))
+) {
     require_once __DIR__ . '/supabase_db.php';
     return;
 }
