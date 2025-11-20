@@ -51,24 +51,29 @@ try {
         exit();
     }
 
-    // Fetch user donation history by email with robust donors_new fallback
-    // Prefer donors_new when available; otherwise fall back to donors.
-    // We avoid relying on an integer id column because some migrated tables
-    // in Supabase may not expose it with that exact name.
-    $donorsTable = 'donors_new';
+    // Fetch user donation history by email.
+    // Use the main donors table, and detect the correct blood-type column
+    // name to support schemas that use blood_type or blood_group, etc.
+    $donorsTable = 'donors';
+    $bloodCol = 'blood_type';
     try {
-        // Attempt a lightweight query to confirm donors_new exists
-        $pdo->query("SELECT 1 FROM donors_new LIMIT 1");
+        // Try standard column name first
+        $pdo->query("SELECT {$bloodCol} FROM {$donorsTable} LIMIT 1");
     } catch (Exception $e) {
-        $donorsTable = 'donors';
+        // Fallbacks for legacy schemas
+        foreach (['blood_group','bloodType','bloodtype'] as $alt) {
+            try {
+                $pdo->query("SELECT {$alt} FROM {$donorsTable} LIMIT 1");
+                $bloodCol = $alt;
+                break;
+            } catch (Exception $e2) {
+                // keep trying
+            }
+        }
     }
 
-    $donations = $pdo->prepare("
-        SELECT blood_type, status, created_at, updated_at
-        FROM $donorsTable 
-        WHERE LOWER(email) = LOWER(?) 
-        ORDER BY COALESCE(updated_at, created_at) DESC
-    ");
+    $sqlHistory = "\n        SELECT {$bloodCol} AS blood_type, status, created_at, updated_at\n        FROM {$donorsTable}\n        WHERE LOWER(email) = LOWER(?)\n        ORDER BY COALESCE(updated_at, created_at) DESC\n    ";
+    $donations = $pdo->prepare($sqlHistory);
     $donations->execute([$user['email']]);
     $donation_history = $donations->fetchAll();
 
