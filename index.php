@@ -145,45 +145,20 @@ try {
 }
 ?>
 <?php
-// Database connection and donations-this-year counter
-try {
-    require_once __DIR__ . '/db.php';
-    $donationsThisYear = 0;
-    $driver = 'mysql';
-    try { $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)); } catch (Throwable $e) { /* default mysql */ }
+    // Database connection and donations counter
+    // Business rule (per project owner): this value should match the total
+    // number of served donors shown in the admin dashboard, regardless of year.
+    try {
+        require_once __DIR__ . '/db.php';
+        $donationsThisYear = 0;
 
-    $yearExpr = function($col) use ($driver) {
-        if ($driver === 'pgsql') {
-            return "EXTRACT(YEAR FROM $col) = EXTRACT(YEAR FROM CURRENT_DATE)";
-        }
-        return "YEAR($col) = YEAR(CURRENT_DATE)"; // mysql/mariadb
-    };
-
-    $table = null;
-    if (function_exists('tableExists')) {
-        try {
-            if (tableExists($pdo, 'donors_new')) { $table = 'donors_new'; }
-            elseif (tableExists($pdo, 'donors')) { $table = 'donors'; }
-        } catch (Throwable $e) { /* ignore */ }
-    }
-
-    if ($table) {
-        $dateCol = ($table === 'donors_new') ? 'COALESCE(served_date, created_at)' : 'COALESCE(served_date, created_at)';
-        $sql = "SELECT COUNT(*) AS cnt FROM $table WHERE status = 'served' AND " . $yearExpr($dateCol);
-        $stmt = $pdo->query($sql);
-        $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
-    } else {
-        // Fallback: donations_new completed this year
-        $col = 'donation_date';
-        $sql = "SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND " . $yearExpr($col);
-        try {
-            $stmt = $pdo->query($sql);
+        if (function_exists('tableExists') && tableExists($pdo, 'donors')) {
+            $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served'");
             $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
-        } catch (Throwable $e) { $donationsThisYear = 0; }
+        }
+    } catch (Throwable $e) {
+        $donationsThisYear = 0;
     }
-} catch (Throwable $e) {
-    $donationsThisYear = 0;
-}
 ?>
 <?php
       $localManifest = __DIR__ . '/manifest.json';

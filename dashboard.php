@@ -52,7 +52,9 @@ try {
     }
 
     // Fetch user donation history by email with robust donors_new fallback
-    // Prefer donors_new when available; otherwise fall back to donors
+    // Prefer donors_new when available; otherwise fall back to donors.
+    // We avoid relying on an integer id column because some migrated tables
+    // in Supabase may not expose it with that exact name.
     $donorsTable = 'donors_new';
     try {
         // Attempt a lightweight query to confirm donors_new exists
@@ -62,10 +64,10 @@ try {
     }
 
     $donations = $pdo->prepare("
-        SELECT id, blood_type, status, created_at, updated_at
+        SELECT blood_type, status, created_at, updated_at
         FROM $donorsTable 
         WHERE LOWER(email) = LOWER(?) 
-        ORDER BY COALESCE(updated_at, created_at) DESC, id DESC
+        ORDER BY COALESCE(updated_at, created_at) DESC
     ");
     $donations->execute([$user['email']]);
     $donation_history = $donations->fetchAll();
