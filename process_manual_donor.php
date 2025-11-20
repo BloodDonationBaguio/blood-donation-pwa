@@ -16,6 +16,24 @@ function generateReferenceNumber() { return strtoupper('DNR-' . substr(md5(uniqi
 function isEligibleAge($birthDate) { $age = date_diff(date_create($birthDate), date_create('today'))->y; return ($age >= 18 && $age <= 65); }
 function isEmailNullable($pdo, $table) { try { $stmt = $pdo->prepare("SELECT is_nullable FROM information_schema.columns WHERE table_name = ? AND column_name = 'email'"); $stmt->execute([$table]); $val = strtolower((string)$stmt->fetchColumn()); return $val === 'yes'; } catch (Throwable $e) { return true; } }
 
+/**
+ * Resolve a donors table that supports the manual registration schema.
+ * Prefers donors_new but will fall back to donors if needed.
+ */
+function resolveDonorsTableForManual(PDO $pdo) {
+    $candidates = ['donors_new', 'donors'];
+    foreach ($candidates as $table) {
+        try {
+            // Ensure expected columns exist; query will fail if they do not
+            $pdo->query("SELECT first_name, last_name, reference_code FROM {$table} LIMIT 1");
+            return $table;
+        } catch (Throwable $e) {
+            // Try next table
+        }
+    }
+    throw new Exception('No compatible donors table found for manual registration');
+}
+
 $errors = [];
 $success = false;
 $refNumber = '';
@@ -56,10 +74,14 @@ try {
     if (empty($province)) $errors[] = "Province is required";
     if (empty($postalCode)) $errors[] = "Postal code is required";
 
+    // Decide which donors table to use for this registration
+    $donorsTable = resolveDonorsTableForManual($pdo);
+
     // Duplicate recent registration check (5 minutes window)
     if (empty($errors) && $email !== '') {
         try {
-            $checkTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+            $checkTable = $donorsTable;
+            // PostgreSQL-style interval; on MySQL this block is best-effort and safely ignored on error
             $duplicateCheck = $pdo->prepare("SELECT id, created_at FROM {$checkTable} WHERE email = ? AND created_at > CURRENT_TIMESTAMP - INTERVAL '5 minutes' ORDER BY created_at DESC LIMIT 1");
             $duplicateCheck->execute([$email]);
             $recentSubmission = $duplicateCheck->fetch();
@@ -82,7 +104,6 @@ try {
     // 3. Insert donor and screening
     $pdo->beginTransaction();
     $refNumber = generateReferenceNumber();
-    $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
 
     // Ensure created_by_admin column exists
     try {
@@ -114,6 +135,26 @@ try {
     $medicalStmt->execute([$donorId, $refNumber, json_encode($medical), $allAnswered]);
 
     $pdo->commit();
+
+    // Log admin audit entry for this manual donor creation (best-effort)
+    try {
+        require_once __DIR__ . '/includes/admin_actions.php';
+        if (function_exists('ensureAuditLogTableExists')) {
+            ensureAuditLogTableExists($pdo);
+        }
+        if (function_exists('logAdminAction')) {
+            logAdminAction(
+                $pdo,
+                'donor_created',
+                $donorsTable,
+                $donorId,
+                "Manual donor registration: {$fullName} ({$refNumber})",
+                $_SESSION['admin_username'] ?? null
+            );
+        }
+    } catch (Throwable $e) {
+        // Ignore audit failures to avoid blocking registration
+    }
 
     // Optional email
     try {

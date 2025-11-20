@@ -428,9 +428,12 @@ try {
             $bloodInventory = [];
         }
 
+        // Filter out empty and Unknown/UNK blood types from the analytics dataset
         $bloodInventory = array_values(array_filter($bloodInventory, function($row) {
             $bt = isset($row['blood_type']) ? trim((string)$row['blood_type']) : '';
-            return $bt !== '';
+            if ($bt === '') return false;
+            $upper = strtoupper($bt);
+            return $upper !== 'UNKNOWN' && $upper !== 'UNK';
         }));
         
         
@@ -525,7 +528,7 @@ try {
         try {
             $recentActivity = $pdo->query($recentSql)->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            // Fallback: attempt audit log
+            // Fallback: attempt audit log if donors query fails entirely
             try {
                 require_once __DIR__ . '/includes/admin_actions.php';
                 $recentActivity = array_map(function($row){
@@ -538,6 +541,25 @@ try {
                     ];
                 }, getAdminActionLog($pdo, ['limit' => 10]));
             } catch (Throwable $e2) {
+                $recentActivity = [];
+            }
+        }
+
+        // Secondary fallback: if donors-based query returned no rows, populate from audit log
+        if (empty($recentActivity)) {
+            try {
+                require_once __DIR__ . '/includes/admin_actions.php';
+                $recentActivity = array_map(function($row){
+                    return [
+                        'type' => 'audit',
+                        'name' => $row['record_name'] ?? ($row['table_name'] ?? 'Record'),
+                        'status' => $row['action_type'] ?? 'action',
+                        'created_at' => $row['created_at'] ?? date('Y-m-d'),
+                        'reference' => $row['record_id'] ?? ''
+                    ];
+                }, getAdminActionLog($pdo, ['limit' => 10]));
+            } catch (Throwable $e3) {
+                // keep as empty
                 $recentActivity = [];
             }
         }

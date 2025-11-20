@@ -165,21 +165,42 @@ if (!function_exists('tableExists')) {
 
     /**
      * Check if a table exists in the database
-     * 
-     * @param PDO $pdo Database connection
+     *
+     * Uses the underlying PDO driver to select the most appropriate
+     * detection strategy and avoids double‑quoting issues.
+     *
+     * @param PDO    $pdo   Database connection
      * @param string $table Table name
      * @return bool
      */
     function tableExists($pdo, $table) {
         try {
-            if (DB_TYPE === 'sqlite') {
-                $result = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='" . $pdo->quote($table) . "'");
-            } else {
-                $result = $pdo->query("SHOW TABLES LIKE '" . $pdo->quote($table) . "'");
+            $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? '');
+
+            if ($driver === 'sqlite') {
+                $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = :t");
+                $stmt->execute([':t' => $table]);
+                return $stmt->fetchColumn() !== false;
             }
-            return $result->rowCount() > 0;
+
+            if ($driver === 'mysql') {
+                $stmt = $pdo->prepare("SHOW TABLES LIKE :t");
+                $stmt->execute([':t' => $table]);
+                return $stmt->rowCount() > 0;
+            }
+
+            if ($driver === 'pgsql') {
+                // Use to_regclass which returns NULL when the relation does not exist
+                $stmt = $pdo->prepare("SELECT to_regclass(:t)");
+                $stmt->execute([':t' => $table]);
+                return $stmt->fetchColumn() !== null;
+            }
+
+            // Generic fallback: try a simple select
+            $stmt = $pdo->query("SELECT 1 FROM {$table} LIMIT 1");
+            return $stmt !== false;
         } catch (PDOException $e) {
-            error_log("Error checking if table exists: " . $e->getMessage());
+            error_log("Error checking if table exists ({$table}): " . $e->getMessage());
             return false;
         }
     }
