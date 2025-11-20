@@ -209,8 +209,8 @@ try {
     $recordId = '0';
     $description = 'Test audit log entry from verify_fixes.php - ' . date('Y-m-d H:i:s');
     
-    // Add the audit log entry
-    $logAdded = logAdminAction($pdo, 'diagnostic_script', $actionType, $tableName, $recordId, $description);
+    // Add the audit log entry (correct parameter order: $pdo, $actionType, $tableName, $recordId, $actionDetails, $adminId)
+    $logAdded = logAdminAction($pdo, $actionType, $tableName, $recordId, $description, 'diagnostic_script');
     
     // Verify the log entry was added
     $stmt = $pdo->prepare("SELECT * FROM admin_audit_log WHERE action_type = ? AND description LIKE ? ORDER BY created_at DESC LIMIT 1");
