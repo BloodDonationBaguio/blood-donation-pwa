@@ -394,69 +394,42 @@ try {
     
     // Enhanced blood inventory analytics
     try {
-        // Blood type distribution prioritizing actual donation records from donor_history
+        // Simplified rule: show distribution of served donors by blood type.
+        // This guarantees the chart matches the "Served" count shown on the dashboard.
         $bloodInventory = [];
-        $hasDonorHistory = false;
-        try { $pdo->query("SELECT 1 FROM donor_history LIMIT 1"); $hasDonorHistory = true; } catch (Exception $e) { $hasDonorHistory = false; }
 
-        if ($hasDonorHistory) {
-            // Use completed donation records as the most reliable source
-            $stmt = $pdo->query("SELECT blood_type, COUNT(*) AS count FROM donor_history WHERE status='completed' AND blood_type IS NOT NULL AND blood_type <> '' GROUP BY blood_type ORDER BY count DESC");
-            $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
-
-        // Fallback to donors/donors_new when donor_history is not present or empty
-        if (empty($bloodInventory)) {
-            // Detect donor blood-type column name to handle schema variants (blood_type vs blood_group)
-            $btDonorsCol = 'blood_type';
-            try { $pdo->query("SELECT {$btDonorsCol} FROM donors LIMIT 1"); }
-            catch (Exception $e) {
-                foreach (['blood_group','bloodType','bloodtype'] as $alt) {
-                    try { $pdo->query("SELECT {$alt} FROM donors LIMIT 1"); $btDonorsCol = $alt; break; } catch (Exception $e2) {}
+        // Detect correct blood-type column name on donors (blood_type vs blood_group, etc.)
+        $btDonorsCol = 'blood_type';
+        try {
+            $pdo->query("SELECT {$btDonorsCol} FROM donors LIMIT 1");
+        } catch (Exception $e) {
+            foreach (['blood_group','bloodType','bloodtype'] as $alt) {
+                try {
+                    $pdo->query("SELECT {$alt} FROM donors LIMIT 1");
+                    $btDonorsCol = $alt;
+                    break;
+                } catch (Exception $e2) {
+                    // keep trying
                 }
             }
+        }
 
-            $hasDonorsNew = false;
-            try { $pdo->query("SELECT 1 FROM donors_new LIMIT 1"); $hasDonorsNew = true; } catch (Exception $e) { $hasDonorsNew = false; }
+        $sql = "SELECT {$btDonorsCol} AS blood_type, COUNT(*) AS count\n"
+             . "FROM donors\n"
+             . "WHERE status = 'served'\n"
+             . "  AND {$btDonorsCol} IS NOT NULL AND {$btDonorsCol} <> ''\n"
+             . "GROUP BY {$btDonorsCol}\n"
+             . "ORDER BY count DESC";
 
-            if ($hasDonorsNew) {
-                // Detect donors_new blood-type column similarly
-                $btDonorsNewCol = $btDonorsCol;
-                try { $pdo->query("SELECT {$btDonorsNewCol} FROM donors_new LIMIT 1"); }
-                catch (Exception $e) {
-                    foreach (['blood_group','bloodType','bloodtype'] as $alt) {
-                        try { $pdo->query("SELECT {$alt} FROM donors_new LIMIT 1"); $btDonorsNewCol = $alt; break; } catch (Exception $e2) {}
-                    }
-                }
-
-                $sql = "SELECT blood_type, COUNT(*) AS count FROM (\n"
-                     . "    SELECT {$btDonorsCol} AS blood_type FROM donors \n"
-                     . "    WHERE status IN ('approved','served','completed') \n"
-                     . "      AND {$btDonorsCol} IS NOT NULL AND {$btDonorsCol} <> ''\n"
-                     . "    UNION ALL\n"
-                     . "    SELECT {$btDonorsNewCol} AS blood_type FROM donors_new \n"
-                     . "    WHERE status IN ('approved','served','completed') \n"
-                     . "      AND {$btDonorsNewCol} IS NOT NULL AND {$btDonorsNewCol} <> ''\n"
-                     . ") AS t GROUP BY blood_type ORDER BY count DESC";
-                $stmt = $pdo->query($sql);
-            } else {
-                $sql = "SELECT {$btDonorsCol} AS blood_type, COUNT(*) AS count FROM donors WHERE status IN ('approved','served','completed') AND {$btDonorsCol} IS NOT NULL AND {$btDonorsCol} <> '' GROUP BY {$btDonorsCol} ORDER BY count DESC";
-                $stmt = $pdo->query($sql);
-            }
+        try {
+            $stmt = $pdo->query($sql);
             $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $bloodInventory = [];
         }
-        // Final fallback: derive distribution from blood_inventory when donor tables lack blood_type
-        if (empty($bloodInventory)) {
-            try {
-                $stmt = $pdo->query("SELECT blood_type, COUNT(*) AS count FROM blood_inventory WHERE blood_type IS NOT NULL AND blood_type <> '' GROUP BY blood_type ORDER BY count DESC");
-                $bloodInventory = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            } catch (Exception $e) {
-                // blood_inventory table might not exist or be empty
-            }
-        }
+
         $bloodInventory = array_values(array_filter($bloodInventory, function($row) {
             $bt = isset($row['blood_type']) ? trim((string)$row['blood_type']) : '';
-            // Keep "Unknown" as a valid category, only drop completely empty values
             return $bt !== '';
         }));
         

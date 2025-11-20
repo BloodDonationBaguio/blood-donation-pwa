@@ -1,4 +1,9 @@
 <?php
+// Enable error reporting for this page so blank screens surface problems during migration
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Include session configuration first - before any output
 require_once __DIR__ . '/includes/session_config.php';
 require_once 'db.php';
@@ -12,19 +17,28 @@ $type = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($_POST['reference'])) {
         $ref = trim($_POST['reference']);
-        
-        // Determine correct donors table dynamically
-        $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
 
-        // Check if it's a donor reference in the appropriate table
-        $stmt = $pdo->prepare("SELECT * FROM {$donorsTable} WHERE reference_code = ?");
-        $stmt->execute([$ref]);
-        $donor = $stmt->fetch();
+        try {
+            // Determine correct donors table dynamically
+            $donorsTable = 'donors';
+            if (function_exists('tableExists') && tableExists($pdo, 'donors_new')) {
+                $donorsTable = 'donors_new';
+            }
 
-        if ($donor) {
-            $type = 'donor';
-        } else {
-            $error = 'No record found with this reference number. Please check your reference number and try again.';
+            // Check if it's a donor reference in the appropriate table
+            $stmt = $pdo->prepare("SELECT * FROM {$donorsTable} WHERE reference_code = ?");
+            $stmt->execute([$ref]);
+            $donor = $stmt->fetch();
+
+            if ($donor) {
+                $type = 'donor';
+            } else {
+                $error = 'No record found with this reference number. Please check your reference number and try again.';
+            }
+        } catch (Throwable $e) {
+            // Surface a clear error instead of a blank page if DB lookup fails
+            $error = 'System error while looking up your reference. Please try again later.';
+            error_log('Track page error: ' . $e->getMessage());
         }
     } else {
         $error = 'Please enter a reference number.';
