@@ -146,8 +146,8 @@ try {
 ?>
 <?php
     // Database connection and donations counter
-    // Business rule (per project owner): this value should match the total
-    // number of served donors shown in the admin dashboard, regardless of year.
+    // Business rule: this value should match the total number of
+    // served donors shown in the admin dashboard, regardless of year.
     try {
         require_once __DIR__ . '/db.php';
         $donationsThisYear = 0;
