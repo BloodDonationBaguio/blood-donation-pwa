@@ -77,9 +77,8 @@ if ($user_id) {
             <?php
               $isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
               $logoutUrl = $isAdmin ? '/admin_logout.php' : 'logout.php';
-              $logoutLabel = $isAdmin ? 'Admin Logout' : 'Logout';
             ?>
-            <a href="<?= $logoutUrl ?>" class="dropdown-item text-danger" role="menuitem"><?= $logoutLabel ?></a>
+            <a href="<?= $logoutUrl ?>" class="dropdown-item text-danger" role="menuitem">Logout</a>
           </div>
         </div>
       <?php else: ?>
