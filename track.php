@@ -14,19 +14,61 @@ $error = '';
 $donor = null;
 $type = '';
 
+function resolveDonorTrackingSource(PDO $pdo) {
+    $candidates = ['donors_new', 'donors'];
+    foreach ($candidates as $table) {
+        try {
+            $columns = [];
+            if (function_exists('getTableStructure')) {
+                $struct = getTableStructure($pdo, $table);
+                foreach ($struct as $row) {
+                    $name = $row['Field'] ?? $row['column_name'] ?? null;
+                    if ($name) {
+                        $columns[strtolower($name)] = $name;
+                    }
+                }
+            } else {
+                $stmt = $pdo->query("SELECT * FROM {$table} LIMIT 0");
+                $colCount = $stmt->columnCount();
+                for ($i = 0; $i < $colCount; $i++) {
+                    $meta = $stmt->getColumnMeta($i);
+                    if (!empty($meta['name'])) {
+                        $name = $meta['name'];
+                        $columns[strtolower($name)] = $name;
+                    }
+                }
+            }
+            if (empty($columns)) {
+                continue;
+            }
+            $refColumn = null;
+            foreach (['reference_code', 'reference_number', 'reference'] as $candidate) {
+                $key = strtolower($candidate);
+                if (isset($columns[$key])) {
+                    $refColumn = $columns[$key];
+                    break;
+                }
+            }
+            if ($refColumn === null) {
+                continue;
+            }
+            return [$table, $refColumn];
+        } catch (Throwable $e) {
+        }
+    }
+    throw new Exception('No compatible donors table found for tracking');
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($_POST['reference'])) {
         $ref = trim($_POST['reference']);
 
         try {
             // Determine correct donors table dynamically
-            $donorsTable = 'donors';
-            if (function_exists('tableExists') && tableExists($pdo, 'donors_new')) {
-                $donorsTable = 'donors_new';
-            }
+            [$donorsTable, $refColumn] = resolveDonorTrackingSource($pdo);
 
             // Check if it's a donor reference in the appropriate table
-            $stmt = $pdo->prepare("SELECT * FROM {$donorsTable} WHERE reference_code = ?");
+            $stmt = $pdo->prepare("SELECT * FROM {$donorsTable} WHERE {$refColumn} = ?");
             $stmt->execute([$ref]);
             $donor = $stmt->fetch();
 
