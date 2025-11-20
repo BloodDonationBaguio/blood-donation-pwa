@@ -146,41 +146,41 @@ try {
 ?>
 <?php
     // Database connection and donations counter
-    // Business rule: show the number of completed donations in the current year
-    // using donations_new when available, with a safe fallback to served donors.
+    // Business rule: show the number of served donors (completed donations) in the current year,
+    // using the donors table when available, with a safe fallback to donations_new.
     try {
         require_once __DIR__ . '/db.php';
         $donationsThisYear = 0;
         $driver = 'mysql';
         try { $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)); } catch (Throwable $e) {}
 
-        // First try: count completed donations in current year from donations_new
+        // First: count served donors in current year (primary business metric)
         try {
-            if (function_exists('tableExists') && tableExists($pdo, 'donations_new')) {
+            if (function_exists('tableExists') && tableExists($pdo, 'donors')) {
                 if ($driver === 'pgsql') {
-                    $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND EXTRACT(YEAR FROM donation_date) = EXTRACT(YEAR FROM CURRENT_DATE)");
+                    $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served' AND EXTRACT(YEAR FROM COALESCE(served_date, created_at)) = EXTRACT(YEAR FROM CURRENT_DATE)");
                 } else {
-                    $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND YEAR(donation_date) = YEAR(CURRENT_DATE)");
+                    $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served' AND YEAR(COALESCE(served_date, created_at)) = YEAR(CURRENT_DATE)");
                 }
                 $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
             }
         } catch (Throwable $e1) {
-            error_log("Error counting donations_new: " . $e1->getMessage());
+            error_log("Error counting served donors: " . $e1->getMessage());
         }
-        
-        // Fallback: count served donors in current year
+
+        // Fallback: count completed donations in current year from donations_new
         if ($donationsThisYear === 0) {
             try {
-                if (function_exists('tableExists') && tableExists($pdo, 'donors')) {
+                if (function_exists('tableExists') && tableExists($pdo, 'donations_new')) {
                     if ($driver === 'pgsql') {
-                        $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served' AND EXTRACT(YEAR FROM COALESCE(served_date, created_at)) = EXTRACT(YEAR FROM CURRENT_DATE)");
+                        $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND EXTRACT(YEAR FROM donation_date) = EXTRACT(YEAR FROM CURRENT_DATE)");
                     } else {
-                        $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served' AND YEAR(COALESCE(served_date, created_at)) = YEAR(CURRENT_DATE)");
+                        $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND YEAR(donation_date) = YEAR(CURRENT_DATE)");
                     }
                     $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
                 }
             } catch (Throwable $e2) {
-                error_log("Error counting served donors: " . $e2->getMessage());
+                error_log("Error counting donations_new: " . $e2->getMessage());
             }
         }
     } catch (Throwable $e) {
