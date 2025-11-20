@@ -521,10 +521,8 @@ try {
 
         $nameExpr = ($driver === 'pgsql') ? "(d.first_name || ' ' || d.last_name)" : "CONCAT(d.first_name, ' ', d.last_name)";
         $idCast   = ($driver === 'pgsql') ? 'CAST(d.id AS TEXT)' : 'CAST(d.id AS CHAR)';
-        // Show a longer window so migrated activity appears on the dashboard
-        $nowMinus = ($driver === 'pgsql') ? "(NOW() - INTERVAL '90 days')" : "DATE_SUB(NOW(), INTERVAL 90 DAY)";
-        $dateCol  = "COALESCE(d.updated_at, d.created_at)";
-        $recentSql = "SELECT 'donor' AS type, $nameExpr AS name, d.status, $dateCol AS created_at, COALESCE(d.reference_code, d.reference, $idCast) AS reference FROM {$donorTable} d WHERE $dateCol >= $nowMinus ORDER BY $dateCol DESC LIMIT 10";
+        $dateCol  = "COALESCE(d.updated_at, d.created_at, d.created)";
+        $recentSql = "SELECT 'donor' AS type, $nameExpr AS name, COALESCE(d.status, 'record') AS status, $dateCol AS created_at, COALESCE(d.reference_code, d.reference, $idCast) AS reference FROM {$donorTable} d WHERE $dateCol IS NOT NULL ORDER BY $dateCol DESC LIMIT 10";
         try {
             $recentActivity = $pdo->query($recentSql)->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
