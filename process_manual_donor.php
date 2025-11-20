@@ -131,6 +131,34 @@ try {
     $requiredQuestions = ($gender === 'Female') ? 37 : 32;
     $actualAnswered = 0; foreach ($medical as $ans) { if (!empty($ans)) $actualAnswered++; }
     $allAnswered = $actualAnswered >= $requiredQuestions ? 1 : 0;
+
+    try {
+        $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
+        if ($driver === 'pgsql') {
+            $pdo->exec("DO $$
+DECLARE
+    seq_name text := 'donor_medical_screening_simple_id_seq';
+    max_id bigint;
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_class WHERE relkind = 'S' AND relname = seq_name
+    ) THEN
+        EXECUTE format('CREATE SEQUENCE IF NOT EXISTS %I', seq_name);
+    END IF;
+
+    SELECT COALESCE(MAX(id), 0) INTO max_id FROM donor_medical_screening_simple;
+    PERFORM setval(seq_name::regclass, GREATEST(max_id, 1), true);
+
+    EXECUTE format(
+        'ALTER TABLE donor_medical_screening_simple ALTER COLUMN id SET DEFAULT nextval(%L::regclass)',
+        seq_name
+    );
+END
+$$;");
+        }
+    } catch (Throwable $e) {
+    }
+
     $medicalStmt = $pdo->prepare("INSERT INTO donor_medical_screening_simple (donor_id, reference_code, screening_data, all_questions_answered) VALUES (?, ?, ?, ?)");
     $medicalStmt->execute([$donorId, $refNumber, json_encode($medical), $allAnswered]);
 

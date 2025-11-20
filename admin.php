@@ -2813,11 +2813,25 @@ if (!function_exists('buildPaginationUrl')) {
                             <div class="card-body">
                                 <?php include __DIR__ . '/includes/medical_section.php'; ?>
                                 <div class="mt-3">
-                                    <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus me-1"></i> Add Donor</button>
+                                    <button type="submit" class="btn btn-primary" id="manualAddDonorBtn"><i class="fas fa-user-plus me-1"></i> Add Donor</button>
                                 </div>
                             </div>
                         </div>
                         </form>
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var form = document.getElementById('donorForm');
+                            if (!form) return;
+                            var btn = document.getElementById('manualAddDonorBtn');
+                            if (!btn) return;
+                            form.addEventListener('submit', function() {
+                                if (btn.dataset.loading === '1') return;
+                                btn.dataset.loading = '1';
+                                btn.disabled = true;
+                                btn.textContent = 'Adding donor...';
+                            });
+                        });
+                        </script>
                     <?php else: ?>
                         <div class="alert alert-warning">
                             <h4>Tab Content</h4>
