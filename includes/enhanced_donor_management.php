@@ -457,6 +457,7 @@ function markDonorUnserved($pdo, $donorId, $reason, $customNote = '', $adminId =
         $donor = getDonorDetails($pdo, $donorId);
         
         if (!$donor) {
+            error_log("Donor not found in markDonorUnserved: " . $donorId);
             throw new Exception("Donor not found");
         }
         
@@ -464,17 +465,17 @@ function markDonorUnserved($pdo, $donorId, $reason, $customNote = '', $adminId =
         $stmt = $pdo->prepare("UPDATE donors SET status = 'unserved' WHERE id = ?");
         $stmt->execute([$donorId]);
         
-        // Add note about unserved reason
-        if (!empty($reason) || !empty($customNote)) {
-            // Ensure donor_notes table exists before inserting
-            ensureDonorNotesTableExists($pdo);
-            $note = "Marked as unserved. Reason: " . $reason;
-            if (!empty($customNote)) {
-                $note .= " - " . $customNote;
-            }
-            
+        // Add note
+        $note = "Marked as unserved. Reason: $reason" . (!empty($customNote) ? " \nAdditional notes: $customNote" : "");
+        
+        // Ensure donor_notes table exists
+        ensureDonorNotesTableExists($pdo);
+        
+        try {
             $stmt = $pdo->prepare("INSERT INTO donor_notes (donor_id, note, created_by, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
             $stmt->execute([$donorId, $note, $adminId]);
+        } catch (Exception $e) {
+            error_log("Error adding donor note: " . $e->getMessage());
         }
         
         if ($donor && !empty($donor['email'])) {
@@ -684,6 +685,7 @@ function getDonorNotes($pdo, $donorId) {
 
 // Add note to donor
 function addDonorNote($pdo, $donorId, $note, $adminId = null) {
+    ensureDonorNotesTableExists($pdo);
     try {
         // Ensure donor_notes table exists before inserting
         ensureDonorNotesTableExists($pdo);

@@ -70,7 +70,7 @@ try {
                 if ($ok) {
                     // Ensure audit table then log
                     ensureAuditLogTableExists($pdo);
-                    @logAdminAction($pdo, 'donor_deleted', 'donors', $id, 'Donor deleted: ' . ($donor['first_name'] ?? '') . ' ' . ($donor['last_name'] ?? '') . ' (' . ($donor['reference_code'] ?? 'N/A') . ')', $_SESSION['admin_username'] ?? null);
+                    logAdminAction($pdo, $_SESSION['admin_username'] ?? 'admin', 'donor_deleted', 'donors', $id, 'Donor deleted: ' . ($donor['first_name'] ?? '') . ' ' . ($donor['last_name'] ?? '') . ' (' . ($donor['reference_code'] ?? 'N/A') . ')');
                 }
 
                 $pdo->commit();
