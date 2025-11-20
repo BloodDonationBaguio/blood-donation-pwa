@@ -56,6 +56,99 @@ function ensureDonorExtendedColumns($pdo) {
     }
 }
 
+// Ensure donor_notes table exists (dialect-aware)
+function ensureDonorNotesTableExists($pdo) {
+    try {
+        $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? '');
+
+        if ($driver === 'pgsql') {
+            $sql = "CREATE TABLE IF NOT EXISTS donor_notes (
+                id SERIAL PRIMARY KEY,
+                donor_id INTEGER NOT NULL,
+                note TEXT NOT NULL,
+                created_by VARCHAR(100),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )";
+            $pdo->exec($sql);
+        } elseif ($driver === 'sqlite') {
+            $sql = "CREATE TABLE IF NOT EXISTS donor_notes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                donor_id INTEGER NOT NULL,
+                note TEXT NOT NULL,
+                created_by TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )";
+            $pdo->exec($sql);
+        } else {
+            // MySQL / MariaDB
+            $sql = "CREATE TABLE IF NOT EXISTS donor_notes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                donor_id INT NOT NULL,
+                note TEXT NOT NULL,
+                created_by VARCHAR(100),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_donor_id (donor_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+            $pdo->exec($sql);
+        }
+    } catch (Exception $e) {
+        error_log("ensureDonorNotesTableExists error: " . $e->getMessage());
+    }
+}
+
+// Ensure donations_new table exists (dialect-aware)
+function ensureDonationsNewTableExists($pdo) {
+    try {
+        $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? '');
+
+        if ($driver === 'pgsql') {
+            $sql = "CREATE TABLE IF NOT EXISTS donations_new (
+                id SERIAL PRIMARY KEY,
+                donor_id INT NOT NULL,
+                donation_date DATE NOT NULL,
+                blood_type VARCHAR(10),
+                units_donated INT DEFAULT 1,
+                status VARCHAR(20) DEFAULT 'scheduled',
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )";
+            $pdo->exec($sql);
+        } elseif ($driver === 'sqlite') {
+            $sql = "CREATE TABLE IF NOT EXISTS donations_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                donor_id INTEGER NOT NULL,
+                donation_date DATE NOT NULL,
+                blood_type TEXT,
+                units_donated INTEGER DEFAULT 1,
+                status TEXT DEFAULT 'scheduled',
+                notes TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )";
+            $pdo->exec($sql);
+        } else {
+            // MySQL / MariaDB
+            $sql = "CREATE TABLE IF NOT EXISTS donations_new (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                donor_id INT NOT NULL,
+                donation_date DATE NOT NULL,
+                blood_type VARCHAR(10),
+                units_donated INT DEFAULT 1,
+                status ENUM('scheduled','completed','cancelled') DEFAULT 'scheduled',
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_donor_id (donor_id),
+                INDEX idx_donation_date (donation_date)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+            $pdo->exec($sql);
+        }
+    } catch (Exception $e) {
+        error_log("ensureDonationsNewTableExists error: " . $e->getMessage());
+    }
+}
+
 // Get medical screening status
 function getMedicalScreeningStatus($screeningData, $allQuestionsAnswered) {
     if (!$screeningData) return "Not Completed";
@@ -373,6 +466,8 @@ function markDonorUnserved($pdo, $donorId, $reason, $customNote = '', $adminId =
         
         // Add note about unserved reason
         if (!empty($reason) || !empty($customNote)) {
+            // Ensure donor_notes table exists before inserting
+            ensureDonorNotesTableExists($pdo);
             $note = "Marked as unserved. Reason: " . $reason;
             if (!empty($customNote)) {
                 $note .= " - " . $customNote;
@@ -590,6 +685,8 @@ function getDonorNotes($pdo, $donorId) {
 // Add note to donor
 function addDonorNote($pdo, $donorId, $note, $adminId = null) {
     try {
+        // Ensure donor_notes table exists before inserting
+        ensureDonorNotesTableExists($pdo);
         $stmt = $pdo->prepare("INSERT INTO donor_notes (donor_id, note, created_by, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
         $stmt->execute([$donorId, $note, $adminId]);
         return true;
@@ -602,34 +699,13 @@ function addDonorNote($pdo, $donorId, $note, $adminId = null) {
 // Create donor management tables
 function createDonorManagementTables($pdo) {
     try {
-        // Make sure donors.status exists (required by the UI and queries)
+        // Make sure donors.status and extended metadata exist (required by the UI and queries)
         ensureDonorStatusColumnExists($pdo);
         ensureDonorExtendedColumns($pdo);
 
-        // Create donor_notes table
-        $pdo->exec("CREATE TABLE IF NOT EXISTS donor_notes (
-id SERIAL PRIMARY KEY,
-            donor_id INT NOT NULL,
-            note TEXT NOT NULL,
-            created_by VARCHAR(100),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_donor_id (donor_id)
-        )");
-        
-        // Create donations_new table if it doesn't exist
-        $pdo->exec("CREATE TABLE IF NOT EXISTS donations_new (
-id SERIAL PRIMARY KEY,
-            donor_id INT NOT NULL,
-            donation_date DATE NOT NULL,
-            blood_type VARCHAR(10),
-            units_donated INT DEFAULT 1,
-            status ENUM('scheduled', 'completed', 'cancelled') DEFAULT 'scheduled',
-            notes TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            INDEX idx_donor_id (donor_id),
-            INDEX idx_donation_date (donation_date)
-        )");
+        // Ensure supporting tables exist in a driver-safe way
+        ensureDonorNotesTableExists($pdo);
+        ensureDonationsNewTableExists($pdo);
         
         return true;
     } catch (Exception $e) {
