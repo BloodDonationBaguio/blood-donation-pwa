@@ -684,6 +684,7 @@ function getDonorNotes($pdo, $donorId) {
 
 // Add note to donor
 function addDonorNote($pdo, $donorId, $note, $adminId = null) {
+    ensureDonorNotesTableExists($pdo);
     try {
         // Ensure donor_notes table exists before inserting
         ensureDonorNotesTableExists($pdo);

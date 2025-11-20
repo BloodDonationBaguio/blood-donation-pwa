@@ -151,27 +151,42 @@ try {
     try {
         require_once __DIR__ . '/db.php';
         $donationsThisYear = 0;
+        $driver = 'mysql';
+        try { $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)); } catch (Throwable $e) {}
 
-        if (function_exists('tableExists') && tableExists($pdo, 'donations_new')) {
-            $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
-            if ($driver === 'pgsql') {
-                $sql = "SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND EXTRACT(YEAR FROM donation_date) = EXTRACT(YEAR FROM CURRENT_DATE)";
-            } else {
-                $sql = "SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND YEAR(donation_date) = YEAR(CURDATE())";
+        // First try: count completed donations in current year from donations_new
+        try {
+            if (function_exists('tableExists') && tableExists($pdo, 'donations_new')) {
+                if ($driver === 'pgsql') {
+                    $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND EXTRACT(YEAR FROM donation_date) = EXTRACT(YEAR FROM CURRENT_DATE)");
+                } else {
+                    $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND YEAR(donation_date) = YEAR(CURRENT_DATE)");
+                }
+                $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
             }
-            $stmt = $pdo->query($sql);
-            $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
+        } catch (Throwable $e1) {
+            error_log("Error counting donations_new: " . $e1->getMessage());
         }
-
-        // Fallback: served donors count if donations_new is unavailable or empty
-        if ($donationsThisYear === 0 && function_exists('tableExists') && tableExists($pdo, 'donors')) {
-            $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served'");
-            $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
+        
+        // Fallback: count served donors in current year
+        if ($donationsThisYear === 0) {
+            try {
+                if (function_exists('tableExists') && tableExists($pdo, 'donors')) {
+                    if ($driver === 'pgsql') {
+                        $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served' AND EXTRACT(YEAR FROM COALESCE(served_date, created_at)) = EXTRACT(YEAR FROM CURRENT_DATE)");
+                    } else {
+                        $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served' AND YEAR(COALESCE(served_date, created_at)) = YEAR(CURRENT_DATE)");
+                    }
+                    $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
+                }
+            } catch (Throwable $e2) {
+                error_log("Error counting served donors: " . $e2->getMessage());
+            }
         }
     } catch (Throwable $e) {
         $donationsThisYear = 0;
     }
-    ?>
+?>
 <?php
       $localManifest = __DIR__ . '/manifest.json';
       $subManifest = __DIR__ . '/blood-donation-pwa/manifest.json';
