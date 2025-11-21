@@ -21,6 +21,9 @@ RewriteRule ^blood-donation-pwa/(sw\.js|manifest\.json)$ - [L]
 RewriteRule ^(css/.*|assets/.*|js/.*|images/.*|fonts/.*)$ - [L]
 RewriteRule ^blood-donation-pwa/(css/.*|assets/.*|js/.*|images/.*|fonts/.*)$ - [L]
 
+# Allow direct access to test files and diagnostic tools
+RewriteRule ^(test_.*\.php|.*_diagnostic\.php|.*_test\.php|health\.php|optimize_.*\.php|monitoring_.*\.php|connection_.*\.php)$ - [L]
+
 # Front controller: send non-existing paths to index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
