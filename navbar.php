@@ -64,13 +64,13 @@ if ($user_id) {
       <a href="track.php" class="nav-link <?= $is_track ? 'active' : '' ?>">Track</a>
       
       <?php if ($user_id): ?>
-        <div class="nav-dropdown">
+        <div class="nav-dropdown" style="z-index:999999!important;position:relative!important;">
           <a href="#" id="userDropdownToggle" role="button" aria-haspopup="true" aria-expanded="false" onclick="toggleDropdown(event); return false;" class="nav-link user-link">
             <span class="user-icon">👤</span> 
             <span class="user-name"><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></span>
           </a>
-          <div id="userDropdown" class="dropdown-menu" aria-labelledby="userDropdownToggle" role="menu">
-            <a href="dashboard.php" class="dropdown-item" role="menuitem" style="display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;background:yellow!important;color:black!important;">🔥 HISTORY (FIXED)</a>
+          <div id="userDropdown" class="dropdown-menu" aria-labelledby="userDropdownToggle" role="menu" style="z-index:999999!important;position:absolute!important;">
+            <a href="dashboard.php" class="dropdown-item" role="menuitem" style="display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;background:red!important;color:white!important;font-size:16px!important;font-weight:bold!important;border:3px solid lime!important;">🚨 HISTORY - MUST BE VISIBLE 🚨</a>
             <a href="profile.php" class="dropdown-item" role="menuitem">Profile</a>
             <a href="profile.php?tab=settings" class="dropdown-item" role="menuitem">Settings</a>
             <hr class="dropdown-divider">
