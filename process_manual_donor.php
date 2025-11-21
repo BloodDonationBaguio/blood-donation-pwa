@@ -122,7 +122,10 @@ try {
 
     // Insert donor
     $dbEmail = ($email !== '') ? $email : null;
-    if ($dbEmail === null && !isEmailNullable($pdo, $donorsTable)) { $dbEmail = 'no-email+' . strtolower($refNumber) . '@donor.invalid'; }
+    if ($dbEmail === null && !isEmailNullable($pdo, $donorsTable)) { 
+        // Generate a cleaner placeholder email for donors without email
+        $dbEmail = 'noemail.' . strtolower($refNumber) . '@placeholder.local'; 
+    }
     $stmt = $pdo->prepare("INSERT INTO {$donorsTable} (first_name, last_name, email, phone, blood_type, date_of_birth, gender, address, city, province, weight, height, reference_code, status, created_by_admin, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP)");
     $stmt->execute([$firstName, $lastName, $dbEmail, $phone, $dbBloodType, $dob, $gender, $address, $city, $province, $weight, $height, $refNumber, 1]);
     $donorId = (int)$pdo->lastInsertId();
