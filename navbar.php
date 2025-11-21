@@ -131,6 +131,21 @@ if ($user_id) {
   padding: 15px 0 0 0;
 }
 
+/* Mobile navbar adjustments to prevent overlap with disclaimer */
+@media (max-width: 768px) {
+  .main-navbar {
+    padding: 10px 0 0 0;
+    height: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-navbar {
+    padding: 8px 0 0 0;
+    height: 45px;
+  }
+}
+
 .nav-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -357,21 +372,21 @@ body {
 }
 @media (max-width: 768px) {
   .nav-disclaimer { 
-    top: 60px; 
+    top: 50px; 
     font-size: 0.9rem; 
     padding: 8px 10px;
     line-height: 1.3;
-    z-index: 1500;
+    z-index: 2500;
   }
 }
 
 @media (max-width: 480px) {
   .nav-disclaimer { 
-    top: 55px; 
+    top: 45px; 
     font-size: 0.85rem; 
     padding: 6px 8px;
     line-height: 1.2;
-    z-index: 1500;
+    z-index: 2500;
   }
 }
 
