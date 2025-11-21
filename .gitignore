@@ -28,10 +28,10 @@ Thumbs.db
 *.tmp
 *.temp
 
-# Test files
-test_*.php
-fix_*.php
-*_test.php
+# Test files (exclude old test files but allow new diagnostic tools)
+# test_*.php
+# fix_*.php
+# *_test.php
 
 # Personal files
 *.txt

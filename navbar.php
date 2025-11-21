@@ -76,7 +76,16 @@ if ($user_id) {
             <hr class="dropdown-divider">
             <?php
               $isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
-              $logoutUrl = $isAdmin ? '/admin_logout.php' : 'logout.php';
+              $isUser = isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'] === true;
+              
+              // Prioritize user logout over admin if both are set
+              if ($isUser && !$isAdmin) {
+                  $logoutUrl = 'logout.php';
+              } else if ($isAdmin) {
+                  $logoutUrl = '/admin_logout.php';
+              } else {
+                  $logoutUrl = 'logout.php'; // Default to user logout
+              }
             ?>
             <a href="<?= $logoutUrl ?>" class="dropdown-item text-danger" role="menuitem">Logout</a>
           </div>
@@ -98,8 +107,9 @@ if ($user_id) {
     ⚠️ Disclaimer: This website is a student capstone project and is currently under development. It is NOT an official Philippine Red Cross platform.
   </div>
   <style>
-    body { padding-top: 104px; }
-    @media (max-width: 480px) { body { padding-top: 89px; } }
+    body { padding-top: 115px; }
+    @media (max-width: 768px) { body { padding-top: 105px; } }
+    @media (max-width: 480px) { body { padding-top: 95px; } }
   </style>
 <?php endif; ?>
 
@@ -118,7 +128,23 @@ if ($user_id) {
   right: 0;
   z-index: 2000;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  padding: 15px 0 0 0;
+  padding: 15px 0 15px 0;
+  min-height: 70px;
+}
+
+/* Mobile navbar adjustments */
+@media (max-width: 768px) {
+  .main-navbar {
+    padding: 12px 0 12px 0;
+    min-height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-navbar {
+    padding: 10px 0 10px 0;
+    min-height: 55px;
+  }
 }
 
 .nav-container {
@@ -226,6 +252,7 @@ if ($user_id) {
 /* User dropdown */
 .nav-dropdown {
   position: relative;
+  z-index: 3001;
 }
 
 .user-link {
@@ -267,7 +294,9 @@ if ($user_id) {
   min-width: 160px;
   display: none; /* default hidden */
   margin-top: 8px;
-  z-index: 2001;
+  z-index: 3000;
+  overflow: visible;
+  max-height: none;
 }
 
 .dropdown-menu.show {
@@ -275,11 +304,13 @@ if ($user_id) {
 }
 
 .dropdown-item {
-  color: #333;
+  color: #333 !important;
   text-decoration: none;
   padding: 10px 16px;
-  display: block;
+  display: block !important;
   transition: all 0.3s ease;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .dropdown-item:hover {
@@ -334,7 +365,7 @@ body {
 /* Disclaimer banner inside fixed navbar */
 .nav-disclaimer {
   position: fixed;
-  top: 60px;
+  top: 70px;
   left: 0;
   right: 0;
   background: #b00020;
@@ -342,11 +373,25 @@ body {
   text-align: center;
   font-size: 0.95rem;
   padding: 8px 12px;
-  z-index: 1000;
+  z-index: 2500;
   pointer-events: none;
 }
 @media (max-width: 768px) {
-  .nav-disclaimer { top: 50px; font-size: 0.9rem; padding: 10px; }
+  .nav-disclaimer { 
+    top: 60px; 
+    font-size: 0.9rem; 
+    padding: 8px 10px;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-disclaimer { 
+    top: 55px; 
+    font-size: 0.85rem; 
+    padding: 6px 8px;
+    line-height: 1.2;
+  }
 }
 
 /* ========================================
@@ -384,7 +429,7 @@ body {
   /* Mobile menu */
   .nav-menu {
     position: fixed;
-    top: 70px;
+    top: 105px;
     left: 0;
     right: 0;
     background: white;
@@ -395,6 +440,7 @@ body {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease;
+    z-index: 3500;
   }
   
   .nav-menu.active {
@@ -426,6 +472,10 @@ body {
     box-shadow: none;
     margin: 0;
     padding-left: 20px;
+    display: block !important;
+    z-index: 3000;
+    overflow: visible;
+    max-height: none;
   }
   
   .nav-link-btn {
@@ -468,6 +518,15 @@ body {
   .nav-menu {
     gap: 30px;
   }
+}
+
+/* FORCE HISTORY ITEM TO BE VISIBLE */
+.dropdown-item[href="dashboard.php"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  overflow: visible !important;
 }
 </style>
 
