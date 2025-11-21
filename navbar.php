@@ -304,11 +304,13 @@ if ($user_id) {
 }
 
 .dropdown-item {
-  color: #333;
+  color: #333 !important;
   text-decoration: none;
   padding: 10px 16px;
-  display: block;
+  display: block !important;
   transition: all 0.3s ease;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .dropdown-item:hover {
@@ -516,6 +518,15 @@ body {
   .nav-menu {
     gap: 30px;
   }
+}
+
+/* FORCE HISTORY ITEM TO BE VISIBLE */
+.dropdown-item[href="dashboard.php"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  overflow: visible !important;
 }
 </style>
 
