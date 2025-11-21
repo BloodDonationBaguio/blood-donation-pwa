@@ -293,7 +293,7 @@ if ($user_id) {
   min-width: 160px;
   display: none; /* default hidden */
   margin-top: 8px;
-  z-index: 2001;
+  z-index: 3000;
 }
 
 .dropdown-menu.show {
