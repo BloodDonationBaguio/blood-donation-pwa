@@ -427,7 +427,7 @@ body {
   /* Mobile menu */
   .nav-menu {
     position: fixed;
-    top: 70px;
+    top: 105px;
     left: 0;
     right: 0;
     background: white;
@@ -438,6 +438,7 @@ body {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease;
+    z-index: 3500;
   }
   
   .nav-menu.active {
@@ -469,6 +470,10 @@ body {
     box-shadow: none;
     margin: 0;
     padding-left: 20px;
+    display: block !important;
+    z-index: 3000;
+    overflow: visible;
+    max-height: none;
   }
   
   .nav-link-btn {
