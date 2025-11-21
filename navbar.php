@@ -126,7 +126,7 @@ if ($user_id) {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 2000;
+  z-index: 4000;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   padding: 15px 0 15px 0;
   min-height: 70px;
@@ -293,7 +293,7 @@ if ($user_id) {
   padding: 8px 0;
   min-width: 160px;
   display: none; /* default hidden */
-  margin-top: 35px;
+  margin-top: 8px;
   z-index: 5000;
 }
 
