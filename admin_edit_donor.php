@@ -28,7 +28,12 @@ if ($donorId <= 0) {
 }
 
 // Choose donors table dynamically and fetch safely
-$donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+$driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? '');
+if ($driver === 'pgsql') {
+    $donorsTable = 'donors';
+} else {
+    $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+}
 try {
     $stmt = $pdo->prepare("SELECT * FROM {$donorsTable} WHERE id = ?");
     $stmt->execute([$donorId]);
