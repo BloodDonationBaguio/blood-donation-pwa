@@ -108,8 +108,8 @@ if ($user_id) {
   </div>
   <style>
     body { padding-top: 104px; }
-    @media (max-width: 768px) { body { padding-top: 95px; } }
-    @media (max-width: 480px) { body { padding-top: 85px; } }
+    @media (max-width: 768px) { body { padding-top: 105px; } }
+    @media (max-width: 480px) { body { padding-top: 95px; } }
   </style>
 <?php endif; ?>
 
@@ -357,19 +357,21 @@ body {
 }
 @media (max-width: 768px) {
   .nav-disclaimer { 
-    top: 50px; 
+    top: 60px; 
     font-size: 0.9rem; 
     padding: 8px 10px;
     line-height: 1.3;
+    z-index: 1500;
   }
 }
 
 @media (max-width: 480px) {
   .nav-disclaimer { 
-    top: 45px; 
+    top: 55px; 
     font-size: 0.85rem; 
     padding: 6px 8px;
     line-height: 1.2;
+    z-index: 1500;
   }
 }
 
