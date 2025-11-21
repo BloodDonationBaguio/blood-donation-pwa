@@ -69,11 +69,9 @@ if ($user_id) {
             <span class="user-icon">👤</span> 
             <span class="user-name"><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></span>
           </a>
-          <div id="userDropdown" class="dropdown-menu" aria-labelledby="userDropdownToggle" role="menu" style="z-index:999999!important;position:absolute!important;">
-            <a href="dashboard.php" class="dropdown-item" role="menuitem" style="display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;background:red!important;color:white!important;font-size:16px!important;font-weight:bold!important;border:3px solid lime!important;">🚨 HISTORY - MUST BE VISIBLE 🚨</a>
+          <div id="userDropdown" class="dropdown-menu" aria-labelledby="userDropdownToggle" role="menu" style="z-index:999999!important;position:absolute!important;margin-top:40px!important;">
             <a href="profile.php" class="dropdown-item" role="menuitem">Profile</a>
             <a href="profile.php?tab=settings" class="dropdown-item" role="menuitem">Settings</a>
-            <hr class="dropdown-divider">
             <?php
               $isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
               $isUser = isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'] === true;
@@ -88,6 +86,8 @@ if ($user_id) {
               }
             ?>
             <a href="<?= $logoutUrl ?>" class="dropdown-item text-danger" role="menuitem">Logout</a>
+            <hr class="dropdown-divider">
+            <a href="dashboard.php" class="dropdown-item" role="menuitem" style="display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;background:red!important;color:white!important;font-size:16px!important;font-weight:bold!important;border:3px solid lime!important;">🚨 HISTORY 🚨</a>
           </div>
         </div>
       <?php else: ?>
@@ -549,15 +549,21 @@ function toggleDropdown(event) {
     const expanded = dropdown.classList.contains('show');
     toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     
-    // FORCE ADD HISTORY ITEM IF MISSING
-    if (expanded && !dropdown.querySelector('a[href="dashboard.php"]')) {
-      const historyItem = document.createElement('a');
-      historyItem.href = 'dashboard.php';
-      historyItem.className = 'dropdown-item';
-      historyItem.role = 'menuitem';
-      historyItem.style.cssText = 'display:block!important;visibility:visible!important;opacity:1!important;background:lime!important;color:black!important;';
-      historyItem.textContent = ' HISTORY (JS FORCED)';
-      dropdown.insertBefore(historyItem, dropdown.firstChild);
+    // Move dropdown below the disclaimer
+    if (expanded) {
+      // Make sure dropdown is positioned below the disclaimer
+      dropdown.style.top = '130px';
+      dropdown.style.position = 'fixed';
+      dropdown.style.right = '20px';
+      dropdown.style.zIndex = '999999';
+      
+      // Make all dropdown items visible
+      const items = dropdown.querySelectorAll('.dropdown-item');
+      items.forEach(item => {
+        item.style.display = 'block';
+        item.style.visibility = 'visible';
+        item.style.opacity = '1';
+      });
     }
   }
 }
