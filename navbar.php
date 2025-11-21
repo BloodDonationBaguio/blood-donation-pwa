@@ -107,7 +107,7 @@ if ($user_id) {
     ⚠️ Disclaimer: This website is a student capstone project and is currently under development. It is NOT an official Philippine Red Cross platform.
   </div>
   <style>
-    body { padding-top: 104px; }
+    body { padding-top: 115px; }
     @media (max-width: 768px) { body { padding-top: 105px; } }
     @media (max-width: 480px) { body { padding-top: 95px; } }
   </style>
@@ -128,21 +128,22 @@ if ($user_id) {
   right: 0;
   z-index: 2000;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  padding: 15px 0 0 0;
+  padding: 15px 0 15px 0;
+  min-height: 70px;
 }
 
-/* Mobile navbar adjustments to prevent overlap with disclaimer */
+/* Mobile navbar adjustments */
 @media (max-width: 768px) {
   .main-navbar {
-    padding: 10px 0 0 0;
-    height: 50px;
+    padding: 12px 0 12px 0;
+    min-height: 60px;
   }
 }
 
 @media (max-width: 480px) {
   .main-navbar {
-    padding: 8px 0 0 0;
-    height: 45px;
+    padding: 10px 0 10px 0;
+    min-height: 55px;
   }
 }
 
@@ -359,7 +360,7 @@ body {
 /* Disclaimer banner inside fixed navbar */
 .nav-disclaimer {
   position: fixed;
-  top: 60px;
+  top: 70px;
   left: 0;
   right: 0;
   background: #b00020;
@@ -367,26 +368,24 @@ body {
   text-align: center;
   font-size: 0.95rem;
   padding: 8px 12px;
-  z-index: 1000;
+  z-index: 2500;
   pointer-events: none;
 }
 @media (max-width: 768px) {
   .nav-disclaimer { 
-    top: 50px; 
+    top: 60px; 
     font-size: 0.9rem; 
     padding: 8px 10px;
     line-height: 1.3;
-    z-index: 2500;
   }
 }
 
 @media (max-width: 480px) {
   .nav-disclaimer { 
-    top: 45px; 
+    top: 55px; 
     font-size: 0.85rem; 
     padding: 6px 8px;
     line-height: 1.2;
-    z-index: 2500;
   }
 }
 
