@@ -76,7 +76,16 @@ if ($user_id) {
             <hr class="dropdown-divider">
             <?php
               $isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
-              $logoutUrl = $isAdmin ? '/admin_logout.php' : 'logout.php';
+              $isUser = isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'] === true;
+              
+              // Prioritize user logout over admin if both are set
+              if ($isUser && !$isAdmin) {
+                  $logoutUrl = 'logout.php';
+              } else if ($isAdmin) {
+                  $logoutUrl = '/admin_logout.php';
+              } else {
+                  $logoutUrl = 'logout.php'; // Default to user logout
+              }
             ?>
             <a href="<?= $logoutUrl ?>" class="dropdown-item text-danger" role="menuitem">Logout</a>
           </div>
