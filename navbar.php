@@ -64,12 +64,12 @@ if ($user_id) {
       <a href="track.php" class="nav-link <?= $is_track ? 'active' : '' ?>">Track</a>
       
       <?php if ($user_id): ?>
-        <div class="nav-dropdown" style="z-index:999999!important;position:relative!important;">
+        <div class="nav-dropdown">
           <a href="#" id="userDropdownToggle" role="button" aria-haspopup="true" aria-expanded="false" onclick="toggleDropdown(event); return false;" class="nav-link user-link">
             <span class="user-icon">👤</span> 
             <span class="user-name"><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></span>
           </a>
-          <div id="userDropdown" class="dropdown-menu" aria-labelledby="userDropdownToggle" role="menu" style="z-index:999999!important;position:absolute!important;margin-top:40px!important;">
+          <div id="userDropdown" class="dropdown-menu" aria-labelledby="userDropdownToggle" role="menu">
             <a href="profile.php" class="dropdown-item" role="menuitem">Profile</a>
             <a href="profile.php?tab=settings" class="dropdown-item" role="menuitem">Settings</a>
             <?php
@@ -87,7 +87,7 @@ if ($user_id) {
             ?>
             <a href="<?= $logoutUrl ?>" class="dropdown-item text-danger" role="menuitem">Logout</a>
             <hr class="dropdown-divider">
-            <a href="dashboard.php" class="dropdown-item" role="menuitem" style="display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;background:red!important;color:white!important;font-size:16px!important;font-weight:bold!important;border:3px solid lime!important;">🚨 HISTORY 🚨</a>
+            <a href="dashboard.php" class="dropdown-item" role="menuitem">History</a>
           </div>
         </div>
       <?php else: ?>
@@ -252,11 +252,11 @@ if ($user_id) {
 /* User dropdown */
 .nav-dropdown {
   position: relative;
-  z-index: 100000 !important;
+  z-index: 10000;
 }
 
 .user-link {
-  padding: 8px 16px !important;
+  padding: 8px 16px;
   background: #f8f9fa;
   border-radius: 20px;
   display: flex;
@@ -293,8 +293,8 @@ if ($user_id) {
   padding: 8px 0;
   min-width: 160px;
   display: none; /* default hidden */
-  margin-top: 8px;
-  z-index: 99999 !important;
+  margin-top: 35px;
+  z-index: 5000;
 }
 
 .dropdown-menu.show {
@@ -302,13 +302,11 @@ if ($user_id) {
 }
 
 .dropdown-item {
-  color: #333 !important;
+  color: #333;
   text-decoration: none;
   padding: 10px 16px;
-  display: block !important;
+  display: block;
   transition: all 0.3s ease;
-  visibility: visible !important;
-  opacity: 1 !important;
 }
 
 .dropdown-item:hover {
@@ -518,14 +516,6 @@ body {
   }
 }
 
-/* FORCE HISTORY ITEM TO BE VISIBLE */
-.dropdown-item[href="dashboard.php"] {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  overflow: visible !important;
-}
 </style>
 
 <script>
@@ -548,23 +538,6 @@ function toggleDropdown(event) {
     dropdown.classList.toggle('show');
     const expanded = dropdown.classList.contains('show');
     toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-    
-    // Move dropdown below the disclaimer
-    if (expanded) {
-      // Make sure dropdown is positioned below the disclaimer
-      dropdown.style.top = '130px';
-      dropdown.style.position = 'fixed';
-      dropdown.style.right = '20px';
-      dropdown.style.zIndex = '999999';
-      
-      // Make all dropdown items visible
-      const items = dropdown.querySelectorAll('.dropdown-item');
-      items.forEach(item => {
-        item.style.display = 'block';
-        item.style.visibility = 'visible';
-        item.style.opacity = '1';
-      });
-    }
   }
 }
 
