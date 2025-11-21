@@ -70,8 +70,10 @@ if ($user_id) {
             <span class="user-name"><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></span>
           </a>
           <div id="userDropdown" class="dropdown-menu" aria-labelledby="userDropdownToggle" role="menu">
+            <a href="dashboard.php" class="dropdown-item" role="menuitem">History</a>
             <a href="profile.php" class="dropdown-item" role="menuitem">Profile</a>
             <a href="profile.php?tab=settings" class="dropdown-item" role="menuitem">Settings</a>
+            <hr class="dropdown-divider">
             <?php
               $isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
               $isUser = isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'] === true;
@@ -86,8 +88,6 @@ if ($user_id) {
               }
             ?>
             <a href="<?= $logoutUrl ?>" class="dropdown-item text-danger" role="menuitem">Logout</a>
-            <hr class="dropdown-divider">
-            <a href="dashboard.php" class="dropdown-item" role="menuitem">History</a>
           </div>
         </div>
       <?php else: ?>
