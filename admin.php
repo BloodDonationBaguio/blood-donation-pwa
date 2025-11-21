@@ -1559,7 +1559,10 @@ if (!function_exists('buildPaginationUrl')) {
                                                 <td><?= htmlspecialchars($donor['id']) ?></td>
                                                 <td><code><?= htmlspecialchars($donor['reference_code'] ?? $donor['reference'] ?? ($donor['id'] ?? 'N/A')) ?></code></td>
                                                 <td><strong><?= htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) ?></strong></td>
-                                                <td><?= htmlspecialchars($donor['email']) ?></td>
+                                                <td><?php 
+                                                    require_once __DIR__ . '/email_display_helper.php';
+                                                    echo formatEmailForDisplay($donor['email']); 
+                                                ?></td>
                                                 <td><?= htmlspecialchars($donor['phone'] ?? 'N/A') ?></td>
                                                 <td>
                                                     <?php 
@@ -1727,7 +1730,10 @@ if (!function_exists('buildPaginationUrl')) {
                                                 <td><?= htmlspecialchars($donor['id']) ?></td>
                                                 <td><code><?= htmlspecialchars($donor['reference_code'] ?? $donor['reference'] ?? ($donor['id'] ?? 'N/A')) ?></code></td>
                                                 <td><strong><?= htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) ?></strong></td>
-                                                <td><?= htmlspecialchars($donor['email']) ?></td>
+                                                <td><?php 
+                                                    require_once __DIR__ . '/email_display_helper.php';
+                                                    echo formatEmailForDisplay($donor['email']); 
+                                                ?></td>
                                                 <td><?= htmlspecialchars($donor['phone'] ?? 'N/A') ?></td>
                                                 <td>
                                                     <?php 
