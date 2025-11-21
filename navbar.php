@@ -548,6 +548,17 @@ function toggleDropdown(event) {
     dropdown.classList.toggle('show');
     const expanded = dropdown.classList.contains('show');
     toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    
+    // FORCE ADD HISTORY ITEM IF MISSING
+    if (expanded && !dropdown.querySelector('a[href="dashboard.php"]')) {
+      const historyItem = document.createElement('a');
+      historyItem.href = 'dashboard.php';
+      historyItem.className = 'dropdown-item';
+      historyItem.role = 'menuitem';
+      historyItem.style.cssText = 'display:block!important;visibility:visible!important;opacity:1!important;background:lime!important;color:black!important;';
+      historyItem.textContent = ' HISTORY (JS FORCED)';
+      dropdown.insertBefore(historyItem, dropdown.firstChild);
+    }
   }
 }
 
