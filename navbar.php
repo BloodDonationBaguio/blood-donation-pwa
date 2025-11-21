@@ -252,7 +252,7 @@ if ($user_id) {
 /* User dropdown */
 .nav-dropdown {
   position: relative;
-  z-index: 10000;
+  z-index: 100000 !important;
 }
 
 .user-link {
@@ -294,7 +294,7 @@ if ($user_id) {
   min-width: 160px;
   display: none; /* default hidden */
   margin-top: 8px;
-  z-index: 9999;
+  z-index: 99999 !important;
 }
 
 .dropdown-menu.show {
