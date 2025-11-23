@@ -1139,7 +1139,25 @@ if (!function_exists('buildPaginationUrl')) {
                                                             <strong><?= htmlspecialchars($activity['name']) ?></strong>
                                                             <br>
                                                             <small class="text-muted">
-                                                                <?= $activity['type'] === 'donor' ? 'Donor Registration' : 'Blood Request' ?> - 
+                                                                <?php
+                                                                // Determine activity type based on action_type from audit log
+                                                                $activityType = 'Unknown Activity';
+                                                                if ($activity['type'] === 'audit') {
+                                                                    $actionType = strtolower($activity['status']);
+                                                                    if (strpos($actionType, 'donor') !== false) {
+                                                                        $activityType = 'Donor Activity';
+                                                                    } elseif (strpos($actionType, 'blood') !== false || strpos($actionType, 'request') !== false) {
+                                                                        $activityType = 'Blood Request';
+                                                                    } elseif (strpos($actionType, 'inventory') !== false) {
+                                                                        $activityType = 'Inventory Activity';
+                                                                    } else {
+                                                                        $activityType = 'System Activity';
+                                                                    }
+                                                                } elseif ($activity['type'] === 'donor') {
+                                                                    $activityType = 'Donor Registration';
+                                                                }
+                                                                echo $activityType;
+                                                                ?> - 
                                                                 <?= date('M d, Y H:i', strtotime($activity['created_at'])) ?>
                                                             </small>
                                                         </div>
