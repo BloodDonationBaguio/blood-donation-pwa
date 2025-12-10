@@ -552,7 +552,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif (strpos($errorMsg, 'Duplicate entry') !== false) {
                 $errors[] = "An account with this email address already exists. Please use a different email or contact support.";
             } else {
-                $errors[] = "An error occurred while processing your registration. Please try again later.";
+                // Temporarily surface the real database error so we can fix it quickly
+                $errors[] = "Registration failed: " . $e->getMessage();
             }
             
             // Log the error for debugging
