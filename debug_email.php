@@ -21,11 +21,8 @@ echo "MAIL_PASS: " . (getenv('MAIL_PASS') ? 'SET' : 'NOT SET') . "\n";
 echo "MAIL_PORT: " . (getenv('MAIL_PORT') ?: 'NOT SET') . "\n";
 echo "MAIL_SECURE: " . (getenv('MAIL_SECURE') ?: 'NOT SET') . "\n";
 echo "MAIL_FROM: " . (getenv('MAIL_FROM') ?: 'NOT SET') . "\n";
-echo "MAIL_FROM_NAME: " . (getenv('MAIL_FROM_NAME') ?: 'NOT SET') . "\n\n";
-
-echo "Attempting to send via helper...\n";
-$result = send_confirmation_email($testTo, $testSubject, $testMessage, $testName);
-echo "Result: " . ($result ? 'SUCCESS' : 'FAILED') . "\n\n";
+echo "MAIL_FROM_NAME: " . (getenv('MAIL_FROM_NAME') ?: 'NOT SET') . "\n";
+echo "SENDGRID_API_KEY: " . (getenv('SENDGRID_API_KEY') ? 'SET' : 'NOT SET') . "\n\n";
 
 echo "Attempting plain PHP mail() test...\n";
 $plainSubject = 'Plain Test from Blood Donation System - ' . date('Y-m-d H:i:s');
@@ -34,15 +31,27 @@ $plainHeaders = "From: Blood Donation System <prc.baguio.blood@gmail.com>\r\n";
 $plainResult = mail($testTo, $plainSubject, $plainBody, $plainHeaders);
 echo "Plain mail() result: " . ($plainResult ? 'SUCCESS' : 'FAILED') . "\n\n";
 
+echo "Attempting direct SendGrid API test...\n";
+if (file_exists(__DIR__ . '/includes/sendgrid_helper.php') && function_exists('sendgrid_send_email')) {
+    $sgResult = sendgrid_send_email($testTo, $testSubject, $testMessage, $testName);
+    echo "SendGrid API result: " . ($sgResult ? 'SUCCESS' : 'FAILED') . "\n\n";
+} else {
+    echo "SendGrid helper not available.\n\n";
+}
+
+echo "Attempting to send via helper...\n";
+$result = send_confirmation_email($testTo, $testSubject, $testMessage, $testName);
+echo "Helper result: " . ($result ? 'SUCCESS' : 'FAILED') . "\n\n";
+
 echo "Recent logs:\n";
 $logDir = __DIR__ . '/logs';
 $errorLog = $logDir . '/email_errors.log';
 $successLog = $logDir . '/email_success.log';
 
 if (file_exists($errorLog)) {
-    echo "--- Last 15 lines of email_errors.log ---\n";
+    echo "--- Last 20 lines of email_errors.log ---\n";
     $lines = file($errorLog, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach (array_slice($lines, -15) as $line) {
+    foreach (array_slice($lines, -20) as $line) {
         echo $line . "\n";
     }
 } else {
@@ -52,9 +61,9 @@ if (file_exists($errorLog)) {
 echo "\n";
 
 if (file_exists($successLog)) {
-    echo "--- Last 15 lines of email_success.log ---\n";
+    echo "--- Last 20 lines of email_success.log ---\n";
     $lines = file($successLog, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach (array_slice($lines, -15) as $line) {
+    foreach (array_slice($lines, -20) as $line) {
         echo $line . "\n";
     }
 } else {
