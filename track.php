@@ -15,7 +15,7 @@ $donor = null;
 $type = '';
 
 function resolveDonorTrackingSource(PDO $pdo) {
-    $candidates = ['donors_new', 'donors'];
+    $candidates = ['donors', 'donors_new'];
     foreach ($candidates as $table) {
         try {
             $columns = [];
