@@ -458,28 +458,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                 }
                 echo "</div>";
             } else {
-                echo "<div class='alert alert-warning'>";
-                echo "<i class='fas fa-exclamation-triangle me-2'></i>";
-                echo "<strong>Medical Screening Status:</strong> ";
-                echo "<span class='badge bg-secondary'>Not Completed</span>";
-                echo "</div>";
-                
-                echo "<div class='alert alert-warning'>";
-                echo "<i class='fas fa-exclamation-triangle me-2'></i>";
-                echo "<strong>Medical screening questionnaire not completed.</strong><br>";
-                echo "This donor has registered but has not completed the medical screening questionnaire yet. ";
-                echo "The donor needs to complete the medical screening before they can be approved for donation.";
-                echo "</div>";
-                
-                echo "<div class='mt-3'>";
-                echo "<h6><i class='fas fa-clipboard-list me-2'></i>Next Steps:</h6>";
-                echo "<ul>";
-                echo "<li>Contact the donor to complete the medical screening questionnaire</li>";
-                echo "<li>Ensure all required health questions are answered</li>";
-                echo "<li>Review responses before approval</li>";
-                echo "<li>Update donor status once screening is complete</li>";
-                echo "</ul>";
-                echo "</div>";
+                // Donor exists but no medical screening record found.
+                // Since registration requires completing the questionnaire, this state should not occur in practice.
+                // We'll omit the misleading "Not Completed" message to avoid confusion.
+                echo "<div class='alert alert-info'>";
+                echo "<i class='fas fa-info-circle me-2'></i>";
+                echo "<strong>Medical Screening:</strong> No screening record on file (this should not happen for registered donors).</div>";
             }
             echo "</div>";
             
