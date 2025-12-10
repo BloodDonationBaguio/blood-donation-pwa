@@ -27,21 +27,15 @@ if (ini_get("session.use_cookies")) {
 // Destroy the session
 session_destroy();
 
-// Redirect based on user type - prioritize user logout when coming from public pages
+// Redirect based on where the logout was triggered
 $referrer = $_SERVER['HTTP_REFERER'] ?? '';
 $isAdminContext = strpos($referrer, '/admin') !== false || strpos($referrer, 'admin.php') !== false;
 
-if ($isUserLogout && !$isAdminLogout) {
-    // Regular user logout - redirect to homepage
-    header('Location: /index.php?logout=success');
-} elseif ($isUserLogout && $isAdminLogout && !$isAdminContext) {
-    // Both logged in but coming from public pages -> treat as user logout
-    header('Location: /index.php?logout=success');
-} elseif ($isAdminLogout) {
-    // Admin logout or from admin context - redirect to admin login
+if ($isAdminContext) {
+    // Logout from admin pages -> go to admin login
     header('Location: /admin-login.php?logout=success');
 } else {
-    // Default case - redirect to homepage
+    // Logout from public pages -> go to homepage
     header('Location: /index.php?logout=success');
 }
 exit();
