@@ -167,6 +167,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
             echo "<h4><i class='fas fa-stethoscope me-2'></i>Medical Screening Information</h4>";
             
             // Check simple screening first
+            error_log("Checking medical screening for donor ID: $donorId");
+            error_log("medicalScreeningSimple found: " . ($medicalScreeningSimple ? 'YES' : 'NO'));
+            error_log("screening_data empty check: " . (!empty($medicalScreeningSimple['screening_data']) ? 'HAS DATA' : 'NO DATA'));
+            if ($medicalScreeningSimple) {
+                error_log("Raw screening_data: " . $medicalScreeningSimple['screening_data']);
+            }
             if (!empty($medicalScreeningSimple) && !empty($medicalScreeningSimple['screening_data'])) {
                 $answers = json_decode($medicalScreeningSimple['screening_data'], true);
                 $allQuestionsAnswered = !empty($medicalScreeningSimple['all_questions_answered']);
