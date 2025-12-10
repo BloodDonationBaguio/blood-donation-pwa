@@ -4,6 +4,7 @@ require_once __DIR__ . '/phpmailer/src/PHPMailer.php';
 require_once __DIR__ . '/phpmailer/src/SMTP.php';
 require_once __DIR__ . '/phpmailer/src/Exception.php';
 require_once __DIR__ . '/email_queue_helper.php';
+require_once __DIR__ . '/sendgrid_helper.php';
 // Enable error reporting for debugging (log only, no display)
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -54,24 +55,17 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 		@mkdir($logDir, 0755, true);
 	}
 	
-	// Read configuration from environment
-	$fromEmail  = getenv('MAIL_FROM') ?: 'prc.baguio.blood@gmail.com';
-	$fromName   = getenv('MAIL_FROM_NAME') ?: 'Blood Donation System';
+    $fromEmail  = getenv('MAIL_FROM') ?: 'prc.baguio.blood@gmail.com';
+    $fromName   = getenv('MAIL_FROM_NAME') ?: 'Blood Donation System';
 	
-	// Primary: SendGrid API
-	if (file_exists(__DIR__ . '/sendgrid_helper.php') && function_exists('sendgrid_send_email')) {
-		try {
-			$sgSuccess = sendgrid_send_email($to, $subject, $htmlMessage, $toName, $fromEmail, $fromName);
-			if ($sgSuccess) {
-				@file_put_contents($successLog, date('Y-m-d H:i:s') . " - SendGrid API SENT to $to\n", FILE_APPEND);
-				return true;
-			} else {
-				@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - SendGrid API FAILED to $to\n", FILE_APPEND);
-			}
-		} catch (Exception $e) {
-			@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - SendGrid API Exception to $to: " . $e->getMessage() . "\n", FILE_APPEND);
-		}
-	}
+    $sgSuccess = false;
+    if (function_exists('sendgrid_send_email')) {
+        $sgSuccess = sendgrid_send_email($to, $subject, $htmlMessage, $toName, $fromEmail, $fromName);
+        @file_put_contents($sgSuccess ? $successLog : $errorLog, date('Y-m-d H:i:s') . ' - SendGrid API ' . ($sgSuccess ? 'SENT' : 'FAILED') . " to $to\n", FILE_APPEND);
+        if ($sgSuccess) {
+            return true;
+        }
+    }
 	
 	// Fallback: SMTP
 	$mailHost   = getenv('MAIL_HOST') ?: 'smtp.sendgrid.net';
@@ -80,7 +74,7 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 	$mailPort   = (int)(getenv('MAIL_PORT') ?: 587);
 	$mailSecure = strtolower(getenv('MAIL_SECURE') ?: 'tls');
 	
-	if (!empty($mailPass)) {
+    if (!$sgSuccess && !empty($mailPass)) {
 		try {
 			$mail = new PHPMailer\PHPMailer\PHPMailer(true);
 			$mail->isSMTP();
@@ -110,16 +104,20 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 			$mail->Body = $htmlMessage;
 			$mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $htmlMessage));
 			
-			if ($mail->send()) {
-				@file_put_contents($successLog, date('Y-m-d H:i:s') . " - SMTP SENT to $to\n", FILE_APPEND);
-				return true;
-			}
+            if ($mail->send()) {
+                @file_put_contents($successLog, date('Y-m-d H:i:s') . " - SMTP SENT to $to\n", FILE_APPEND);
+                return true;
+            }
 		} catch (Exception $e) {
 			@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - SMTP Exception to $to: " . $e->getMessage() . "\n", FILE_APPEND);
 		}
 	}
 	
-	// Fallback to PHP native mail
+    if ($sgSuccess) {
+        return true;
+    }
+    
+    // Fallback to PHP native mail
 	$headers = "From: $fromName <$fromEmail>\r\n";
 	$headers .= "Reply-To: $fromName <$fromEmail>\r\n";
 	$headers .= "MIME-Version: 1.0\r\n";
