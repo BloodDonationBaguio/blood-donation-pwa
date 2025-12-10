@@ -291,32 +291,20 @@ try {
         $id = (int)$_GET['mark_unserved'];
         $reason = $_GET['reason'] ?? 'No show';
         try {
-            // Update status first
-            $stmt = $pdo->prepare("UPDATE donors SET status = 'unserved' WHERE id = ?");
-            $result = $stmt->execute([$id]);
-            
-            if ($result) {
-                // Try to update unserved_reason if column exists
-                try {
-                    $reasonStmt = $pdo->prepare('UPDATE donors SET unserved_reason = ? WHERE id = ?');
-                    $reasonStmt->execute([$reason, $id]);
-                } catch (PDOException $e) {
-                    // Column might not exist, that's okay
-                    error_log("unserved_reason column might not exist: " . $e->getMessage());
-                }
-                
-                // Log the action
-                logAdminAction($pdo, 'donor_marked_unserved', 'donors', $id, "Donor marked as unserved with reason: $reason");
-                
+            require_once __DIR__ . '/includes/enhanced_donor_management.php';
+            $ok = markDonorUnserved($pdo, $id, $reason, '');
+            if ($ok) {
                 header('Location: ?tab=donor-list&success=Donor was marked as unserved successfully.');
                 exit();
             } else {
-                header('Location: ?tab=donor-list&error=Failed to update donor status.');
+                $ei = $pdo->errorInfo();
+                $err = isset($ei[2]) ? $ei[2] : 'Unknown database error';
+                header('Location: ?tab=donor-list&error=' . urlencode('Failed to mark donor as unserved: ' . $err));
                 exit();
             }
-        } catch (PDOException $e) {
+        } catch (Throwable $e) {
             error_log("Error marking donor as unserved: " . $e->getMessage());
-            header('Location: ?tab=donor-list&error=Database error occurred.');
+            header('Location: ?tab=donor-list&error=' . urlencode('Server error occurred: ' . $e->getMessage()));
             exit();
         }
     }

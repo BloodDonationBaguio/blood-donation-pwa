@@ -258,7 +258,7 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
                     . "<p>Your status has been updated to: <strong>" . ucfirst($newStatus) . "</strong>.</p>"
                     . "<p><strong>Remarks from admin:</strong><br>" . nl2br(htmlspecialchars($notes)) . "</p>"
                     . "<p>Thank you for your participation in our blood donation program.</p>";
-                @send_confirmation_email($donor['email'], $subject, $message);
+                send_confirmation_email($donor['email'], $subject, $message);
             }
         }
         
@@ -300,12 +300,12 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
                     . "<p>You may donate blood again after 90 days (3 months). We will be happy to welcome you back when you are eligible.</p>"
                     . (!empty($notes) ? ("<p><strong>Additional Notes:</strong><br>" . nl2br(htmlspecialchars($notes)) . "</p>") : '')
                     . "<p>With gratitude,<br>Philippine Red Cross – Baguio Chapter</p>";
-                @send_confirmation_email($donor['email'], $subject, $message);
+                send_confirmation_email($donor['email'], $subject, $message);
             } elseif ($newStatus === 'approved') {
                 $subject = "Blood Donation Application Approved - Reference: {$donor['reference_code']}";
                 $message = "<h2>Your Application is Approved</h2><p>Dear {$donor['first_name']} {$donor['last_name']}, your application was approved. You may visit our center at your convenience.</p>"
                     . (!empty($notes) ? ("<p><strong>Remarks:</strong><br>" . nl2br(htmlspecialchars($notes)) . "</p>") : '');
-                @send_confirmation_email($donor['email'], $subject, $message);
+                send_confirmation_email($donor['email'], $subject, $message);
             } elseif ($newStatus === 'unserved') {
                 $subject = "Blood Donation Not Completed – Philippine Red Cross Baguio Chapter";
                 $message = "<p>Dear {$donor['first_name']} {$donor['last_name']},</p>"
@@ -319,7 +319,16 @@ function updateDonorStatus($pdo, $donorId, $newStatus, $notes = '', $adminId = n
                     . "<p>Your donation will help patients in need. We look forward to seeing you soon.</p>"
                     . (!empty($notes) ? ("<p><strong>Additional Notes:</strong><br>" . nl2br(htmlspecialchars($notes)) . "</p>") : '')
                     . "<p>Sincerely,<br>Philippine Red Cross – Baguio Chapter</p>";
-                @send_confirmation_email($donor['email'], $subject, $message);
+                send_confirmation_email($donor['email'], $subject, $message);
+            } else {
+                $subject = "Your Application Status Updated";
+                $displayStatus = getDonorDisplayStatus($newStatus);
+                $message = "<h3>Application Update</h3>"
+                    . "<p>Dear " . htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) . ",</p>"
+                    . "<p>Your status has been updated to: <strong>" . htmlspecialchars($displayStatus) . "</strong>.</p>"
+                    . (!empty($notes) ? ("<p><strong>Remarks from admin:</strong><br>" . nl2br(htmlspecialchars($notes)) . "</p>") : '')
+                    . "<p>Thank you for your participation in our blood donation program.</p>";
+                send_confirmation_email($donor['email'], $subject, $message);
             } elseif ($newStatus === 'rejected') {
                 $subject = "Important Update on Your Blood Donation Eligibility – Philippine Red Cross Baguio Chapter";
                 $message = "<p>Dear {$donor['first_name']} {$donor['last_name']},</p>"
