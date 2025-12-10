@@ -9,7 +9,17 @@ if (!file_exists($logDir)) {
 }
 ini_set('error_log', $logDir . '/error.log');
 
-// Get database URL from Render PostgreSQL
+// Prefer Supabase configuration when available (or when only PostgreSQL is present)
+$hasSupabaseEnv = getenv('SUPABASE_URL') || getenv('SUPABASE_DB_HOST') || getenv('SUPABASE_DB_PASSWORD');
+$hasPg = extension_loaded('pdo_pgsql');
+$hasMy = extension_loaded('pdo_mysql');
+
+if ($hasSupabaseEnv || ($hasPg && !$hasMy)) {
+    require_once __DIR__ . '/supabase_db.php';
+    return;
+}
+
+// Legacy Render PostgreSQL support via DATABASE_URL (fallback)
 $database_url = getenv('DATABASE_URL');
 
 if ($database_url) {
