@@ -609,9 +609,6 @@ try {
         if ($statusFilter) {
             $sql .= ' AND d.status = ?';
             $params[] = $statusFilter;
-        } else {
-            // Exclude pending donors by default in All Donors view
-            $sql .= " AND d.status <> 'pending'";
         }
         
         if ($bloodTypeFilter) {
@@ -947,21 +944,6 @@ if (!function_exists('buildPaginationUrl')) {
         <li class="nav-item">
             <a class="nav-link" href="admin_blood_inventory_modern.php">
                 <i class="fas fa-tint"></i> Blood Inventory
-            </a>
-        </li>
-        <?php
-        $queueDir = __DIR__ . '/email_queue';
-        $queuedCount = 0;
-        if (is_dir($queueDir)) {
-            $queuedCount = count(glob($queueDir . '/*.json'));
-        }
-        ?>
-        <li class="nav-item">
-            <a class="nav-link" href="admin_email_queue.php">
-                <i class="fas fa-envelope"></i> Email Queue
-                <?php if ($queuedCount > 0): ?>
-                    <span class="badge bg-warning text-dark ms-2"><?= $queuedCount ?></span>
-                <?php endif; ?>
             </a>
         </li>
         <li class="nav-item">
