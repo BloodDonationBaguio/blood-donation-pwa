@@ -19,14 +19,31 @@ $format = (isset($_GET['format']) && strtolower((string)$_GET['format']) === 'js
 function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
 // Attempt to include a DB connector from common locations
-$dbIncludePaths = [
-    __DIR__ . '/db_production.php',
-    __DIR__ . '/db.php',
-    __DIR__ . '/blood-donation-pwa/db_production.php',
-    __DIR__ . '/blood-donation-pwa/db.php',
-    __DIR__ . '/__zip_restore/blood-donation-pwa/db_production.php',
-    __DIR__ . '/__zip_restore/blood-donation-pwa/db.php',
-];
+$dbIncludePaths = [];
+$hasSupabaseEnv = getenv('SUPABASE_URL') || getenv('SUPABASE_DB_HOST') || getenv('SUPABASE_DB_PASSWORD');
+$hasPg = extension_loaded('pdo_pgsql');
+$hasMy = extension_loaded('pdo_mysql');
+
+if ($hasSupabaseEnv || ($hasPg && !$hasMy)) {
+	$dbIncludePaths = [
+		__DIR__ . '/supabase_db.php',
+		__DIR__ . '/db.php',
+		__DIR__ . '/blood-donation-pwa/db.php',
+		__DIR__ . '/db_production.php',
+		__DIR__ . '/blood-donation-pwa/db_production.php',
+		__DIR__ . '/__zip_restore/blood-donation-pwa/db.php',
+		__DIR__ . '/__zip_restore/blood-donation-pwa/db_production.php',
+	];
+} else {
+	$dbIncludePaths = [
+		__DIR__ . '/db.php',
+		__DIR__ . '/db_production.php',
+		__DIR__ . '/blood-donation-pwa/db.php',
+		__DIR__ . '/blood-donation-pwa/db_production.php',
+		__DIR__ . '/__zip_restore/blood-donation-pwa/db.php',
+		__DIR__ . '/__zip_restore/blood-donation-pwa/db_production.php',
+	];
+}
 
 $includedDb = false;
 foreach ($dbIncludePaths as $p) {

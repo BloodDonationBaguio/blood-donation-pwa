@@ -1,6 +1,10 @@
 <?php
 // Environment-aware DB config: Prefer Supabase Postgres via DB password; fallback to Render; else MySQL
-if (getenv('SUPABASE_DB_PASSWORD') || getenv('SUPABASE_CONNECTION_STRING')) {
+if (extension_loaded('pdo_pgsql') && !extension_loaded('pdo_mysql')) {
+    require_once __DIR__ . '/supabase_db.php';
+    return;
+}
+if (getenv('SUPABASE_DB_PASSWORD') || getenv('SUPABASE_CONNECTION_STRING') || getenv('SUPABASE_URL') || getenv('SUPABASE_DB_HOST')) {
     require_once __DIR__ . '/supabase_db.php';
     return;
 }
