@@ -12,8 +12,8 @@ RUN a2enmod rewrite
 # Copy application
 COPY . /var/www/html/
 
-# Use env-aware connector. Do NOT overwrite db.php.
-# The application will auto-detect Supabase/DATABASE_URL/MySQL via `db.php`.
+# Copy production db config as db.php
+RUN cp /var/www/html/db_production.php /var/www/html/db.php
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \

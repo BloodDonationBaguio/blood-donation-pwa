@@ -291,65 +291,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     if ($savedDonor) {
                         error_log("Verified: Donor saved with ID: {$savedDonor['id']}");
-                        
-                        // Save medical screening data WITHIN the same transaction
-                        error_log('Saving medical screening data for donor ID ' . $donorId);
-                        
+                        $pdo->commit();
+                        error_log('Transaction committed: donor registration saved');
                         try {
-                            // Check if all questions were answered
-                            // For males: questions 1-32 (skip female-specific 33-37)
-                            // For females: all questions 1-37
-                            $requiredQuestions = ($gender === 'Female') ? 37 : 32;
-                            $actualAnswered = count(array_filter($medical, function($answer) {
-                                return !empty($answer) && $answer !== '';
-                            }));
-                            
-                            $allAnswered = $actualAnswered >= $requiredQuestions;
-                            error_log("Medical screening validation: $actualAnswered answered out of $requiredQuestions required (gender: $gender)");
-                            
-                            // Validate medical data before saving
-                            if (empty($medical)) {
-                                throw new Exception("Medical screening data is empty");
+                            if (function_exists('tableExists') && tableExists($pdo, 'donor_medical_screening_simple')) {
+                                $requiredQuestions = ($gender === 'Female') ? 37 : 32;
+                                $actualAnswered = count(array_filter($medical, function($answer) { return !empty($answer) && $answer !== ''; }));
+                                $allAnswered = $actualAnswered >= $requiredQuestions;
+                                $medicalStmt = $pdo->prepare("INSERT INTO donor_medical_screening_simple (donor_id, reference_code, screening_data, all_questions_answered) VALUES (?, ?, ?, ?)");
+                                $medicalStmt->execute([$donorId, $refNumber, json_encode($medical), $allAnswered ? 1 : 0]);
+                                error_log('Medical screening data saved after commit');
+                            } else {
+                                error_log('Medical screening table missing, skipping save');
                             }
-                            
-                            // Save to simple medical screening table
-                            $medicalStmt = $pdo->prepare("
-                                INSERT INTO donor_medical_screening_simple 
-                                (donor_id, reference_code, screening_data, all_questions_answered) 
-                                VALUES (?, ?, ?, ?)
-                            ");
-                            
-                            $medicalStmt->execute([
-                                $donorId,
-                                $refNumber,
-                                json_encode($medical),
-                                $allAnswered ? 1 : 0
-                            ]);
-                            
-                            error_log('Medical screening data saved successfully in transaction');
-                            
-                            // Verify medical screening was actually saved
-                            $verifyMedicalStmt = $pdo->prepare("SELECT id, all_questions_answered FROM donor_medical_screening_simple WHERE donor_id = ?");
-                            $verifyMedicalStmt->execute([$donorId]);
-                            $savedMedical = $verifyMedicalStmt->fetch();
-                            
-                            if (!$savedMedical) {
-                                throw new Exception("Medical screening data verification failed - not found in database");
-                            }
-                            
-                            error_log("Medical screening verified: ID {$savedMedical['id']}, Questions answered: " . ($savedMedical['all_questions_answered'] ? 'Yes' : 'No'));
-                            
-                            // NOW commit both donor registration AND medical screening together
-                            $pdo->commit();
-                            error_log('Transaction committed: both donor registration and medical screening saved and verified');
-                            
                         } catch (Exception $medicalError) {
-                            // If medical screening fails, rollback the entire transaction
-                            $pdo->rollBack();
-                            error_log('Medical screening failed, rolling back entire transaction: ' . $medicalError->getMessage());
-                            $errors[] = "Registration failed: Unable to save medical screening data. Please try again.";
-                            // Don't continue with email sending
-                            throw $medicalError;
+                            error_log('Medical screening save failed after commit: ' . $medicalError->getMessage());
                         }
                         
                         // Send confirmation email before redirect

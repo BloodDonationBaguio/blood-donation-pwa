@@ -3793,3 +3793,8 @@ Stack trace:
 [12-Nov-2025 22:17:14 Asia/Manila] ✓ Admin audit log inserted: unit_created for unit 372 by system
 [12-Nov-2025 22:17:14 Asia/Manila] DeleteUnit: attempting commit
 [12-Nov-2025 22:17:14 Asia/Manila] DeleteUnit: not in transaction, skipping commit
+[20-Nov-2025 17:52:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[20-Nov-2025 17:52:02 Europe/Berlin] DB connect failed for root@127.0.0.1:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[20-Nov-2025 17:52:02 Europe/Berlin] DB connect failed for root@localhost:3306/blood_system: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+[20-Nov-2025 17:52:02 Europe/Berlin] Database connection established successfully
+[20-Nov-2025 17:52:02 Europe/Berlin] Error checking if table exists (donations_new): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '?' at line 1

@@ -1,18 +1,9 @@
 <?php
-// Environment-aware DB config: Prefer Supabase Postgres first, then Render (DATABASE_URL), else local MySQL
-if (
-    getenv('SUPABASE_DB_PASSWORD') || getenv('SUPABASE_CONNECTION_STRING') || getenv('SUPABASE_URL') || getenv('SUPABASE_DB_HOST') || getenv('NEXT_PUBLIC_SUPABASE_URL') ||
-    (!empty($_ENV['SUPABASE_URL']) || !empty($_SERVER['SUPABASE_URL'])) ||
-    (!empty($_ENV['SUPABASE_DB_PASSWORD']) || !empty($_SERVER['SUPABASE_DB_PASSWORD']))
-) {
-    require_once __DIR__ . '/supabase_db.php';
-    return;
-}
+// Environment-aware DB config: PostgreSQL on Render (DATABASE_URL), MySQL locally
 if (getenv('DATABASE_URL')) {
     require_once __DIR__ . '/db_production.php';
     return;
 }
-
 // Local/dev fallback: MySQL
 
 // Check if this file is being included directly
@@ -165,42 +156,21 @@ if (!function_exists('tableExists')) {
 
     /**
      * Check if a table exists in the database
-     *
-     * Uses the underlying PDO driver to select the most appropriate
-     * detection strategy and avoids double‑quoting issues.
-     *
-     * @param PDO    $pdo   Database connection
+     * 
+     * @param PDO $pdo Database connection
      * @param string $table Table name
      * @return bool
      */
     function tableExists($pdo, $table) {
         try {
-            $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? '');
-
-            if ($driver === 'sqlite') {
-                $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = :t");
-                $stmt->execute([':t' => $table]);
-                return $stmt->fetchColumn() !== false;
+            if (DB_TYPE === 'sqlite') {
+                $result = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='" . $pdo->quote($table) . "'");
+            } else {
+                $result = $pdo->query("SHOW TABLES LIKE '" . $pdo->quote($table) . "'");
             }
-
-            if ($driver === 'mysql') {
-                $stmt = $pdo->prepare("SHOW TABLES LIKE :t");
-                $stmt->execute([':t' => $table]);
-                return $stmt->rowCount() > 0;
-            }
-
-            if ($driver === 'pgsql') {
-                // Use to_regclass which returns NULL when the relation does not exist
-                $stmt = $pdo->prepare("SELECT to_regclass(:t)");
-                $stmt->execute([':t' => $table]);
-                return $stmt->fetchColumn() !== null;
-            }
-
-            // Generic fallback: try a simple select
-            $stmt = $pdo->query("SELECT 1 FROM {$table} LIMIT 1");
-            return $stmt !== false;
+            return $result->rowCount() > 0;
         } catch (PDOException $e) {
-            error_log("Error checking if table exists ({$table}): " . $e->getMessage());
+            error_log("Error checking if table exists: " . $e->getMessage());
             return false;
         }
     }
