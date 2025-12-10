@@ -2,7 +2,6 @@
 // SendGrid API mail helper
 if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../vendor/autoload.php';
-    use SendGrid\Mail\Mail;
 }
 
 function sendgrid_send_email($to, $subject, $htmlMessage, $toName = '', $from = null, $fromName = null) {
@@ -18,7 +17,7 @@ function sendgrid_send_email($to, $subject, $htmlMessage, $toName = '', $from = 
     }
     $from = $from ?: (getenv('MAIL_FROM') ?: 'prc.baguio.blood@gmail.com');
     $fromName = $fromName ?: 'Blood Donation System';
-    $email = new Mail();
+    $email = new \SendGrid\Mail\Mail();
     $email->setFrom($from, $fromName);
     $email->setSubject($subject);
     $email->addTo($to, $toName ?: $to);
