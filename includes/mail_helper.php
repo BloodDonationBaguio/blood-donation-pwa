@@ -36,57 +36,43 @@ if (php_sapi_name() !== 'cli') {
 
 /**
  * Send a confirmation email with HTML content using PHPMailer with SMTP
- * 
+ * Falls back to PHP native mail if SMTP fails.
+ *
  * @param string $to Recipient email address
  * @param string $subject Email subject
  * @param string $htmlMessage HTML formatted message
  * @param string $toName Optional recipient name
  * @return bool True if email was sent successfully, false otherwise
  */
-require_once __DIR__ . '/sendgrid_helper.php';
 function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
-	// Create a new PHPMailer instance
-	$mail = new PHPMailer\PHPMailer\PHPMailer(true);
-	
 	// Set up logging
 	$logDir = __DIR__ . '/../logs';
-	$debugLog = $logDir . '/mail_debug.log';
 	$errorLog = $logDir . '/email_errors.log';
 	$successLog = $logDir . '/email_success.log';
-	
-	// Ensure logs directory exists and is writable
 	if (!file_exists($logDir)) {
 		@mkdir($logDir, 0755, true);
 	}
 	
 	// Read configuration from environment
 	$mailHost   = getenv('MAIL_HOST') ?: 'smtp.sendgrid.net';
-	$mailUser   = getenv('MAIL_USER') ?: 'apikey'; // SendGrid requires literal 'apikey'
+	$mailUser   = getenv('MAIL_USER') ?: 'apikey';
 	$mailPass   = getenv('MAIL_PASS') ?: '';
 	$mailPort   = (int)(getenv('MAIL_PORT') ?: 587);
 	$mailSecure = strtolower(getenv('MAIL_SECURE') ?: 'tls');
 	$fromEmail  = getenv('MAIL_FROM') ?: 'prc.baguio.blood@gmail.com';
 	$fromName   = getenv('MAIL_FROM_NAME') ?: 'Blood Donation System';
 	
-	$useSmtp = !empty($mailPass);
-	
-	// Attempt SMTP first (preferred)
-	if ($useSmtp) {
+	// Try SMTP if credentials are present
+	if (!empty($mailPass)) {
 		try {
+			$mail = new PHPMailer\PHPMailer\PHPMailer(true);
 			$mail->isSMTP();
 			$mail->Host = $mailHost;
 			$mail->SMTPAuth = true;
 			$mail->Username = $mailUser;
 			$mail->Password = $mailPass;
 			$mail->Port = $mailPort;
-			$mail->SMTPKeepAlive = true;
-			$mail->Timeout = 30;
-			$mail->Mailer = 'smtp';
-			if ($mailSecure === 'tls') {
-				$mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-			} elseif ($mailSecure === 'ssl') {
-				$mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
-			}
+			$mail->SMTPSecure = $mailSecure === 'tls' ? PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS : PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
 			$mail->SMTPOptions = [
 				'ssl' => [
 					'verify_peer' => false,
@@ -94,14 +80,6 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 					'allow_self_signed' => true,
 				],
 			];
-			// Debug to file
-			if (is_writable($logDir)) {
-				$mail->SMTPDebug = PHPMailer\PHPMailer\SMTP::DEBUG_SERVER;
-				$mail->Debugoutput = function($str) use ($debugLog) {
-					@file_put_contents($debugLog, date('Y-m-d H:i:s') . ' - ' . trim($str) . "\n", FILE_APPEND);
-				};
-			}
-			
 			$mail->setFrom($fromEmail, $fromName);
 			if (!empty($toName)) {
 				$mail->addAddress($to, $toName);
@@ -114,16 +92,24 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 			$mail->Body = $htmlMessage;
 			$mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $htmlMessage));
 			
-			$result = $mail->send();
-			$logMessage = sprintf('[%s] SMTP %s to %s\n', date('Y-m-d H:i:s'), $result ? 'SENT' : 'FAILED', $to);
-			@file_put_contents($result ? $successLog : $errorLog, $logMessage, FILE_APPEND);
-			return $result;
-		} catch (\Exception $e) {
-			@file_put_contents($errorLog, '[' . date('Y-m-d H:i:s') . "] SMTP ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
-			// fall through to SendGrid API
+			if ($mail->send()) {
+				@file_put_contents($successLog, date('Y-m-d H:i:s') . " - SMTP SENT to $to\n", FILE_APPEND);
+				return true;
+			}
+		} catch (Exception $e) {
+			@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - SMTP Exception to $to: " . $e->getMessage() . "\n", FILE_APPEND);
 		}
 	}
 	
-	// Fallback: SendGrid Web API (requires SENDGRID_API_KEY env)
-	return sendgrid_send_email($to, $subject, $htmlMessage, $toName, $fromEmail, $fromName);
+	// Fallback to PHP native mail
+	$headers = "MIME-Version: 1.0\r\n";
+	$headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+	$headers .= "From: $fromName <$fromEmail>\r\n";
+	$headers .= "Reply-To: $fromName <$fromEmail>\r\n";
+	$plainBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $htmlMessage));
+	$subjectPlain = html_entity_decode($subject, ENT_QUOTES, 'UTF-8');
+	
+	$success = mail($to, $subjectPlain, $plainBody, $headers);
+	@file_put_contents($success ? $successLog : $errorLog, date('Y-m-d H:i:s') . " - PHP mail " . ($success ? 'SENT' : 'FAILED') . " to $to\n", FILE_APPEND);
+	return $success;
 }

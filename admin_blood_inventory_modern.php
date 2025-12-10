@@ -241,10 +241,17 @@ try {
     ];
 
     // Simple summary (counts by blood type)
-    $summary = [];
+    $summary = [
+        'total_units' => 0,
+        'available_units' => 0,
+        'used_units' => 0,
+        'expired_units' => 0
+    ];
     $summarySql = "SELECT blood_type, COUNT(*) AS cnt FROM donors WHERE status = 'served' GROUP BY blood_type";
     foreach ($pdo->query($summarySql)->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $summary[$r['blood_type']] = $r['cnt'];
+        $summary['total_units'] += $r['cnt'];
+        $summary['available_units'] += $r['cnt']; // All served count as available in this simplified view
     }
 } catch (Throwable $e) {
     error_log('Served donors inventory query failed: ' . $e->getMessage());
