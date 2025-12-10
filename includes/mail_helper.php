@@ -3,6 +3,7 @@ require_once __DIR__ . '/phpmailer_loader.php';
 require_once __DIR__ . '/phpmailer/src/PHPMailer.php';
 require_once __DIR__ . '/phpmailer/src/SMTP.php';
 require_once __DIR__ . '/phpmailer/src/Exception.php';
+require_once __DIR__ . '/email_queue_helper.php';
 // Enable error reporting for debugging (log only, no display)
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -36,7 +37,7 @@ if (php_sapi_name() !== 'cli') {
 
 /**
  * Send a confirmation email with HTML content using PHPMailer with SMTP
- * Falls back to PHP native mail if SMTP fails.
+ * Falls back to PHP native mail, then SendGrid API, then local queue.
  *
  * @param string $to Recipient email address
  * @param string $subject Email subject
@@ -121,10 +122,19 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 		try {
 			$sgSuccess = sendgrid_send_email($to, $subject, $htmlMessage, $toName, $fromEmail, $fromName);
 			@file_put_contents($sgSuccess ? $successLog : $errorLog, date('Y-m-d H:i:s') . " - SendGrid API " . ($sgSuccess ? 'SENT' : 'FAILED') . " to $to\n", FILE_APPEND);
-			return $sgSuccess;
+			if ($sgSuccess) {
+				return true;
+			}
 		} catch (Exception $e) {
 			@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - SendGrid API Exception to $to: " . $e->getMessage() . "\n", FILE_APPEND);
 		}
+	}
+	
+	// Final fallback: queue to local file
+	$queued = queue_email($to, $subject, $htmlMessage, $toName);
+	if ($queued) {
+		@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - QUEUED to file for $to\n", FILE_APPEND);
+		return true; // treat as success so registration continues
 	}
 	
 	return false;
