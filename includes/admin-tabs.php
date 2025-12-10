@@ -46,96 +46,71 @@ if (!function_exists('fmtBloodType')) {
 
 // Dashboard Tab
 if ($activeTab === 'dashboard') {
+    // Simpler dashboard view: just high-level metrics like the original
+    $totalDonors = 0;
+    $pendingDonorsCount = 0;
+    $pendingRequestCount = 0;
+
     try {
-        // Use donors table for core stats
-        $dashboardStats = $pdo->query("
-            SELECT 
-                COUNT(*) AS total,
-                COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending,
-                COUNT(CASE WHEN status = 'approved' THEN 1 END) AS approved,
-                COUNT(CASE WHEN status IN ('served','completed') THEN 1 END) AS served
-            FROM donors
-        ")->fetch(PDO::FETCH_ASSOC);
-        $recentDonorsStmt = $pdo->query("
-            SELECT first_name, last_name, blood_type, status, created_at
-            FROM donors
-            ORDER BY created_at DESC
-            LIMIT 5
-        ");
-        $recentDonors = $recentDonorsStmt ? $recentDonorsStmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        // Use donors table only; donors_new is MySQL-only
+        if (isset($pdo)) {
+            // Total / pending donors
+            try {
+                $statsStmt = $pdo->query("
+                    SELECT 
+                        COUNT(*) AS total,
+                        COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending
+                    FROM donors
+                ");
+                $stats = $statsStmt ? $statsStmt->fetch(PDO::FETCH_ASSOC) : null;
+                if ($stats) {
+                    $totalDonors = (int)($stats['total'] ?? 0);
+                    $pendingDonorsCount = (int)($stats['pending'] ?? 0);
+                }
+            } catch (Throwable $e) {
+                // If donors table is missing or query fails, leave defaults
+            }
+
+            // Pending blood requests (if table exists)
+            try {
+                $hasRequests = function_exists('tableExists') ? tableExists($pdo, 'blood_requests') : true;
+                if ($hasRequests) {
+                    $pendingRequestCount = (int)$pdo->query("SELECT COUNT(*) FROM blood_requests WHERE status = 'pending'")->fetchColumn();
+                }
+            } catch (Throwable $e) {
+                // Ignore if blood_requests table does not exist
+            }
+        }
     } catch (Throwable $e) {
-        echo '<div class="alert alert-danger">Unable to load dashboard: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</div>';
-        $dashboardStats = null;
-        $recentDonors = [];
+        echo '<div class="alert alert-danger">Unable to load dashboard metrics: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</div>';
     }
     ?>
     <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
         <h2 class="mb-4">Admin Dashboard</h2>
-        <div class="row mb-4">
-            <div class="col-md-3 mb-3">
-                <div class="card text-center">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card shadow-sm text-center">
                     <div class="card-body">
                         <h5 class="card-title">Total Donors</h5>
-                        <p class="display-6 mb-0"><?= isset($dashboardStats['total']) ? (int)$dashboardStats['total'] : 0 ?></p>
+                        <p class="display-6 mb-0"><?= $totalDonors ?></p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card text-center">
+            <div class="col-md-4">
+                <div class="card shadow-sm text-center">
                     <div class="card-body">
-                        <h5 class="card-title">Pending</h5>
-                        <p class="display-6 text-warning mb-0"><?= isset($dashboardStats['pending']) ? (int)$dashboardStats['pending'] : 0 ?></p>
+                        <h5 class="card-title">Pending Donors</h5>
+                        <p class="display-6 mb-0"><?= $pendingDonorsCount ?></p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card text-center">
+            <div class="col-md-4">
+                <div class="card shadow-sm text-center">
                     <div class="card-body">
-                        <h5 class="card-title">Approved</h5>
-                        <p class="display-6 text-primary mb-0"><?= isset($dashboardStats['approved']) ? (int)$dashboardStats['approved'] : 0 ?></p>
+                        <h5 class="card-title">Pending Requests</h5>
+                        <p class="display-6 mb-0"><?= $pendingRequestCount ?></p>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Served / Completed</h5>
-                        <p class="display-6 text-success mb-0"><?= isset($dashboardStats['served']) ? (int)$dashboardStats['served'] : 0 ?></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Recent Donor Registrations</h5>
-            </div>
-            <div class="card-body">
-                <?php if (!empty($recentDonors)): ?>
-                    <div class="table-responsive">
-                        <table class="table table-striped mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Blood Type</th>
-                                    <th>Status</th>
-                                    <th>Registered At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($recentDonors as $d): ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars(($d['first_name'] ?? '') . ' ' . ($d['last_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
-                                        <td><?= htmlspecialchars($d['blood_type'] ?? 'Unknown', ENT_QUOTES, 'UTF-8') ?></td>
-                                        <td><span class="badge bg-secondary text-capitalize"><?= htmlspecialchars($d['status'] ?? 'pending', ENT_QUOTES, 'UTF-8') ?></span></td>
-                                        <td><?= !empty($d['created_at']) ? htmlspecialchars(date('M d, Y H:i', strtotime($d['created_at'])), ENT_QUOTES, 'UTF-8') : '' ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <p class="text-muted mb-0">No donor registrations found yet.</p>
-                <?php endif; ?>
             </div>
         </div>
     </div>
