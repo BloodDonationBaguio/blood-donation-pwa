@@ -961,10 +961,26 @@ if (!function_exists('buildPaginationUrl')) {
                 <i class="fas fa-tint"></i> Blood Inventory
             </a>
         </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= $activeTab === 'audit-log' ? 'active' : '' ?>" href="?tab=audit-log">
-                            <i class="fas fa-history"></i> Audit Log
-                        </a>
+        <?php
+        $queueDir = __DIR__ . '/email_queue';
+        $queuedCount = 0;
+        if (is_dir($queueDir)) {
+            $queuedCount = count(glob($queueDir . '/*.json'));
+        }
+        ?>
+        <li class="nav-item">
+            <a class="nav-link" href="admin_email_queue.php">
+                <i class="fas fa-envelope"></i> Email Queue
+                <?php if ($queuedCount > 0): ?>
+                    <span class="badge bg-warning text-dark ms-2"><?= $queuedCount ?></span>
+                <?php endif; ?>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <?= $activeTab === 'audit-log' ? 'active' : '' ?>" href="?tab=audit-log">
+                <i class="fas fa-history"></i> Audit Log
+            </a>
+        </li>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?= $activeTab === 'help' ? 'active' : '' ?>" href="?tab=help">
