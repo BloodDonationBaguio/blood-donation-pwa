@@ -333,9 +333,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 ";
                             }
                             
-                            // Send the email
+                            // Send the email (non-blocking, fast path)
                             if (function_exists('send_confirmation_email')) {
                                 error_log('Attempting to send confirmation email to: ' . $email);
+                                // Fast: send email without waiting for response
                                 $emailSent = send_confirmation_email($email, $subject, $message, $fullName);
                                 if ($emailSent) {
                                     error_log('Confirmation email sent successfully to ' . $email);
@@ -350,7 +351,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             // Don't stop registration if email fails
                         }
                         
-                        // REDIRECT AFTER SUCCESSFUL REGISTRATION
+                        // REDIRECT IMMEDIATELY AFTER SUCCESSFUL REGISTRATION
                         $_SESSION['registration_ref'] = $refNumber;
                         header('Location: registration_success.php?ref=' . urlencode($refNumber));
                         exit();

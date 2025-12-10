@@ -67,6 +67,7 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 		try {
 			$mail = new PHPMailer\PHPMailer\PHPMailer(true);
 			$mail->isSMTP();
+			$mail->Timeout = 10;
 			$mail->Host = $mailHost;
 			$mail->SMTPAuth = true;
 			$mail->Username = $mailUser;
