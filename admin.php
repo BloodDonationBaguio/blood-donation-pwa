@@ -2112,6 +2112,28 @@ if (!function_exists('buildPaginationUrl')) {
                                             } else {
                                                 $bloodInventory = $pdo->query($inventoryQuery)->fetchAll();
                                             }
+
+                                            // Ensure all standard blood types are present (even with 0 units)
+                                            $standardTypes = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+                                            $indexed = [];
+                                            foreach ($bloodInventory as $row) {
+                                                $indexed[$row['blood_type']] = $row;
+                                            }
+                                            $finalInventory = [];
+                                            foreach ($standardTypes as $bt) {
+                                                $finalInventory[] = $indexed[$bt] ?? [
+                                                    'blood_type' => $bt,
+                                                    'available_units' => 0,
+                                                    'used_units' => 0,
+                                                    'pending_units' => 0
+                                                ];
+                                            }
+                                            // Include any non-standard types that exist (e.g., if data has 'UNK')
+                                            foreach ($bloodInventory as $row) {
+                                                if (!in_array($row['blood_type'], $standardTypes)) {
+                                                    $finalInventory[] = $row;
+                                                }
+                                            }
                                             ?>
                                             <div class="table-responsive">
                                                 <table class="table table-striped table-hover">
@@ -2126,7 +2148,7 @@ if (!function_exists('buildPaginationUrl')) {
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <?php foreach ($bloodInventory as $item): ?>
+                                                        <?php foreach ($finalInventory as $item): ?>
                                                             <tr>
                                                                 <td>
                                                                     <strong class="text-primary"><?= htmlspecialchars($item['blood_type']) ?></strong>
