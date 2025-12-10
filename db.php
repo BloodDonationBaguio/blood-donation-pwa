@@ -1,5 +1,9 @@
 <?php
-// Environment-aware DB config: PostgreSQL on Render (DATABASE_URL), MySQL locally
+// Environment-aware DB config: Prefer Supabase Postgres via DB password; fallback to Render; else MySQL
+if (getenv('SUPABASE_DB_PASSWORD') || getenv('SUPABASE_CONNECTION_STRING')) {
+    require_once __DIR__ . '/supabase_db.php';
+    return;
+}
 if (getenv('DATABASE_URL')) {
     require_once __DIR__ . '/db_production.php';
     return;
