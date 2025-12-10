@@ -23,9 +23,16 @@ echo "MAIL_SECURE: " . (getenv('MAIL_SECURE') ?: 'NOT SET') . "\n";
 echo "MAIL_FROM: " . (getenv('MAIL_FROM') ?: 'NOT SET') . "\n";
 echo "MAIL_FROM_NAME: " . (getenv('MAIL_FROM_NAME') ?: 'NOT SET') . "\n\n";
 
-echo "Attempting to send...\n";
+echo "Attempting to send via helper...\n";
 $result = send_confirmation_email($testTo, $testSubject, $testMessage, $testName);
 echo "Result: " . ($result ? 'SUCCESS' : 'FAILED') . "\n\n";
+
+echo "Attempting plain PHP mail() test...\n";
+$plainSubject = 'Plain Test from Blood Donation System - ' . date('Y-m-d H:i:s');
+$plainBody = "This is a plain text test email.\nSent at: " . date('Y-m-d H:i:s');
+$plainHeaders = "From: Blood Donation System <prc.baguio.blood@gmail.com>\r\n";
+$plainResult = mail($testTo, $plainSubject, $plainBody, $plainHeaders);
+echo "Plain mail() result: " . ($plainResult ? 'SUCCESS' : 'FAILED') . "\n\n";
 
 echo "Recent logs:\n";
 $logDir = __DIR__ . '/logs';
@@ -33,9 +40,9 @@ $errorLog = $logDir . '/email_errors.log';
 $successLog = $logDir . '/email_success.log';
 
 if (file_exists($errorLog)) {
-    echo "--- Last 10 lines of email_errors.log ---\n";
+    echo "--- Last 15 lines of email_errors.log ---\n";
     $lines = file($errorLog, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach (array_slice($lines, -10) as $line) {
+    foreach (array_slice($lines, -15) as $line) {
         echo $line . "\n";
     }
 } else {
@@ -45,9 +52,9 @@ if (file_exists($errorLog)) {
 echo "\n";
 
 if (file_exists($successLog)) {
-    echo "--- Last 10 lines of email_success.log ---\n";
+    echo "--- Last 15 lines of email_success.log ---\n";
     $lines = file($successLog, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach (array_slice($lines, -10) as $line) {
+    foreach (array_slice($lines, -15) as $line) {
         echo $line . "\n";
     }
 } else {

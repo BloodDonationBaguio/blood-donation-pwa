@@ -67,7 +67,7 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 		try {
 			$mail = new PHPMailer\PHPMailer\PHPMailer(true);
 			$mail->isSMTP();
-			$mail->Timeout = 5; // very short timeout
+			$mail->Timeout = 5;
 			$mail->Host = $mailHost;
 			$mail->SMTPAuth = true;
 			$mail->Username = $mailUser;
@@ -102,11 +102,11 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 		}
 	}
 	
-	// Fallback to PHP native mail
-	$headers = "MIME-Version: 1.0\r\n";
-	$headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-	$headers .= "From: $fromName <$fromEmail>\r\n";
+	// Fallback to PHP native mail (try minimal headers)
+	$headers = "From: $fromName <$fromEmail>\r\n";
 	$headers .= "Reply-To: $fromName <$fromEmail>\r\n";
+	$headers .= "MIME-Version: 1.0\r\n";
+	$headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 	$plainBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $htmlMessage));
 	$subjectPlain = html_entity_decode($subject, ENT_QUOTES, 'UTF-8');
 	
@@ -116,11 +116,11 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 		return true;
 	}
 	
-	// Ultimate fallback: try SendGrid API if available (requires sendgrid_helper.php)
+	// Ultimate fallback: try SendGrid API if available
 	if (file_exists(__DIR__ . '/sendgrid_helper.php') && function_exists('sendgrid_send_email')) {
 		try {
 			$sgSuccess = sendgrid_send_email($to, $subject, $htmlMessage, $toName, $fromEmail, $fromName);
-			@file_put_contents($success ? $successLog : $errorLog, date('Y-m-d H:i:s') . " - SendGrid API " . ($sgSuccess ? 'SENT' : 'FAILED') . " to $to\n", FILE_APPEND);
+			@file_put_contents($sgSuccess ? $successLog : $errorLog, date('Y-m-d H:i:s') . " - SendGrid API " . ($sgSuccess ? 'SENT' : 'FAILED') . " to $to\n", FILE_APPEND);
 			return $sgSuccess;
 		} catch (Exception $e) {
 			@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - SendGrid API Exception to $to: " . $e->getMessage() . "\n", FILE_APPEND);
