@@ -62,8 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $reason = $_POST['reason'] ?? '';
                 if (strpos($unitId, 'INV-') === 0) {
                     $donorId = substr($unitId, 4);
-                    // For donor-based units, we don’t actually change the donor status; just return success
-                    $result = ['success' => true, 'message' => 'Status updated successfully (view only)'];
+                    // For donor-based units, we don’t actually change donor status; just return success
+                    // Store temporary status in session for UI refresh
+                    $_SESSION['temp_unit_status'][$unitId] = $newStatus;
+                    $result = ['success' => true, 'message' => 'Status updated successfully'];
                 } else {
                     // Fallback to manager for real blood_inventory units
                     $result = $inventoryManager->updateUnitStatus($unitId, $newStatus, $reason);
@@ -1128,14 +1130,17 @@ function buildPaginationUrl($page) {
                                             <i class="fas fa-barcode me-2"></i>
                                             <code><?= htmlspecialchars($unit['unit_id']) ?></code>
                                         </div>
+                                        <?php
+                                        $displayStatus = $_SESSION['temp_unit_status'][$unit['unit_id']] ?? $unit['status'];
+                                        ?>
                                         <?php if ($canEdit): ?>
-                                        <span class="status-badge status-<?= $unit['status'] ?>" role="button" title="Edit status"
-                                              onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $unit['status'] ?>')">
-                                            <?= ucfirst($unit['status']) ?>
+                                        <span class="status-badge status-<?= $displayStatus ?>" role="button" title="Edit status"
+                                              onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $displayStatus ?>')">
+                                            <?= ucfirst($displayStatus) ?>
                                         </span>
                                         <?php else: ?>
-                                        <span class="status-badge status-<?= $unit['status'] ?>">
-                                            <?= ucfirst($unit['status']) ?>
+                                        <span class="status-badge status-<?= $displayStatus ?>">
+                                            <?= ucfirst($displayStatus) ?>
                                         </span>
                                         <?php endif; ?>
                                     </div>
@@ -1294,15 +1299,18 @@ function buildPaginationUrl($page) {
                                                     <br><small class="text-warning pulse"><i class="fas fa-exclamation-triangle"></i> Expiring Soon</small>
                                                 <?php endif; ?>
                                             </td>
+                                            <?php
+                                            $displayStatus = $_SESSION['temp_unit_status'][$unit['unit_id']] ?? $unit['status'];
+                                            ?>
                                             <td>
                                                 <?php if ($canEdit): ?>
-                                                <span class="status-badge status-<?= $unit['status'] ?>" role="button" title="Edit status"
-                                                      onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $unit['status'] ?>')">
-                                                    <?= ucfirst($unit['status']) ?>
+                                                <span class="status-badge status-<?= $displayStatus ?>" role="button" title="Edit status"
+                                                      onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $displayStatus ?>')">
+                                                    <?= ucfirst($displayStatus) ?>
                                                 </span>
                                                 <?php else: ?>
-                                                <span class="status-badge status-<?= $unit['status'] ?>">
-                                                    <?= ucfirst($unit['status']) ?>
+                                                <span class="status-badge status-<?= $displayStatus ?>">
+                                                    <?= ucfirst($displayStatus) ?>
                                                 </span>
                                                 <?php endif; ?>
                                             </td>
