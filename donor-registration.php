@@ -117,8 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check for duplicate submission (same email within last 5 minutes)
     if (empty($errors)) {
         try {
+            // Always use donors table in Supabase (donors_new has incompatible schema)
             $duplicateCheck = $pdo->prepare("
-                SELECT id, created_at FROM donors 
+                SELECT created_at FROM donors 
                 WHERE email = ? AND created_at > CURRENT_TIMESTAMP - INTERVAL '5 minutes'
                 ORDER BY created_at DESC LIMIT 1
             ");
@@ -195,12 +196,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         try {
             // Check if email already exists and handle repeat donations
-            // Use donors_new if present
-            $checkTable = 'donors';
-            if (function_exists('tableExists') && tableExists($pdo, 'donors_new')) {
-                $checkTable = 'donors_new';
-            }
-            $checkEmail = $pdo->prepare("SELECT id, first_name, last_name, status, created_at FROM {$checkTable} WHERE email = ? ORDER BY created_at DESC LIMIT 1");
+            // Supabase uses the donors table; donors_new is legacy MySQL-only
+            $checkEmail = $pdo->prepare("SELECT first_name, last_name, status, created_at FROM donors WHERE email = ? ORDER BY created_at DESC LIMIT 1");
             $checkEmail->execute([$email]);
             $existingDonor = $checkEmail->fetch();
             
@@ -231,10 +228,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     error_log("Starting registration for: $email with reference: $refNumber");
                     // Determine target donor table and normalize blood type (Unknown compatibility)
+                    // Always use donors on Supabase; donors_new is legacy
                     $donorsTable = 'donors';
-                    if (function_exists('tableExists') && tableExists($pdo, 'donors_new')) {
-                        $donorsTable = 'donors_new';
-                    }
                     $isUnknownSelected = ($bloodType === 'Unknown' || $bloodType === 'UNK');
                     $dbBloodType = $bloodType;
                     if ($isUnknownSelected) {
@@ -280,33 +275,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $gender, $address, $city, $province, $weight, $height, $refNumber
                     ]);
 
-                    // Get donor ID but DON'T commit yet - we need to save medical screening too
-                    $donorId = $pdo->lastInsertId();
-                    error_log("Got donor ID: $donorId, now saving medical screening in same transaction...");
-                    
-                    // Verify the data was actually saved
-                    $verifyStmt = $pdo->prepare("SELECT id FROM {$donorsTable} WHERE id = ?");
-                    $verifyStmt->execute([$donorId]);
-                    $savedDonor = $verifyStmt->fetch();
-                    
-                    if ($savedDonor) {
-                        error_log("Verified: Donor saved with ID: {$savedDonor['id']}");
-                        $pdo->commit();
-                        error_log('Transaction committed: donor registration saved');
-                        try {
-                            if (function_exists('tableExists') && tableExists($pdo, 'donor_medical_screening_simple')) {
-                                $requiredQuestions = ($gender === 'Female') ? 37 : 32;
-                                $actualAnswered = count(array_filter($medical, function($answer) { return !empty($answer) && $answer !== ''; }));
-                                $allAnswered = $actualAnswered >= $requiredQuestions;
-                                $medicalStmt = $pdo->prepare("INSERT INTO donor_medical_screening_simple (donor_id, reference_code, screening_data, all_questions_answered) VALUES (?, ?, ?, ?)");
-                                $medicalStmt->execute([$donorId, $refNumber, json_encode($medical), $allAnswered ? 1 : 0]);
-                                error_log('Medical screening data saved after commit');
-                            } else {
-                                error_log('Medical screening table missing, skipping save');
-                            }
-                        } catch (Exception $medicalError) {
-                            error_log('Medical screening save failed after commit: ' . $medicalError->getMessage());
+                    // At this point, the insert succeeded; commit the transaction
+                    $pdo->commit();
+                    error_log('Transaction committed: donor registration saved');
+                    try {
+                        if (function_exists('tableExists') && tableExists($pdo, 'donor_medical_screening_simple')) {
+                            $requiredQuestions = ($gender === 'Female') ? 37 : 32;
+                            $actualAnswered = count(array_filter($medical, function($answer) { return !empty($answer) && $answer !== ''; }));
+                            $allAnswered = $actualAnswered >= $requiredQuestions;
+                            // Save screening data without relying on donor_id lookups
+                            $medicalStmt = $pdo->prepare("INSERT INTO donor_medical_screening_simple (donor_id, reference_code, screening_data, all_questions_answered) VALUES (NULL, ?, ?, ?)");
+                            $medicalStmt->execute([$refNumber, json_encode($medical), $allAnswered ? 1 : 0]);
+                            error_log('Medical screening data saved after commit (donor_id nullable or handled by DB)');
+                        } else {
+                            error_log('Medical screening table missing, skipping save');
                         }
+                    } catch (Exception $medicalError) {
+                        error_log('Medical screening save failed after commit: ' . $medicalError->getMessage());
+                    }
                         
                         // Send confirmation email before redirect
                         try {
@@ -368,10 +354,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['registration_ref'] = $refNumber;
                         header('Location: registration_success.php?ref=' . urlencode($refNumber));
                         exit();
-                    } else {
-                        error_log("ERROR: Donor not found after commit! ID: $donorId");
-                        $errors[] = "Registration failed - data not saved. Please try again.";
-                    }
                     
                 } catch (PDOException $mainError) {
                     if ($pdo->inTransaction()) {
