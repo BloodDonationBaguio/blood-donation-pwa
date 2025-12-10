@@ -174,236 +174,91 @@ if (isset($_GET['export']) && strtolower($_GET['export']) === 'csv') {
     exit;
 }
 
-// Try primary manager first
-$inventory = $inventoryManager->getInventory($filters, $filters['page'], $perPage);
-$summary = $inventoryManager->getDashboardSummary();
+// Directly query served donors (like the dashboard) to always show units
+$inventory = ['data' => [], 'total' => 0, 'page' => $filters['page'], 'limit' => $perPage, 'total_pages' => 0];
+$alerts = [];
+$donors = [];
+$usingFallback = false;
 
-// Decide fallback based on UNFILTERED total count (only fallback when table is truly empty)
-$filteredTotal = 0;
-$unfilteredTotal = 0;
 try {
-    // Current filtered count (for pagination)
-    $filteredTotal = (int)$inventoryManager->getInventoryCount($filters);
+    // Build WHERE from filters
+    $where = ["status = 'served'"];
+    $params = [];
+    if (!empty($filters['blood_type'])) { $where[] = 'blood_type = ?'; $params[] = $filters['blood_type']; }
+    if (!empty($filters['status']) && strtolower($filters['status']) !== 'all') { $where[] = '?'; $params[] = $filters['status']; } // status column unused but kept for compatibility
+    if (!empty($filters['search'])) {
+        $term = '%' . $filters['search'] . '%';
+        $where[] = '(first_name LIKE ? OR last_name LIKE ? OR reference_code LIKE ?)';
+        $params = array_merge($params, [$term, $term, $term]);
+    }
+    $whereClause = 'WHERE ' . implode(' AND ', $where);
+
+    // Get total count
+    $countSql = "SELECT COUNT(*) FROM donors $whereClause";
+    $stmtCount = $pdo->prepare($countSql);
+    $stmtCount->execute($params);
+    $totalRecords = (int)$stmtCount->fetchColumn();
+    $totalPages = ceil($totalRecords / $perPage);
+
+    // Driver-aware expressions
+    $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
+    $unitIdExpr = ($driver === 'pgsql') ? "('INV-' || id)" : "CONCAT('INV-', id)";
+    $donorNameExpr = ($driver === 'pgsql') ? "(first_name || ' ' || last_name)" : "CONCAT(first_name, ' ', last_name)";
+    $expiryExpr = ($driver === 'pgsql') ? "(last_donation_date + INTERVAL '35 day')" : "(DATE_ADD(COALESCE(last_donation_date, created_at), INTERVAL 35 DAY))";
+
+    // Pagination
+    $offset = ($filters['page'] - 1) * $perPage;
+
+    // Fetch paginated rows
+    $sql = "
+        SELECT
+            id AS donor_id,
+            $unitIdExpr AS unit_id,
+            blood_type,
+            'available' AS status,
+            $donorNameExpr AS donor_name,
+            reference_code,
+            COALESCE(last_donation_date, created_at) AS collection_date,
+            $expiryExpr AS expiry_date,
+            0 AS expiring_soon
+        FROM donors
+        $whereClause
+        ORDER BY created_at DESC
+        LIMIT ? OFFSET ?
+    ";
+    $params[] = $perPage;
+    $params[] = $offset;
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $inventory = [
+        'data' => $rows,
+        'total' => $totalRecords,
+        'page' => $filters['page'],
+        'limit' => $perPage,
+        'total_pages' => $totalPages,
+        'source' => 'served_donors_direct'
+    ];
+
+    // Simple summary (counts by blood type)
+    $summary = [];
+    $summarySql = "SELECT blood_type, COUNT(*) AS cnt FROM donors WHERE status = 'served' GROUP BY blood_type";
+    foreach ($pdo->query($summarySql)->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $summary[$r['blood_type']] = $r['cnt'];
+    }
 } catch (Throwable $e) {
-    $filteredTotal = 0;
-}
-// Unfiltered count (definitive table emptiness check)
-try {
-    $stmt = $pdo->query("SELECT COUNT(*) AS total FROM blood_inventory");
-    $unfilteredTotal = (int)($stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
-} catch (Throwable $e) {
-    $unfilteredTotal = 0;
+    error_log('Served donors inventory query failed: ' . $e->getMessage());
+    $totalRecords = 0;
+    $totalPages = 0;
 }
 
-if ($unfilteredTotal === 0) {
-    // Use robust manager only when primary inventory truly has no records (table empty)
-    $inventory = $robustManager->getInventory($filters, $filters['page'], $perPage);
-    $summary = $robustManager->getDashboardSummary();
-    $alerts = $robustManager->getAlerts();
-    $donors = $robustManager->getEligibleDonors();
-    $totalRecords = $robustManager->getInventoryCount($filters);
-    $usingFallback = true;
-} else {
-    // Keep primary manager results even if current page has no rows due to filters
-    $alerts = $inventoryManager->getAlerts();
-    $donors = $inventoryManager->getEligibleDonors();
-    $totalRecords = $filteredTotal;
-    $usingFallback = false;
-}
-// Calculate pagination info (sync with actual inventory total when available)
-$displayTotal = isset($inventory['total']) ? (int)$inventory['total'] : (int)$totalRecords;
-$totalPages = (int)ceil($displayTotal / $perPage);
-
-// Calculate pagination bounds
+// Pagination display
+$displayTotal = (int)($inventory['total'] ?? 0);
+$totalPages = (int)($inventory['total_pages'] ?? 0);
 $offset = ($filters['page'] - 1) * $perPage;
 $startRecord = $displayTotal > 0 ? ($offset + 1) : 0;
 $endRecord = min($offset + $perPage, $displayTotal);
 
-// Final guard: if we have records but no data rows, fetch minimal dataset directly
-if ($totalRecords > 0 && (empty($inventory) || empty($inventory['data']))) {
-    try {
-        $donorTable = 'donors';
-        try {
-            // Prefer donors_new when present and populated
-            $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors_new");
-            $hasNew = (int)$stmt->fetch(PDO::FETCH_ASSOC)['cnt'] > 0;
-            if ($hasNew) { $donorTable = 'donors_new'; }
-        } catch (Throwable $e) {
-            // fall back to donors
-        }
-
-        $where = [];
-        $params = [];
-        if (!empty($filters['blood_type'])) { $where[] = 'bi.blood_type = ?'; $params[] = $filters['blood_type']; }
-        if (!empty($filters['status']) && strtolower($filters['status']) !== 'all') { $where[] = 'bi.status = ?'; $params[] = $filters['status']; }
-        if (!empty($filters['search'])) {
-            $term = '%' . $filters['search'] . '%';
-            $where[] = '(bi.unit_id LIKE ? OR d.first_name LIKE ? OR d.last_name LIKE ? OR d.reference_code LIKE ?)';
-            $params = array_merge($params, [$term, $term, $term, $term]);
-        }
-        $whereClause = !empty($where) ? ('WHERE ' . implode(' AND ', $where)) : '';
-
-        // Choose date math and string concatenation compatible with the current PDO driver
-        try {
-            $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
-        } catch (Throwable $e) {
-            $driver = 'mysql';
-        }
-        $expiringSoonExpr = ($driver === 'pgsql')
-            ? "CASE WHEN bi.expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND bi.status = 'available' THEN 1 ELSE 0 END"
-            : "CASE WHEN bi.expiry_date <= CURRENT_TIMESTAMP + INTERVAL '5 day' AND bi.status = 'available' THEN 1 ELSE 0 END";
-        $donorNameExpr = ($driver === 'pgsql')
-            ? "COALESCE(d.first_name || ' ' || d.last_name, 'Unknown Donor')"
-            : "COALESCE(CONCAT(d.first_name, ' ', d.last_name), 'Unknown Donor')";
-
-        $sql = "
-            SELECT 
-                bi.unit_id,
-                bi.blood_type,
-                bi.status,
-                bi.collection_date,
-                bi.expiry_date,
-                $donorNameExpr AS donor_name,
-                d.reference_code,
-                $expiringSoonExpr AS expiring_soon
-            FROM blood_inventory bi
-            LEFT JOIN {$donorTable} d ON bi.donor_id = d.id
-            $whereClause
-            ORDER BY bi.created_at DESC
-            LIMIT ? OFFSET ?
-        ";
-        $params[] = $perPage;
-        $params[] = $offset;
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if (!empty($rows)) {
-            $inventory = [
-                'data' => $rows,
-                'total' => $totalRecords,
-                'page' => $filters['page'],
-                'limit' => $perPage,
-                'total_pages' => $totalPages,
-                'source' => 'final_guard_query'
-            ];
-        } else {
-            // Secondary guard: generate virtual rows from donors if blood_inventory has no rows
-            $statusCondition = "status IN ('served','completed')";
-
-            $dWhere = [$statusCondition];
-            $dParams = [];
-            if (!empty($filters['blood_type'])) { $dWhere[] = 'blood_type = ?'; $dParams[] = $filters['blood_type']; }
-            if (!empty($filters['search'])) {
-                $term = '%' . $filters['search'] . '%';
-                $dWhere[] = '(first_name LIKE ? OR last_name LIKE ? OR reference_code LIKE ?)';
-                $dParams = array_merge($dParams, [$term, $term, $term]);
-            }
-            $dWhereClause = 'WHERE ' . implode(' AND ', $dWhere);
-            // Driver-aware expiry and string concatenation for virtual rows
-            $expiryFromCreatedExpr = ($driver === 'pgsql')
-                ? "created_at + INTERVAL '35 day'"
-                : "created_at + INTERVAL '35 day'";
-            $virtUnitIdExpr = ($driver === 'pgsql')
-                ? "('VIRT-' || id)"
-                : "CONCAT('VIRT-', id)";
-            $virtDonorNameExpr = ($driver === 'pgsql')
-                ? "(first_name || ' ' || last_name)"
-                : "CONCAT(first_name, ' ', last_name)";
-            $dsql = "
-                SELECT 
-                    id AS donor_id,
-                    $virtUnitIdExpr AS unit_id,
-                    blood_type,
-                    'available' AS status,
-                    $virtDonorNameExpr AS donor_name,
-                    reference_code,
-                    created_at AS collection_date,
-                    $expiryFromCreatedExpr AS expiry_date,
-                    0 AS expiring_soon
-                FROM {$donorTable}
-                {$dWhereClause}
-                ORDER BY created_at DESC
-                LIMIT ? OFFSET ?
-            ";
-            $dParams[] = $perPage;
-            $dParams[] = $offset;
-            $dstmt = $pdo->prepare($dsql);
-            $dstmt->execute($dParams);
-            $drows = $dstmt->fetchAll(PDO::FETCH_ASSOC);
-            if (!empty($drows)) {
-                $inventory = [
-                    'data' => $drows,
-                    'total' => $totalRecords,
-                    'page' => $filters['page'],
-                    'limit' => $perPage,
-                    'total_pages' => $totalPages,
-                    'source' => 'final_guard_virtual_from_donors'
-                ];
-            }
-        }
-    } catch (Throwable $e) {
-        // Keep page rendering even if guard fails
-        error_log('Final guard inventory query failed: ' . $e->getMessage());
-    }
-} else {
-    // Simplified: always use served donors to match dashboard count (90 units)
-    $inventory = ['data' => [], 'total' => 0, 'page' => $filters['page'], 'limit' => $perPage, 'total_pages' => 0];
-    try {
-        // Build WHERE from filters
-        $where = ["status = 'served'"];
-        $params = [];
-        if (!empty($filters['blood_type'])) { $where[] = 'blood_type = ?'; $params[] = $filters['blood_type']; }
-        if (!empty($filters['search'])) {
-            $term = '%' . $filters['search'] . '%';
-            $where[] = '(first_name LIKE ? OR last_name LIKE ? OR reference_code LIKE ?)';
-            $params = array_merge($params, [$term, $term, $term]);
-        }
-        $whereClause = 'WHERE ' . implode(' AND ', $where);
-
-        // Get total count
-        $countSql = "SELECT COUNT(*) FROM donors $whereClause";
-        $totalRecords = (int)$pdo->prepare($countSql)->execute($params) ? $pdo->prepare($countSql)->fetchColumn() : 0;
-        $totalPages = ceil($totalRecords / $perPage);
-
-        // Driver-aware expressions
-        $unitIdExpr = ($driver === 'pgsql') ? "('INV-' || id)" : "CONCAT('INV-', id)";
-        $donorNameExpr = ($driver === 'pgsql') ? "(first_name || ' ' || last_name)" : "CONCAT(first_name, ' ', last_name)";
-        $expiryExpr = ($driver === 'pgsql') ? "(last_donation_date + INTERVAL '35 day')" : "(DATE_ADD(COALESCE(last_donation_date, created_at), INTERVAL 35 DAY))";
-
-        // Fetch paginated rows
-        $sql = "
-            SELECT
-                id AS donor_id,
-                $unitIdExpr AS unit_id,
-                blood_type,
-                'available' AS status,
-                $donorNameExpr AS donor_name,
-                reference_code,
-                COALESCE(last_donation_date, created_at) AS collection_date,
-                $expiryExpr AS expiry_date,
-                0 AS expiring_soon
-            FROM donors
-            $whereClause
-            ORDER BY created_at DESC
-            LIMIT ? OFFSET ?
-        ";
-        $params[] = $perPage;
-        $params[] = $offset;
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $inventory = [
-            'data' => $rows,
-            'total' => $totalRecords,
-            'page' => $filters['page'],
-            'limit' => $perPage,
-            'total_pages' => $totalPages,
-            'source' => 'served_donors_direct'
-        ];
-    } catch (Throwable $e) {
-        error_log('Served donors inventory query failed: ' . $e->getMessage());
-    }
-}
 
 /**
  * Build pagination URL with current parameters
