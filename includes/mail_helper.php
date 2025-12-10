@@ -55,15 +55,31 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 	}
 	
 	// Read configuration from environment
+	$fromEmail  = getenv('MAIL_FROM') ?: 'prc.baguio.blood@gmail.com';
+	$fromName   = getenv('MAIL_FROM_NAME') ?: 'Blood Donation System';
+	
+	// Primary: SendGrid API
+	if (file_exists(__DIR__ . '/sendgrid_helper.php') && function_exists('sendgrid_send_email')) {
+		try {
+			$sgSuccess = sendgrid_send_email($to, $subject, $htmlMessage, $toName, $fromEmail, $fromName);
+			if ($sgSuccess) {
+				@file_put_contents($successLog, date('Y-m-d H:i:s') . " - SendGrid API SENT to $to\n", FILE_APPEND);
+				return true;
+			} else {
+				@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - SendGrid API FAILED to $to\n", FILE_APPEND);
+			}
+		} catch (Exception $e) {
+			@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - SendGrid API Exception to $to: " . $e->getMessage() . "\n", FILE_APPEND);
+		}
+	}
+	
+	// Fallback: SMTP
 	$mailHost   = getenv('MAIL_HOST') ?: 'smtp.sendgrid.net';
 	$mailUser   = getenv('MAIL_USER') ?: 'apikey';
 	$mailPass   = getenv('MAIL_PASS') ?: '';
 	$mailPort   = (int)(getenv('MAIL_PORT') ?: 587);
 	$mailSecure = strtolower(getenv('MAIL_SECURE') ?: 'tls');
-	$fromEmail  = getenv('MAIL_FROM') ?: 'prc.baguio.blood@gmail.com';
-	$fromName   = getenv('MAIL_FROM_NAME') ?: 'Blood Donation System';
 	
-	// Try SMTP if credentials are present
 	if (!empty($mailPass)) {
 		try {
 			$mail = new PHPMailer\PHPMailer\PHPMailer(true);
@@ -103,7 +119,7 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 		}
 	}
 	
-	// Fallback to PHP native mail (try minimal headers)
+	// Fallback to PHP native mail
 	$headers = "From: $fromName <$fromEmail>\r\n";
 	$headers .= "Reply-To: $fromName <$fromEmail>\r\n";
 	$headers .= "MIME-Version: 1.0\r\n";
@@ -115,19 +131,6 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 	@file_put_contents($success ? $successLog : $errorLog, date('Y-m-d H:i:s') . " - PHP mail " . ($success ? 'SENT' : 'FAILED') . " to $to\n", FILE_APPEND);
 	if ($success) {
 		return true;
-	}
-	
-	// Ultimate fallback: try SendGrid API if available
-	if (file_exists(__DIR__ . '/sendgrid_helper.php') && function_exists('sendgrid_send_email')) {
-		try {
-			$sgSuccess = sendgrid_send_email($to, $subject, $htmlMessage, $toName, $fromEmail, $fromName);
-			@file_put_contents($sgSuccess ? $successLog : $errorLog, date('Y-m-d H:i:s') . " - SendGrid API " . ($sgSuccess ? 'SENT' : 'FAILED') . " to $to\n", FILE_APPEND);
-			if ($sgSuccess) {
-				return true;
-			}
-		} catch (Exception $e) {
-			@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - SendGrid API Exception to $to: " . $e->getMessage() . "\n", FILE_APPEND);
-		}
 	}
 	
 	// Final fallback: queue to local file
