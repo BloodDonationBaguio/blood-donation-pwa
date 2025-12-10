@@ -32,7 +32,7 @@ $IS_TEST_MODE = (defined('TEST_MODE') && TEST_MODE === true);
 // Check admin login
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || !isset($_SESSION['admin_username'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'] ?? '/admin.php';
-    header("Location: admin-login.php");
+    header("Location: admin_login.php");
     exit();
 }
 
@@ -47,13 +47,13 @@ if (!$IS_TEST_MODE) {
         if (!$admin) {
             // Admin no longer exists or is inactive, destroy session
             session_destroy();
-            header("Location: admin-login.php?error=session_expired");
+            header("Location: admin_login.php?error=session_expired");
             exit();
         }
     } catch (Exception $e) {
         // Database error, destroy session for security
         session_destroy();
-        header("Location: admin-login.php?error=database_error");
+        header("Location: admin_login.php?error=database_error");
         exit();
     }
 }

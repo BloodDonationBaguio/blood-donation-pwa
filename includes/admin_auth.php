@@ -26,7 +26,7 @@ function requireAdminLogin() {
         if (basename($_SERVER['REQUEST_URI']) !== 'admin_login.php') {
             $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
         }
-        header('Location: /admin-login.php');
+        header('Location: /admin_login.php');
         exit();
     }
 }

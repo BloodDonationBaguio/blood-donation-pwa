@@ -5,7 +5,7 @@
  */
 
 require_once 'db.php';
-require_once __DIR__ . '/admin/includes/admin_auth.php';
+require_once __DIR__ . '/includes/admin_auth.php';
 require_once 'includes/enhanced_donor_management.php';
 require_once 'includes/admin_actions.php';
 
