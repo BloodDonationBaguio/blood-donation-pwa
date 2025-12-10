@@ -67,7 +67,7 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 		try {
 			$mail = new PHPMailer\PHPMailer\PHPMailer(true);
 			$mail->isSMTP();
-			$mail->Timeout = 10;
+			$mail->Timeout = 5; // very short timeout
 			$mail->Host = $mailHost;
 			$mail->SMTPAuth = true;
 			$mail->Username = $mailUser;
@@ -112,5 +112,20 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 	
 	$success = mail($to, $subjectPlain, $plainBody, $headers);
 	@file_put_contents($success ? $successLog : $errorLog, date('Y-m-d H:i:s') . " - PHP mail " . ($success ? 'SENT' : 'FAILED') . " to $to\n", FILE_APPEND);
-	return $success;
+	if ($success) {
+		return true;
+	}
+	
+	// Ultimate fallback: try SendGrid API if available (requires sendgrid_helper.php)
+	if (file_exists(__DIR__ . '/sendgrid_helper.php') && function_exists('sendgrid_send_email')) {
+		try {
+			$sgSuccess = sendgrid_send_email($to, $subject, $htmlMessage, $toName, $fromEmail, $fromName);
+			@file_put_contents($success ? $successLog : $errorLog, date('Y-m-d H:i:s') . " - SendGrid API " . ($sgSuccess ? 'SENT' : 'FAILED') . " to $to\n", FILE_APPEND);
+			return $sgSuccess;
+		} catch (Exception $e) {
+			@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - SendGrid API Exception to $to: " . $e->getMessage() . "\n", FILE_APPEND);
+		}
+	}
+	
+	return false;
 }

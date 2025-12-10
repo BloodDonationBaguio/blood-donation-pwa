@@ -253,7 +253,7 @@ try {
         'source' => 'served_donors_direct'
     ];
 
-    // Simple summary (counts by blood type)
+    // Simple summary (counts by blood type), including temporary status changes
     $summary = [
         'total_units' => 0,
         'available_units' => 0,
@@ -264,7 +264,20 @@ try {
     foreach ($pdo->query($summarySql)->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $summary[$r['blood_type']] = $r['cnt'];
         $summary['total_units'] += $r['cnt'];
-        $summary['available_units'] += $r['cnt']; // All served count as available in this simplified view
+        $summary['available_units'] += $r['cnt']; // default to available
+    }
+    // Apply temporary status changes from session to summary
+    if (!empty($_SESSION['temp_unit_status'])) {
+        foreach ($_SESSION['temp_unit_status'] as $unitId => $tempStatus) {
+            // Deduct from available and add to the new status bucket
+            if ($tempStatus === 'used') {
+                $summary['available_units'] = max(0, $summary['available_units'] - 1);
+                $summary['used_units']++;
+            } elseif ($tempStatus === 'expired') {
+                $summary['available_units'] = max(0, $summary['available_units'] - 1);
+                $summary['expired_units']++;
+            }
+        }
     }
 } catch (Throwable $e) {
     error_log('Served donors inventory query failed: ' . $e->getMessage());
