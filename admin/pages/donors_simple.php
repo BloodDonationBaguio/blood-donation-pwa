@@ -38,9 +38,21 @@ if (!in_array($perPage, $allowedPerPage)) {
 // Calculate offset
 $offset = ($page - 1) * $perPage;
 
-// Build WHERE clause
-$whereConditions = ['1=1']; // Start with a true condition
-$params = [];
+// Resolve donors table dynamically (prefer 'donors' over legacy 'donors_new')
+$donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors')) ? 'donors' : ((function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : null);
+if ($donorsTable === null) {
+    $donors = [];
+    $totalRecords = 0;
+    $totalPages = 0;
+} else {
+    // Detect optional columns present on legacy tables
+    $columns = function_exists('getTableStructure') ? getTableStructure($pdo, $donorsTable) : [];
+    $hasSeedFlag = false;
+    foreach ($columns as $col) { if (($col['column_name'] ?? '') === 'seed_flag') { $hasSeedFlag = true; break; } }
+
+    // Build WHERE clause
+    $whereConditions = ['1=1'];
+    $params = [];
 
 // Show all donors - no filtering by test status
 
@@ -62,66 +74,72 @@ if (!empty($search)) {
 
 $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
 
-// Get total count for pagination
-$countQuery = "SELECT COUNT(*) as total FROM donors_new $whereClause";
-$countStmt = $pdo->prepare($countQuery);
-$countStmt->execute($params);
-$totalRecords = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
-$totalPages = ceil($totalRecords / $perPage);
+    // Filter out seeded test data when column exists
+    if ($hasSeedFlag) {
+        $whereConditions[] = 'seed_flag = 0';
+    }
+
+    // Get total count for pagination
+    $countQuery = "SELECT COUNT(*) as total FROM {$donorsTable} $whereClause";
+    $countStmt = $pdo->prepare($countQuery);
+    $countStmt->execute($params);
+    $totalRecords = (int)($countStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+    $totalPages = $totalRecords > 0 ? (int)ceil($totalRecords / $perPage) : 0;
 
 // Get paginated donors
-$query = "
-    SELECT 
-        id,
-        first_name,
-        last_name,
-        email,
-        phone,
-        blood_type,
-        status,
-        reference_code,
-        created_at,
-        updated_at,
-        CONCAT(first_name, ' ', last_name) as full_name
-    FROM donors_new
-    $whereClause
-    ORDER BY created_at DESC
-    LIMIT ? OFFSET ?
-";
+    $query = "
+        SELECT 
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            blood_type,
+            status,
+            reference_code,
+            created_at,
+            updated_at,
+            CONCAT(first_name, ' ', last_name) as full_name
+        FROM {$donorsTable}
+        $whereClause
+        ORDER BY created_at DESC
+        LIMIT ? OFFSET ?
+    ";
 
 $params[] = $perPage;
 $params[] = $offset;
 
-$stmt = $pdo->prepare($query);
-$stmt->execute($params);
-$donors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
+    $donors = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Calculate pagination info
 $startRecord = $offset + 1;
 $endRecord = min($offset + $perPage, $totalRecords);
 
-// Get status counts for filters
-$statusCounts = [];
-try {
-    $statusQuery = "SELECT status, COUNT(*) as count FROM donors_new GROUP BY status";
-    $statusStmt = $pdo->query($statusQuery);
-    while ($row = $statusStmt->fetch(PDO::FETCH_ASSOC)) {
-        $statusCounts[$row['status']] = $row['count'];
+    // Get status counts for filters
+    $statusCounts = [];
+    try {
+        $statusQuery = "SELECT status, COUNT(*) as count FROM {$donorsTable}" . ($hasSeedFlag ? " WHERE seed_flag = 0" : "") . " GROUP BY status";
+        $statusStmt = $pdo->query($statusQuery);
+        while ($row = $statusStmt->fetch(PDO::FETCH_ASSOC)) {
+            $statusCounts[$row['status']] = (int)$row['count'];
+        }
+    } catch (Exception $e) {
+        error_log('Status count query failed: ' . $e->getMessage());
     }
-} catch (Exception $e) {
-    // Handle error silently
-}
 
-// Get blood type counts for filters
-$bloodTypeCounts = [];
-try {
-    $bloodTypeQuery = "SELECT blood_type, COUNT(*) as count FROM donors_new GROUP BY blood_type";
-    $bloodTypeStmt = $pdo->query($bloodTypeQuery);
-    while ($row = $bloodTypeStmt->fetch(PDO::FETCH_ASSOC)) {
-        $bloodTypeCounts[$row['blood_type']] = $row['count'];
+    // Get blood type counts for filters
+    $bloodTypeCounts = [];
+    try {
+        $bloodTypeQuery = "SELECT blood_type, COUNT(*) as count FROM {$donorsTable}" . ($hasSeedFlag ? " WHERE seed_flag = 0" : "") . " GROUP BY blood_type";
+        $bloodTypeStmt = $pdo->query($bloodTypeQuery);
+        while ($row = $bloodTypeStmt->fetch(PDO::FETCH_ASSOC)) {
+            $bloodTypeCounts[$row['blood_type']] = (int)$row['count'];
+        }
+    } catch (Exception $e) {
+        error_log('Blood type count query failed: ' . $e->getMessage());
     }
-} catch (Exception $e) {
-    // Handle error silently
 }
 ?>
 
