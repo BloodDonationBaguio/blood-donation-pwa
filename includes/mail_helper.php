@@ -5,6 +5,7 @@ require_once __DIR__ . '/phpmailer/src/SMTP.php';
 require_once __DIR__ . '/phpmailer/src/Exception.php';
 require_once __DIR__ . '/email_queue_helper.php';
 require_once __DIR__ . '/sendgrid_helper.php';
+require_once __DIR__ . '/email_config.php';
 // Enable error reporting for debugging (log only, no display)
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -54,9 +55,29 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
 	if (!file_exists($logDir)) {
 		@mkdir($logDir, 0755, true);
 	}
+
+	$devFlag = getenv('MAIL_DEV_MODE');
+	$isDevMode = $devFlag && in_array(strtolower($devFlag), ['1','true','yes','on'], true);
+	if ($isDevMode) {
+		$queued = queue_email($to, $subject, $htmlMessage, $toName);
+		if ($queued) {
+			@file_put_contents($successLog, date('Y-m-d H:i:s') . " - DEV QUEUE to file for $to (no external send)\n", FILE_APPEND);
+			return true;
+		}
+		@file_put_contents($errorLog, date('Y-m-d H:i:s') . " - DEV QUEUE FAILED for $to\n", FILE_APPEND);
+		return false;
+	}
 	
-    $fromEmail  = getenv('MAIL_FROM') ?: 'prc.baguio.blood@gmail.com';
-    $fromName   = getenv('MAIL_FROM_NAME') ?: 'Blood Donation System';
+	// Load advanced email configuration (Gmail SMTP, etc.) when available
+	$config = null;
+	try {
+		$config = EmailConfig::getConfig();
+	} catch (Throwable $e) {
+		$config = null;
+	}
+
+	$fromEmail  = $config['smtp']['from_email'] ?? (getenv('MAIL_FROM') ?: 'prc.baguio.blood@gmail.com');
+	$fromName   = $config['smtp']['from_name']  ?? (getenv('MAIL_FROM_NAME') ?: 'Blood Donation System');
 	
     $sgSuccess = false;
     if (function_exists('sendgrid_send_email')) {
@@ -67,12 +88,12 @@ function send_confirmation_email($to, $subject, $htmlMessage, $toName = '') {
         }
     }
 	
-	// Fallback: SMTP
-	$mailHost   = getenv('MAIL_HOST') ?: 'smtp.sendgrid.net';
-	$mailUser   = getenv('MAIL_USER') ?: 'apikey';
-	$mailPass   = getenv('MAIL_PASS') ?: '';
-	$mailPort   = (int)(getenv('MAIL_PORT') ?: 587);
-	$mailSecure = strtolower(getenv('MAIL_SECURE') ?: 'tls');
+	// Fallback: SMTP (prefer config/email_config.json over environment)
+	$mailHost   = $config['smtp']['host']        ?? (getenv('MAIL_HOST')   ?: 'smtp.sendgrid.net');
+	$mailUser   = $config['smtp']['username']    ?? (getenv('MAIL_USER')   ?: 'apikey');
+	$mailPass   = $config['smtp']['password']    ?? (getenv('MAIL_PASS')   ?: '');
+	$mailPort   = (int)($config['smtp']['port']  ?? (getenv('MAIL_PORT')   ?: 587));
+	$mailSecure = strtolower($config['smtp']['encryption'] ?? (getenv('MAIL_SECURE') ?: 'tls'));
 	
     if (!$sgSuccess && !empty($mailPass)) {
 		try {

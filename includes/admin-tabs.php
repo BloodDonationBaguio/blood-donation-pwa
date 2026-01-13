@@ -58,12 +58,13 @@ if ($activeTab === 'dashboard') {
             try {
                 $statsStmt = $pdo->query("
                     SELECT 
-                        COUNT(*) AS total,
+                        COUNT(CASE WHEN status <> 'pending' THEN 1 END) AS total,
                         COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending
                     FROM donors
                 ");
                 $stats = $statsStmt ? $statsStmt->fetch(PDO::FETCH_ASSOC) : null;
                 if ($stats) {
+                    // Total donors excludes pending; pending is reported separately
                     $totalDonors = (int)($stats['total'] ?? 0);
                     $pendingDonorsCount = (int)($stats['pending'] ?? 0);
                 }

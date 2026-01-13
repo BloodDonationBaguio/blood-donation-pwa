@@ -5,8 +5,7 @@
 //   /admin/tests/seed_existing_donor_screening.php?ref=DNR-E762E6
 // Optional: ?answers=all|partial (default all), ?yes_every=5
 
-session_start();
-// Ensure admin session
+// Let shared admin_auth manage the session; avoid duplicate session_start notices
 require_once __DIR__ . '/../includes/admin_auth.php';
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     http_response_code(401);
@@ -14,7 +13,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
-// DB include via admin config
+// DB include via admin config (reuses central env-aware db.php)
 require_once __DIR__ . '/../includes/db.php';
 if (!isset($pdo) || !$pdo instanceof PDO) {
     http_response_code(500);
@@ -22,11 +21,18 @@ if (!isset($pdo) || !$pdo instanceof PDO) {
     exit;
 }
 
-function tableExists(PDO $pdo, string $table): bool {
-    try { $stmt = $pdo->prepare('SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?'); $stmt->execute([$table]); return (bool)$stmt->fetchColumn(); }
-    catch (Throwable $e) { try { $pdo->query("SELECT 1 FROM `{$table}` LIMIT 1"); return true; } catch (Throwable $e2) { return false; } }
+// Prefer current donors table over legacy donors_new when both exist
+function donorsTable(PDO $pdo): string {
+    if (function_exists('tableExists')) {
+        if (tableExists($pdo, 'donors')) {
+            return 'donors';
+        }
+        if (tableExists($pdo, 'donors_new')) {
+            return 'donors_new';
+        }
+    }
+    return 'donors';
 }
-function donorsTable(PDO $pdo): string { return tableExists($pdo, 'donors_new') ? 'donors_new' : 'donors'; }
 function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -34,18 +40,30 @@ $ref = isset($_GET['ref']) ? trim((string)$_GET['ref']) : '';
 $mode = strtolower($_GET['answers'] ?? 'all');
 $yesEvery = max(2, (int)($_GET['yes_every'] ?? 5));
 
-$table = donorsTable($pdo);
-if ($id <= 0 && $ref === '') { http_response_code(400); echo 'Provide ?id=<number> or ?ref=DBR-XXXXXX'; exit; }
+if ($id <= 0 && $ref === '') { http_response_code(400); echo 'Provide ?id=<number> or ?ref=DNR-XXXXXX'; exit; }
 
-// Load donor
-if ($id > 0) {
-    $stmt = $pdo->prepare("SELECT * FROM `{$table}` WHERE id = ?");
-    $stmt->execute([$id]);
-} else {
-    $stmt = $pdo->prepare("SELECT * FROM `{$table}` WHERE reference_code = ?");
-    $stmt->execute([$ref]);
+// Load donor, checking both donors and donors_new like the diagnostic script
+$donor = null;
+foreach (['donors', 'donors_new'] as $tbl) {
+    try {
+        if (function_exists('tableExists') && !tableExists($pdo, $tbl)) {
+            continue;
+        }
+        if ($id > 0) {
+            $stmt = $pdo->prepare("SELECT * FROM `{$tbl}` WHERE id = ?");
+            $stmt->execute([$id]);
+        } else {
+            $stmt = $pdo->prepare("SELECT * FROM `{$tbl}` WHERE reference_code = ?");
+            $stmt->execute([$ref]);
+        }
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) { $donor = $row; break; }
+    } catch (Throwable $e) {
+        error_log('seed_existing_donor_screening donor lookup failed on ' . $tbl . ': ' . $e->getMessage());
+    }
 }
-$donor = $stmt->fetch(PDO::FETCH_ASSOC);
+unset($stmt, $row);
+
 if (!$donor) { http_response_code(404); echo 'Donor not found'; exit; }
 
 // Load questions (resolve from root includes)

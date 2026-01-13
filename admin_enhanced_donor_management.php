@@ -261,7 +261,8 @@ if ($donorId > 0 && $donor) {
     // Compute medical screening status for the single donor entry
     $donor['medical_screening_status'] = getMedicalScreeningStatus(
         $donor['screening_data'] ?? null,
-        $donor['all_questions_answered'] ?? null
+        $donor['all_questions_answered'] ?? null,
+        $donor['gender'] ?? null
     );
     $donors = [$donor];
 } else {
@@ -953,8 +954,9 @@ $unservedReasons = getUnservedReasons();
             // Show the modal first
             new bootstrap.Modal(document.getElementById('donorModal')).show();
             
-            // Fetch donor details
-            fetch(`/simple_ajax_donor_details.php?action=get_donor_details&donor_id=${donorId}`)
+            // Fetch donor details from the same app folder (works on localhost subfolder
+            // like /blood-donation-pwa-1 and on production)
+            fetch(`simple_ajax_donor_details.php?action=get_donor_details&donor_id=${donorId}`)
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('donorModalBody').innerHTML = html;

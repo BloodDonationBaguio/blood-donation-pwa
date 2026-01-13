@@ -2,35 +2,65 @@
 // Admin-only diagnostic tool to inspect a donor's screening data using admin DB/session.
 // Usage: /admin/tests/diagnose_screening_data.php?id=123 or ?ref=DNR-XXXXXX
 
-session_start();
+// Let the shared admin_auth bootstrap the session; avoid duplicate session_start notices
 require_once __DIR__ . '/../includes/admin_auth.php';
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     http_response_code(401);
     echo 'Admin login required. Please login and retry.';
     exit;
 }
-
+// Reuse the central env-aware DB connection and helpers
 require_once __DIR__ . '/../includes/db.php';
-if (!isset($pdo) || !$pdo instanceof PDO) { http_response_code(500); echo 'Database connection not available.'; exit; }
-
-function tableExists(PDO $pdo, string $table): bool {
-    try { $stmt = $pdo->prepare('SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?'); $stmt->execute([$table]); return (bool)$stmt->fetchColumn(); }
-    catch (Throwable $e) { try { $pdo->query("SELECT 1 FROM `{$table}` LIMIT 1"); return true; } catch (Throwable $e2) { return false; } }
+if (!isset($pdo) || !$pdo instanceof PDO) {
+    http_response_code(500);
+    echo 'Database connection not available.';
+    exit;
 }
-function donorsTable(PDO $pdo): string { return tableExists($pdo, 'donors_new') ? 'donors_new' : 'donors'; }
+
 function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $ref = isset($_GET['ref']) ? trim((string)$_GET['ref']) : '';
-$table = donorsTable($pdo);
 
-if ($id <= 0 && $ref === '') { http_response_code(400); echo 'Provide ?id=<number> or ?ref=DBR-XXXXXX'; exit; }
+if ($id <= 0 && $ref === '') {
+	http_response_code(400);
+	echo 'Provide ?id=<number> or ?ref=DNR-XXXXXX';
+	exit;
+}
 
-// Load donor
-if ($id > 0) { $stmt = $pdo->prepare("SELECT * FROM `{$table}` WHERE id = ?"); $stmt->execute([$id]); }
-else { $stmt = $pdo->prepare("SELECT * FROM `{$table}` WHERE reference_code = ?"); $stmt->execute([$ref]); }
-$donor = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$donor) { http_response_code(404); echo 'Donor not found'; exit; }
+// Load donor by checking both donors and donors_new to match the main app behaviour
+$donor = null;
+$candidateTables = ['donors', 'donors_new'];
+
+foreach ($candidateTables as $tbl) {
+	try {
+		// Skip tables that don't exist when tableExists helper is available
+		if (function_exists('tableExists') && !tableExists($pdo, $tbl)) {
+			continue;
+		}
+		if ($id > 0) {
+			$stmt = $pdo->prepare("SELECT * FROM `{$tbl}` WHERE id = ?");
+			$stmt->execute([$id]);
+		} else {
+			$stmt = $pdo->prepare("SELECT * FROM `{$tbl}` WHERE reference_code = ?");
+			$stmt->execute([$ref]);
+		}
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		if ($row) {
+			$donor = $row;
+			break;
+		}
+	} catch (Throwable $e) {
+		// Ignore errors per-table, keep trying other candidates
+		error_log('diagnose_screening_data donor lookup failed on ' . $tbl . ': ' . $e->getMessage());
+	}
+}
+
+if (!$donor) {
+	http_response_code(404);
+	echo 'Donor not found';
+	exit;
+}
 
 // Fetch screening rows
 $rows = [ 'simple' => null, 'fixed' => null ];

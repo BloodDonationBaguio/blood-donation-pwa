@@ -24,7 +24,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
             echo "<tr><td><strong>Name:</strong></td><td>" . htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) . "</td></tr>";
             echo "<tr><td><strong>Email:</strong></td><td>" . htmlspecialchars($donor['email']) . "</td></tr>";
             echo "<tr><td><strong>Phone:</strong></td><td>" . htmlspecialchars($donor['phone'] ?? 'N/A') . "</td></tr>";
-            echo "<tr><td><strong>Blood Type:</strong></td><td><span class='badge bg-danger'>" . htmlspecialchars($donor['blood_type']) . "</span></td></tr>";
+            echo "<tr><td><strong>Blood Type:</strong></td><td><span class='badge bg-danger'>" . htmlspecialchars(!empty($donor['blood_type']) ? $donor['blood_type'] : 'Unknown') . "</span></td></tr>";
             echo "<tr><td><strong>Gender:</strong></td><td>" . (!empty($donor['gender']) ? htmlspecialchars($donor['gender']) : 'Not specified') . "</td></tr>";
             echo "<tr><td><strong>Date of Birth:</strong></td><td>" . (!empty($donor['date_of_birth']) ? date('M d, Y', strtotime($donor['date_of_birth'])) : 'Not specified') . "</td></tr>";
             echo "<tr><td><strong>Status:</strong></td><td><span class='badge bg-" . getDonorStatusColor($donor['status']) . "'>" . getDonorDisplayStatus($donor['status']) . "</span></td></tr>";
@@ -106,8 +106,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                     }
                     error_log("Table exists (MySQL): " . ($tableCheckMy ? 'YES' : 'NO'));
                     if ($tableCheckMy) {
-                        $screeningStmt = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_simple WHERE donor_id = ?");
-                        $screeningStmt->execute([$donorId]);
+                        // Local MySQL often stores screening rows with donor_id=NULL and
+                        // reference_code set. Prefer a match by donor_id, but fall back
+                        // to reference_code when donor_id is NULL.
+                        $refCode = $donor['reference_code'] ?? null;
+                        $screeningStmt = $pdo->prepare(
+                            "SELECT screening_data, all_questions_answered, created_at
+                             FROM donor_medical_screening_simple
+                             WHERE donor_id = ?
+                                OR (donor_id IS NULL AND reference_code = ?)
+                             ORDER BY created_at DESC
+                             LIMIT 1"
+                        );
+                        $screeningStmt->execute([$donorId, $refCode]);
                         error_log("Screening query executed (MySQL)");
                         $medicalScreeningSimple = $screeningStmt->fetch(PDO::FETCH_ASSOC);
                         error_log("Screening data found: " . ($medicalScreeningSimple ? 'YES' : 'NO'));
@@ -194,40 +205,126 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                     echo "</div>";
                 }
 
-                // Questions block
-                echo "<div class='screening-answers mt-3'>";
-                echo "<h5>Screening Questions & Answers:</h5>";
-                
-                // Define questions (expects these keys in screening_data)
-                $questions = [
-                    'chronic_conditions' => 'Do you have any chronic medical conditions?',
-                    'medications' => 'Are you currently taking any medications?',
-                    'recent_illness' => 'Have you been ill in the past 2 weeks?',
-                    'recent_travel' => 'Have you traveled internationally in the past 6 months?',
-                    'tattoos_piercings' => 'Have you gotten any tattoos or piercings in the past 12 months?',
-                    'pregnancy' => 'Are you currently pregnant or breastfeeding?',
-                    'blood_disorders' => 'Do you have any blood disorders?',
-                    'infectious_diseases' => 'Have you been diagnosed with hepatitis, HIV, or other infectious diseases?',
-                    'recent_vaccines' => 'Have you received any vaccines in the past 4 weeks?',
-                    'weight_requirement' => 'Do you weigh at least 110 pounds (50 kg)?'
-                ];
-
-                foreach ($questions as $key => $question) {
-                    if (isset($answers[$key])) {
-                        $val = $answers[$key];
-                        echo "<div class='question-item'>";
-                        echo "<strong>" . htmlspecialchars($question) . "</strong>";
-                        echo "<p class='answer'>" . htmlspecialchars($val) . "</p>";
-                        if (isset($answers[$key . '_details']) && !empty($answers[$key . '_details'])) {
-                            echo "<p class='details'><em>Details: " . htmlspecialchars($answers[$key . '_details']) . "</em></p>";
-                        }
-                        echo "</div>";
+                // Decide how to render based on key style: full questionnaire (q1,q2,...) vs simple fields
+                $hasQKeys = false;
+                if (is_array($answers)) {
+                    foreach ($answers as $k => $_v) {
+                        if (preg_match('/^q[0-9]+$/', (string)$k)) { $hasQKeys = true; break; }
                     }
                 }
-                echo "</div>"; // .screening-answers
 
-                // Inline CSS simplified (no icons or colored borders)
-                echo "<style>.question-item{padding:8px;margin:6px 0}.question-item .answer{margin:4px 0}.question-item .details{font-size:.9em;color:#666}</style>";
+                if ($hasQKeys) {
+                    // Use detailed questionnaire layout similar to the donors.screening_data branch
+                    $screeningData = $answers;
+                    $medicalQuestions = include __DIR__ . '/includes/medical_questions.php';
+                    if (!is_array($medicalQuestions) || empty($medicalQuestions['sections'])) {
+                        $medicalQuestions = include __DIR__ . '/includes/medical_questions_new.php';
+                    }
+                    $sections = is_array($medicalQuestions) ? ($medicalQuestions['sections'] ?? []) : [];
+
+                    echo "<div class='mt-4'>";
+                    echo "<h5><i class='fas fa-clipboard-list me-2'></i>Medical Screening Questions & Answers</h5>";
+                    echo "<div class='alert alert-info mb-3'>";
+                    echo "<i class='fas fa-info-circle me-2'></i>";
+                    echo "<strong>Note:</strong> Click on each section to view the detailed questions and answers.";
+                    echo "</div>";
+
+                    if (!empty($sections)) {
+                        echo "<div class='accordion' id='medicalScreeningAccordion'>";
+                        $questionCounter = 0;
+                        $donorGender = $donor['gender'] ?? '';
+
+                        foreach ($sections as $sectionKey => $section) {
+                            $sectionTitle = $section['title'];
+                            $questions = $section['questions'];
+                            $sectionId = 'section-' . str_replace(' ', '-', strtolower($sectionTitle));
+
+                            if ($sectionKey === 'female_only' && strtolower($donorGender) !== 'female') {
+                                continue;
+                            }
+
+                            echo "<div class='accordion-item'>";
+                            echo "<h2 class='accordion-header' id='heading-{$sectionId}'>";
+                            echo "<button class='accordion-button " . ($questionCounter === 0 ? '' : 'collapsed') . "' type='button' data-bs-toggle='collapse' data-bs-target='#collapse-{$sectionId}' aria-expanded='" . ($questionCounter === 0 ? 'true' : 'false') . "' aria-controls='collapse-{$sectionId}'>";
+                            echo "<i class='fas fa-heartbeat me-2'></i>{$sectionTitle}";
+                            echo "</button>";
+                            echo "</h2>";
+
+                            echo "<div id='collapse-{$sectionId}' class='accordion-collapse collapse " . ($questionCounter === 0 ? 'show' : '') . "' aria-labelledby='heading-{$sectionId}' data-bs-parent='#medicalScreeningAccordion'>";
+                            echo "<div class='accordion-body'>";
+
+                            foreach ($questions as $questionKey => $questionText) {
+                                $answer = $screeningData[$questionKey] ?? 'not_answered';
+                                if ($questionKey === 'q34') {
+                                    $q34Type = $screeningData['q34'] ?? null;
+                                    $q34Date = $screeningData['q34_date'] ?? null;
+                                    if ($q34Type === 'none') {
+                                        $answer = 'None';
+                                    } elseif ($q34Type === 'date' && !empty($q34Date)) {
+                                        $answer = $q34Date;
+                                    } else {
+                                        $answer = 'not_answered';
+                                    }
+                                } elseif ($questionKey === 'q37') {
+                                    $q37Date = $screeningData['q37_date'] ?? null;
+                                    $answer = !empty($q37Date) ? $q37Date : 'not_answered';
+                                }
+
+                                echo "<div class='mb-3'>";
+                                echo "<div class='fw-bold mb-2'>" . htmlspecialchars($questionText) . "</div>";
+                                echo "<div><strong>Answer:</strong> " . (in_array($answer, ['yes','no','not_answered']) ? ucfirst($answer) : htmlspecialchars($answer)) . "</div>";
+                                echo "</div>";
+                            }
+
+                            echo "</div>";
+                            echo "</div>";
+                            echo "</div>";
+
+                            $questionCounter++;
+                        }
+
+                        echo "</div>";
+                    } else {
+                        echo "<div class='alert alert-info'>";
+                        echo "<i class='fas fa-info-circle me-2'></i>";
+                        echo "Medical screening questions not available.";
+                        echo "</div>";
+                    }
+                    echo "</div>";
+                } else {
+                    // Simple 10-question layout for older screening_data format
+                    echo "<div class='screening-answers mt-3'>";
+                    echo "<h5>Screening Questions & Answers:</h5>";
+
+                    $questions = [
+                        'chronic_conditions' => 'Do you have any chronic medical conditions?',
+                        'medications' => 'Are you currently taking any medications?',
+                        'recent_illness' => 'Have you been ill in the past 2 weeks?',
+                        'recent_travel' => 'Have you traveled internationally in the past 6 months?',
+                        'tattoos_piercings' => 'Have you gotten any tattoos or piercings in the past 12 months?',
+                        'pregnancy' => 'Are you currently pregnant or breastfeeding?',
+                        'blood_disorders' => 'Do you have any blood disorders?',
+                        'infectious_diseases' => 'Have you been diagnosed with hepatitis, HIV, or other infectious diseases?',
+                        'recent_vaccines' => 'Have you received any vaccines in the past 4 weeks?',
+                        'weight_requirement' => 'Do you weigh at least 110 pounds (50 kg)?'
+                    ];
+
+                    foreach ($questions as $key => $question) {
+                        if (isset($answers[$key])) {
+                            $val = $answers[$key];
+                            echo "<div class='question-item'>";
+                            echo "<strong>" . htmlspecialchars($question) . "</strong>";
+                            echo "<p class='answer'>" . htmlspecialchars($val) . "</p>";
+                            if (isset($answers[$key . '_details']) && !empty($answers[$key . '_details'])) {
+                                echo "<p class='details'><em>Details: " . htmlspecialchars($answers[$key . '_details']) . "</em></p>";
+                            }
+                            echo "</div>";
+                        }
+                    }
+                    echo "</div>"; // .screening-answers
+
+                    echo "<style>.question-item{padding:8px;margin:6px 0}.question-item .answer{margin:4px 0}.question-item .details{font-size:.9em;color:#666}</style>";
+                }
             } elseif (!empty($donor['screening_data'])) {
                 // Fallback: use joined donor.screening_data when standalone row not found
                 $screeningData = json_decode($donor['screening_data'], true);
@@ -464,12 +561,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_donor_details') {
                 }
                 echo "</div>";
             } else {
-                // Donor exists but no medical screening record found.
-                // Since registration requires completing the questionnaire, this state should not occur in practice.
-                // We'll omit the misleading "Not Completed" message to avoid confusion.
+                // Donor exists but no medical screening record is associated.
+                // This can legitimately happen for donors registered via admin or
+                // older forms without the online questionnaire.
                 echo "<div class='alert alert-info'>";
                 echo "<i class='fas fa-info-circle me-2'></i>";
-                echo "<strong>Medical Screening:</strong> No screening record on file (this should not happen for registered donors).</div>";
+                echo "<strong>Medical Screening:</strong> No online medical screening has been recorded for this donor yet.</div>";
             }
             echo "</div>";
             

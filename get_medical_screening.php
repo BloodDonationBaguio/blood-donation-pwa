@@ -7,9 +7,10 @@
 // Start session for authentication
 session_start();
 
-// Robust DB include: prefer production if present, else local
+// Robust DB include: prefer environment-aware db.php first (Supabase in prod, MySQL locally),
+// then fall back to db_production.php for legacy DATABASE_URL setups.
 $__dbIncluded = false;
-foreach ([__DIR__ . '/db_production.php', __DIR__ . '/db.php', __DIR__ . '/../db.php'] as $__candidate) {
+foreach ([__DIR__ . '/db.php', __DIR__ . '/db_production.php', __DIR__ . '/../db.php'] as $__candidate) {
     if (file_exists($__candidate)) { require_once $__candidate; $__dbIncluded = true; break; }
 }
 
@@ -72,12 +73,32 @@ try {
     // 1) donor_medical_screening_simple (guarded by table existence to avoid 500s)
     if (function_exists('tableExists') ? tableExists($pdo, 'donor_medical_screening_simple') : true) {
         try {
-            $stmt = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_simple WHERE donor_id = ?");
+            // Primary lookup by donor_id
+            $stmt = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at FROM donor_medical_screening_simple WHERE donor_id = ? ORDER BY created_at DESC LIMIT 1");
             $stmt->execute([$donorId]);
-            if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                if (!empty($row['screening_data'])) {
-                    $data = json_decode($row['screening_data'], true);
-                    if (is_array($data)) { $screeningData = $data; $screeningDate = $row['created_at'] ?? $donor['created_at'] ?? null; $completed = !empty($row['all_questions_answered']); }
+            $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
+            // Fallback: some legacy/local rows may have donor_id=NULL but a matching reference_code
+            if ((!$row || empty($row['screening_data'])) && !empty($donor['reference_code'])) {
+                try {
+                    $stmt2 = $pdo->prepare("SELECT screening_data, all_questions_answered, created_at
+                                             FROM donor_medical_screening_simple
+                                             WHERE (donor_id = ? OR donor_id IS NULL) AND reference_code = ?
+                                             ORDER BY created_at DESC
+                                             LIMIT 1");
+                    $stmt2->execute([$donorId, $donor['reference_code']]);
+                    $row = $stmt2->fetch(PDO::FETCH_ASSOC) ?: $row;
+                } catch (Throwable $inner) {
+                    error_log('get_medical_screening: simple reference_code fallback failed: ' . $inner->getMessage());
+                }
+            }
+
+            if ($row && !empty($row['screening_data'])) {
+                $data = json_decode($row['screening_data'], true);
+                if (is_array($data)) {
+                    $screeningData = $data;
+                    $screeningDate = $row['created_at'] ?? $donor['created_at'] ?? null;
+                    $completed = !empty($row['all_questions_answered']);
                 }
             }
         } catch (Throwable $e) {

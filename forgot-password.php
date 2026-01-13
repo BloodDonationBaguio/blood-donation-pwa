@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/config/timezone.php';
+
 define('INCLUDES_PATH', true);
 session_start();
 require_once 'includes/db.php';

@@ -62,7 +62,7 @@ if ($donorId) {
                     <div class="col-md-8">
                         <h2 class="mb-2"><i class="fas fa-user-circle me-2"></i><?= htmlspecialchars($donor['full_name']) ?></h2>
                         <p class="mb-1"><strong>Reference Code:</strong> <?= htmlspecialchars($donor['reference_code']) ?></p>
-                        <p class="mb-1"><strong>Blood Type:</strong> <span class="badge bg-light text-dark"><?= htmlspecialchars($donor['blood_type']) ?></span></p>
+                        <p class="mb-1"><strong>Blood Type:</strong> <span class="badge bg-light text-dark"><?= htmlspecialchars(!empty($donor['blood_type']) ? $donor['blood_type'] : 'Unknown') ?></span></p>
                         <p class="mb-0"><strong>Status:</strong> 
                             <span class="badge <?= $donor['status'] === 'approved' ? 'bg-success' : ($donor['status'] === 'pending' ? 'bg-warning' : 'bg-danger') ?>">
                                 <?= ucfirst(htmlspecialchars($donor['status'])) ?>

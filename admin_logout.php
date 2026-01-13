@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/config/timezone.php';
+
 // admin_logout.php
 // This script will clear the admin session and redirect to login
 
@@ -19,7 +22,9 @@ if (ini_get("session.use_cookies")) {
 // Destroy the session
 session_destroy();
 
-// Redirect to canonical admin login page
-header('Location: /admin-login.php');
+// Redirect to canonical admin login page with correct base path
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+$redirectPath = $basePath ? $basePath . '/admin-login.php' : '/admin-login.php';
+header('Location: ' . $redirectPath);
 exit();
 ?>

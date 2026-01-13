@@ -42,24 +42,9 @@ if (!in_array(strtoupper($sortOrder), $allowedSortOrders)) {
 // Calculate offset
 $offset = ($page - 1) * $perPage;
 
-// Resolve donors table dynamically (prefer 'donors' over legacy 'donors_new')
-$donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors')) ? 'donors' : ((function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : null);
-if ($donorsTable === null) {
-    $donors = [];
-    $totalRecords = 0;
-    $totalPages = 0;
-    $statusCounts = [];
-    $bloodTypeCounts = [];
-} else {
-    // Detect optional columns present on legacy tables
-    $columns = function_exists('getTableStructure') ? getTableStructure($pdo, $donorsTable) : [];
-    $hasSeedFlag = false;
-    foreach ($columns as $col) { if (($col['column_name'] ?? '') === 'seed_flag') { $hasSeedFlag = true; break; } }
-
-    // Build WHERE clause
-    $whereConditions = [];
-    $params = [];
-    if ($hasSeedFlag) { $whereConditions[] = 'd.seed_flag = 0'; }
+// Build WHERE clause
+$whereConditions = ['d.seed_flag = 0']; // Exclude test data
+$params = [];
 
 if (!empty($status)) {
     $whereConditions[] = 'd.status = ?';
@@ -80,10 +65,10 @@ if (!empty($search)) {
     $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
 }
 
-$whereClause = count($whereConditions) ? ('WHERE ' . implode(' AND ', $whereConditions)) : '';
+$whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
 
 // Get total count for pagination
-$countQuery = "SELECT COUNT(*) as total FROM {$donorsTable} d $whereClause";
+$countQuery = "SELECT COUNT(*) as total FROM donors_new d $whereClause";
 $countStmt = $pdo->prepare($countQuery);
 $countStmt->execute($params);
 $totalRecords = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
@@ -103,7 +88,7 @@ $query = "
         d.created_at,
         d.updated_at,
         CONCAT(d.first_name, ' ', d.last_name) as full_name
-    FROM {$donorsTable} d
+    FROM donors_new d
     $whereClause
     ORDER BY d.$sortBy $sortOrder
     LIMIT ? OFFSET ?
@@ -122,19 +107,18 @@ $endRecord = min($offset + $perPage, $totalRecords);
 
 // Get status counts for filters
 $statusCounts = [];
-$statusQuery = "SELECT status, COUNT(*) as count FROM {$donorsTable}" . ($hasSeedFlag ? " WHERE seed_flag = 0" : "") . " GROUP BY status";
+$statusQuery = "SELECT status, COUNT(*) as count FROM donors_new WHERE seed_flag = 0 GROUP BY status";
 $statusStmt = $pdo->query($statusQuery);
 while ($row = $statusStmt->fetch(PDO::FETCH_ASSOC)) {
-    $statusCounts[$row['status']] = (int)$row['count'];
+    $statusCounts[$row['status']] = $row['count'];
 }
 
 // Get blood type counts for filters
 $bloodTypeCounts = [];
-$bloodTypeQuery = "SELECT blood_type, COUNT(*) as count FROM {$donorsTable}" . ($hasSeedFlag ? " WHERE seed_flag = 0" : "") . " GROUP BY blood_type";
+$bloodTypeQuery = "SELECT blood_type, COUNT(*) as count FROM donors_new WHERE seed_flag = 0 GROUP BY blood_type";
 $bloodTypeStmt = $pdo->query($bloodTypeQuery);
 while ($row = $bloodTypeStmt->fetch(PDO::FETCH_ASSOC)) {
-    $bloodTypeCounts[$row['blood_type']] = (int)$row['count'];
-}
+    $bloodTypeCounts[$row['blood_type']] = $row['count'];
 }
 ?>
 

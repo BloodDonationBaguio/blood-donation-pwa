@@ -4,6 +4,9 @@
  * Production-ready email delivery with failover support
  */
 
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/../config/timezone.php';
+
 require_once __DIR__ . '/email_config.php';
 
 class AdvancedMail {

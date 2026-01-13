@@ -35,7 +35,7 @@ function ensureAuditLogTableExists($pdo) {
                 )");
             } else {
                 $pdo->exec("CREATE TABLE IF NOT EXISTS admin_audit_log (
-id SERIAL PRIMARY KEY,
+                    id INT AUTO_INCREMENT PRIMARY KEY,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     admin_username VARCHAR(255) NULL,
                     action_type VARCHAR(255) NOT NULL,
@@ -120,7 +120,7 @@ function getAdminActionLog($pdo, $filters = []) {
     $sql = "SELECT aal.*, {$recordNameExpr} as record_name
             FROM admin_audit_log aal
             {$joinClause}
-            WHERE 1=1";
+            WHERE 1=1 AND aal.table_name <> 'blood_request'";
 
     $params = [];
 

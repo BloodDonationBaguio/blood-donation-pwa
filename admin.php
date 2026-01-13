@@ -3,6 +3,9 @@
  * Admin Dashboard - Blood Donation System
  */
 
+// Set timezone to Baguio, Philippines
+require_once 'config/timezone.php';
+
 // Error reporting
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -375,10 +378,13 @@ try {
 
     
     // Get counts for dashboard
-    $donorCount = $pdo->query("SELECT COUNT(*) FROM donors")->fetchColumn();
-    $pendingDonorCount = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'pending'")->fetchColumn();
+    // donorCountAll: all donors (any status), used for ratios/percentages
+    // donorCount: donors excluding pending, used for "Total Donors" card
+    $donorCountAll = $pdo->query("SELECT COUNT(*) FROM donors")->fetchColumn();
+    $donorCount    = $pdo->query("SELECT COUNT(*) FROM donors WHERE status <> 'pending'")->fetchColumn();
+    $pendingDonorCount  = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'pending'")->fetchColumn();
     $approvedDonorCount = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'approved'")->fetchColumn();
-    $servedDonorCount = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'served'")->fetchColumn();
+    $servedDonorCount   = $pdo->query("SELECT COUNT(*) FROM donors WHERE status = 'served'")->fetchColumn();
     
     // Enhanced blood inventory analytics
     try {
@@ -556,8 +562,16 @@ try {
         $recentActivity = [];
     }
     
+    // Resolve which donors table to use across admin tabs
+    $donorsTableResolved = (function_exists('tableExists') && tableExists($pdo, 'donors'))
+        ? 'donors'
+        : ((function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : null);
+
     // Get recent records
-    $recentDonors = $pdo->query("SELECT * FROM donors ORDER BY created_at DESC LIMIT 5")->fetchAll();
+    $recentDonors = [];
+    if ($donorsTableResolved !== null) {
+        $recentDonors = $pdo->query("SELECT * FROM {$donorsTableResolved} ORDER BY created_at DESC LIMIT 5")->fetchAll();
+    }
     
     // Fetch donors and requests for tabs
     $donors = [];
@@ -565,6 +579,9 @@ try {
     $pendingDonors = [];
     
     if ($activeTab === 'donor-list') {
+        if ($donorsTableResolved === null) {
+            $donors = [];
+        } else {
         $search = trim($_GET['donor_search'] ?? '');
         $statusFilter = $_GET['status_filter'] ?? '';
         $bloodTypeFilter = $_GET['blood_type_filter'] ?? '';
@@ -578,7 +595,7 @@ try {
         }
         $offset = ($page - 1) * $perPage;
         
-        $sql = 'SELECT d.* FROM donors d WHERE 1=1';
+        $sql = 'SELECT d.* FROM ' . $donorsTableResolved . ' d WHERE 1=1';
         $params = [];
         
         if ($search) {
@@ -590,8 +607,8 @@ try {
             $idCastExpr = $driver === 'pgsql' ? 'CAST(d.id AS TEXT)' : 'CAST(d.id AS CHAR)';
             // Detect reference columns safely
             $hasRefCode = false; $hasRef = false;
-            try { $pdo->query("SELECT reference_code FROM donors LIMIT 1"); $hasRefCode = true; } catch (Exception $e) {}
-            try { $pdo->query("SELECT reference FROM donors LIMIT 1"); $hasRef = true; } catch (Exception $e) {}
+            try { $pdo->query("SELECT reference_code FROM {$donorsTableResolved} LIMIT 1"); $hasRefCode = true; } catch (Exception $e) {}
+            try { $pdo->query("SELECT reference FROM {$donorsTableResolved} LIMIT 1"); $hasRef = true; } catch (Exception $e) {}
             $sql .= " AND (" . $nameExpr . " LIKE ? OR d.email LIKE ? OR d.phone LIKE ?";
             $params = array_merge($params, array_fill(0, 3, "%$search%"));
             if ($hasRefCode) {
@@ -607,8 +624,14 @@ try {
         }
         
         if ($statusFilter) {
+            // When a specific status is selected, honor it (including 'pending')
             $sql .= ' AND d.status = ?';
             $params[] = $statusFilter;
+        } else {
+            // Default All Donors view should hide pending donors;
+            // they are managed separately in the Pending Donors tab.
+            $sql .= ' AND d.status <> ?';
+            $params[] = 'pending';
         }
         
         if ($bloodTypeFilter) {
@@ -634,11 +657,15 @@ try {
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $donors = $stmt->fetchAll();
+        }
     }
     
     if ($activeTab === 'pending-donors') {
+        if ($donorsTableResolved === null) {
+            $pendingDonors = [];
+        } else {
         $search = trim($_GET['donor_search'] ?? '');
-        $sql = "SELECT d.* FROM donors d WHERE d.status = 'pending'";
+        $sql = "SELECT d.* FROM {$donorsTableResolved} d WHERE d.status = 'pending'";
         $params = [];
         
         if ($search) {
@@ -650,8 +677,8 @@ try {
             $idCastExpr = $driver === 'pgsql' ? 'CAST(d.id AS TEXT)' : 'CAST(d.id AS CHAR)';
             // Detect reference columns safely
             $hasRefCode = false; $hasRef = false;
-            try { $pdo->query("SELECT reference_code FROM donors LIMIT 1"); $hasRefCode = true; } catch (Exception $e) {}
-            try { $pdo->query("SELECT reference FROM donors LIMIT 1"); $hasRef = true; } catch (Exception $e) {}
+            try { $pdo->query("SELECT reference_code FROM {$donorsTableResolved} LIMIT 1"); $hasRefCode = true; } catch (Exception $e) {}
+            try { $pdo->query("SELECT reference FROM {$donorsTableResolved} LIMIT 1"); $hasRef = true; } catch (Exception $e) {}
             $sql .= " AND (" . $nameExpr . " LIKE ? OR d.email LIKE ? OR d.phone LIKE ?";
             $params = array_fill(0, 3, "%$search%");
             if ($hasRefCode) {
@@ -669,6 +696,7 @@ try {
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $pendingDonors = $stmt->fetchAll();
+        }
     }
     
     
@@ -964,7 +992,7 @@ if (!function_exists('buildPaginationUrl')) {
                         </a>
                     </li>
                     <li class="nav-item mt-4">
-                        <a class="nav-link text-danger" href="/admin_logout.php">
+                        <a class="nav-link text-danger" href="admin_logout.php">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </a>
                     </li>
@@ -1125,7 +1153,7 @@ if (!function_exists('buildPaginationUrl')) {
                                                             <strong><?= htmlspecialchars($activity['name']) ?></strong>
                                                             <br>
                                                             <small class="text-muted">
-                                                                <?= $activity['type'] === 'donor' ? 'Donor Registration' : 'Blood Request' ?> - 
+                                                                <?= $activity['type'] === 'donor' ? 'Donor Registration' : 'Admin Action' ?> - 
                                                                 <?= date('M d, Y H:i', strtotime($activity['created_at'])) ?>
                                                             </small>
                                                         </div>
@@ -1589,7 +1617,7 @@ if (!function_exists('buildPaginationUrl')) {
                                                     }
                                                     ?>
                                                 </td>
-                                                <td><span class="badge bg-danger"><?= htmlspecialchars($donor['blood_type']) ?></span></td>
+                                                <td><span class="badge bg-danger"><?= htmlspecialchars(!empty($donor['blood_type']) ? $donor['blood_type'] : 'Unknown') ?></span></td>
                                                 <td>
                                                     <span class="badge bg-<?= getDonorStatusColor($donor['status']) ?>">
                                                         <?= getDonorDisplayStatus($donor['status'] ?? 'pending') ?>
@@ -1760,7 +1788,7 @@ if (!function_exists('buildPaginationUrl')) {
                                                     }
                                                     ?>
                                                 </td>
-                                                <td><span class="badge bg-danger"><?= htmlspecialchars($donor['blood_type']) ?></span></td>
+                                                <td><span class="badge bg-danger"><?= htmlspecialchars(!empty($donor['blood_type']) ? $donor['blood_type'] : 'Unknown') ?></span></td>
                                                 <td><?= date('M d, Y', strtotime($donor['created_at'])) ?></td>
                                                 <td>
                                                     <a href="admin_enhanced_donor_management.php?donor_id=<?= $donor['id'] ?>" class="btn btn-sm btn-primary" title="View Donor Details">
@@ -3123,11 +3151,11 @@ if (!function_exists('buildPaginationUrl')) {
             
             // For now, just show a simple alert with the request ID
             // In a full implementation, this would open a modal with detailed information
-            alert(`Viewing details for Blood Request #${requestId}\n\nThis would show:\n- Patient information\n- Hospital details\n- Contact information\n- Request history\n- Current status`);
+            alert(`Viewing details for Admin Action #${requestId}\n\nThis would show:\n- Action details\n- Admin information\n- Timestamp\n- Related record`);
         }
 
         function createDonorMatch(requestId, donorId, matchScore) {
-            if (confirm('Create match between this donor and blood request?')) {
+            if (confirm('Create match between this donor and admin action?')) {
                 // Send AJAX request to create match
                 fetch('admin_actions_handler.php', {
                     method: 'POST',

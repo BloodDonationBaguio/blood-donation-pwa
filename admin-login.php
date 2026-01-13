@@ -315,8 +315,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p class="card-subtitle">Please sign in to continue</p>
         
         <?php if (!empty($error)): ?>
-        <div class="alert alert-danger" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
           <?= htmlspecialchars($error) ?>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (isset($_GET['logout']) && $_GET['logout'] === 'success'): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <i class="fas fa-check-circle me-2"></i>You have been successfully logged out.
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         <?php endif; ?>
         

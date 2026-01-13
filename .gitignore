@@ -29,3 +29,6 @@ fix_*.php
 
 # Personal files
 *.txt
+__zip_restore/
+legacy-pwa-4/
+email_queue/

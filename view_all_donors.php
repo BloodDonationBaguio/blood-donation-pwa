@@ -61,7 +61,7 @@ try {
             echo "<td>{$donor['first_name']} {$donor['last_name']}</td>";
             echo "<td>{$donor['email']}</td>";
             echo "<td>{$donor['phone']}</td>";
-            echo "<td><span class='badge bg-danger'>{$donor['blood_type']}</span></td>";
+            echo "<td><span class='badge bg-danger'>" . (!empty($donor['blood_type']) ? htmlspecialchars($donor['blood_type']) : 'Unknown') . "</span></td>";
             echo "<td><span class='badge bg-primary'>{$donor['status']}</span></td>";
             echo "<td><code>{$donor['reference_code']}</code></td>";
             echo "<td><span class='$seedFlagClass'>$seedFlagText</span></td>";

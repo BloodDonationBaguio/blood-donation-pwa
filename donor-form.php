@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/config/timezone.php';
+
 session_start();
 require_once __DIR__ . "/includes/db.php";
 
@@ -134,6 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="blood_type">Blood Type:</label>
                 <select id="blood_type" name="blood_type" required>
                     <option value="">Select Blood Type</option>
+                    <option value="Unknown" <?= ($_POST['blood_type'] ?? '') == 'Unknown' ? 'selected' : '' ?>>Unknown</option>
                     <option value="A+" <?= ($_POST['blood_type'] ?? '') == 'A+' ? 'selected' : '' ?>>A+</option>
                     <option value="A-" <?= ($_POST['blood_type'] ?? '') == 'A-' ? 'selected' : '' ?>>A-</option>
                     <option value="B+" <?= ($_POST['blood_type'] ?? '') == 'B+' ? 'selected' : '' ?>>B+</option>

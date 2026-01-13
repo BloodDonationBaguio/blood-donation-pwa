@@ -6,6 +6,9 @@
  * to prevent delays in form submission.
  */
 
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/../config/timezone.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;

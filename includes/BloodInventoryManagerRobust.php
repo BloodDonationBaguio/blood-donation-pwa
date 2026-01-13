@@ -241,8 +241,8 @@ class BloodInventoryManagerRobust {
             $driver = 'mysql';
         }
         $expiryExpr = ($driver === 'pgsql')
-            ? "created_at + INTERVAL '35 day'"
-: "created_at + INTERVAL '35 day'";
+            ? "created_at + INTERVAL '25 day'"
+            : "created_at + INTERVAL 25 DAY";
         $virtUnitIdExpr = ($driver === 'pgsql')
             ? "('VIRT-' || id)"
             : "CONCAT('VIRT-', id)";

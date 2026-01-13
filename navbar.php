@@ -81,8 +81,8 @@ if ($user_id) {
               // Prioritize user logout over admin if both are set
               if ($isUser && !$isAdmin) {
                   $logoutUrl = 'logout.php';
-              } else if ($isAdmin) {
-                  $logoutUrl = '/admin_logout.php';
+              } elseif ($isAdmin) {
+                  $logoutUrl = 'logout.php';
               } else {
                   $logoutUrl = 'logout.php'; // Default to user logout
               }
@@ -102,22 +102,16 @@ if ($user_id) {
   </div>
 </nav>
 
-<?php if ($is_home): ?>
-  <div class="nav-disclaimer" role="alert">
-    ⚠️ Disclaimer: This website is a student capstone project and is currently under development. It is NOT an official Philippine Red Cross platform.
-  </div>
-  <style>
-    body { padding-top: 115px; }
-    @media (max-width: 768px) { body { padding-top: 105px; } }
-    @media (max-width: 480px) { body { padding-top: 95px; } }
-  </style>
-<?php endif; ?>
-
 <style>
 /* ========================================
    RESPONSIVE NAVBAR STYLES
    Works on ALL devices: Mobile, Tablet, Desktop
 ======================================== */
+
+/* Body padding for fixed navbar */
+body {
+  padding-top: 80px;
+}
 
 /* Base navbar styles */
 .main-navbar {
@@ -130,6 +124,15 @@ if ($user_id) {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   padding: 15px 0 15px 0;
   min-height: 70px;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* Mobile navbar adjustments */
@@ -145,15 +148,6 @@ if ($user_id) {
     padding: 10px 0 10px 0;
     min-height: 55px;
   }
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 /* Brand */
@@ -354,41 +348,6 @@ if ($user_id) {
   transform: translateY(-1px);
 }
 
-/* Body padding for fixed navbar */
-body {
-  padding-top: 80px;
-}
-/* Disclaimer banner inside fixed navbar */
-.nav-disclaimer {
-  position: fixed;
-  top: 70px;
-  left: 0;
-  right: 0;
-  background: #b00020;
-  color: #fff;
-  text-align: center;
-  font-size: 0.95rem;
-  padding: 8px 12px;
-  z-index: 2500;
-  pointer-events: none;
-}
-@media (max-width: 768px) {
-  .nav-disclaimer { 
-    top: 60px; 
-    font-size: 0.9rem; 
-    padding: 8px 10px;
-    line-height: 1.3;
-  }
-}
-
-@media (max-width: 480px) {
-  .nav-disclaimer { 
-    top: 55px; 
-    font-size: 0.85rem; 
-    padding: 6px 8px;
-    line-height: 1.2;
-  }
-}
 
 /* ========================================
    RESPONSIVE BREAKPOINTS

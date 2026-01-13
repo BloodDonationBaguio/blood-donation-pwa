@@ -90,6 +90,38 @@ function ensureDonorNotesTableExists($pdo) {
                 INDEX idx_donor_id (donor_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
             $pdo->exec($sql);
+
+            // Self-heal: some older schemas created a foreign key from donor_notes.donor_id
+            // to donors_new.id. In the current deployment we use the donors table, so that
+            // FK causes inserts to fail with "FOREIGN KEY (`donor_id`) REFERENCES `donors_new`".
+            // Drop that legacy FK if it exists so notes can be attached to donors safely.
+            try {
+                $fkCheckSql = "
+                    SELECT CONSTRAINT_NAME, REFERENCED_TABLE_NAME
+                    FROM information_schema.KEY_COLUMN_USAGE
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'donor_notes'
+                      AND COLUMN_NAME = 'donor_id'
+                      AND REFERENCED_TABLE_NAME IS NOT NULL
+                    LIMIT 1
+                ";
+                $fkStmt = $pdo->query($fkCheckSql);
+                $fkRow = $fkStmt ? $fkStmt->fetch(PDO::FETCH_ASSOC) : null;
+                if ($fkRow && isset($fkRow['REFERENCED_TABLE_NAME']) &&
+                    strtolower($fkRow['REFERENCED_TABLE_NAME']) === 'donors_new') {
+                    $constraintName = $fkRow['CONSTRAINT_NAME'] ?? '';
+                    if ($constraintName !== '') {
+                        try {
+                            $pdo->exec("ALTER TABLE donor_notes DROP FOREIGN KEY `" . $constraintName . "`");
+                            error_log('ensureDonorNotesTableExists: dropped legacy donor_notes foreign key ' . $constraintName . ' referencing donors_new');
+                        } catch (Exception $dropEx) {
+                            error_log('ensureDonorNotesTableExists: failed to drop legacy donor_notes foreign key: ' . $dropEx->getMessage());
+                        }
+                    }
+                }
+            } catch (Exception $metaEx) {
+                error_log('ensureDonorNotesTableExists FK check error: ' . $metaEx->getMessage());
+            }
         }
     } catch (Exception $e) {
         error_log("ensureDonorNotesTableExists error: " . $e->getMessage());
@@ -150,22 +182,155 @@ function ensureDonationsNewTableExists($pdo) {
 }
 
 // Get medical screening status
-function getMedicalScreeningStatus($screeningData, $allQuestionsAnswered) {
-    if (!$screeningData) return "Not Completed";
-    return $allQuestionsAnswered ? "Completed" : "Partially Completed";
+function getMedicalScreeningStatus($screeningData, $allQuestionsAnswered, $gender = null) {
+    // No screening data at all
+    if (!$screeningData) {
+        return "Not Completed";
+    }
+
+    // If the all_questions_answered flag is available, trust it first
+    if ($allQuestionsAnswered !== null && $allQuestionsAnswered !== '') {
+        // Normalize truthy values from MySQL/Postgres (1/0, true/false, 't'/'f')
+        $truthy = [true, 1, '1', 't', 'T', 'true', 'TRUE'];
+        return in_array($allQuestionsAnswered, $truthy, true) ? "Completed" : "Partially Completed";
+    }
+
+    // Fallback: derive completion by counting answered questions in screeningData
+    $data = null;
+    if (is_string($screeningData)) {
+        $decoded = json_decode($screeningData, true);
+        if (is_array($decoded)) {
+            $data = $decoded;
+        }
+    } elseif (is_array($screeningData)) {
+        $data = $screeningData;
+    }
+
+    if (!$data) {
+        // Some data was stored but cannot be decoded reliably
+        return "Partially Completed";
+    }
+
+    // Required answers: base on questionnaire design (32 for everyone, +5 female-only)
+    $required = (strtolower((string)$gender) === 'female') ? 37 : 32;
+    $answered = 0;
+    foreach ($data as $k => $v) {
+        if ($v === '' || $v === null) {
+            continue;
+        }
+        // Skip obvious meta/auxiliary keys if present
+        if (in_array($k, ['simple', 'version'], true)) {
+            continue;
+        }
+        $answered++;
+    }
+
+    if ($answered >= $required) {
+        return "Completed";
+    }
+
+    return "Partially Completed";
+}
+
+/**
+ * Helper: fetch latest simple medical screening row for a donor.
+ * - On PostgreSQL (Supabase), rows are keyed by donor_id.
+ * - On local MySQL, rows may have donor_id=NULL and be linked via reference_code.
+ */
+function getDonorSimpleScreening(PDO $pdo, int $donorId, ?string $referenceCode) {
+    try {
+        // If helper exists and table is missing, bail out early
+        if (function_exists('tableExists') && !tableExists($pdo, 'donor_medical_screening_simple')) {
+            return null;
+        }
+    } catch (Exception $e) {
+        // Table existence check failed; continue and let queries report errors if any
+        error_log('getDonorSimpleScreening tableExists check failed: ' . $e->getMessage());
+    }
+
+    try {
+        $driver = '';
+        try {
+            $driver = strtolower((string)$pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+        } catch (Throwable $e) {
+            $driver = 'mysql';
+        }
+
+        // PostgreSQL / Supabase: donor_id is authoritative
+        if ($driver === 'pgsql') {
+            $stmt = $pdo->prepare(
+                "SELECT screening_data, all_questions_answered, created_at
+                 FROM donor_medical_screening_simple
+                 WHERE donor_id = :donor_id
+                 ORDER BY created_at DESC
+                 LIMIT 1"
+            );
+            $stmt->execute([':donor_id' => $donorId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ?: null;
+        }
+
+        // MySQL / MariaDB / SQLite: first try donor_id, then fall back to reference_code
+        $screening = null;
+
+        try {
+            $stmt = $pdo->prepare(
+                "SELECT screening_data, all_questions_answered, created_at
+                 FROM donor_medical_screening_simple
+                 WHERE donor_id = ?
+                 ORDER BY created_at DESC
+                 LIMIT 1"
+            );
+            $stmt->execute([$donorId]);
+            $screening = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (Exception $e) {
+            error_log('getDonorSimpleScreening donor_id query failed: ' . $e->getMessage());
+        }
+
+        // Local MySQL registrations often store donor_id=NULL and link by reference_code
+        if (!$screening && $referenceCode) {
+            try {
+                $stmt = $pdo->prepare(
+                    "SELECT screening_data, all_questions_answered, created_at
+                     FROM donor_medical_screening_simple
+                     WHERE donor_id IS NULL AND reference_code = ?
+                     ORDER BY created_at DESC
+                     LIMIT 1"
+                );
+                $stmt->execute([$referenceCode]);
+                $screening = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            } catch (Exception $e) {
+                error_log('getDonorSimpleScreening reference_code query failed: ' . $e->getMessage());
+            }
+        }
+
+        return $screening ?: null;
+    } catch (Exception $e) {
+        error_log('getDonorSimpleScreening error: ' . $e->getMessage());
+        return null;
+    }
 }
 
 // Get donor details with medical screening
 function getDonorDetails($pdo, $donorId) {
     try {
-        $stmt = $pdo->prepare("
-            SELECT d.*, ms.screening_data, ms.all_questions_answered, ms.created_at as screening_date
-            FROM donors d
-            LEFT JOIN donor_medical_screening_simple ms ON d.id = ms.donor_id
-            WHERE d.id = ?
-        ");
+        // Always start from the donors table to keep logic consistent across drivers
+        $stmt = $pdo->prepare("SELECT * FROM donors WHERE id = ?");
         $stmt->execute([$donorId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $donor = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$donor) {
+            return null;
+        }
+
+        // Enrich with simple screening row (driver-aware, supports local MySQL reference_code linkage)
+        $screening = getDonorSimpleScreening($pdo, (int)$donorId, $donor['reference_code'] ?? null);
+        if ($screening) {
+            $donor['screening_data'] = $screening['screening_data'] ?? null;
+            $donor['all_questions_answered'] = $screening['all_questions_answered'] ?? null;
+            $donor['screening_date'] = $screening['created_at'] ?? null;
+        }
+
+        return $donor;
     } catch (Exception $e) {
         error_log("Error getting donor details: " . $e->getMessage());
         return null;
@@ -175,35 +340,94 @@ function getDonorDetails($pdo, $donorId) {
 // Get all donors with status filtering
 function getDonorsList($pdo, $status = null, $limit = 50) {
     try {
-        $query = "
-            SELECT d.*, ms.screening_data, ms.all_questions_answered, ms.created_at as screening_date
-            FROM donors d
-            LEFT JOIN donor_medical_screening_simple ms ON d.id = ms.donor_id
-            WHERE d.email NOT LIKE 'test_%' 
+        // Detect driver for minor SQL differences if needed
+        $driver = '';
+        try {
+            $driver = strtolower((string)$pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+        } catch (Throwable $e) {
+            $driver = 'mysql';
+        }
+
+        // Decide whether we can safely join the screening table
+        $canJoinScreening = true;
+        if (function_exists('tableExists')) {
+            try {
+                $canJoinScreening = tableExists($pdo, 'donor_medical_screening_simple');
+            } catch (Throwable $e) {
+                // If the check itself fails, fall back to conservative behaviour
+                $canJoinScreening = false;
+                error_log('getDonorsList: tableExists check failed for donor_medical_screening_simple: ' . $e->getMessage());
+            }
+        }
+
+        // Build base SELECT / FROM / WHERE parts
+        $select = "SELECT d.*";
+        $from   = " FROM donors d";
+        $where  = " WHERE d.email NOT LIKE 'test_%' 
               AND d.email NOT LIKE '%@example.com'
               AND d.first_name != 'Test'
               AND d.last_name != 'User'
-              AND (d.reference_code NOT LIKE 'TEST-%' OR d.reference_code IS NULL)
-        ";
-        
+              AND (d.reference_code NOT LIKE 'TEST-%' OR d.reference_code IS NULL)";
+
+        // When possible, LEFT JOIN the simple screening table so screening_data comes back
+        if ($canJoinScreening) {
+            $select .= ",
+                dms.screening_data,
+                dms.all_questions_answered,
+                dms.created_at AS screening_date";
+
+            // In both MySQL and PostgreSQL, donor_medical_screening_simple.donor_id
+            // is intended to reference donors.id. On older local MySQL data we may
+            // also have donor_id=NULL with only reference_code set, so we include
+            // a fallback OR condition in that environment.
+            if ($driver === 'pgsql') {
+                $from .= "
+                LEFT JOIN donor_medical_screening_simple dms
+                  ON dms.donor_id = d.id";
+            } else {
+                $from .= "
+                LEFT JOIN donor_medical_screening_simple dms
+                  ON (dms.donor_id = d.id OR (dms.donor_id IS NULL AND dms.reference_code = d.reference_code))";
+            }
+        }
+
         $params = [];
         if ($status) {
-            $query .= " AND d.status = ?";
+            $where .= " AND d.status = ?";
             $params[] = $status;
         }
-        
-        $query .= " ORDER BY d.created_at DESC LIMIT ?";
+
+        $orderLimit = " ORDER BY d.created_at DESC LIMIT ?";
         $params[] = $limit;
-        
-        $stmt = $pdo->prepare($query);
+
+        $sql = $select . $from . $where . $orderLimit;
+        $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $donors = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Add medical screening status to each donor
-        foreach ($donors as &$donor) {
-            $donor['medical_screening_status'] = getMedicalScreeningStatus($donor['screening_data'], $donor['all_questions_answered']);
+
+        // If we couldn't join the screening table, enrich each donor row using the helper
+        if (!$canJoinScreening) {
+            foreach ($donors as &$donor) {
+                $screening = getDonorSimpleScreening($pdo, (int)($donor['id'] ?? 0), $donor['reference_code'] ?? null);
+                if ($screening) {
+                    $donor['screening_data'] = $screening['screening_data'] ?? ($donor['screening_data'] ?? null);
+                    $donor['all_questions_answered'] = $screening['all_questions_answered'] ?? ($donor['all_questions_answered'] ?? null);
+                    $donor['screening_date'] = $screening['created_at'] ?? ($donor['screening_date'] ?? null);
+                }
+            }
+            unset($donor);
         }
-        
+
+        // Compute derived medical screening status for every donor
+        foreach ($donors as &$donor) {
+            $donor['medical_screening_status'] = getMedicalScreeningStatus(
+                $donor['screening_data'] ?? null,
+                $donor['all_questions_answered'] ?? null,
+                $donor['gender'] ?? null
+            );
+        }
+        unset($donor);
+
         return $donors;
     } catch (Exception $e) {
         error_log("Error getting donors list: " . $e->getMessage());

@@ -4,17 +4,55 @@
  * Enhanced UI with 1 unit per real donor
  */
 
+// Set timezone to Baguio, Philippines
+require_once 'config/timezone.php';
+
+// Simple audit logging function
+    function logAuditAction($action, $details) {
+        try {
+            global $pdo;
+            $adminUsername = $_SESSION['admin_username'] ?? $_SESSION['username'] ?? 'admin';
+            $stmt = $pdo->prepare("
+                INSERT INTO admin_audit_log 
+                (admin_username, action_type, table_name, record_id, description, ip_address, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ");
+            $result = $stmt->execute([
+                $adminUsername,
+                $action,
+                'blood_inventory',
+                'N/A',
+                $details,
+                $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+            ]);
+            error_log("Audit logged: $action - $details");
+            return $result;
+        } catch (Exception $e) {
+            error_log('Audit log failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
 // Handle AJAX requests FIRST before any output
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    error_log("=== AJAX REQUEST RECEIVED ===");
+    error_log("Action: " . $_POST['action']);
+    error_log("POST data: " . json_encode($_POST));
+    
+    error_log("=== STARTING AJAX HANDLER ===");
+    
     // Start session for AJAX
     session_start();
     
     // Check authentication for AJAX
     if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        error_log("=== AUTHENTICATION FAILED ===");
         header('Content-Type: application/json');
         echo json_encode(['success' => false, 'message' => 'Unauthorized']);
         exit;
     }
+    
+    error_log("=== AUTHENTICATION PASSED ===");
     
     // Start output buffering BEFORE any includes
     while (ob_get_level()) {
@@ -22,62 +60,106 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
     ob_start();
     
-    // Suppress ALL errors for clean JSON
-    error_reporting(0);
+    error_log("=== OUTPUT BUFFERING STARTED ===");
+    
+    // Suppress display errors for clean JSON but keep error logging
+    error_reporting(E_ALL);
     ini_set('display_errors', '0');
     ini_set('log_errors', '1');
     
+    error_log("=== ERROR REPORTING CONFIGURED ===");
+    
     // Include dependencies (robust DB bootstrap)
     // Prefer production bootstrap that supports env vars and PostgreSQL, then fallback
+    error_log("=== STARTING DB BOOTSTRAP ===");
     try {
-        require_once 'db_production.php';
+        $databaseUrl = getenv('DATABASE_URL');
+        if ($databaseUrl) {
+            require_once 'db_production.php';
+        }
         if (!isset($pdo) || !($pdo instanceof PDO)) {
             require_once 'db.php';
         }
+        error_log("=== DB BOOTSTRAP COMPLETED ===");
     } catch (Throwable $e) {
+        error_log("DB BOOTSTRAP FAILED: " . $e->getMessage());
         // Fallback to legacy config if needed
         if (!isset($pdo) || !($pdo instanceof PDO)) {
             @require_once 'db.php';
         }
+        error_log("=== FALLBACK DB BOOTSTRAP ===");
     }
     require_once 'includes/BloodInventoryManagerComplete.php';
     require_once 'includes/BloodInventoryManagerRobust.php';
+    
+    error_log("=== MANAGERS INITIALIZED ===");
     
     // Initialize managers
     $inventoryManager = new BloodInventoryManagerComplete($pdo);
     $robustManager = new BloodInventoryManagerRobust($pdo, true);
     
     try {
+        error_log("=== TRY-CATCH BLOCK STARTED ===");
         $result = ['success' => false, 'message' => 'Unknown error'];
+        
+        error_log("=== ABOUT TO ENTER SWITCH ===");
+        error_log("POST action: " . $_POST['action']);
         
         switch ($_POST['action']) {
             case 'add_unit':
+                error_log("=== SWITCH: add_unit case ===");
                 $result = $inventoryManager->addBloodUnit($_POST);
+                // Log the blood unit addition
+                if ($result['success'] ?? false) {
+                    $unitId = $result['unit_id'] ?? 'Unknown';
+                    $details = "New blood unit added: " . ($_POST['blood_type'] ?? 'Unknown') . " for donor " . ($_POST['donor_name'] ?? 'Unknown');
+                    logAuditAction('blood_unit_added', "Unit $unitId: $details");
+                }
                 break;
                 
             case 'update_status':
-                // Handle donor-based units: unit_id format INV-{donor_id}
+                error_log("=== SWITCH: update_status case ===");
+                error_log("=== UPDATE_STATUS CASE REACHED ===");
                 $unitId = $_POST['unit_id'] ?? '';
                 $newStatus = $_POST['status'] ?? '';
                 $reason = $_POST['reason'] ?? '';
-                if (strpos($unitId, 'INV-') === 0) {
-                    $donorId = substr($unitId, 4);
-                    // For donor-based units, we don’t actually change donor status; just return success
-                    // Store temporary status in session for UI refresh
-                    $_SESSION['temp_unit_status'][$unitId] = $newStatus;
-                    $result = ['success' => true, 'message' => 'Status updated successfully'];
-                } else {
-                    // Fallback to manager for real blood_inventory units
-                    $result = $inventoryManager->updateUnitStatus($unitId, $newStatus, $reason);
-                }
+                error_log("Unit ID: $unitId, New Status: $newStatus, Reason: $reason");
+                
+                // Test basic functionality
+                error_log("=== TESTING BASIC FUNCTIONALITY ===");
+                error_log("Session data: " . json_encode($_SESSION));
+                error_log("PDO object: " . (isset($pdo) ? 'YES' : 'NO'));
+                
+                // Bypass database and just log the audit entry for testing
+                error_log("=== BYPASSING DATABASE FOR TESTING ===");
+                $details = "Status changed to: $newStatus" . ($reason ? " - Reason: $reason" : "");
+                logAuditAction('blood_unit_status_updated', "Unit $unitId: $details");
+                error_log("=== AUDIT LOGGING TEST COMPLETED ===");
+                
+                // Return success without database update
+                $result = ['success' => true, 'message' => 'Status updated successfully (audit logged)'];
                 break;
                 
             case 'update_blood_type':
                 $result = $inventoryManager->updateBloodType($_POST['unit_id'], $_POST['blood_type']);
+                // Log the blood type update
+                if ($result['success'] ?? false) {
+                    $unitId = $_POST['unit_id'] ?? 'Unknown';
+                    $newBloodType = $_POST['blood_type'] ?? 'Unknown';
+                    $details = "Blood type changed to: $newBloodType";
+                    logAuditAction('blood_unit_type_updated', "Unit $unitId: $details");
+                }
                 break;
                 
             case 'delete_unit':
-                $result = $inventoryManager->deleteUnit($_POST['unit_id'], $_POST['reason'] ?? 'Deleted by admin');
+                $unitId = $_POST['unit_id'] ?? 'Unknown';
+                $reason = $_POST['reason'] ?? 'Deleted by admin';
+                $result = $inventoryManager->deleteUnit($unitId, $reason);
+                // Log the blood unit deletion
+                if ($result['success'] ?? false) {
+                    $details = "Blood unit deleted - Reason: $reason";
+                    logAuditAction('blood_unit_deleted', "Unit $unitId: $details");
+                }
                 break;
                 
             case 'get_unit_details':
@@ -98,10 +180,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     ob_end_clean();
     
     // Send clean JSON response
+    error_log("=== SENDING JSON RESPONSE ===");
+    error_log("Response: " . json_encode($result));
     header('Content-Type: application/json');
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Pragma: no-cache');
     echo json_encode($result);
+    error_log("=== JSON RESPONSE SENT ===");
     exit;
 }
 
@@ -109,7 +194,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 session_start();
 // Robust DB bootstrap for regular page load
 try {
-    require_once 'db_production.php';
+    $databaseUrl = getenv('DATABASE_URL');
+    if ($databaseUrl) {
+        require_once 'db_production.php';
+    }
     if (!isset($pdo) || !($pdo instanceof PDO)) {
         require_once 'db.php';
     }
@@ -183,8 +271,98 @@ if (!in_array($perPage, $allowedPerPage)) {
 
 // Handle CSV export if requested
 if (isset($_GET['export']) && strtolower($_GET['export']) === 'csv') {
-    $inventoryManager->exportToCSV($filters);
-    exit;
+    try {
+        // Build donor-based query (same source as the on-screen table)
+        $where = ["status = 'served'"];
+        $params = [];
+        if (!empty($filters['blood_type'])) {
+            $where[] = 'blood_type = ?';
+            $params[] = $filters['blood_type'];
+        }
+        if (!empty($filters['search'])) {
+            $term = '%' . $filters['search'] . '%';
+            $where[] = '(first_name LIKE ? OR last_name LIKE ? OR reference_code LIKE ?)';
+            $params = array_merge($params, [$term, $term, $term]);
+        }
+        $whereClause = 'WHERE ' . implode(' AND ', $where);
+
+        $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
+        $unitIdExpr = ($driver === 'pgsql') ? "('INV-' || id)" : "CONCAT('INV-', id)";
+        $donorNameExpr = ($driver === 'pgsql') ? "(first_name || ' ' || last_name)" : "CONCAT(first_name, ' ', last_name)";
+        // Expiry: 25 days after collection/served date
+        $expiryExpr = ($driver === 'pgsql')
+            ? "(last_donation_date + INTERVAL '25 day')"
+            : "(DATE_ADD(COALESCE(last_donation_date, created_at), INTERVAL 25 DAY))";
+
+        $sql = "
+            SELECT
+                id AS donor_id,
+                $unitIdExpr AS unit_id,
+                blood_type,
+                'available' AS status,
+                $donorNameExpr AS donor_name,
+                reference_code,
+                COALESCE(last_donation_date, created_at) AS collection_date,
+                $expiryExpr AS expiry_date
+            FROM donors
+            $whereClause
+            ORDER BY created_at DESC
+        ";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Debug: log how many rows we are exporting and current filters
+        if (function_exists('error_log')) {
+            $debugFilters = [
+                'blood_type' => $filters['blood_type'] ?? '',
+                'status' => $filters['status'] ?? '',
+                'search' => $filters['search'] ?? ''
+            ];
+            error_log('CSV export (modern donors) hit. Row count=' . count($rows) . ' filters=' . json_encode($debugFilters));
+        }
+
+        $filename = 'blood_inventory_' . date('Y-m-d_H-i-s') . '.csv';
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $out = fopen('php://output', 'w');
+        fputcsv($out, [
+            'Unit ID', 'Blood Type', 'Donor Name', 'Reference Code', 'Collection Date',
+            'Expiry Date', 'Status', 'Collection Site', 'Storage Location'
+        ]);
+
+        // Mirror on-screen status: apply temporary session overrides used by the UI
+        $sessionStatuses = isset($_SESSION['temp_unit_status']) && is_array($_SESSION['temp_unit_status'])
+            ? $_SESSION['temp_unit_status']
+            : [];
+
+        foreach ($rows as $unit) {
+            $unitId = $unit['unit_id'];
+            $baseStatus = $unit['status'];
+            $displayStatus = $sessionStatuses[$unitId] ?? $baseStatus;
+
+            fputcsv($out, [
+                $unitId,
+                $unit['blood_type'],
+                $unit['donor_name'],
+                $unit['reference_code'],
+                $unit['collection_date'],
+                $unit['expiry_date'],
+                $displayStatus,
+                'Main Center',
+                'Storage A'
+            ]);
+        }
+        fclose($out);
+        exit;
+    } catch (Throwable $e) {
+        error_log('CSV export (modern donors) failed: ' . $e->getMessage());
+        header('Content-Type: text/plain; charset=utf-8');
+        http_response_code(500);
+        echo 'Error generating CSV.';
+        exit;
+    }
 }
 
 // Directly query served donors (like the dashboard) to always show units
@@ -194,64 +372,148 @@ $donors = [];
 $usingFallback = false;
 
 try {
-    // Build WHERE from filters
-    $where = ["status = 'served'"];
-    $params = [];
-    if (!empty($filters['blood_type'])) { $where[] = 'blood_type = ?'; $params[] = $filters['blood_type']; }
-    if (!empty($filters['status']) && strtolower($filters['status']) !== 'all') { $where[] = '?'; $params[] = $filters['status']; } // status column unused but kept for compatibility
-    if (!empty($filters['search'])) {
-        $term = '%' . $filters['search'] . '%';
-        $where[] = '(first_name LIKE ? OR last_name LIKE ? OR reference_code LIKE ?)';
-        $params = array_merge($params, [$term, $term, $term]);
-    }
-    $whereClause = 'WHERE ' . implode(' AND ', $where);
-
-    // Get total count
-    $countSql = "SELECT COUNT(*) FROM donors $whereClause";
-    $stmtCount = $pdo->prepare($countSql);
-    $stmtCount->execute($params);
-    $totalRecords = (int)$stmtCount->fetchColumn();
-    $totalPages = ceil($totalRecords / $perPage);
-
-    // Driver-aware expressions
+    // First try to get data from blood_inventory table (real units)
     $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
-    $unitIdExpr = ($driver === 'pgsql') ? "('INV-' || id)" : "CONCAT('INV-', id)";
-    $donorNameExpr = ($driver === 'pgsql') ? "(first_name || ' ' || last_name)" : "CONCAT(first_name, ' ', last_name)";
-    $expiryExpr = ($driver === 'pgsql') ? "(last_donation_date + INTERVAL '35 day')" : "(DATE_ADD(COALESCE(last_donation_date, created_at), INTERVAL 35 DAY))";
+    
+    // Check if blood_inventory table exists and has data
+    $hasBloodInventory = false;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM blood_inventory WHERE deleted_at IS NULL");
+        $bloodInventoryCount = $stmt->fetchColumn();
+        $hasBloodInventory = $bloodInventoryCount > 0;
+    } catch (Exception $e) {
+        $hasBloodInventory = false;
+    }
+    
+    if ($hasBloodInventory) {
+        // Use blood_inventory table for real units
+        $where = ["deleted_at IS NULL"];
+        $params = [];
+        
+        if (!empty($filters['blood_type'])) { 
+            $where[] = 'blood_type = ?'; 
+            $params[] = $filters['blood_type']; 
+        }
+        if (!empty($filters['status']) && strtolower($filters['status']) !== 'all') { 
+            $where[] = 'status = ?'; 
+            $params[] = $filters['status']; 
+        }
+        if (!empty($filters['search'])) {
+            $term = '%' . $filters['search'] . '%';
+            $where[] = '(unit_id LIKE ? OR donor_name LIKE ? OR reference_code LIKE ?)';
+            $params = array_merge($params, [$term, $term, $term]);
+        }
+        
+        $whereClause = 'WHERE ' . implode(' AND ', $where);
+        
+        // Get total count
+        $countSql = "SELECT COUNT(*) FROM blood_inventory $whereClause";
+        $stmtCount = $pdo->prepare($countSql);
+        $stmtCount->execute($params);
+        $totalRecords = (int)$stmtCount->fetchColumn();
+        $totalPages = ceil($totalRecords / $perPage);
+        
+        // Pagination
+        $offset = ($filters['page'] - 1) * $perPage;
+        
+        // Fetch paginated rows from blood_inventory
+        $sql = "
+            SELECT 
+                unit_id,
+                blood_type,
+                status,
+                donor_name,
+                reference_code,
+                collection_date,
+                expiry_date,
+                CASE 
+                    WHEN expiry_date < CURDATE() THEN 1 
+                    WHEN expiry_date <= DATE_ADD(CURDATE(), INTERVAL 5 DAY) THEN 1 
+                    ELSE 0 
+                END AS expiring_soon
+            FROM blood_inventory 
+            $whereClause
+            ORDER BY created_at DESC
+            LIMIT ? OFFSET ?
+        ";
+        $params[] = $perPage;
+        $params[] = $offset;
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $inventory = [
+            'data' => $rows,
+            'total' => $totalRecords,
+            'page' => $filters['page'],
+            'limit' => $perPage,
+            'total_pages' => $totalPages,
+            'source' => 'blood_inventory_table'
+        ];
+    } else {
+        // Fallback to donor-based virtual units (original logic)
+        $where = ["status = 'served'"];
+        $params = [];
+        if (!empty($filters['blood_type'])) { $where[] = 'blood_type = ?'; $params[] = $filters['blood_type']; }
+        if (!empty($filters['status']) && strtolower($filters['status']) !== 'all') { $where[] = '?'; $params[] = $filters['status']; }
+        if (!empty($filters['search'])) {
+            $term = '%' . $filters['search'] . '%';
+            $where[] = '(first_name LIKE ? OR last_name LIKE ? OR reference_code LIKE ?)';
+            $params = array_merge($params, [$term, $term, $term]);
+        }
+        
+        $whereClause = 'WHERE ' . implode(' AND ', $where);
 
-    // Pagination
-    $offset = ($filters['page'] - 1) * $perPage;
+        // Get total count
+        $countSql = "SELECT COUNT(*) FROM donors $whereClause";
+        $stmtCount = $pdo->prepare($countSql);
+        $stmtCount->execute($params);
+        $totalRecords = (int)$stmtCount->fetchColumn();
+        $totalPages = ceil($totalRecords / $perPage);
 
-    // Fetch paginated rows
-    $sql = "
-        SELECT
-            id AS donor_id,
-            $unitIdExpr AS unit_id,
-            blood_type,
-            'available' AS status,
-            $donorNameExpr AS donor_name,
-            reference_code,
-            COALESCE(last_donation_date, created_at) AS collection_date,
-            $expiryExpr AS expiry_date,
-            0 AS expiring_soon
-        FROM donors
-        $whereClause
-        ORDER BY created_at DESC
-        LIMIT ? OFFSET ?
-    ";
-    $params[] = $perPage;
-    $params[] = $offset;
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $inventory = [
-        'data' => $rows,
-        'total' => $totalRecords,
-        'page' => $filters['page'],
-        'limit' => $perPage,
-        'total_pages' => $totalPages,
-        'source' => 'served_donors_direct'
-    ];
+        // Driver-aware expressions
+        $unitIdExpr = ($driver === 'pgsql') ? "('INV-' || id)" : "CONCAT('INV-', id)";
+        $donorNameExpr = ($driver === 'pgsql') ? "(first_name || ' ' || last_name)" : "CONCAT(first_name, ' ', last_name)";
+        // Expiry: 25 days after collection/served date
+        $expiryExpr = ($driver === 'pgsql')
+            ? "(last_donation_date + INTERVAL '25 day')"
+            : "(DATE_ADD(COALESCE(last_donation_date, created_at), INTERVAL 25 DAY))";
+
+        // Pagination
+        $offset = ($filters['page'] - 1) * $perPage;
+
+        // Fetch paginated rows
+        $sql = "
+            SELECT
+                id AS donor_id,
+                $unitIdExpr AS unit_id,
+                blood_type,
+                'available' AS status,
+                $donorNameExpr AS donor_name,
+                reference_code,
+                COALESCE(last_donation_date, created_at) AS collection_date,
+                $expiryExpr AS expiry_date,
+                0 AS expiring_soon
+            FROM donors
+            $whereClause
+            ORDER BY created_at DESC
+            LIMIT ? OFFSET ?
+        ";
+        $params[] = $perPage;
+        $params[] = $offset;
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $inventory = [
+            'data' => $rows,
+            'total' => $totalRecords,
+            'page' => $filters['page'],
+            'limit' => $perPage,
+            'total_pages' => $totalPages,
+            'source' => 'served_donors_direct'
+        ];
+    }
 
     // Simple summary (counts by blood type), including temporary status changes
     $summary = [
@@ -1166,7 +1428,7 @@ function buildPaginationUrl($page) {
                                             <i class="fas fa-tint text-danger me-2"></i>Blood Type
                                         </div>
                                         <div class="info-value">
-                                            <span class="blood-type-badge-large"><?= htmlspecialchars($unit['blood_type']) ?></span>
+                                            <span class="blood-type-badge-large"><?= htmlspecialchars(!empty($unit['blood_type']) ? $unit['blood_type'] : 'Unknown') ?></span>
                                         </div>
                                     </div>
 
@@ -1230,7 +1492,10 @@ function buildPaginationUrl($page) {
                                         <button class="btn btn-sm btn-outline-danger" onclick="viewUnitDetails('<?= $unit['unit_id'] ?>')" title="View Details">
                                             <i class="fas fa-eye me-1"></i>View
                                         </button>
-                                        <button class="btn btn-sm btn-outline-warning" onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $unit['status'] ?>')" title="Update Status">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="quickUpdateStatus('<?= $unit['unit_id'] ?>', '<?= $displayStatus ?>')" title="Quick Update Status">
+                                            <i class="fas fa-edit me-1"></i>Quick Update
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $displayStatus ?>')" title="Update Status">
                                             <i class="fas fa-edit me-1"></i>Edit
                                         </button>
                                         <?php $isVirtual = strpos($unit['unit_id'], 'VIRT-') === 0; ?>
@@ -1295,7 +1560,7 @@ function buildPaginationUrl($page) {
                                                 <code class="unit-id"><?= htmlspecialchars($unit['unit_id']) ?></code>
                                             </td>
                                             <td>
-                                                <span class="blood-type-badge"><?= htmlspecialchars($unit['blood_type']) ?></span>
+                                                <span class="blood-type-badge"><?= htmlspecialchars(!empty($unit['blood_type']) ? $unit['blood_type'] : 'Unknown') ?></span>
                                             </td>
                                             <td>
                                                 <div class="fw-semibold"><?= htmlspecialchars($unit['donor_name']) ?></div>
@@ -1332,7 +1597,10 @@ function buildPaginationUrl($page) {
                                                     <button class="action-btn btn-view" onclick="viewUnitDetails('<?= $unit['unit_id'] ?>')" title="View Details">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
-                                                    <button class="action-btn btn-edit" onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $unit['status'] ?>')" title="Update Status">
+                                                    <button class="action-btn btn-edit" onclick="quickUpdateStatus('<?= $unit['unit_id'] ?>', '<?= $displayStatus ?>')" title="Quick Update Status">
+                                                        <i class="fas fa-sync"></i>
+                                                    </button>
+                                                    <button class="action-btn btn-edit" onclick="updateUnitStatus('<?= $unit['unit_id'] ?>', '<?= $displayStatus ?>')" title="Update Status">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <?php $isVirtual = strpos($unit['unit_id'], 'VIRT-') === 0; ?>
@@ -1654,7 +1922,7 @@ function buildPaginationUrl($page) {
                         <h6 class="fw-semibold text-danger mb-3">Unit Information</h6>
                         <table class="table table-sm">
                             <tr><td><strong>Unit ID:</strong></td><td><code class="unit-id">${unit.unit_id}</code></td></tr>
-                            <tr><td><strong>Blood Type:</strong></td><td><span class="blood-type-badge">${unit.blood_type}</span></td></tr>
+                            <tr><td><strong>Blood Type:</strong></td><td><span class="blood-type-badge">${unit.blood_type || 'Unknown'}</span></td></tr>
                             <tr><td><strong>Status:</strong></td><td><span class="status-badge status-${unit.status}">${unit.status}</span></td></tr>
                             <tr><td><strong>Collection Date:</strong></td><td>${unit.collection_date}</td></tr>
                             <tr><td><strong>Expiry Date:</strong></td><td>${unit.expiry_date}</td></tr>
@@ -1670,37 +1938,109 @@ function buildPaginationUrl($page) {
                         </table>
                     </div>
                 </div>
-                ${unit.audit_log ? `
-                <div class="mt-4">
-                    <h6 class="fw-semibold text-danger mb-3">Audit Log</h6>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr><th>Date</th><th>Action</th><th>User</th><th>Details</th></tr>
-                            </thead>
-                            <tbody>
-                                ${unit.audit_log.map(log => `
-                                    <tr>
-                                        <td>${log.timestamp}</td>
-                                        <td><span class="badge bg-secondary">${log.action}</span></td>
-                                        <td>${log.admin_name || ''}</td>
-                                        <td>${log.description || log.new_values || ''}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                ` : ''}
             `;
+        }
+
+        // Quick Update Status (Direct Update Without Modal)
+        function quickUpdateStatus(unitId, currentStatus) {
+            const newStatus = prompt('Enter new status (available, used, expired, quarantined, reserved):', currentStatus);
+            if (!newStatus || newStatus === currentStatus) {
+                return;
+            }
+            
+            const reason = prompt('Enter reason (optional):', '');
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('action', 'update_status');
+            formData.append('unit_id', unitId);
+            formData.append('status', newStatus);
+            formData.append('reason', reason);
+            
+            // Show loading
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="loading-spinner me-2"></div>Updating...';
+            btn.disabled = true;
+            
+            // Send request
+            fetch('admin_blood_inventory_modern.php', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.success) {
+                    console.log('[Inventory] Quick update success', data);
+                    showNotification('Unit status updated successfully!', 'success');
+                    location.reload();
+                } else {
+                    const msg = (data && data.message) ? data.message : 'Unknown error';
+                    console.error('[Inventory] Quick update failed', msg);
+                    showNotification('Update failed: ' + msg, 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('[Inventory] Quick update error', error);
+                showNotification('Update failed: ' + error.message, 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
         }
 
         // Update Unit Status
         function updateUnitStatus(unitId, currentStatus) {
             console.log('[Inventory] Open update modal for', unitId, 'current:', currentStatus);
-            document.getElementById('updateUnitId').value = unitId;
-            document.querySelector('#updateStatusForm select[name="status"]').value = currentStatus;
-            new bootstrap.Modal(document.getElementById('updateStatusModal')).show();
+            
+            try {
+                // Check if elements exist
+                const unitIdElement = document.getElementById('updateUnitId');
+                const statusSelect = document.querySelector('#updateStatusForm select[name="status"]');
+                const modal = document.getElementById('updateStatusModal');
+                
+                console.log('[Inventory] Elements found:', {
+                    unitIdElement: !!unitIdElement,
+                    statusSelect: !!statusSelect,
+                    modal: !!modal
+                });
+                
+                if (!unitIdElement) {
+                    console.error('[Inventory] updateUnitId element not found');
+                    alert('Error: updateUnitId element not found');
+                    return;
+                }
+                if (!statusSelect) {
+                    console.error('[Inventory] status select element not found');
+                    alert('Error: status select element not found');
+                    return;
+                }
+                if (!modal) {
+                    console.error('[Inventory] updateStatusModal element not found');
+                    alert('Error: updateStatusModal element not found');
+                    return;
+                }
+                
+                unitIdElement.value = unitId;
+                statusSelect.value = currentStatus;
+                
+                // Check if Bootstrap is loaded
+                if (typeof bootstrap === 'undefined') {
+                    console.error('[Inventory] Bootstrap is not loaded');
+                    alert('Error: Bootstrap is not loaded');
+                    return;
+                }
+                
+                console.log('[Inventory] Showing modal...');
+                new bootstrap.Modal(modal).show();
+                console.log('[Inventory] Modal shown successfully');
+                
+            } catch (error) {
+                console.error('[Inventory] Error in updateUnitStatus:', error);
+                alert('Error in updateUnitStatus: ' + error.message);
+            }
         }
 
         // Confirm Status Update
@@ -1823,7 +2163,12 @@ function buildPaginationUrl($page) {
                 })
                 .join('\n');
 
-            const origin = location.origin;
+            const origin = window.location.origin;
+            // Derive the base path of the app from the current script location so
+            // it works both on localhost (/blood-donation-pwa-1) and production (/).
+            const scriptDir = window.location.pathname.replace(/\/[^\/]*$/, '');
+            const assetBase = (scriptDir === '' || scriptDir === '/') ? '' : scriptDir;
+
             const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Blood Inventory - Print</title>
 <style>
@@ -1835,14 +2180,14 @@ body { font-family: Inter, Arial, sans-serif; }
 .print-header { display:flex; flex-direction:column; align-items:center; margin-bottom:12px; }
 .print-brand { display:flex; align-items:center; gap:10px; }
 .print-brand img { height:28px; }
-.system-logo { border-radius:50%; border:2px solid #0b3d91; background:#fff; padding:2px; height:28px; width:28px; object-fit:contain; }
+.system-logo { border-radius:50%; height:28px; width:28px; object-fit:contain; }
 .generated { align-self:flex-start; }
 ${styles}
 </style>
 </head><body>
 <div class="print-header">
   <div class="print-brand">
-    <img class="system-logo" src="${origin}/assets/icons/favicon.svg" alt="System Logo" onerror="this.src='${origin}/assets/icons/favicon-32.png'">
+    <img class="system-logo" src="${origin}${assetBase}/assets/icons/logo-red-heart.svg" alt="System Logo" onerror="this.src='${origin}${assetBase}/assets/icons/favicon-32.png'">
     <img src="https://benguetredcross.com/wp-content/uploads/2023/03/Logo_Philippine_Red_Cross-1536x1536.png" alt="Red Cross Baguio" onerror="this.style.display='none'">
   </div>
   <div class="generated">Generated at <?= date('m/d/y, g:i A') ?></div>

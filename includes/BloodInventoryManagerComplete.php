@@ -4,6 +4,9 @@
  * Full admin capabilities with security and compliance
  */
 
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/../config/timezone.php';
+
 class BloodInventoryManagerComplete {
     private $pdo;
 
@@ -291,54 +294,98 @@ class BloodInventoryManagerComplete {
 
             if (!$unit) {
                 // Fallback: support virtual unit IDs derived from donors
-                // Detect donors table dynamically
-                $donorTable = 'donors';
-                try {
-                    if (function_exists('tableExists') && tableExists($this->pdo, 'donors_new')) {
-                        $donorTable = 'donors_new';
-                    }
-                } catch (Exception $e) {
-                    // default to donors
-                }
+                // If unitId looks like VIRT-<donor_id> or INV-<donor_id>,
+                // synthesize details from donor record. Try donors_new first
+                // when present, but if that specific donor ID is not found,
+                // fall back to the legacy donors table.
+                if (is_string($unitId) && preg_match('/^(VIRT|INV)-(\d+)$/', $unitId, $m)) {
+                    $donorId = (int)$m[2];
+                    error_log('getUnitDetails fallback: unitId=' . $unitId . ' donorId=' . $donorId);
 
-                // If unitId looks like VIRT-<donor_id>, synthesize details from donor record
-                if (is_string($unitId) && preg_match('/^VIRT-(\d+)$/', $unitId, $m)) {
-                    $donorId = (int)$m[1];
+                    // Helper closure to fetch donor from a specific table
+                    $fetchDonor = function($table, $id) {
+                        try {
+                            $sql = "SELECT id, first_name, last_name, reference_code, blood_type, created_at FROM {$table} WHERE id = ?";
+                            $st = $this->pdo->prepare($sql);
+                            $st->execute([$id]);
+                            return $st->fetch(PDO::FETCH_ASSOC) ?: null;
+                        } catch (Exception $e) {
+                            return null;
+                        }
+                    };
+
+                    $donor = null;
+
+                    // 1) donors_new if table exists
+                    $hasDonorsNew = false;
                     try {
-                        $dsql = "SELECT id, first_name, last_name, reference_code, blood_type, created_at FROM {$donorTable} WHERE id = ?";
-                        $dst = $this->pdo->prepare($dsql);
-                        $dst->execute([$donorId]);
-                        $donor = $dst->fetch(PDO::FETCH_ASSOC);
-                        if ($donor) {
-                            // Compute expiry: 35 days after donor created_at
-                            $created = $donor['created_at'] ?? date('Y-m-d');
-                            $expiry = date('Y-m-d', strtotime($created . ' +35 days'));
-                            $unit = [
-                                'id' => null,
-                                'unit_id' => $unitId,
-                                'donor_id' => $donor['id'],
-                                'blood_type' => $donor['blood_type'],
-                                'collection_date' => $created,
-                                'expiry_date' => $expiry,
-                                'status' => 'available',
-                                'collection_site' => 'Main Center',
-                                'storage_location' => 'Storage A',
-                                'notes' => '',
-                                'first_name' => $donor['first_name'],
-                                'last_name' => $donor['last_name'],
-                                'reference_code' => $donor['reference_code'],
-                                'donor_blood_type' => $donor['blood_type'],
-                                'email' => null,
-                                'phone' => null,
-                                'donor_name' => trim(($donor['first_name'] ?? '') . ' ' . ($donor['last_name'] ?? '')),
-                                'audit_log' => []
-                            ];
-                            return ['success' => true, 'unit' => $unit];
+                        if (function_exists('tableExists') && tableExists($this->pdo, 'donors_new')) {
+                            $hasDonorsNew = true;
                         }
                     } catch (Exception $e) {
-                        // fall through to error
+                        $hasDonorsNew = false;
+                    }
+
+                    if ($hasDonorsNew) {
+                        $donor = $fetchDonor('donors_new', $donorId);
+                        if ($donor) {
+                            error_log('getUnitDetails fallback: donor ' . $donorId . ' found in donors_new');
+                        } else {
+                            error_log('getUnitDetails fallback: donor ' . $donorId . ' NOT found in donors_new');
+                        }
+                    }
+
+                    // 2) Fallback to donors if not found in donors_new
+                    if (!$donor) {
+                        $donor = $fetchDonor('donors', $donorId);
+                        if ($donor) {
+                            error_log('getUnitDetails fallback: donor ' . $donorId . ' found in donors');
+                        } else {
+                            error_log('getUnitDetails fallback: donor ' . $donorId . ' NOT found in donors');
+                        }
+                    }
+
+                    if ($donor) {
+                        // Compute expiry: 25 days after donor created_at
+                        $created = $donor['created_at'] ?? date('Y-m-d');
+                        $expiry = date('Y-m-d', strtotime($created . ' +25 days'));
+
+                        // Apply any temporary status/notes overrides from the session
+                        $overrideStatus = null;
+                        $overrideNotes = null;
+                        if (session_status() === PHP_SESSION_ACTIVE) {
+                            if (isset($_SESSION['temp_unit_status'][$unitId])) {
+                                $overrideStatus = $_SESSION['temp_unit_status'][$unitId];
+                            }
+                            if (isset($_SESSION['temp_unit_notes'][$unitId])) {
+                                $overrideNotes = $_SESSION['temp_unit_notes'][$unitId];
+                            }
+                        }
+
+                        $unit = [
+                            'id' => null,
+                            'unit_id' => $unitId,
+                            'donor_id' => $donor['id'],
+                            'blood_type' => $donor['blood_type'],
+                            'collection_date' => $created,
+                            'expiry_date' => $expiry,
+                            'status' => $overrideStatus ?: 'available',
+                            'collection_site' => 'Main Center',
+                            'storage_location' => 'Storage A',
+                            'notes' => $overrideNotes ?? '',
+                            'first_name' => $donor['first_name'],
+                            'last_name' => $donor['last_name'],
+                            'reference_code' => $donor['reference_code'],
+                            'donor_blood_type' => $donor['blood_type'],
+                            'email' => null,
+                            'phone' => null,
+                            'donor_name' => trim(($donor['first_name'] ?? '') . ' ' . ($donor['last_name'] ?? '')),
+                            'audit_log' => []
+                        ];
+                        return ['success' => true, 'unit' => $unit];
                     }
                 }
+
                 return ['success' => false, 'message' => 'Unit not found'];
             }
 
@@ -1097,8 +1144,26 @@ class BloodInventoryManagerComplete {
      */
     public function exportToCSV($filters = []) {
         try {
+            // Primary source: inventory table view
             $inventory = $this->getInventory($filters, 1, 10000);
-            
+
+            // Fallback: if no rows were found (common in dev/local where we derive
+            // units directly from donors), try the robust inventory manager which
+            // can synthesize virtual units from donor records.
+            if (empty($inventory['data']) || !is_array($inventory['data'])) {
+                try {
+                    if (!class_exists('BloodInventoryManagerRobust') && file_exists(__DIR__ . '/BloodInventoryManagerRobust.php')) {
+                        require_once __DIR__ . '/BloodInventoryManagerRobust.php';
+                    }
+                    if (class_exists('BloodInventoryManagerRobust')) {
+                        $robustManager = new BloodInventoryManagerRobust($this->pdo, false);
+                        $inventory = $robustManager->getInventory($filters, 1, 10000);
+                    }
+                } catch (Exception $inner) {
+                    error_log('CSV export fallback inventory failed: ' . $inner->getMessage());
+                }
+            }
+
             $filename = 'blood_inventory_' . date('Y-m-d_H-i-s') . '.csv';
             header('Content-Type: text/csv');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -1112,20 +1177,34 @@ class BloodInventoryManagerComplete {
             ]);
             
             // CSV data
-            foreach ($inventory['data'] as $unit) {
-                fputcsv($output, [
-                    $unit['unit_id'],
-                    $unit['blood_type'],
-                    $unit['donor_name'],
-                    $unit['reference_code'],
-                    $unit['collection_date'],
-                    $unit['expiry_date'],
-                    $unit['status'],
-                    $unit['collection_site'],
-                    $unit['storage_location']
-                ]);
+            if (!empty($inventory['data']) && is_array($inventory['data'])) {
+                foreach ($inventory['data'] as $unit) {
+                    $unitId          = $unit['unit_id']        ?? '';
+                    $bloodType       = $unit['blood_type']     ?? '';
+                    $donorName       = $unit['donor_name']     
+                        ?? trim(($unit['first_name'] ?? '') . ' ' . ($unit['last_name'] ?? ''));
+                    $referenceCode   = $unit['reference_code'] ?? '';
+                    $collectionDate  = $unit['collection_date']
+                        ?? ($unit['created_at'] ?? '');
+                    $expiryDate      = $unit['expiry_date']    ?? '';
+                    $status          = $unit['status']         ?? 'available';
+                    $collectionSite  = $unit['collection_site'] ?? 'Main Center';
+                    $storageLocation = $unit['storage_location'] ?? 'Storage A';
+
+                    fputcsv($output, [
+                        $unitId,
+                        $bloodType,
+                        $donorName,
+                        $referenceCode,
+                        $collectionDate,
+                        $expiryDate,
+                        $status,
+                        $collectionSite,
+                        $storageLocation
+                    ]);
+                }
             }
-            
+
             fclose($output);
             exit;
         } catch (Exception $e) {

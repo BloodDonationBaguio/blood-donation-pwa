@@ -102,7 +102,6 @@ try {
     }
 
     $pdo->exec("SET timezone = 'Asia/Manila'");
-    try { $pdo->exec("SET statement_timeout TO '10s'"); } catch (Throwable $t) { /* ignore if not supported */ }
     error_log("Supabase PostgreSQL connection established successfully");
 
 } catch (PDOException $e) {
@@ -110,38 +109,18 @@ try {
     if (getenv('SUPABASE_TEST_MODE') === '1') {
         throw $e;
     }
-    // Fallback: try legacy DATABASE_URL (Render/Heroku-style)
-    $database_url = getenv('DATABASE_URL');
-    if ($database_url) {
-        try {
-            $db = parse_url($database_url);
-            $fbHost = $db['host'] ?? null;
-            $fbName = isset($db['path']) ? ltrim($db['path'], '/') : null;
-            $fbUser = $db['user'] ?? null;
-            $fbPass = $db['pass'] ?? null;
-            $fbPort = isset($db['port']) ? (int)$db['port'] : 5432;
-            $pdo = new PDO(
-                "pgsql:host=" . $fbHost . ";port=" . $fbPort . ";dbname=" . $fbName,
-                $fbUser,
-                $fbPass,
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                ]
-            );
-            try { $pdo->exec("SET timezone = 'Asia/Manila'"); } catch (Throwable $t) {}
-            try { $pdo->exec("SET statement_timeout TO '10s'"); } catch (Throwable $t) {}
-            error_log("Fallback PostgreSQL connection established via DATABASE_URL");
-            return;
-        } catch (PDOException $fallbackErr) {
-            error_log("Fallback DATABASE_URL connection failed: " . $fallbackErr->getMessage());
-        }
-    }
     die("<div style='font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; border: 1px solid #f5c6cb; background-color: #f8d7da; color: #721c24; border-radius: 5px;'>
-        <h2>Database Connection Error</h2>
-        <p>Failed to connect to Supabase. No working fallback found.</p>
+        <h2>Supabase Connection Error</h2>
+        <p>Failed to connect to Supabase PostgreSQL database.</p>
         <p><strong>Error:</strong> " . htmlspecialchars($e->getMessage()) . "</p>
+        <h3>Please check:</h3>
+        <ul>
+            <li>SUPABASE_DB_PASSWORD is set from Settings > Database</li>
+            <li>Host can be db.<em>project-ref</em>.supabase.co or <em>project-ref</em>.supabase.co</li>
+            <li>SSL must be enabled (sslmode=require)</li>
+            <li>Network connection to Supabase is working</li>
+        </ul>
+        <p>Get credentials: <a href='https://app.supabase.com/project/_/settings/database' target='_blank'>Supabase Dashboard → Settings → Database</a></p>
     </div>");
 }
 

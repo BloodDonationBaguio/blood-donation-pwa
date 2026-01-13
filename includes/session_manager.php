@@ -1,6 +1,9 @@
 <?php
 // includes/session_manager.php - Enhanced session management with Remember Me functionality
 
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/../config/timezone.php';
+
 // Include session configuration first
 require_once __DIR__ . '/session_config.php';
 

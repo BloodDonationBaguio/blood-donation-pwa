@@ -1,4 +1,7 @@
 <?php 
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/config/timezone.php';
+
 // Enable error display for debugging
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -146,7 +149,7 @@ try {
 ?>
 <?php
     // Database connection and donations counter
-    // Business rule: show the number of served donors (completed donations) in the current year,
+    // Business rule: show the total number of served donors (completed donations),
     // using the donors table when available, with a safe fallback to donations_new.
     try {
         require_once __DIR__ . '/db.php';
@@ -154,29 +157,21 @@ try {
         $driver = 'mysql';
         try { $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)); } catch (Throwable $e) {}
 
-        // First: count served donors in current year (primary business metric)
+        // First: count served donors (primary business metric)
         try {
             if (function_exists('tableExists') && tableExists($pdo, 'donors')) {
-                if ($driver === 'pgsql') {
-                    $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served' AND EXTRACT(YEAR FROM COALESCE(served_date, created_at)) = EXTRACT(YEAR FROM CURRENT_DATE)");
-                } else {
-                    $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served' AND YEAR(COALESCE(served_date, created_at)) = YEAR(CURRENT_DATE)");
-                }
+                $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donors WHERE status = 'served'");
                 $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
             }
         } catch (Throwable $e1) {
             error_log("Error counting served donors: " . $e1->getMessage());
         }
 
-        // Fallback: count completed donations in current year from donations_new
+        // Fallback: count completed donations from donations_new
         if ($donationsThisYear === 0) {
             try {
                 if (function_exists('tableExists') && tableExists($pdo, 'donations_new')) {
-                    if ($driver === 'pgsql') {
-                        $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND EXTRACT(YEAR FROM donation_date) = EXTRACT(YEAR FROM CURRENT_DATE)");
-                    } else {
-                        $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed' AND YEAR(donation_date) = YEAR(CURRENT_DATE)");
-                    }
+                    $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM donations_new WHERE status = 'completed'");
                     $donationsThisYear = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
                 }
             } catch (Throwable $e2) {
@@ -195,10 +190,10 @@ try {
           $manifestHref = 'manifest.json';
           $manifestFile = $localManifest;
       } elseif (is_file($subManifest)) {
-          $manifestHref = '/blood-donation-pwa/manifest.json';
+          $manifestHref = 'blood-donation-pwa/manifest.json';
           $manifestFile = $subManifest;
       } else {
-          $manifestHref = '/manifest.json';
+          $manifestHref = 'manifest.json';
       }
       $version = $manifestFile ? (string)filemtime($manifestFile) : (string)time();
       $manifestHref .= '?v=' . rawurlencode($version);

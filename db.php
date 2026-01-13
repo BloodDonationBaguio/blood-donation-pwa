@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/config/timezone.php';
+
 // Environment-aware DB config: Prefer Supabase Postgres via DB password; fallback to Render; else MySQL
 if (extension_loaded('pdo_pgsql') && !extension_loaded('pdo_mysql')) {
     require_once __DIR__ . '/supabase_db.php';
@@ -172,11 +175,18 @@ if (!function_exists('tableExists')) {
     function tableExists($pdo, $table) {
         try {
             if (DB_TYPE === 'sqlite') {
-                $result = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='" . $pdo->quote($table) . "'");
-            } else {
-                $result = $pdo->query("SHOW TABLES LIKE '" . $pdo->quote($table) . "'");
+                // SQLite: use sqlite_master with a bound parameter
+                $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = :table");
+                $stmt->execute([':table' => $table]);
+                return (bool)$stmt->fetchColumn();
             }
-            return $result->rowCount() > 0;
+
+            // MySQL/MariaDB: SHOW TABLES LIKE 'name' does not work reliably with bound params,
+            // so safely embed the table name. These names are internal, not user input.
+            $tableSafe = str_replace(['`', "'"], ['``', "''"], $table);
+            $sql = "SHOW TABLES LIKE '" . $tableSafe . "'";
+            $stmt = $pdo->query($sql);
+            return (bool)$stmt->fetchColumn();
         } catch (PDOException $e) {
             error_log("Error checking if table exists: " . $e->getMessage());
             return false;

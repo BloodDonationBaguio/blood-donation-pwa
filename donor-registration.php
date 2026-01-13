@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/config/timezone.php';
+
 // Start output buffering to prevent any accidental output before DOCTYPE
 ob_start();
 
@@ -283,10 +286,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $requiredQuestions = ($gender === 'Female') ? 37 : 32;
                             $actualAnswered = count(array_filter($medical, function($answer) { return !empty($answer) && $answer !== ''; }));
                             $allAnswered = $actualAnswered >= $requiredQuestions;
-                            // Save screening data without relying on donor_id lookups
-                            $medicalStmt = $pdo->prepare("INSERT INTO donor_medical_screening_simple (donor_id, reference_code, screening_data, all_questions_answered) VALUES (NULL, ?, ?, ?)");
-                            $medicalStmt->execute([$refNumber, json_encode($medical), $allAnswered ? 1 : 0]);
-                            error_log('Medical screening data saved after commit (donor_id nullable or handled by DB)');
+
+                            // Resolve donor ID using lastInsertId when possible (MySQL/SQLite),
+                            // then fall back to a lookup by reference_code. Never insert with NULL donor_id
+                            // to avoid NOT NULL / FK violations.
+                            $donorIdForScreening = null;
+                            $driver = 'mysql';
+                            try {
+                                $driver = strtolower((string)$pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+                            } catch (Throwable $e) {
+                                // Default to MySQL-style behaviour
+                            }
+
+                            // Prefer PDO::lastInsertId on non-PostgreSQL drivers
+                            if ($driver !== 'pgsql') {
+                                try {
+                                    $lastId = $pdo->lastInsertId();
+                                    if (!empty($lastId)) {
+                                        $donorIdForScreening = (int)$lastId;
+                                        error_log('Using lastInsertId for medical screening donor_id: ' . $donorIdForScreening);
+                                    }
+                                } catch (Throwable $e) {
+                                    error_log('lastInsertId failed when resolving donor_id for screening: ' . $e->getMessage());
+                                }
+                            }
+
+                            // Fallback: look up donor by reference_code if lastInsertId was not usable
+                            if ($donorIdForScreening === null) {
+                                try {
+                                    // donorsTable is set above (Supabase and local both use "donors")
+                                    $lookupStmt = $pdo->prepare("SELECT id FROM {$donorsTable} WHERE reference_code = ? ORDER BY created_at DESC LIMIT 1");
+                                    $lookupStmt->execute([$refNumber]);
+                                    $donorRow = $lookupStmt->fetch(PDO::FETCH_ASSOC);
+                                    if ($donorRow && isset($donorRow['id'])) {
+                                        $donorIdForScreening = (int)$donorRow['id'];
+                                        error_log('Resolved donor_id ' . $donorIdForScreening . ' for medical screening using reference ' . $refNumber);
+                                    } else {
+                                        error_log('Could not resolve donor_id for medical screening using reference ' . $refNumber . ' (row not found)');
+                                    }
+                                } catch (Exception $lookupError) {
+                                    error_log('Failed to look up donor ID for medical screening: ' . $lookupError->getMessage());
+                                }
+                            }
+
+                            if ($donorIdForScreening === null) {
+                                // As a safety net, do not attempt an INSERT that will violate NOT NULL
+                                error_log('Skipping medical screening save: donor_id could not be resolved for reference ' . $refNumber);
+                            } else {
+                                // Save screening data linked to the resolved donor_id
+                                $medicalStmt = $pdo->prepare("INSERT INTO donor_medical_screening_simple (donor_id, reference_code, screening_data, all_questions_answered) VALUES (?, ?, ?, ?)");
+                                $medicalStmt->execute([
+                                    $donorIdForScreening,
+                                    $refNumber,
+                                    json_encode($medical),
+                                    $allAnswered ? 1 : 0
+                                ]);
+                                error_log('Medical screening data saved after commit (donor_id=' . $donorIdForScreening . ')');
+                            }
                         } else {
                             error_log('Medical screening table missing, skipping save');
                         }
@@ -836,7 +892,7 @@ ob_clean();
                                     <option value="AB-" <?php echo $bt === 'AB-' ? 'selected' : ''; ?>>AB-</option>
                                     <option value="O+" <?php echo $bt === 'O+' ? 'selected' : ''; ?>>O+</option>
                                     <option value="O-" <?php echo $bt === 'O-' ? 'selected' : ''; ?>>O-</option>
-                                    <option value="UNK" <?php echo ($bt === 'Unknown' || $bt === 'UNK') ? 'selected' : ''; ?>>Unknown (Will be determined during screening)</option>
+                                    <option value="Unknown" <?php echo $bt === 'Unknown' ? 'selected' : ''; ?>>Unknown (Will be determined during screening)</option>
                                 </select>
                                 <div class="invalid-feedback">Please select your blood type.</div>
                             </div>

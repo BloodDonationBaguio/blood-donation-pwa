@@ -21,11 +21,13 @@ function isEmailNullable($pdo, $table) { try { $stmt = $pdo->prepare("SELECT is_
  * Prefers donors_new but will fall back to donors if needed.
  */
 function resolveDonorsTableForManual(PDO $pdo) {
-    $candidates = ['donors_new', 'donors'];
+    // Prefer the canonical table used by admin lists (admin.php queries `donors`).
+    // Fall back to legacy `donors_new` only if `donors` is missing/incompatible.
+    $candidates = ['donors', 'donors_new'];
     foreach ($candidates as $table) {
         try {
             // Ensure expected columns exist; query will fail if they do not
-            $pdo->query("SELECT first_name, last_name, reference_code FROM {$table} LIMIT 1");
+            $pdo->query("SELECT first_name, last_name FROM {$table} LIMIT 1");
             return $table;
         } catch (Throwable $e) {
             // Try next table
@@ -77,6 +79,20 @@ try {
     // Decide which donors table to use for this registration
     $donorsTable = resolveDonorsTableForManual($pdo);
 
+    // Determine which reference column this table uses
+    $refColumn = 'reference_code';
+    try {
+        $pdo->query("SELECT reference_code FROM {$donorsTable} LIMIT 1");
+        $refColumn = 'reference_code';
+    } catch (Throwable $e) {
+        try {
+            $pdo->query("SELECT reference FROM {$donorsTable} LIMIT 1");
+            $refColumn = 'reference';
+        } catch (Throwable $e2) {
+            // Keep default; INSERT will fail with a clear DB error if schema is unexpected
+        }
+    }
+
     // Duplicate recent registration check (5 minutes window)
     if (empty($errors) && $email !== '') {
         try {
@@ -101,20 +117,22 @@ try {
 
     if (!empty($errors)) { header('Location: admin.php?tab=manual-register&error=' . urlencode(implode('; ', $errors))); exit; }
 
-    // 3. Insert donor and screening
-    $pdo->beginTransaction();
-    $refNumber = generateReferenceNumber();
-
     // Ensure created_by_admin column exists
+    // IMPORTANT: On MySQL/MariaDB, ALTER TABLE causes an implicit commit.
+    // So we must do this BEFORE beginTransaction() to avoid "There is no active transaction" on commit.
     try {
-        $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
+        $driver = strtolower((string)$pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
         if ($driver === 'pgsql') {
             $pdo->exec("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = '{$donorsTable}' AND column_name = 'created_by_admin') THEN ALTER TABLE {$donorsTable} ADD COLUMN created_by_admin BOOLEAN DEFAULT FALSE; END IF; END $$;");
         } else {
-            // MySQL/MariaDB
+            // MySQL/MariaDB best-effort (older versions may not support IF NOT EXISTS)
             $pdo->exec("ALTER TABLE {$donorsTable} ADD COLUMN IF NOT EXISTS created_by_admin TINYINT(1) NOT NULL DEFAULT 0");
         }
     } catch (Throwable $e) { /* ignore */ }
+
+    // 3. Insert donor and screening
+    $pdo->beginTransaction();
+    $refNumber = generateReferenceNumber();
 
     // Blood type normalization
     $isUnknownSelected = ($bloodType === 'Unknown' || $bloodType === 'UNK');
@@ -126,7 +144,7 @@ try {
         // Generate a cleaner placeholder email for donors without email
         $dbEmail = 'noemail.' . strtolower($refNumber) . '@placeholder.local'; 
     }
-    $stmt = $pdo->prepare("INSERT INTO {$donorsTable} (first_name, last_name, email, phone, blood_type, date_of_birth, gender, address, city, province, weight, height, reference_code, status, created_by_admin, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP)");
+    $stmt = $pdo->prepare("INSERT INTO {$donorsTable} (first_name, last_name, email, phone, blood_type, date_of_birth, gender, address, city, province, weight, height, {$refColumn}, status, created_by_admin, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP)");
     $stmt->execute([$firstName, $lastName, $dbEmail, $phone, $dbBloodType, $dob, $gender, $address, $city, $province, $weight, $height, $refNumber, 1]);
     $donorId = (int)$pdo->lastInsertId();
 
@@ -165,7 +183,9 @@ $$;");
     $medicalStmt = $pdo->prepare("INSERT INTO donor_medical_screening_simple (donor_id, reference_code, screening_data, all_questions_answered) VALUES (?, ?, ?, ?)");
     $medicalStmt->execute([$donorId, $refNumber, json_encode($medical), $allAnswered]);
 
-    $pdo->commit();
+    if ($pdo->inTransaction()) {
+        $pdo->commit();
+    }
 
     // Log admin audit entry for this manual donor creation (best-effort)
     try {

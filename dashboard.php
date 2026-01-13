@@ -2,6 +2,9 @@
 // Root-level donor Dashboard page
 // Implements logged-in user dashboard with profile and donation history
 
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/config/timezone.php';
+
 // Disable error display to prevent output before headers
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
@@ -275,7 +278,7 @@ try {
                                                 <?php foreach ($donation_history as $don): ?>
                                                     <tr>
                                                         <td><?= date('M d, Y', strtotime($don['updated_at'] ?? $don['created_at'])) ?></td>
-                                                        <td><?= htmlspecialchars($don['blood_type']) ?></td>
+                                                        <td><?= htmlspecialchars(!empty($don['blood_type']) ? $don['blood_type'] : 'Unknown') ?></td>
                                                         <?php 
                                                             $status = strtolower($don['status'] ?? '');
                                                             $label = 'Donation Completed';

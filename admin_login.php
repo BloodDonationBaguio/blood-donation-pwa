@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/config/timezone.php';
+
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -227,6 +230,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h1 class="card-title">Welcome Back</h1>
         <p class="card-subtitle">Please sign in to continue</p>
         
+        <?php if (isset($_GET['logout']) && $_GET['logout'] === 'success'): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <i class="fas fa-check-circle me-2"></i>You have been successfully logged out.
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php endif; ?>
+        
         <?php if (!empty($error)): ?>
         <div class="alert alert-danger" role="alert">
           <?= htmlspecialchars($error) ?>
@@ -250,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         
         <div class="text-center mt-2">
-          <a href="admin_logout.php" class="text-muted">Clear Session / Logout</a>
+          <a href="logout.php" class="text-muted">Clear Session / Logout</a>
         </div>
       </div>
     </div>

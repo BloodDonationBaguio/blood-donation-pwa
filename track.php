@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Baguio, Philippines
+require_once __DIR__ . '/config/timezone.php';
+
 // Enable error reporting for this page so blank screens surface problems during migration
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -416,7 +419,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                     <div class="info-row">
                                         <p class="info-label">Blood Type:</p>
-                                        <p class="info-value"><?= htmlspecialchars($donor['blood_type'] ?? 'Not specified') ?></p>
+                                        <p class="info-value"><?= htmlspecialchars(!empty($donor['blood_type']) ? $donor['blood_type'] : 'Unknown') ?></p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">

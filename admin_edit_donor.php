@@ -27,17 +27,31 @@ if ($donorId <= 0) {
     exit();
 }
 
-// Choose donors table dynamically and fetch safely
-$driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? '');
-if ($driver === 'pgsql') {
-    $donorsTable = 'donors';
-} else {
-    $donorsTable = (function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : 'donors';
+// Choose donors table dynamically and fetch safely (same logic as admin.php)
+$donorsTableResolved = (function_exists('tableExists') && tableExists($pdo, 'donors'))
+    ? 'donors'
+    : ((function_exists('tableExists') && tableExists($pdo, 'donors_new')) ? 'donors_new' : null);
+
+// Debug: Log which table we're using
+error_log("admin_edit_donor.php: Using table '{$donorsTableResolved}' for donor ID {$donorId}");
+
+if ($donorsTableResolved === null) {
+    error_log("admin_edit_donor.php: No donors table found");
+    header('Location: admin.php?tab=donor-list&error=No donors table found');
+    exit();
 }
+
 try {
-    $stmt = $pdo->prepare("SELECT * FROM {$donorsTable} WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT * FROM {$donorsTableResolved} WHERE id = ?");
     $stmt->execute([$donorId]);
     $donor = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Debug: Log if donor was found
+    if ($donor) {
+        error_log("admin_edit_donor.php: Found donor '{$donor['first_name']} {$donor['last_name']}' in table '{$donorsTableResolved}'");
+    } else {
+        error_log("admin_edit_donor.php: Donor ID {$donorId} NOT found in table '{$donorsTableResolved}'");
+    }
 } catch (Exception $e) {
     error_log('admin_edit_donor.php: donor fetch failed - ' . $e->getMessage());
     header('Location: admin.php?tab=donor-list&error=Database error loading donor');
@@ -73,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Update donor
         $updateStmt = $pdo->prepare("
-            UPDATE {$donorsTable} SET 
+            UPDATE {$donorsTableResolved} SET 
                 first_name = ?, last_name = ?, email = ?, phone = ?, 
                 blood_type = ?, date_of_birth = ?, gender = ?, 
                 address = ?, city = ?, province = ?, 
@@ -157,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $logStmt->execute([
             $_SESSION['admin_username'] ?? 'admin',
-            $donorsTable,
+            $donorsTableResolved,
             $donorId,
             "Donor information updated: {$firstName} {$lastName}",
             $_SERVER['REMOTE_ADDR']
