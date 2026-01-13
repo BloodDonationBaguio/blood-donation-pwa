@@ -1305,8 +1305,27 @@ class BloodInventoryManagerComplete {
         $inserted = 0;
         $startedTx = false;
         try {
+            // Ensure blood_inventory table exists before attempting backfill
+            $this->ensureBloodInventoryTable();
+
+            // Determine whether the blood_inventory table supports deleted_at for soft deletes
+            $hasDeletedAt = false;
+            try {
+                if (function_exists('getTableStructure')) {
+                    $cols = getTableStructure($this->pdo, 'blood_inventory');
+                    foreach ($cols as $col) {
+                        $name = strtolower($col['column_name'] ?? $col['Field'] ?? '');
+                        if ($name === 'deleted_at') { $hasDeletedAt = true; break; }
+                    }
+                }
+            } catch (Throwable $e) {
+                $hasDeletedAt = false;
+            }
+
+            $unitExistsClause = $hasDeletedAt ? 'bi.deleted_at IS NULL' : "bi.status <> 'deleted'";
+
             // Helper to fetch eligible donors who lack an AVAILABLE unit from a given table
-            $fetchMissing = function (string $table, int $limit) {
+            $fetchMissing = function (string $table, int $limit) use ($unitExistsClause) {
                 // Eligibility per table — treat both 'served' and 'completed' as eligible (robust to case/spacing)
                 $eligibilityWhere = "LOWER(TRIM(d.status)) IN ('served','completed')";
 
@@ -1317,7 +1336,7 @@ class BloodInventoryManagerComplete {
                     WHERE {$eligibilityWhere}
                       AND NOT EXISTS (
                         SELECT 1 FROM blood_inventory bi
-                        WHERE bi.donor_id = d.id AND bi.status = 'available'
+                        WHERE bi.donor_id = d.id AND {$unitExistsClause}
                       )
                     ORDER BY d.id DESC
                     LIMIT ?

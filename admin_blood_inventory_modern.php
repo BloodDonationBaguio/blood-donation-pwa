@@ -272,8 +272,34 @@ if (!in_array($perPage, $allowedPerPage)) {
 // Handle CSV export if requested
 if (isset($_GET['export']) && strtolower($_GET['export']) === 'csv') {
     try {
+        // Determine donor table and eligibility for donor-derived units
+        $donorTable = 'donors';
+        $donorEligibilityWhere = "LOWER(TRIM(status)) IN ('served','completed')";
+        try {
+            $cNew = (int)$pdo->query("SELECT COUNT(*) FROM donors_new WHERE {$donorEligibilityWhere}")->fetchColumn();
+            if ($cNew > 0) {
+                $donorTable = 'donors_new';
+            }
+        } catch (Throwable $e) {
+            // ignore
+        }
+
+        // Determine if last_donation_date exists on the selected donor table
+        $hasLastDonationDate = false;
+        try {
+            if (function_exists('getTableStructure')) {
+                $cols = getTableStructure($pdo, $donorTable);
+                foreach ($cols as $col) {
+                    $name = strtolower($col['column_name'] ?? $col['Field'] ?? '');
+                    if ($name === 'last_donation_date') { $hasLastDonationDate = true; break; }
+                }
+            }
+        } catch (Throwable $e) {
+            $hasLastDonationDate = false;
+        }
+
         // Build donor-based query (same source as the on-screen table)
-        $where = ["status = 'served'"];
+        $where = [$donorEligibilityWhere];
         $params = [];
         if (!empty($filters['blood_type'])) {
             $where[] = 'blood_type = ?';
@@ -289,10 +315,11 @@ if (isset($_GET['export']) && strtolower($_GET['export']) === 'csv') {
         $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
         $unitIdExpr = ($driver === 'pgsql') ? "('INV-' || id)" : "CONCAT('INV-', id)";
         $donorNameExpr = ($driver === 'pgsql') ? "(first_name || ' ' || last_name)" : "CONCAT(first_name, ' ', last_name)";
+        $collectionExpr = $hasLastDonationDate ? 'COALESCE(last_donation_date, created_at)' : 'created_at';
         // Expiry: 25 days after collection/served date
         $expiryExpr = ($driver === 'pgsql')
-            ? "(last_donation_date + INTERVAL '25 day')"
-            : "(DATE_ADD(COALESCE(last_donation_date, created_at), INTERVAL 25 DAY))";
+            ? "({$collectionExpr} + INTERVAL '25 day')"
+            : "(DATE_ADD({$collectionExpr}, INTERVAL 25 DAY))";
 
         $sql = "
             SELECT
@@ -302,9 +329,9 @@ if (isset($_GET['export']) && strtolower($_GET['export']) === 'csv') {
                 'available' AS status,
                 $donorNameExpr AS donor_name,
                 reference_code,
-                COALESCE(last_donation_date, created_at) AS collection_date,
+                {$collectionExpr} AS collection_date,
                 $expiryExpr AS expiry_date
-            FROM donors
+            FROM {$donorTable}
             $whereClause
             ORDER BY created_at DESC
         ";
@@ -374,7 +401,35 @@ $usingFallback = false;
 try {
     // First try to get data from blood_inventory table (real units)
     $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
-    
+
+    // Determine donor table and eligibility for donor-derived units (fallback)
+    $donorTable = 'donors';
+    $donorEligibilityWhere = "LOWER(TRIM(status)) IN ('served','completed')";
+    try {
+        $cNew = (int)$pdo->query("SELECT COUNT(*) FROM donors_new WHERE {$donorEligibilityWhere}")->fetchColumn();
+        if ($cNew > 0) {
+            $donorTable = 'donors_new';
+        }
+    } catch (Throwable $e) {
+        // ignore
+    }
+
+    // Determine if last_donation_date exists on the selected donor table
+    $hasLastDonationDate = false;
+    try {
+        if (function_exists('getTableStructure')) {
+            $cols = getTableStructure($pdo, $donorTable);
+            foreach ($cols as $col) {
+                $name = strtolower($col['column_name'] ?? $col['Field'] ?? '');
+                if ($name === 'last_donation_date') { $hasLastDonationDate = true; break; }
+            }
+        }
+    } catch (Throwable $e) {
+        $hasLastDonationDate = false;
+    }
+
+    $collectionExpr = $hasLastDonationDate ? 'COALESCE(last_donation_date, created_at)' : 'created_at';
+
     // Check if blood_inventory table exists and has data
     $hasBloodInventory = false;
     try {
@@ -383,6 +438,20 @@ try {
         $hasBloodInventory = $bloodInventoryCount > 0;
     } catch (Exception $e) {
         $hasBloodInventory = false;
+    }
+
+    // If inventory is empty, try to backfill real units from served/completed donors (idempotent)
+    if (!$hasBloodInventory) {
+        try {
+            $bf = $inventoryManager->backfillMissingUnits(500);
+            if (($bf['success'] ?? false) && ((int)($bf['inserted'] ?? 0) > 0)) {
+                $stmt = $pdo->query("SELECT COUNT(*) FROM blood_inventory WHERE deleted_at IS NULL");
+                $bloodInventoryCount = $stmt->fetchColumn();
+                $hasBloodInventory = $bloodInventoryCount > 0;
+            }
+        } catch (Throwable $e) {
+            // ignore
+        }
     }
     
     if ($hasBloodInventory) {
@@ -416,6 +485,10 @@ try {
         // Pagination
         $offset = ($filters['page'] - 1) * $perPage;
         
+        $expiringSoonExpr = ($driver === 'pgsql')
+            ? "CASE WHEN expiry_date < CURRENT_DATE THEN 1 WHEN expiry_date <= (CURRENT_DATE + INTERVAL '5 day') THEN 1 ELSE 0 END"
+            : "CASE WHEN expiry_date < CURDATE() THEN 1 WHEN expiry_date <= DATE_ADD(CURDATE(), INTERVAL 5 DAY) THEN 1 ELSE 0 END";
+
         // Fetch paginated rows from blood_inventory
         $sql = "
             SELECT 
@@ -426,11 +499,7 @@ try {
                 reference_code,
                 collection_date,
                 expiry_date,
-                CASE 
-                    WHEN expiry_date < CURDATE() THEN 1 
-                    WHEN expiry_date <= DATE_ADD(CURDATE(), INTERVAL 5 DAY) THEN 1 
-                    ELSE 0 
-                END AS expiring_soon
+                {$expiringSoonExpr} AS expiring_soon
             FROM blood_inventory 
             $whereClause
             ORDER BY created_at DESC
@@ -452,10 +521,16 @@ try {
         ];
     } else {
         // Fallback to donor-based virtual units (original logic)
-        $where = ["status = 'served'"];
+        // Donor-based units are always treated as 'available'
+        if (!empty($filters['status']) && strtolower($filters['status']) !== 'all' && strtolower($filters['status']) !== 'available') {
+            $inventory = ['data' => [], 'total' => 0, 'page' => $filters['page'], 'limit' => $perPage, 'total_pages' => 0, 'source' => 'served_donors_direct'];
+            $summary = ['total_units' => 0, 'available_units' => 0, 'used_units' => 0, 'expired_units' => 0];
+            throw new Exception('Unsupported status filter for donor-derived units');
+        }
+
+        $where = [$donorEligibilityWhere];
         $params = [];
         if (!empty($filters['blood_type'])) { $where[] = 'blood_type = ?'; $params[] = $filters['blood_type']; }
-        if (!empty($filters['status']) && strtolower($filters['status']) !== 'all') { $where[] = '?'; $params[] = $filters['status']; }
         if (!empty($filters['search'])) {
             $term = '%' . $filters['search'] . '%';
             $where[] = '(first_name LIKE ? OR last_name LIKE ? OR reference_code LIKE ?)';
@@ -465,7 +540,7 @@ try {
         $whereClause = 'WHERE ' . implode(' AND ', $where);
 
         // Get total count
-        $countSql = "SELECT COUNT(*) FROM donors $whereClause";
+        $countSql = "SELECT COUNT(*) FROM {$donorTable} $whereClause";
         $stmtCount = $pdo->prepare($countSql);
         $stmtCount->execute($params);
         $totalRecords = (int)$stmtCount->fetchColumn();
@@ -476,8 +551,8 @@ try {
         $donorNameExpr = ($driver === 'pgsql') ? "(first_name || ' ' || last_name)" : "CONCAT(first_name, ' ', last_name)";
         // Expiry: 25 days after collection/served date
         $expiryExpr = ($driver === 'pgsql')
-            ? "(last_donation_date + INTERVAL '25 day')"
-            : "(DATE_ADD(COALESCE(last_donation_date, created_at), INTERVAL 25 DAY))";
+            ? "({$collectionExpr} + INTERVAL '25 day')"
+            : "(DATE_ADD({$collectionExpr}, INTERVAL 25 DAY))";
 
         // Pagination
         $offset = ($filters['page'] - 1) * $perPage;
@@ -491,10 +566,10 @@ try {
                 'available' AS status,
                 $donorNameExpr AS donor_name,
                 reference_code,
-                COALESCE(last_donation_date, created_at) AS collection_date,
+                {$collectionExpr} AS collection_date,
                 $expiryExpr AS expiry_date,
                 0 AS expiring_soon
-            FROM donors
+            FROM {$donorTable}
             $whereClause
             ORDER BY created_at DESC
             LIMIT ? OFFSET ?
@@ -522,7 +597,7 @@ try {
         'used_units' => 0,
         'expired_units' => 0
     ];
-    $summarySql = "SELECT blood_type, COUNT(*) AS cnt FROM donors WHERE status = 'served' GROUP BY blood_type";
+    $summarySql = "SELECT blood_type, COUNT(*) AS cnt FROM {$donorTable} WHERE {$donorEligibilityWhere} GROUP BY blood_type";
     foreach ($pdo->query($summarySql)->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $summary[$r['blood_type']] = $r['cnt'];
         $summary['total_units'] += $r['cnt'];

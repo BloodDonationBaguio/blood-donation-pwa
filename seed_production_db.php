@@ -10,12 +10,17 @@ if (!isset($pdo) || !$pdo instanceof PDO) {
 
 echo "Database connection appears to be successful.\n";
 
+require_once __DIR__ . '/includes/BloodInventoryManagerComplete.php';
+$inventoryManager = new BloodInventoryManagerComplete($pdo);
+$backfill = $inventoryManager->backfillMissingUnits(500);
+echo "Inventory backfill result: " . json_encode($backfill) . "\n";
+
 function seedTestDonor($pdo) {
     try {
         // Use the helper function from db_production.php to check if the table exists
         if (!tableExists($pdo, 'donors')) {
-            echo "Error: 'donors' table does not exist in the database.\n";
-            exit(1);
+            echo "Note: 'donors' table not found; skipping test donor seed.\n";
+            return;
         }
         echo "'donors' table exists. Checking for test donor...\n";
 
