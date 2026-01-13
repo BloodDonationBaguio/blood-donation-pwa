@@ -1324,6 +1324,84 @@ class BloodInventoryManagerComplete {
 
             $unitExistsClause = $hasDeletedAt ? 'bi.deleted_at IS NULL' : "bi.status <> 'deleted'";
 
+            // 0) Prefer backfill from donations_new (completed) when present
+            try {
+                $hasDonationsNew = false;
+                if (function_exists('tableExists')) {
+                    try { $hasDonationsNew = tableExists($this->pdo, 'donations_new'); } catch (Throwable $e) { $hasDonationsNew = false; }
+                }
+
+                if ($hasDonationsNew) {
+                    // Begin transaction if not already in one
+                    if (!$this->pdo->inTransaction()) {
+                        $this->pdo->beginTransaction();
+                        $startedTx = true;
+                    }
+
+                    $insDon = $this->pdo->prepare("INSERT INTO blood_inventory (
+                            unit_id, donor_id, blood_type, collection_date, expiry_date,
+                            status, collection_site, storage_location, created_at
+                        ) VALUES (?, ?, ?, ?, ?, 'available', ?, ?, CURRENT_TIMESTAMP)");
+
+                    $remaining = max(0, (int)$maxInserts);
+                    if ($remaining > 0) {
+                        $driver2 = 'mysql';
+                        try { $driver2 = strtolower($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME)); } catch (Throwable $e) { /* ignore */ }
+
+                        $unitIdExpr = ($driver2 === 'pgsql')
+                            ? "('DON-' || dn.id)"
+                            : "CONCAT('DON-', dn.id)";
+
+                        $sqlMissingDon = "
+                            SELECT dn.id, dn.donor_id, dn.donation_date, dn.blood_type
+                            FROM donations_new dn
+                            WHERE LOWER(TRIM(dn.status)) = 'completed'
+                              AND NOT EXISTS (
+                                SELECT 1 FROM blood_inventory bi
+                                WHERE bi.unit_id = {$unitIdExpr} AND {$unitExistsClause}
+                              )
+                            ORDER BY dn.id DESC
+                            LIMIT ?
+                        ";
+                        $stMissing = $this->pdo->prepare($sqlMissingDon);
+                        $stMissing->execute([$remaining]);
+                        $rows = $stMissing->fetchAll(PDO::FETCH_ASSOC);
+
+                        foreach ($rows as $dn) {
+                            $donationId = (string)($dn['id'] ?? '');
+                            if ($donationId === '') { continue; }
+                            $unitId = 'DON-' . $donationId;
+
+                            $collectionDate = (string)($dn['donation_date'] ?? date('Y-m-d'));
+                            $collectionDate = substr($collectionDate, 0, 10);
+                            $expiryDate = date('Y-m-d', strtotime($collectionDate . ' +25 days'));
+
+                            $insDon->execute([
+                                $unitId,
+                                $dn['donor_id'] ?? null,
+                                $dn['blood_type'] ?? 'Unknown',
+                                $collectionDate,
+                                $expiryDate,
+                                'Main Center',
+                                'Storage A'
+                            ]);
+
+                            $this->logAudit($this->pdo->lastInsertId(), 'unit_backfilled', 'Backfilled unit from completed donation', [
+                                'unit_id' => $unitId,
+                                'donor_id' => $dn['donor_id'] ?? null,
+                                'blood_type' => $dn['blood_type'] ?? 'Unknown',
+                                'donation_id' => $dn['id'] ?? null,
+                                'source_table' => 'donations_new'
+                            ]);
+
+                            $inserted++;
+                        }
+                    }
+                }
+            } catch (Throwable $e) {
+                // ignore donations_new backfill failures; fall back to donors
+            }
+
             // Helper to fetch eligible donors who lack an AVAILABLE unit from a given table
             $fetchMissing = function (string $table, int $limit) use ($unitExistsClause) {
                 // Eligibility per table — treat both 'served' and 'completed' as eligible (robust to case/spacing)

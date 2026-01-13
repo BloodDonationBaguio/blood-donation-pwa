@@ -402,6 +402,20 @@ try {
     // First try to get data from blood_inventory table (real units)
     $driver = strtolower($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
 
+    // Detect whether blood_inventory supports deleted_at
+    $bloodInventoryHasDeletedAt = false;
+    try {
+        if (function_exists('getTableStructure')) {
+            $cols = getTableStructure($pdo, 'blood_inventory');
+            foreach ($cols as $col) {
+                $name = strtolower($col['column_name'] ?? $col['Field'] ?? '');
+                if ($name === 'deleted_at') { $bloodInventoryHasDeletedAt = true; break; }
+            }
+        }
+    } catch (Throwable $e) {
+        $bloodInventoryHasDeletedAt = false;
+    }
+
     // Determine donor table and eligibility for donor-derived units (fallback)
     $donorTable = 'donors';
     $donorEligibilityWhere = "LOWER(TRIM(status)) IN ('served','completed')";
@@ -433,7 +447,10 @@ try {
     // Check if blood_inventory table exists and has data
     $hasBloodInventory = false;
     try {
-        $stmt = $pdo->query("SELECT COUNT(*) FROM blood_inventory WHERE deleted_at IS NULL");
+        $inventoryCountSql = $bloodInventoryHasDeletedAt
+            ? "SELECT COUNT(*) FROM blood_inventory WHERE deleted_at IS NULL"
+            : "SELECT COUNT(*) FROM blood_inventory WHERE status <> 'deleted'";
+        $stmt = $pdo->query($inventoryCountSql);
         $bloodInventoryCount = $stmt->fetchColumn();
         $hasBloodInventory = $bloodInventoryCount > 0;
     } catch (Exception $e) {
@@ -444,11 +461,10 @@ try {
     if (!$hasBloodInventory) {
         try {
             $bf = $inventoryManager->backfillMissingUnits(500);
-            if (($bf['success'] ?? false) && ((int)($bf['inserted'] ?? 0) > 0)) {
-                $stmt = $pdo->query("SELECT COUNT(*) FROM blood_inventory WHERE deleted_at IS NULL");
-                $bloodInventoryCount = $stmt->fetchColumn();
-                $hasBloodInventory = $bloodInventoryCount > 0;
-            }
+            // Re-check regardless of inserted count (schema detection may have been the only blocker)
+            $stmt = $pdo->query($inventoryCountSql);
+            $bloodInventoryCount = $stmt->fetchColumn();
+            $hasBloodInventory = $bloodInventoryCount > 0;
         } catch (Throwable $e) {
             // ignore
         }
@@ -456,7 +472,7 @@ try {
     
     if ($hasBloodInventory) {
         // Use blood_inventory table for real units
-        $where = ["deleted_at IS NULL"];
+        $where = [$bloodInventoryHasDeletedAt ? "deleted_at IS NULL" : "status <> 'deleted'"];
         $params = [];
         
         if (!empty($filters['blood_type'])) { 
